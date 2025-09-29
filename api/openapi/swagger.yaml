@@ -1,0 +1,682 @@
+basePath: /api
+definitions:
+  domain.VerifyWay:
+    enum:
+    - image:click
+    type: string
+    x-enum-varnames:
+    - WayImageClick
+  handler.CaptchaAnswerResponse:
+    properties:
+      audio:
+        description: 音频验证码
+        type: string
+      id:
+        example: "0"
+        type: string
+      image:
+        description: 主图片
+        type: string
+      thumb:
+        description: 缩略图
+        type: string
+      value:
+        type: string
+      way:
+        $ref: '#/definitions/domain.VerifyWay'
+    type: object
+  handler.CaptchaResponse:
+    properties:
+      audio:
+        description: 音频验证码
+        type: string
+      id:
+        example: "0"
+        type: string
+      image:
+        description: 主图片
+        type: string
+      thumb:
+        description: 缩略图
+        type: string
+    type: object
+  handler.CategoryResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      prefix:
+        type: string
+      title:
+        type: string
+    type: object
+  handler.CreateCategoryRequest:
+    properties:
+      prefix:
+        maxLength: 20
+        type: string
+      title:
+        maxLength: 10
+        type: string
+    required:
+    - prefix
+    - title
+    type: object
+  handler.ImgListResponse:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/handler.ImgResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  handler.ImgResponse:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: string
+      url:
+        type: string
+    type: object
+  handler.RefreshTokenResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  handler.UpdateCategoryRequest:
+    properties:
+      prefix:
+        maxLength: 20
+        type: string
+      title:
+        maxLength: 10
+        type: string
+    type: object
+  handler.UserResponse:
+    properties:
+      avatar_url:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      email_verified:
+        type: boolean
+      id:
+        type: integer
+      last_login_at:
+        type: string
+      name:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  response.errorResponse:
+    properties:
+      code:
+        type: integer
+      details:
+        additionalProperties: true
+        type: object
+      message:
+        example: Internal server error
+        type: string
+    type: object
+  response.invalidParamsResponse:
+    properties:
+      code:
+        type: integer
+      details:
+        additionalProperties: true
+        type: object
+      message:
+        example: invalid params
+        type: string
+    type: object
+  response.successResponse:
+    properties:
+      code:
+        example: 2000
+        type: integer
+      data: {}
+      message:
+        example: 请求成功
+        type: string
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:8080
+info:
+  contact:
+    email: lirous@lirous.com
+    name: Lirous
+    url: https://Lirous.com
+  description: 自定义描述
+  license:
+    name: MIT
+    url: https://github.com/Lirous587/go-scaffold/main/LICENSE
+  termsOfService: https://Lirous.com
+  title: 自定义title
+  version: "1.0"
+paths:
+  /v1/captcha:
+    post:
+      consumes:
+      - application/json
+      description: 创建新的验证码
+      parameters:
+      - enum:
+        - image:click
+        in: query
+        name: way
+        type: string
+        x-enum-varnames:
+        - WayImageClick
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功创建验证码
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.CaptchaResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      summary: 生成验证码
+      tags:
+      - captcha
+  /v1/captcha/with-answer:
+    get:
+      consumes:
+      - application/json
+      description: 创建新的验证码并返回答案（仅用于测试或开发环境）
+      parameters:
+      - enum:
+        - image:click
+        in: query
+        name: way
+        type: string
+        x-enum-varnames:
+        - WayImageClick
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功创建验证码并返回答案
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.CaptchaAnswerResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      summary: 生成带答案的验证码
+      tags:
+      - captcha
+  /v1/img:
+    get:
+      consumes:
+      - application/json
+      description: 分页获取图片列表
+      parameters:
+      - description: 页码（默认1）
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量（默认5，最大50）
+        in: query
+        name: page_size
+        type: integer
+      - description: 关键词（可选，最长20字）
+        in: query
+        name: keyword
+        type: string
+      - description: 是否查询回收站图片（默认false）
+        in: query
+        name: deleted
+        type: boolean
+      - description: 分类ID（可选）
+        in: query
+        name: category_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.ImgListResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 图片列表
+      tags:
+      - img
+  /v1/img/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除图片（软删除或硬删除）
+      parameters:
+      - description: 图片ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 是否硬删除（默认false）
+        in: query
+        name: hard
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 删除图片
+      tags:
+      - img
+  /v1/img/categories:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有图片分类
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/handler.CategoryResponse'
+                  type: array
+              type: object
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 分类列表
+      tags:
+      - img-category
+  /v1/img/category:
+    post:
+      consumes:
+      - application/json
+      description: 新建图片分类
+      parameters:
+      - description: 创建分类请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.CategoryResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 创建图片分类
+      tags:
+      - img-category
+  /v1/img/category/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定图片分类
+      parameters:
+      - description: 分类ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 删除图片分类
+      tags:
+      - img-category
+    put:
+      consumes:
+      - application/json
+      description: 修改图片分类信息
+      parameters:
+      - description: 分类ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新分类请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.UpdateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.CategoryResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 更新图片分类
+      tags:
+      - img-category
+  /v1/img/recycle/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 彻底删除回收站中的图片
+      parameters:
+      - description: 图片ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 清空成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 清空回收站图片
+      tags:
+      - img
+    put:
+      consumes:
+      - application/json
+      description: 从回收站恢复图片
+      parameters:
+      - description: 图片ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 恢复成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.ImgResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 恢复回收站图片
+      tags:
+      - img
+  /v1/img/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传单张图片（支持 jpeg/png/gif/webp/avif/bmp/svg）
+      parameters:
+      - description: 图片文件
+        in: formData
+        name: object
+        required: true
+        type: file
+      - description: 自定义图片路径（可选）
+        in: formData
+        name: path
+        type: string
+      - description: 图片描述（可选，最长60字）
+        in: formData
+        name: description
+        type: string
+      - description: 分类ID（可选）
+        in: formData
+        name: category_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 上传成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.ImgResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 上传图片
+      tags:
+      - img
+  /v1/user/auth:
+    post:
+      consumes:
+      - application/json
+      description: 校验当前访问令牌是否有效
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 令牌有效
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "401":
+          description: 令牌无效或过期
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 校验令牌
+      tags:
+      - user
+  /v1/user/profile:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前登录用户的详细信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.UserResponse'
+              type: object
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 获取用户信息
+      tags:
+      - user
+  /v1/user/refresh_token:
+    post:
+      consumes:
+      - application/json
+      description: 使用刷新令牌获取新的访问令牌
+      parameters:
+      - description: refresh_token刷新令牌
+        in: header
+        name: X-Refresh-Token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 刷新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.RefreshTokenResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+        "401":
+          description: 令牌无效或过期
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      summary: 刷新令牌
+      tags:
+      - user
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

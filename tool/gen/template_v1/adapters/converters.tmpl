@@ -1,0 +1,64 @@
+package adapters
+
+import (
+	"{{.Module}}/internal/common/orm"
+	"{{.Module}}/internal/{{.Domain}}/domain"
+	"github.com/aarondl/null/v8"
+)
+
+func domain{{.DomainTitle}}ToORM({{.Domain}} *domain.{{.DomainTitle}}) *orm.{{.DomainTitle}} {
+	if {{.Domain}} == nil {
+		return nil
+	}
+
+	// 非null项
+	orm{{.DomainTitle}} := &orm.{{.DomainTitle}}{
+		ID:        		{{.Domain}}.ID,
+		Title:     		{{.Domain}}.Title,
+        CreatedAt: 		{{.Domain}}.CreatedAt,
+        UpdatedAt: 		{{.Domain}}.UpdatedAt,
+	}
+
+	// 处理null项
+	if {{.Domain}}.Description != "" {
+	 	orm{{.DomainTitle}}.Description = null.StringFrom({{.Domain}}.Description)
+	}
+
+	return orm{{.DomainTitle}}
+}
+
+func orm{{.DomainTitle}}ToDomain(orm{{.DomainTitle}} *orm.{{.DomainTitle}}) *domain.{{.DomainTitle}} {
+	if orm{{.DomainTitle}} == nil {
+		return nil
+	}
+
+	// 非null项
+	{{.Domain}} := &domain.{{.DomainTitle}}{
+		ID:        		orm{{.DomainTitle}}.ID,
+		Title:     		orm{{.DomainTitle}}.Title,
+		CreatedAt: 		orm{{.DomainTitle}}.CreatedAt,
+		UpdatedAt: 		orm{{.DomainTitle}}.UpdatedAt,
+	}
+
+	// 处理null项
+	if orm{{.DomainTitle}}.Description.Valid {
+ 	 	{{.Domain}}.Description = orm{{.DomainTitle}}.Description.String
+	}
+
+	return {{.Domain}}
+}
+
+func orm{{.DomainTitle}}sToDomain(orm{{.DomainTitle}}s []*orm.{{.DomainTitle}}) []*domain.{{.DomainTitle}} {
+	if len(orm{{.DomainTitle}}s) == 0 {
+		return nil
+	}
+
+	{{.Domain}}s := make([]*domain.{{.DomainTitle}}, 0, len(orm{{.DomainTitle}}s))
+	for _, orm{{.DomainTitle}} := range orm{{.DomainTitle}}s {
+		if orm{{.DomainTitle}} != nil {
+			{{.Domain}}s = append({{.Domain}}s, orm{{.DomainTitle}}ToDomain(orm{{.DomainTitle}}))
+		}
+	}
+	return {{.Domain}}s
+}
+

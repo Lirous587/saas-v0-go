@@ -1,0 +1,23 @@
+//go:build wireinject
+// +build wireinject
+
+package {{.Domain}}
+
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
+	"{{.Module}}/internal/{{.Domain}}/adapters"
+	"{{.Module}}/internal/{{.Domain}}/handler"
+	"{{.Module}}/internal/{{.Domain}}/service"
+)
+
+func InitV1(r *gin.RouterGroup) func() {
+	wire.Build(
+		RegisterV1,
+		handler.NewHttpHandler,
+		service.New{{.DomainTitle}}Service,
+		adapters.NewPSQL{{.DomainTitle}}Repository,
+	)
+
+	return nil
+}

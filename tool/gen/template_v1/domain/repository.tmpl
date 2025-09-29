@@ -1,0 +1,15 @@
+﻿package domain
+
+
+type {{.DomainTitle}}Repository interface {
+	FindByID(id int64) (*{{.DomainTitle}}, error)
+
+	Create({{.Domain}} *{{.DomainTitle}}) (*{{.DomainTitle}}, error)
+	Update({{.Domain}} *{{.DomainTitle}}) (*{{.DomainTitle}}, error)
+	Delete(id int64) error
+	List(query *{{.DomainTitle}}Query) (*{{.DomainTitle}}List, error)
+}
+
+type {{.DomainTitle}}Cache interface {
+
+}
