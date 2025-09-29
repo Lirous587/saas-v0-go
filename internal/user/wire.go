@@ -4,11 +4,11 @@
 package user
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
 	"saas/internal/user/adapters"
 	"saas/internal/user/handler"
 	"saas/internal/user/service"
+	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
 )
 
 func InitV1(r *gin.RouterGroup) func() {

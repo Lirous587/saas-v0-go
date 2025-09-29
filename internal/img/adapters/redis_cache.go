@@ -1,12 +1,12 @@
 package adapters
 
 import (
-	"saas/internal/common/utils"
-	"saas/internal/img/domain"
 	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"os"
+	"saas/internal/common/utils"
+	"saas/internal/img/domain"
 	"strconv"
 	"strings"
 	"time"

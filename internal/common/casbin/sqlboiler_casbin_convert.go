@@ -29,6 +29,7 @@ func ormCasbinRulesToStrings(rule *orm.CasbinRule) string {
 	return strings.Join(vals, ", ")
 }
 
+// nolint
 func ormCasbinRuleToDomain(orm *orm.CasbinRule) *CasbinRule {
 	casbinRule := &CasbinRule{
 		ID:    orm.ID,

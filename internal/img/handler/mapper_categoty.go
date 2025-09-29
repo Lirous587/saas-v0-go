@@ -2,14 +2,13 @@ package handler
 
 import (
 	"saas/internal/img/domain"
-	"time"
 )
 
 type CategoryResponse struct {
 	ID		int64	`json:"id"`
 	Title		string	`json:"title"`
 	Prefix		string	`json:"prefix"`
-	CreatedAt	string	`json:"created_at"`
+	CreatedAt	int64	`json:"created_at"`
 }
 
 type CreateCategoryRequest struct {
@@ -31,7 +30,7 @@ func domainCategoryToResponse(category *domain.Category) *CategoryResponse {
 		ID:		category.ID,
 		Title:		category.Title,
 		Prefix:		category.Prefix,
-		CreatedAt:	category.CreatedAt.Format(time.DateTime),
+		CreatedAt:	category.CreatedAt.Unix(),
 	}
 
 	return resp

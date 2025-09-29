@@ -61,5 +61,9 @@ func init() {
 
 func StartPrometheusServer() {
 	http.Handle(path, promhttp.Handler())
-	go http.ListenAndServe(":"+port, nil)
+	go func() {
+		if err := http.ListenAndServe(":"+port, nil); err != nil {
+			panic(errors.Wrap(err, "Prometheus 监控服务启动失败"))
+		}
+	}()
 }

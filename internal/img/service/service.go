@@ -18,15 +18,14 @@ import (
 	"os"
 	"saas/internal/common/reskit/codes"
 	"saas/internal/img/domain"
-	"time"
 )
 
 type service struct {
-	repo         domain.ImgRepository
-	s3Client     *s3.Client
-	msgQueue     domain.ImgMsgQueue
-	publicBucket bucket
-	deleteBucket bucket
+	repo		domain.ImgRepository
+	s3Client	*s3.Client
+	msgQueue	domain.ImgMsgQueue
+	publicBucket	bucket
+	deleteBucket	bucket
 }
 
 func loadS3() (*s3.Client, string, string) {
@@ -42,35 +41,31 @@ func loadS3() (*s3.Client, string, string) {
 	}
 
 	// 配置 S3 客户端
-	r2Resolver := aws.EndpointResolverWithOptionsFunc(func(
-			service, region string, options ...interface{},
-	) (aws.Endpoint, error) {
-		return aws.Endpoint{
-			URL: fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountID),
-		}, nil
-	})
-
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithEndpointResolverWithOptions(r2Resolver),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, "")),
-		config.WithRegion("auto"), // R2 不使用区域，但 SDK 需要
+		config.WithRegion("auto"),	// R2 不使用区域，但 SDK 需要
 	)
 	if err != nil {
 		log.Fatalf("Unable to load SDK config, %v", err)
 	}
 
-	return s3.NewFromConfig(cfg), publicBucket, deleteBucket
+	// 使用服务特定端点创建 S3 客户端（适用于 Cloudflare R2）
+	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
+		o.BaseEndpoint = aws.String(fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountID))
+	})
+
+	return client, publicBucket, deleteBucket
 }
 
 func NewImgService(repo domain.ImgRepository, msgQueue domain.ImgMsgQueue) domain.ImgService {
 	client, publicBucket, deleteBucket := loadS3()
 
 	return &service{
-		repo:         repo,
-		s3Client:     client,
-		publicBucket: bucket(publicBucket),
-		deleteBucket: bucket(deleteBucket),
-		msgQueue:     msgQueue,
+		repo:		repo,
+		s3Client:	client,
+		publicBucket:	bucket(publicBucket),
+		deleteBucket:	bucket(deleteBucket),
+		msgQueue:	msgQueue,
 	}
 }
 
@@ -97,10 +92,6 @@ func (s *service) Compress(src io.Reader) (io.Reader, error) {
 	}
 
 	return bytes.NewReader(output.Bytes()), nil
-}
-
-func (s *service) genNewPath(oldPath string) string {
-	return fmt.Sprintf("deleted/%d_%s", time.Now().Unix(), oldPath)
 }
 
 func (s *service) Upload(src io.Reader, img *domain.Img, categoryID int64) (*domain.Img, error) {
@@ -175,7 +166,7 @@ func (s *service) Delete(id int64, hard ...bool) error {
 
 	if len(hard) == 0 {
 		ifHard = false
-	} else if hard[0] == true {
+	} else if hard[0] {
 		ifHard = true
 	}
 
@@ -238,7 +229,7 @@ func (s *service) ClearRecycleBin(id int64) error {
 	// 4.从删除队列中移除（防止定时器重复删除）
 	if err := s.msgQueue.RemoveFromDeleteQueue(id); err != nil {
 		zap.L().Error("清空回收站：移除定时删除任务失败",
-			zap.Int64("img_id", id),
+			zap.Int64("imgID", id),
 			zap.Error(err),
 		)
 	}
@@ -315,7 +306,7 @@ func (s *service) RestoreFromRecycleBin(id int64) (*domain.Img, error) {
 	// 5.从删除队列中移除
 	if err := s.msgQueue.RemoveFromDeleteQueue(id); err != nil {
 		zap.L().Error("从回收站恢复：移除定时删除任务失败",
-			zap.Int64("imgID", id),
+			zap.Int64("img_id", id),
 			zap.Error(err),
 		)
 	}
