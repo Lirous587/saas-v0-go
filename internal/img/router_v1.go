@@ -1,9 +1,9 @@
 package img
 
 import (
-	"github.com/gin-gonic/gin"
 	"saas/internal/common/middleware/auth"
 	"saas/internal/img/handler"
+	"github.com/gin-gonic/gin"
 )
 
 func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
