@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
@@ -22,37 +23,58 @@ import (
 
 // Tenant is an object representing the database table.
 type Tenant struct {
-	ID   int64  `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name string `boil:"name" json:"name" toml:"name" yaml:"name"`
+	ID          int64       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Name        string      `boil:"name" json:"name" toml:"name" yaml:"name"`
+	CreatedAt   time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt   time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	Description null.String `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
 
 	R *tenantR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L tenantL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var TenantColumns = struct {
-	ID   string
-	Name string
+	ID          string
+	Name        string
+	CreatedAt   string
+	UpdatedAt   string
+	Description string
 }{
-	ID:   "id",
-	Name: "name",
+	ID:          "id",
+	Name:        "name",
+	CreatedAt:   "created_at",
+	UpdatedAt:   "updated_at",
+	Description: "description",
 }
 
 var TenantTableColumns = struct {
-	ID   string
-	Name string
+	ID          string
+	Name        string
+	CreatedAt   string
+	UpdatedAt   string
+	Description string
 }{
-	ID:   "tenants.id",
-	Name: "tenants.name",
+	ID:          "tenants.id",
+	Name:        "tenants.name",
+	CreatedAt:   "tenants.created_at",
+	UpdatedAt:   "tenants.updated_at",
+	Description: "tenants.description",
 }
 
 // Generated where
 
 var TenantWhere = struct {
-	ID   whereHelperint64
-	Name whereHelperstring
+	ID          whereHelperint64
+	Name        whereHelperstring
+	CreatedAt   whereHelpertime_Time
+	UpdatedAt   whereHelpertime_Time
+	Description whereHelpernull_String
 }{
-	ID:   whereHelperint64{field: "\"tenants\".\"id\""},
-	Name: whereHelperstring{field: "\"tenants\".\"name\""},
+	ID:          whereHelperint64{field: "\"tenants\".\"id\""},
+	Name:        whereHelperstring{field: "\"tenants\".\"name\""},
+	CreatedAt:   whereHelpertime_Time{field: "\"tenants\".\"created_at\""},
+	UpdatedAt:   whereHelpertime_Time{field: "\"tenants\".\"updated_at\""},
+	Description: whereHelpernull_String{field: "\"tenants\".\"description\""},
 }
 
 // TenantRels is where relationship names are stored.
@@ -206,9 +228,9 @@ func (r *tenantR) GetUserTenants() UserTenantSlice {
 type tenantL struct{}
 
 var (
-	tenantAllColumns            = []string{"id", "name"}
+	tenantAllColumns            = []string{"id", "name", "created_at", "updated_at", "description"}
 	tenantColumnsWithoutDefault = []string{"name"}
-	tenantColumnsWithDefault    = []string{"id"}
+	tenantColumnsWithDefault    = []string{"id", "created_at", "updated_at", "description"}
 	tenantPrimaryKeyColumns     = []string{"id"}
 	tenantGeneratedColumns      = []string{}
 )
@@ -1875,6 +1897,14 @@ func (o *Tenant) Insert(exec boil.Executor, columns boil.Columns) error {
 	}
 
 	var err error
+	currTime := time.Now().In(boil.GetLocation())
+
+	if o.CreatedAt.IsZero() {
+		o.CreatedAt = currTime
+	}
+	if o.UpdatedAt.IsZero() {
+		o.UpdatedAt = currTime
+	}
 
 	if err := o.doBeforeInsertHooks(exec); err != nil {
 		return err
@@ -1955,6 +1985,10 @@ func (o *Tenant) UpdateG(columns boil.Columns) (int64, error) {
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *Tenant) Update(exec boil.Executor, columns boil.Columns) (int64, error) {
+	currTime := time.Now().In(boil.GetLocation())
+
+	o.UpdatedAt = currTime
+
 	var err error
 	if err = o.doBeforeUpdateHooks(exec); err != nil {
 		return 0, err
@@ -2098,6 +2132,12 @@ func (o *Tenant) Upsert(exec boil.Executor, updateOnConflict bool, conflictColum
 	if o == nil {
 		return errors.New("orm: no tenants provided for upsert")
 	}
+	currTime := time.Now().In(boil.GetLocation())
+
+	if o.CreatedAt.IsZero() {
+		o.CreatedAt = currTime
+	}
+	o.UpdatedAt = currTime
 
 	if err := o.doBeforeUpsertHooks(exec); err != nil {
 		return err

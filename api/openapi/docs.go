@@ -699,6 +699,924 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/plan": {
+            "get": {
+                "description": "根据查询参数获取Plan列表，返回当前页数据和total数量",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plan"
+                ],
+                "summary": "获取 Plan 列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "关键词搜索",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Plan列表",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.PlanListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "创建新的 Plan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plan"
+                ],
+                "summary": "创建 Plan",
+                "parameters": [
+                    {
+                        "description": "创建 Plan 请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/saas_internal_plan_handler.CreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功创建 Plan",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.PlanResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/plan/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "读取单条 Plan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plan"
+                ],
+                "summary": "读取单条 Plan",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功创建 Plan",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.PlanResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID更新 Plan 信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plan"
+                ],
+                "summary": "更新 Plan",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新 Plan 请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/saas_internal_plan_handler.UpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功更新 Plan",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.PlanResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 Plan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plan"
+                ],
+                "summary": "删除 Plan",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功删除 Plan",
+                        "schema": {
+                            "$ref": "#/definitions/response.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/role": {
+            "get": {
+                "description": "根据查询参数获取Role列表，返回当前页数据和total数量",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "role"
+                ],
+                "summary": "获取 Role 列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "关键词搜索",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Role列表",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.RoleListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "创建新的 Role",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "role"
+                ],
+                "summary": "创建 Role",
+                "parameters": [
+                    {
+                        "description": "创建 Role 请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/saas_internal_role_handler.CreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功创建 Role",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.RoleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/role/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "读取单条 Role",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "role"
+                ],
+                "summary": "读取单条 Role",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功创建 Role",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.RoleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID更新 Role 信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "role"
+                ],
+                "summary": "更新 Role",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新 Role 请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/saas_internal_role_handler.UpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功更新 Role",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.RoleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 Role",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "role"
+                ],
+                "summary": "删除 Role",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功删除 Role",
+                        "schema": {
+                            "$ref": "#/definitions/response.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/tenant": {
+            "get": {
+                "description": "根据查询参数获取Tenant列表，返回当前页数据和total数量",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tenant"
+                ],
+                "summary": "获取 Tenant 列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "关键词搜索",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tenant列表",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.TenantListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "创建新的 Tenant",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tenant"
+                ],
+                "summary": "用户新建租户",
+                "parameters": [
+                    {
+                        "description": "创建 Tenant 请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/saas_internal_tenant_handler.CreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功创建 Tenant",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.TenantResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/tenant/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "读取单条 Tenant",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tenant"
+                ],
+                "summary": "读取单条 Tenant",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tenant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功创建 Tenant",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.TenantResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID更新 Tenant 信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tenant"
+                ],
+                "summary": "更新 Tenant",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tenant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新 Tenant 请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/saas_internal_tenant_handler.UpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功更新 Tenant",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.TenantResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 Tenant",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tenant"
+                ],
+                "summary": "删除 Tenant",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tenant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功删除 Tenant",
+                        "schema": {
+                            "$ref": "#/definitions/response.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/user/auth": {
             "post": {
                 "security": [
@@ -726,6 +1644,64 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "令牌无效或过期",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/user/auth/github": {
+            "post": {
+                "description": "使用 GitHub OAuth 登录，返回用户信息和令牌",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "GitHub 授权登录",
+                "parameters": [
+                    {
+                        "description": "GitHub 授权码",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.GithubAuthRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "登录成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.AuthResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
                         "schema": {
                             "$ref": "#/definitions/response.errorResponse"
                         }
@@ -858,6 +1834,20 @@ const docTemplate = `{
                 "WayImageClick"
             ]
         },
+        "handler.AuthResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/handler.UserResponse"
+                }
+            }
+        },
         "handler.CaptchaAnswerResponse": {
             "type": "object",
             "properties": {
@@ -910,7 +1900,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -940,6 +1930,17 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.GithubAuthRequest": {
+            "type": "object",
+            "required": [
+                "code"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                }
+            }
+        },
         "handler.ImgListResponse": {
             "type": "object",
             "properties": {
@@ -958,10 +1959,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "type": "string"
-                },
-                "deleted_at": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "description": {
                     "type": "string"
@@ -970,10 +1968,44 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "url": {
                     "type": "string"
+                }
+            }
+        },
+        "handler.PlanListResponse": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.PlanResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.PlanResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "integer"
                 }
             }
         },
@@ -985,6 +2017,74 @@ const docTemplate = `{
                 },
                 "refresh_token": {
                     "type": "string"
+                }
+            }
+        },
+        "handler.RoleListResponse": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.RoleResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.RoleResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.TenantListResponse": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.TenantResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.TenantResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "integer"
                 }
             }
         },
@@ -1008,7 +2108,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "email": {
                     "type": "string"
@@ -1020,16 +2120,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "last_login_at": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "updated_at": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "username": {
                     "type": "string"
@@ -1081,6 +2175,101 @@ const docTemplate = `{
                     "example": "请求成功"
                 }
             }
+        },
+        "saas_internal_plan_handler.CreateRequest": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 60
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 30
+                }
+            }
+        },
+        "saas_internal_plan_handler.UpdateRequest": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 60
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 30
+                }
+            }
+        },
+        "saas_internal_role_handler.CreateRequest": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 60
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 30
+                }
+            }
+        },
+        "saas_internal_role_handler.UpdateRequest": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 60
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 30
+                }
+            }
+        },
+        "saas_internal_tenant_handler.CreateRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "plan_id"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 120
+                },
+                "name": {
+                    "type": "string"
+                },
+                "plan_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "saas_internal_tenant_handler.UpdateRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 120
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {
@@ -1090,10 +2279,6 @@ const docTemplate = `{
             "name": "Authorization",
             "in": "header"
         }
-    },
-    "externalDocs": {
-        "description": "OpenAPI",
-        "url": "https://swagger.io/resources/open-api/"
     }
 }`
 

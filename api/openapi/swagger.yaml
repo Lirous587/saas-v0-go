@@ -6,6 +6,15 @@ definitions:
     type: string
     x-enum-varnames:
     - WayImageClick
+  handler.AuthResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/handler.UserResponse'
+    type: object
   handler.CaptchaAnswerResponse:
     properties:
       audio:
@@ -43,7 +52,7 @@ definitions:
   handler.CategoryResponse:
     properties:
       created_at:
-        type: string
+        type: integer
       id:
         type: integer
       prefix:
@@ -63,6 +72,13 @@ definitions:
     - prefix
     - title
     type: object
+  handler.GithubAuthRequest:
+    properties:
+      code:
+        type: string
+    required:
+    - code
+    type: object
   handler.ImgListResponse:
     properties:
       list:
@@ -75,17 +91,37 @@ definitions:
   handler.ImgResponse:
     properties:
       created_at:
-        type: string
-      deleted_at:
-        type: string
+        type: integer
       description:
         type: string
       id:
         type: integer
       updated_at:
-        type: string
+        type: integer
       url:
         type: string
+    type: object
+  handler.PlanListResponse:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/handler.PlanResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  handler.PlanResponse:
+    properties:
+      created_at:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: integer
     type: object
   handler.RefreshTokenResponse:
     properties:
@@ -93,6 +129,50 @@ definitions:
         type: string
       refresh_token:
         type: string
+    type: object
+  handler.RoleListResponse:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/handler.RoleResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  handler.RoleResponse:
+    properties:
+      created_at:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: integer
+    type: object
+  handler.TenantListResponse:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/handler.TenantResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  handler.TenantResponse:
+    properties:
+      created_at:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: integer
     type: object
   handler.UpdateCategoryRequest:
     properties:
@@ -108,7 +188,7 @@ definitions:
       avatar_url:
         type: string
       created_at:
-        type: string
+        type: integer
       email:
         type: string
       email_verified:
@@ -116,13 +196,9 @@ definitions:
       id:
         type: integer
       last_login_at:
-        type: string
-      name:
-        type: string
-      status:
-        type: string
+        type: integer
       updated_at:
-        type: string
+        type: integer
       username:
         type: string
     type: object
@@ -158,9 +234,71 @@ definitions:
         example: 请求成功
         type: string
     type: object
-externalDocs:
-  description: OpenAPI
-  url: https://swagger.io/resources/open-api/
+  saas_internal_plan_handler.CreateRequest:
+    properties:
+      description:
+        maxLength: 60
+        type: string
+      title:
+        maxLength: 30
+        type: string
+    required:
+    - title
+    type: object
+  saas_internal_plan_handler.UpdateRequest:
+    properties:
+      description:
+        maxLength: 60
+        type: string
+      title:
+        maxLength: 30
+        type: string
+    required:
+    - title
+    type: object
+  saas_internal_role_handler.CreateRequest:
+    properties:
+      description:
+        maxLength: 60
+        type: string
+      title:
+        maxLength: 30
+        type: string
+    required:
+    - title
+    type: object
+  saas_internal_role_handler.UpdateRequest:
+    properties:
+      description:
+        maxLength: 60
+        type: string
+      title:
+        maxLength: 30
+        type: string
+    required:
+    - title
+    type: object
+  saas_internal_tenant_handler.CreateRequest:
+    properties:
+      description:
+        maxLength: 120
+        type: string
+      name:
+        type: string
+      plan_id:
+        type: integer
+    required:
+    - name
+    - plan_id
+    type: object
+  saas_internal_tenant_handler.UpdateRequest:
+    properties:
+      description:
+        maxLength: 120
+        type: string
+      name:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -584,6 +722,564 @@ paths:
       summary: 上传图片
       tags:
       - img
+  /v1/plan:
+    get:
+      consumes:
+      - application/json
+      description: 根据查询参数获取Plan列表，返回当前页数据和total数量
+      parameters:
+      - description: 关键词搜索
+        in: query
+        name: keyword
+        type: string
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Plan列表
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.PlanListResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      summary: 获取 Plan 列表
+      tags:
+      - plan
+    post:
+      consumes:
+      - application/json
+      description: 创建新的 Plan
+      parameters:
+      - description: 创建 Plan 请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/saas_internal_plan_handler.CreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功创建 Plan
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.PlanResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 创建 Plan
+      tags:
+      - plan
+  /v1/plan/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 根据ID删除 Plan
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功删除 Plan
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 删除 Plan
+      tags:
+      - plan
+    get:
+      consumes:
+      - application/json
+      description: 读取单条 Plan
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功创建 Plan
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.PlanResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 读取单条 Plan
+      tags:
+      - plan
+    put:
+      consumes:
+      - application/json
+      description: 根据ID更新 Plan 信息
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新 Plan 请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/saas_internal_plan_handler.UpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功更新 Plan
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.PlanResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 更新 Plan
+      tags:
+      - plan
+  /v1/role:
+    get:
+      consumes:
+      - application/json
+      description: 根据查询参数获取Role列表，返回当前页数据和total数量
+      parameters:
+      - description: 关键词搜索
+        in: query
+        name: keyword
+        type: string
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role列表
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.RoleListResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      summary: 获取 Role 列表
+      tags:
+      - role
+    post:
+      consumes:
+      - application/json
+      description: 创建新的 Role
+      parameters:
+      - description: 创建 Role 请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/saas_internal_role_handler.CreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功创建 Role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.RoleResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 创建 Role
+      tags:
+      - role
+  /v1/role/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 根据ID删除 Role
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功删除 Role
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 删除 Role
+      tags:
+      - role
+    get:
+      consumes:
+      - application/json
+      description: 读取单条 Role
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功创建 Role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.RoleResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 读取单条 Role
+      tags:
+      - role
+    put:
+      consumes:
+      - application/json
+      description: 根据ID更新 Role 信息
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新 Role 请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/saas_internal_role_handler.UpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功更新 Role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.RoleResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 更新 Role
+      tags:
+      - role
+  /v1/tenant:
+    get:
+      consumes:
+      - application/json
+      description: 根据查询参数获取Tenant列表，返回当前页数据和total数量
+      parameters:
+      - description: 关键词搜索
+        in: query
+        name: keyword
+        type: string
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tenant列表
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.TenantListResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      summary: 获取 Tenant 列表
+      tags:
+      - tenant
+    post:
+      consumes:
+      - application/json
+      description: 创建新的 Tenant
+      parameters:
+      - description: 创建 Tenant 请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/saas_internal_tenant_handler.CreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功创建 Tenant
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.TenantResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 用户新建租户
+      tags:
+      - tenant
+  /v1/tenant/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 根据ID删除 Tenant
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功删除 Tenant
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 删除 Tenant
+      tags:
+      - tenant
+    get:
+      consumes:
+      - application/json
+      description: 读取单条 Tenant
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功创建 Tenant
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.TenantResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 读取单条 Tenant
+      tags:
+      - tenant
+    put:
+      consumes:
+      - application/json
+      description: 根据ID更新 Tenant 信息
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新 Tenant 请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/saas_internal_tenant_handler.UpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功更新 Tenant
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.TenantResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 更新 Tenant
+      tags:
+      - tenant
   /v1/user/auth:
     post:
       consumes:
@@ -603,6 +1299,41 @@ paths:
       security:
       - BearerAuth: []
       summary: 校验令牌
+      tags:
+      - user
+  /v1/user/auth/github:
+    post:
+      consumes:
+      - application/json
+      description: 使用 GitHub OAuth 登录，返回用户信息和令牌
+      parameters:
+      - description: GitHub 授权码
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.GithubAuthRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登录成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.AuthResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      summary: GitHub 授权登录
       tags:
       - user
   /v1/user/profile:

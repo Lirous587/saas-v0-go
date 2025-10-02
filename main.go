@@ -15,13 +15,12 @@ import (
 	"os"
 	"os/signal"
 	_ "saas/api/openapi"
-	"saas/internal/captcha"
 	casbinadapter "saas/internal/common/casbin"
 	"saas/internal/common/logger"
 	"saas/internal/common/metrics"
 	"saas/internal/common/server"
 	"saas/internal/common/uid"
-	"saas/internal/img"
+	"saas/internal/tenant"
 	"saas/internal/user"
 	"syscall"
 )
@@ -142,8 +141,10 @@ func main() {
 			ginSwagger.PersistAuthorization(true)))
 
 		user.InitV1(r)
-		captcha.InitV1(r)
-		img.InitV1(r)
+		//captcha.InitV1(r)
+		//img.InitV1(r)
 
+		tenant.InitV1(r)
+		
 	})
 }

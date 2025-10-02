@@ -1,12 +1,13 @@
 package auth
 
 import (
+	"github.com/pkg/errors"
 	"saas/internal/common/reskit/codes"
 	"saas/internal/common/reskit/response"
+	"saas/internal/common/server"
 	"saas/internal/user/adapters"
 	"saas/internal/user/domain"
 	"saas/internal/user/service"
-	"github.com/pkg/errors"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -21,8 +22,8 @@ func init() {
 }
 
 const (
-	authHeaderKey	= "Authorization"
-	bearerPrefix	= "Bearer "
+	authHeaderKey = "Authorization"
+	bearerPrefix  = "Bearer "
 )
 
 // 解析 Authorization 头部的 Token
@@ -67,7 +68,7 @@ func Validate() gin.HandlerFunc {
 		}
 
 		// 3. 将用户 相关信息存入上下文
-		c.Set("user_id", payload.UserID)
+		c.Set(server.UserIDKey, payload.UserID)
 
 		c.Next()
 	}

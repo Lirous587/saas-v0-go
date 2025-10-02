@@ -50,8 +50,11 @@ CREATE TABLE public.plans
 -- 租户表
 CREATE TABLE public.tenants
 (
-    id   bigserial PRIMARY KEY,
-    name varchar(50) NOT NULL
+    id          bigserial PRIMARY KEY,
+    name        varchar(50)    NOT NULL,
+    created_at  timestamptz(6) NOT NULL DEFAULT now(),
+    updated_at  timestamptz(6) NOT NULL DEFAULT now(),
+    description varchar(120)
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_tenants_name ON public.tenants (name);
 
@@ -66,15 +69,25 @@ CREATE TABLE public.tenant_plan
     PRIMARY KEY (tenant_id, plan_id)
 );
 
+
+
 -- 角色表
+-- tenant_id 可为空 当计划等级较低时 仅有默认角色选择
 CREATE TABLE public.roles
 (
     id          bigserial PRIMARY KEY,
-    tenant_id   bigint      NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+    tenant_id   bigint      NULL REFERENCES tenants (id) ON DELETE CASCADE,
     name        varchar(30) NOT NULL,
     description text,
-    CONSTRAINT ux_roles_tenant_name UNIQUE (tenant_id, name)
+    is_default  boolean     NOT NULL DEFAULT true,
+    -- 防止无效数据组合
+    CONSTRAINT ux_roles_name CHECK (
+        (is_default = true AND tenant_id IS NULL) OR
+        (is_default = false AND tenant_id IS NOT NULL)
+    )
 );
+CREATE UNIQUE INDEX ux_roles_default_name ON public.roles (name) WHERE is_default = true;
+CREATE UNIQUE INDEX ux_roles_tenant_name ON public.roles (tenant_id, name) WHERE tenant_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_roles_tenant_id ON public.roles (tenant_id);
 
 
@@ -96,38 +109,38 @@ CREATE INDEX IF NOT EXISTS idx_menus_tenant_parent_sort ON public.menus (tenant_
 CREATE INDEX IF NOT EXISTS idx_menus_path_trgm ON public.menus USING gin (path gin_trgm_ops);
 
 
--- 角色菜单关联
-CREATE TABLE public.role_menu
-(
-    id      bigserial PRIMARY KEY,
-    role_id bigint NOT NULL REFERENCES roles (id) ON DELETE CASCADE,
-    menu_id bigint NOT NULL REFERENCES menus (id) ON DELETE CASCADE,
-    UNIQUE (role_id, menu_id)
-);
+-- -- 角色菜单关联
+-- CREATE TABLE public.role_menu
+-- (
+--     id      bigserial PRIMARY KEY,
+--     role_id bigint NOT NULL REFERENCES roles (id) ON DELETE CASCADE,
+--     menu_id bigint NOT NULL REFERENCES menus (id) ON DELETE CASCADE,
+--     UNIQUE (role_id, menu_id)
+-- );
 
 
--- 按钮表
-CREATE TABLE public.buttons
-(
-    id        bigserial PRIMARY KEY,
-    tenant_id bigint      NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
-    menu_id   bigint      NOT NULL REFERENCES menus (id) ON DELETE CASCADE,
-    name      varchar(50) NOT NULL,
-    code      varchar(50) NOT NULL,
-    UNIQUE (tenant_id, menu_id, code)
-);
--- 按 tenant/menu 查、按 menu_id 加速关联查询
-CREATE INDEX IF NOT EXISTS idx_buttons_tenant_id ON public.buttons (tenant_id);
-CREATE INDEX IF NOT EXISTS idx_buttons_menu_id ON public.buttons (menu_id);
+-- -- 按钮表
+-- CREATE TABLE public.buttons
+-- (
+--     id        bigserial PRIMARY KEY,
+--     tenant_id bigint      NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+--     menu_id   bigint      NOT NULL REFERENCES menus (id) ON DELETE CASCADE,
+--     name      varchar(50) NOT NULL,
+--     code      varchar(50) NOT NULL,
+--     UNIQUE (tenant_id, menu_id, code)
+-- );
+-- -- 按 tenant/menu 查、按 menu_id 加速关联查询
+-- CREATE INDEX IF NOT EXISTS idx_buttons_tenant_id ON public.buttons (tenant_id);
+-- CREATE INDEX IF NOT EXISTS idx_buttons_menu_id ON public.buttons (menu_id);
 
--- 角色按钮关联
-CREATE TABLE public.role_button
-(
-    id        bigserial PRIMARY KEY,
-    role_id   bigint NOT NULL REFERENCES roles (id) ON DELETE CASCADE,
-    button_id bigint NOT NULL REFERENCES buttons (id) ON DELETE CASCADE,
-    UNIQUE (role_id, button_id)
-);
+-- -- 角色按钮关联
+-- CREATE TABLE public.role_button
+-- (
+--     id        bigserial PRIMARY KEY,
+--     role_id   bigint NOT NULL REFERENCES roles (id) ON DELETE CASCADE,
+--     button_id bigint NOT NULL REFERENCES buttons (id) ON DELETE CASCADE,
+--     UNIQUE (role_id, button_id)
+-- );
 
 -- 用户表
 CREATE TABLE public.users
