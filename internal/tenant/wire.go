@@ -16,7 +16,7 @@ func InitV1(r *gin.RouterGroup) func() {
 		RegisterV1,
 		handler.NewHttpHandler,
 		service.NewTenantService,
-		adapters.NewPSQLTenantRepository,
+		adapters.NewTenantPSQLRepository,
 	)
 
 	return nil

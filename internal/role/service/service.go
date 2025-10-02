@@ -1,25 +1,27 @@
 package service
 
 import (
+	"errors"
 	"saas/internal/role/domain"
+
+	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 )
 
 type service struct {
-	repo     domain.RoleRepository
+	repo  domain.RoleRepository
+	cache domain.RoleCache
 }
 
-func NewRoleService(repo domain.RoleRepository) domain.RoleService {
+func NewRoleService(repo domain.RoleRepository, cache domain.RoleCache) domain.RoleService {
 	return &service{
-		repo:     repo,
+		repo:  repo,
+		cache: cache,
 	}
 }
 
 func (s *service) Create(role *domain.Role) (*domain.Role, error) {
 	return s.repo.Create(role)
-}
-
-func (s *service) Read(id int64) (*domain.Role, error) {
-   return s.repo.FindByID(id)
 }
 
 func (s *service) Update(role *domain.Role) (*domain.Role, error) {
@@ -35,4 +37,27 @@ func (s *service) Delete(id int64) error {
 
 func (s *service) List(query *domain.RoleQuery) (*domain.RoleList, error) {
 	return s.repo.List(query)
+}
+
+func (s *service) GetUserRoleInTenant(userID, tenantID int64) (*domain.Role, error) {
+	role, err := s.cache.GetUserRoleInTenant(userID, tenantID)
+
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			role, err = s.repo.FindUserRoleInTenant(userID, tenantID)
+			if err != nil {
+				return nil, err
+			}
+
+			// 添加到缓存
+			if err := s.cache.SetUserRoleInTenant(userID, tenantID, role); err != nil {
+				zap.L().Error("设置用户角色缓存失败", zap.Error(err), zap.Int64("userID", userID), zap.Int64("tenantID", tenantID))
+			}
+
+		} else {
+			return nil, err
+		}
+	}
+
+	return role, nil
 }

@@ -24,9 +24,10 @@ import (
 // Role is an object representing the database table.
 type Role struct {
 	ID          int64       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	TenantID    int64       `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
+	TenantID    null.Int64  `boil:"tenant_id" json:"tenant_id,omitempty" toml:"tenant_id" yaml:"tenant_id,omitempty"`
 	Name        string      `boil:"name" json:"name" toml:"name" yaml:"name"`
 	Description null.String `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
+	IsDefault   bool        `boil:"is_default" json:"is_default" toml:"is_default" yaml:"is_default"`
 
 	R *roleR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L roleL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -37,11 +38,13 @@ var RoleColumns = struct {
 	TenantID    string
 	Name        string
 	Description string
+	IsDefault   string
 }{
 	ID:          "id",
 	TenantID:    "tenant_id",
 	Name:        "name",
 	Description: "description",
+	IsDefault:   "is_default",
 }
 
 var RoleTableColumns = struct {
@@ -49,25 +52,38 @@ var RoleTableColumns = struct {
 	TenantID    string
 	Name        string
 	Description string
+	IsDefault   string
 }{
 	ID:          "roles.id",
 	TenantID:    "roles.tenant_id",
 	Name:        "roles.name",
 	Description: "roles.description",
+	IsDefault:   "roles.is_default",
 }
 
 // Generated where
 
+type whereHelperbool struct{ field string }
+
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+
 var RoleWhere = struct {
 	ID          whereHelperint64
-	TenantID    whereHelperint64
+	TenantID    whereHelpernull_Int64
 	Name        whereHelperstring
 	Description whereHelpernull_String
+	IsDefault   whereHelperbool
 }{
 	ID:          whereHelperint64{field: "\"roles\".\"id\""},
-	TenantID:    whereHelperint64{field: "\"roles\".\"tenant_id\""},
+	TenantID:    whereHelpernull_Int64{field: "\"roles\".\"tenant_id\""},
 	Name:        whereHelperstring{field: "\"roles\".\"name\""},
 	Description: whereHelpernull_String{field: "\"roles\".\"description\""},
+	IsDefault:   whereHelperbool{field: "\"roles\".\"is_default\""},
 }
 
 // RoleRels is where relationship names are stored.
@@ -164,9 +180,9 @@ func (r *roleR) GetUserTenants() UserTenantSlice {
 type roleL struct{}
 
 var (
-	roleAllColumns            = []string{"id", "tenant_id", "name", "description"}
-	roleColumnsWithoutDefault = []string{"tenant_id", "name"}
-	roleColumnsWithDefault    = []string{"id", "description"}
+	roleAllColumns            = []string{"id", "tenant_id", "name", "description", "is_default"}
+	roleColumnsWithoutDefault = []string{"name"}
+	roleColumnsWithDefault    = []string{"id", "tenant_id", "description", "is_default"}
 	rolePrimaryKeyColumns     = []string{"id"}
 	roleGeneratedColumns      = []string{}
 )
@@ -546,7 +562,9 @@ func (roleL) LoadTenant(e boil.Executor, singular bool, maybeRole interface{}, m
 		if object.R == nil {
 			object.R = &roleR{}
 		}
-		args[object.TenantID] = struct{}{}
+		if !queries.IsNil(object.TenantID) {
+			args[object.TenantID] = struct{}{}
+		}
 
 	} else {
 		for _, obj := range slice {
@@ -554,7 +572,9 @@ func (roleL) LoadTenant(e boil.Executor, singular bool, maybeRole interface{}, m
 				obj.R = &roleR{}
 			}
 
-			args[obj.TenantID] = struct{}{}
+			if !queries.IsNil(obj.TenantID) {
+				args[obj.TenantID] = struct{}{}
+			}
 
 		}
 	}
@@ -619,7 +639,7 @@ func (roleL) LoadTenant(e boil.Executor, singular bool, maybeRole interface{}, m
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if local.TenantID == foreign.ID {
+			if queries.Equal(local.TenantID, foreign.ID) {
 				local.R.Tenant = foreign
 				if foreign.R == nil {
 					foreign.R = &tenantR{}
@@ -1006,7 +1026,7 @@ func (o *Role) SetTenant(exec boil.Executor, insert bool, related *Tenant) error
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	o.TenantID = related.ID
+	queries.Assign(&o.TenantID, related.ID)
 	if o.R == nil {
 		o.R = &roleR{
 			Tenant: related,
@@ -1023,6 +1043,47 @@ func (o *Role) SetTenant(exec boil.Executor, insert bool, related *Tenant) error
 		related.R.Roles = append(related.R.Roles, o)
 	}
 
+	return nil
+}
+
+// RemoveTenantG relationship.
+// Sets o.R.Tenant to nil.
+// Removes o from all passed in related items' relationships struct.
+// Uses the global database handle.
+func (o *Role) RemoveTenantG(related *Tenant) error {
+	return o.RemoveTenant(boil.GetDB(), related)
+}
+
+// RemoveTenant relationship.
+// Sets o.R.Tenant to nil.
+// Removes o from all passed in related items' relationships struct.
+func (o *Role) RemoveTenant(exec boil.Executor, related *Tenant) error {
+	var err error
+
+	queries.SetScanner(&o.TenantID, nil)
+	if _, err = o.Update(exec, boil.Whitelist("tenant_id")); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	if o.R != nil {
+		o.R.Tenant = nil
+	}
+	if related == nil || related.R == nil {
+		return nil
+	}
+
+	for i, ri := range related.R.Roles {
+		if queries.Equal(o.TenantID, ri.TenantID) {
+			continue
+		}
+
+		ln := len(related.R.Roles)
+		if ln > 1 && i < ln-1 {
+			related.R.Roles[i] = related.R.Roles[ln-1]
+		}
+		related.R.Roles = related.R.Roles[:ln-1]
+		break
+	}
 	return nil
 }
 

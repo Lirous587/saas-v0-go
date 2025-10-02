@@ -3,35 +3,35 @@
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-    "strconv"
 	"saas/internal/common/reqkit/bind"
 	"saas/internal/common/reskit/response"
 	"saas/internal/role/domain"
+	"strconv"
 )
 
 type HttpHandler struct {
-    service domain.RoleService
+	service domain.RoleService
 }
 
 func NewHttpHandler(service domain.RoleService) *HttpHandler {
-    return &HttpHandler{
-        service: service,
-    }
+	return &HttpHandler{
+		service: service,
+	}
 }
 
 func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
-    idStr := ctx.Param("id")
-    idInt, err := strconv.Atoi(idStr)
-    if err != nil {
-        response.InvalidParams(ctx,err)
-        return 0, err
-    }
-    if idInt == 0 {
-        err := errors.New("无效的id")
-        response.InvalidParams(ctx,err)
-        return 0, err
-    }
-    return int64(idInt), err
+	idStr := ctx.Param("id")
+	idInt, err := strconv.Atoi(idStr)
+	if err != nil {
+		response.InvalidParams(ctx, err)
+		return 0, err
+	}
+	if idInt == 0 {
+		err := errors.New("无效的id")
+		response.InvalidParams(ctx, err)
+		return 0, err
+	}
+	return int64(idInt), err
 }
 
 // Create godoc
@@ -47,44 +47,16 @@ func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/role [post]
 func (h *HttpHandler) Create(ctx *gin.Context) {
-    req := new(CreateRequest)
+	req := new(CreateRequest)
 
-	if err := bind.BindingRegularAndResponse(ctx,req); err != nil {
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
-    data, err := h.service.Create(&domain.Role{
-        Title:    req.Title,
-        Description:  req.Description,
-    })
-
-    if err != nil {
-        response.Error(ctx, err)
-        return
-    }
-
-    response.Success(ctx, domainRoleToResponse(data))
-}
-
-// Read godoc
-// @Summary      读取单条 Role
-// @Description  读取单条 Role
-// @Tags         role
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        id   path int true "Role ID"
-// @Success      200  {object}  response.successResponse{data=handler.RoleResponse} "成功创建 Role"
-// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
-// @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/role/{id} [get]
-func (h *HttpHandler) Read(ctx *gin.Context) {
-	id, err := h.getID(ctx)
-	if err != nil {
-		return
-	}
-
-	data, err := h.service.Read(id)
+	data, err := h.service.Create(&domain.Role{
+		TenantID:    req.TenantID,
+		Description: req.Description,
+	})
 
 	if err != nil {
 		response.Error(ctx, err)
@@ -108,29 +80,29 @@ func (h *HttpHandler) Read(ctx *gin.Context) {
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/role/{id} [put]
 func (h *HttpHandler) Update(ctx *gin.Context) {
-    id, err := h.getID(ctx)
-    if err != nil {
-        return
-    }
-
-    req := new(UpdateRequest)
-
-	if err := bind.BindingRegularAndResponse(ctx,req); err != nil {
+	id, err := h.getID(ctx)
+	if err != nil {
 		return
 	}
 
-    data, err := h.service.Update(&domain.Role{
-        ID:           id,
-        Title:        req.Title,
-        Description:  req.Description,
-    })
+	req := new(UpdateRequest)
 
-    if err != nil {
-        response.Error(ctx, err)
-        return
-    }
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
 
-    response.Success(ctx, domainRoleToResponse(data))
+	data, err := h.service.Update(&domain.Role{
+		ID: id,
+		// Title:       req.Title,
+		Description: req.Description,
+	})
+
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx, domainRoleToResponse(data))
 }
 
 // Delete godoc
@@ -146,17 +118,17 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/role/{id} [delete]
 func (h *HttpHandler) Delete(ctx *gin.Context) {
-    id, err := h.getID(ctx)
-    if err != nil {
-        return
-    }
+	id, err := h.getID(ctx)
+	if err != nil {
+		return
+	}
 
-    if err := h.service.Delete(id); err != nil {
-        response.Error(ctx, err)
-        return
-    }
+	if err := h.service.Delete(id); err != nil {
+		response.Error(ctx, err)
+		return
+	}
 
-    response.Success(ctx)
+	response.Success(ctx)
 }
 
 // List godoc
@@ -165,30 +137,31 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Tags         role
 // @Accept       json
 // @Produce      json
+// @Security     BearerAuth
 // @Param        keyword    query     string  false  "关键词搜索"
 // @Param        page       query     int     false  "页码" default(1)
 // @Param        page_size  query     int     false  "每页数量" default(10)
 // @Success      200  {object}  response.successResponse{data=handler.RoleListResponse} "Role列表"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/role [get]
+// @Router       /v1/role/:tenant_id [get]
 func (h *HttpHandler) List(ctx *gin.Context) {
-    req := new(ListRequest)
+	req := new(ListRequest)
 
-	if err := bind.BindingRegularAndResponse(ctx,req); err != nil {
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
-    data, err := h.service.List(&domain.RoleQuery{
-        Keyword:  req.KeyWord,
-        Page:     req.Page,
-        PageSize: req.PageSize,
-    })
+	data, err := h.service.List(&domain.RoleQuery{
+		Keyword:  req.KeyWord,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+	})
 
-    if err != nil {
-        response.Error(ctx, err)
-        return
-    }
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
 
-    response.Success(ctx, domainRoleListToResponse(data))
+	response.Success(ctx, domainRoleListToResponse(data))
 }

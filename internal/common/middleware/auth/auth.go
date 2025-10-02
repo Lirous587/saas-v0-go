@@ -1,24 +1,54 @@
 package auth
 
 import (
-	"github.com/pkg/errors"
+	casbinadapter "saas/internal/common/casbin"
 	"saas/internal/common/reskit/codes"
 	"saas/internal/common/reskit/response"
 	"saas/internal/common/server"
-	"saas/internal/user/adapters"
-	"saas/internal/user/domain"
-	"saas/internal/user/service"
+	roleadapter "saas/internal/role/adapters"
+	roleDomain "saas/internal/role/domain"
+	roleService "saas/internal/role/service"
+	useradapter "saas/internal/user/adapters"
+	userdomain "saas/internal/user/domain"
+	userService "saas/internal/user/service"
+	"strconv"
 	"strings"
+
+	"github.com/casbin/casbin/v2"
+	"github.com/pkg/errors"
 
 	"github.com/gin-gonic/gin"
 )
 
-var tokenServer domain.TokenService
+var tokenServer userdomain.TokenService
 
-func init() {
-	tokenCache := adapters.NewRedisTokenCache()
-	userRepo := adapters.NewPSQLUserRepository()
-	tokenServer = service.NewTokenService(tokenCache, userRepo)
+var roleServer roleDomain.RoleService
+
+var enforcer *casbin.Enforcer
+
+func Init() {
+	// 初始化token服务
+	tokenCache := useradapter.NewTokenRedisCache()
+	userRepo := useradapter.NewUserPSQLRepository()
+	tokenServer = userService.NewTokenService(tokenCache, userRepo)
+
+	// 初始化roleService
+	roleCache := roleadapter.NewRoleRedisCache()
+	roleRepo := roleadapter.NewRolePSQLRepository()
+	roleServer = roleService.NewRoleService(roleRepo, roleCache)
+
+	// 初始化casbin服务
+	var err error
+	adapter := casbinadapter.NewSQLBoilerCasbinAdapter()
+	enforcer, err = casbin.NewEnforcer("./model.conf", adapter)
+	if err != nil {
+		panic("创建执行器失败: " + err.Error())
+	}
+
+	err = enforcer.LoadPolicy()
+	if err != nil {
+		panic("加载策略失败:" + err.Error())
+	}
 }
 
 const (
@@ -40,7 +70,7 @@ func parseTokenFromHeader(c *gin.Context) (string, error) {
 	return strings.TrimPrefix(authHeader, bearerPrefix), nil
 }
 
-func Validate() gin.HandlerFunc {
+func JWTValidate() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 1. 从请求头解析 Token
 		tokenStr, err := parseTokenFromHeader(c)
@@ -71,5 +101,54 @@ func Validate() gin.HandlerFunc {
 		c.Set(server.UserIDKey, payload.UserID)
 
 		c.Next()
+	}
+}
+
+func CasbinValited() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		// 1.获取useID
+		userID, err := server.GetUserID(ctx)
+		if err != nil {
+			response.Error(ctx, codes.ErrUnauthorized)
+			ctx.Abort()
+			return
+		}
+
+		// 2.获取tenantID
+		tenantID, err := server.GetTenantID(ctx)
+		if err != nil {
+			response.Error(ctx, err)
+			ctx.Abort()
+			return
+		}
+
+		// 查询用户在该租户下的角色
+		role, err := roleServer.GetUserRoleInTenant(userID, tenantID)
+		if err != nil {
+			response.Error(ctx, codes.ErrRoleNotFound)
+			ctx.Abort()
+			return
+		}
+
+		// 获取请求路径和方法
+		obj := ctx.Request.URL.Path
+		act := strings.ToLower(ctx.Request.Method)
+
+		// 将 tenantID 转换为字符串（确保与策略类型匹配）
+		tenantIDStr := strconv.FormatInt(tenantID, 10)
+
+		ok, err := enforcer.Enforce(role.Name, tenantIDStr, obj, act)
+		if err != nil {
+			response.Error(ctx, codes.ErrPermissionDenied)
+			ctx.Abort()
+			return
+		}
+		if !ok {
+			response.Error(ctx, codes.ErrPermissionDenied)
+			ctx.Abort()
+			return
+		}
+
+		ctx.Next()
 	}
 }

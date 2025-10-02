@@ -4,25 +4,26 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"os"
+	"os/signal"
+	_ "saas/api/openapi"
+	"saas/internal/common/logger"
+	"saas/internal/common/metrics"
+	"saas/internal/common/middleware/auth"
+	"saas/internal/common/server"
+	"saas/internal/common/uid"
+	"saas/internal/role"
+	"saas/internal/tenant"
+	"saas/internal/user"
+	"syscall"
+
 	"github.com/aarondl/sqlboiler/v4/boil"
-	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/subosito/gotenv"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/zap"
-	"os"
-	"os/signal"
-	_ "saas/api/openapi"
-	casbinadapter "saas/internal/common/casbin"
-	"saas/internal/common/logger"
-	"saas/internal/common/metrics"
-	"saas/internal/common/server"
-	"saas/internal/common/uid"
-	"saas/internal/tenant"
-	"saas/internal/user"
-	"syscall"
 )
 
 func setGDB() {
@@ -63,18 +64,6 @@ func setGDB() {
 			panic(fmt.Sprintf("打开debug日志错误:%v", err))
 		}
 		boil.DebugWriter = fh
-	}
-}
-
-func setCasbin() {
-	casbinAd := casbinadapter.NewSQLBoilerCasbinAdapter()
-	enforcer, err := casbin.NewEnforcer("./model.conf", casbinAd)
-	if err != nil {
-		panic("创建执行器失败: " + err.Error())
-	}
-	err = enforcer.LoadPolicy()
-	if err != nil {
-		panic("加载策略失败:" + err.Error())
 	}
 }
 
@@ -124,11 +113,11 @@ func main() {
 
 	setGDB()
 
+	auth.Init()
+
 	if err = logger.Init(); err != nil {
 		panic(errors.WithMessage(err, "logger模块初始化失败"))
 	}
-
-	setCasbin()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	go sync(ctx, cancel)
@@ -145,6 +134,6 @@ func main() {
 		//img.InitV1(r)
 
 		tenant.InitV1(r)
-		
+		role.InitV1(r)
 	})
 }

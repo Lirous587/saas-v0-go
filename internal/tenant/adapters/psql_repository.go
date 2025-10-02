@@ -13,14 +13,14 @@ import (
 	"saas/internal/tenant/domain"
 )
 
-type PSQLTenantRepository struct {
+type TenantPSQLRepository struct {
 }
 
-func NewPSQLTenantRepository() domain.TenantRepository {
-	return &PSQLTenantRepository{}
+func NewTenantPSQLRepository() domain.TenantRepository {
+	return &TenantPSQLRepository{}
 }
 
-func (repo *PSQLTenantRepository) BeginTx(option ...*sql.TxOptions) (*sql.Tx, error) {
+func (repo *TenantPSQLRepository) BeginTx(option ...*sql.TxOptions) (*sql.Tx, error) {
 	var op *sql.TxOptions
 	if len(option) > 1 {
 		op = option[0]
@@ -33,7 +33,7 @@ func (repo *PSQLTenantRepository) BeginTx(option ...*sql.TxOptions) (*sql.Tx, er
 	return boil.BeginTx(context.TODO(), op)
 }
 
-func (repo *PSQLTenantRepository) FindByID(id int64) (*domain.Tenant, error) {
+func (repo *TenantPSQLRepository) FindByID(id int64) (*domain.Tenant, error) {
 	ormTenant, err := orm.FindTenantG(id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -44,7 +44,7 @@ func (repo *PSQLTenantRepository) FindByID(id int64) (*domain.Tenant, error) {
 	return ormTenantToDomain(ormTenant), nil
 }
 
-func (repo *PSQLTenantRepository) InsertTx(tx *sql.Tx, tenant *domain.Tenant) (*domain.Tenant, error) {
+func (repo *TenantPSQLRepository) InsertTx(tx *sql.Tx, tenant *domain.Tenant) (*domain.Tenant, error) {
 	ormTenant := domainTenantToORM(tenant)
 
 	if err := ormTenant.Insert(tx, boil.Infer()); err != nil {
@@ -54,7 +54,7 @@ func (repo *PSQLTenantRepository) InsertTx(tx *sql.Tx, tenant *domain.Tenant) (*
 	return ormTenantToDomain(ormTenant), nil
 }
 
-func (repo *PSQLTenantRepository) InsertPlanTx(tx *sql.Tx, tenantID int64, planID int64) error {
+func (repo *TenantPSQLRepository) InsertPlanTx(tx *sql.Tx, tenantID int64, planID int64) error {
 	ormTenantPlan := orm.TenantPlan{
 		TenantID: tenantID,
 		PlanID:   planID,
@@ -63,7 +63,7 @@ func (repo *PSQLTenantRepository) InsertPlanTx(tx *sql.Tx, tenantID int64, planI
 	return ormTenantPlan.Insert(tx, boil.Infer())
 }
 
-func (repo *PSQLTenantRepository) InsertUserTx(tx *sql.Tx, tenantID int64, userID int64) error {
+func (repo *TenantPSQLRepository) InsertUserTx(tx *sql.Tx, tenantID int64, userID int64) error {
 	ormUserTenant := orm.UserTenant{
 		TenantID: tenantID,
 		UserID:   userID,
@@ -72,7 +72,7 @@ func (repo *PSQLTenantRepository) InsertUserTx(tx *sql.Tx, tenantID int64, userI
 	return ormUserTenant.Insert(tx, boil.Infer())
 }
 
-func (repo *PSQLTenantRepository) Update(tenant *domain.Tenant) (*domain.Tenant, error) {
+func (repo *TenantPSQLRepository) Update(tenant *domain.Tenant) (*domain.Tenant, error) {
 	ormTenant := domainTenantToORM(tenant)
 
 	rows, err := ormTenant.UpdateG(boil.Infer())
@@ -87,7 +87,7 @@ func (repo *PSQLTenantRepository) Update(tenant *domain.Tenant) (*domain.Tenant,
 	return ormTenantToDomain(ormTenant), nil
 }
 
-func (repo *PSQLTenantRepository) Delete(id int64) error {
+func (repo *TenantPSQLRepository) Delete(id int64) error {
 	ormTenant := orm.Tenant{
 		ID: id,
 	}
@@ -102,7 +102,7 @@ func (repo *PSQLTenantRepository) Delete(id int64) error {
 	return nil
 }
 
-func (repo *PSQLTenantRepository) List(query *domain.TenantQuery) (*domain.TenantList, error) {
+func (repo *TenantPSQLRepository) List(query *domain.TenantQuery) (*domain.TenantList, error) {
 	var whereMods []qm.QueryMod
 	if query.Keyword != "" {
 		like := "%" + query.Keyword + "%"

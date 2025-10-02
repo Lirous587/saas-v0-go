@@ -6,7 +6,6 @@
 
 package role
 
-
 import (
 	"github.com/gin-gonic/gin"
 	"saas/internal/role/adapters"
@@ -17,8 +16,9 @@ import (
 // Injectors from wire.go:
 
 func InitV1(r *gin.RouterGroup) func() {
-	roleRepository := adapters.NewPSQLRoleRepository()
-	roleService := service.NewRoleService(roleRepository)
+	roleRepository := adapters.NewRolePSQLRepository()
+	roleCache := adapters.NewRoleRedisCache()
+	roleService := service.NewRoleService(roleRepository, roleCache)
 	httpHandler := handler.NewHttpHandler(roleService)
 	v := RegisterV1(r, httpHandler)
 	return v

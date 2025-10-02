@@ -17,4 +17,8 @@ const (
 	// 图库模块 (1400-1599)
 	ImgErrorStart = 1400
 	ImgErrorEnd   = 1599
+
+	// 租户模块(1600-1799)
+	TenantErrorStart = 1600
+	TenantErrorEnd   = 1799
 )

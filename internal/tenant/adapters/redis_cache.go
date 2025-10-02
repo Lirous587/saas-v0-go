@@ -1,18 +1,18 @@
 ﻿package adapters
 
 import (
-	"saas/internal/tenant/domain"
 	"context"
 	"github.com/redis/go-redis/v9"
 	"os"
+	"saas/internal/tenant/domain"
 	"strconv"
 )
 
-type RedisTenantCache struct {
+type TenantRedisCache struct {
 	client *redis.Client
 }
 
-func NewRedisCache() domain.TenantCache {
+func NewTenantRedisCache() domain.TenantCache {
 	host := os.Getenv("REDIS_HOST")
 	port := os.Getenv("REDIS_PORT")
 	password := os.Getenv("REDIS_PASSWORD")
@@ -36,5 +36,5 @@ func NewRedisCache() domain.TenantCache {
 		panic(err)
 	}
 
-	return &RedisTenantCache{client: client}
+	return &TenantRedisCache{client: client}
 }

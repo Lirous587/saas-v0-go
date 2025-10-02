@@ -112,16 +112,12 @@ definitions:
     type: object
   handler.PlanResponse:
     properties:
-      created_at:
-        type: integer
       description:
         type: string
       id:
         type: integer
       title:
         type: string
-      updated_at:
-        type: integer
     type: object
   handler.RefreshTokenResponse:
     properties:
@@ -141,15 +137,13 @@ definitions:
     type: object
   handler.RoleResponse:
     properties:
-      created_at:
-        type: integer
       description:
         type: string
       id:
         type: integer
-      title:
+      name:
         type: string
-      updated_at:
+      tenant_id:
         type: integer
     type: object
   handler.TenantListResponse:
@@ -261,22 +255,32 @@ definitions:
       description:
         maxLength: 60
         type: string
-      title:
-        maxLength: 30
+      id:
+        type: integer
+      is_default:
+        type: boolean
+      name:
         type: string
+      tenant_id:
+        type: integer
     required:
-    - title
+    - id
+    - name
     type: object
   saas_internal_role_handler.UpdateRequest:
     properties:
       description:
         maxLength: 60
         type: string
-      title:
-        maxLength: 30
+      id:
+        type: integer
+      name:
         type: string
+      tenant_id:
+        type: integer
     required:
-    - title
+    - id
+    - name
     type: object
   saas_internal_tenant_handler.CreateRequest:
     properties:
@@ -909,6 +913,43 @@ paths:
       tags:
       - plan
   /v1/role:
+    post:
+      consumes:
+      - application/json
+      description: 创建新的 Role
+      parameters:
+      - description: 创建 Role 请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/saas_internal_role_handler.CreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功创建 Role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.RoleResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 创建 Role
+      tags:
+      - role
+  /v1/role/:tenant_id:
     get:
       consumes:
       - application/json
@@ -948,43 +989,9 @@ paths:
           description: 服务器错误
           schema:
             $ref: '#/definitions/response.errorResponse'
-      summary: 获取 Role 列表
-      tags:
-      - role
-    post:
-      consumes:
-      - application/json
-      description: 创建新的 Role
-      parameters:
-      - description: 创建 Role 请求
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/saas_internal_role_handler.CreateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功创建 Role
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.RoleResponse'
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
       security:
       - BearerAuth: []
-      summary: 创建 Role
+      summary: 获取 Role 列表
       tags:
       - role
   /v1/role/{id}:
@@ -1016,41 +1023,6 @@ paths:
       security:
       - BearerAuth: []
       summary: 删除 Role
-      tags:
-      - role
-    get:
-      consumes:
-      - application/json
-      description: 读取单条 Role
-      parameters:
-      - description: Role ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功创建 Role
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.RoleResponse'
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 读取单条 Role
       tags:
       - role
     put:

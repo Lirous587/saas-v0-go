@@ -1,6 +1,5 @@
 ﻿package domain
 
-
 type RoleRepository interface {
 	FindByID(id int64) (*Role, error)
 
@@ -8,8 +7,11 @@ type RoleRepository interface {
 	Update(role *Role) (*Role, error)
 	Delete(id int64) error
 	List(query *RoleQuery) (*RoleList, error)
+
+	FindUserRoleInTenant(userID, tenantID int64) (*Role, error)
 }
 
 type RoleCache interface {
-
+	GetUserRoleInTenant(userID, tenantID int64) (*Role, error)
+	SetUserRoleInTenant(userID, tenantID int64, role *Role) error
 }

@@ -7,16 +7,16 @@
 package img
 
 import (
+	"github.com/gin-gonic/gin"
 	"saas/internal/img/adapters"
 	"saas/internal/img/handler"
 	"saas/internal/img/service"
-	"github.com/gin-gonic/gin"
 )
 
 // Injectors from wire.go:
 
 func InitV1(r *gin.RouterGroup) func() {
-	imgRepository := adapters.NewPSQLImgRepository()
+	imgRepository := adapters.NewImgPSQLRepository()
 	imgMsgQueue := adapters.NewImgRedisCache()
 	imgService := service.NewImgService(imgRepository, imgMsgQueue)
 	httpHandler := handler.NewHttpHandler(imgService)

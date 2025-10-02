@@ -1,9 +1,9 @@
 package adapters
 
 import (
+	"github.com/aarondl/null/v8"
 	"saas/internal/common/orm"
 	"saas/internal/role/domain"
-	"github.com/aarondl/null/v8"
 )
 
 func domainRoleToORM(role *domain.Role) *orm.Role {
@@ -13,15 +13,21 @@ func domainRoleToORM(role *domain.Role) *orm.Role {
 
 	// 非null项
 	ormRole := &orm.Role{
-		ID:        		role.ID,
-		Title:     		role.Title,
-        CreatedAt: 		role.CreatedAt,
-        UpdatedAt: 		role.UpdatedAt,
+		ID:        role.ID,
+		Name:      role.Name,
+		IsDefault: role.IsDefault,
 	}
 
 	// 处理null项
+	if role.TenantID != 0 {
+		ormRole.TenantID = null.Int64From(role.TenantID)
+		ormRole.TenantID.Valid = true
+	}
+
 	if role.Description != "" {
-	 	ormRole.Description = null.StringFrom(role.Description)
+		ormRole.Description = null.StringFrom(role.Description)
+		ormRole.Description.Valid = true
+
 	}
 
 	return ormRole
@@ -34,15 +40,17 @@ func ormRoleToDomain(ormRole *orm.Role) *domain.Role {
 
 	// 非null项
 	role := &domain.Role{
-		ID:        		ormRole.ID,
-		Title:     		ormRole.Title,
-		CreatedAt: 		ormRole.CreatedAt,
-		UpdatedAt: 		ormRole.UpdatedAt,
+		ID:        ormRole.ID,
+		Name:      ormRole.Name,
+		IsDefault: ormRole.IsDefault,
 	}
 
 	// 处理null项
+	if ormRole.TenantID.Valid {
+		role.TenantID = ormRole.TenantID.Int64
+	}
 	if ormRole.Description.Valid {
- 	 	role.Description = ormRole.Description.String
+		role.Description = ormRole.Description.String
 	}
 
 	return role
@@ -61,4 +69,3 @@ func ormRolesToDomain(ormRoles []*orm.Role) []*domain.Role {
 	}
 	return roles
 }
-

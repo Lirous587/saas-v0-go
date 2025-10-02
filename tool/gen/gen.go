@@ -193,12 +193,12 @@ func main() {
 		log.Printf("生成成功: %s\n", codePath)
 	}
 
-	// 创建基础表
-	//if err := createTable(domainLower); err != nil {
-	//	rollBackCode(codePath)
-	//	rollBackTemplate(outBase)
-	//	log.Fatalf("生成基础表失败: %v", err)
-	//}
+	// // 创建基础表
+	// if err := createTable(domainLower); err != nil {
+	// 	rollBackCode(codePath)
+	// 	rollBackTemplate(outBase)
+	// 	log.Fatalf("生成基础表失败: %v", err)
+	// }
 
 	// 生成api文档
 	if err := genApiDoc(); err != nil {

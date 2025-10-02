@@ -1288,7 +1288,7 @@ func (tenantL) LoadRoles(e boil.Executor, singular bool, maybeTenant interface{}
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if local.ID == foreign.TenantID {
+			if queries.Equal(local.ID, foreign.TenantID) {
 				local.R.Roles = append(local.R.Roles, foreign)
 				if foreign.R == nil {
 					foreign.R = &roleR{}
@@ -1733,7 +1733,7 @@ func (o *Tenant) AddRoles(exec boil.Executor, insert bool, related ...*Role) err
 	var err error
 	for _, rel := range related {
 		if insert {
-			rel.TenantID = o.ID
+			queries.Assign(&rel.TenantID, o.ID)
 			if err = rel.Insert(exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -1753,7 +1753,7 @@ func (o *Tenant) AddRoles(exec boil.Executor, insert bool, related ...*Role) err
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			rel.TenantID = o.ID
+			queries.Assign(&rel.TenantID, o.ID)
 		}
 	}
 
@@ -1774,6 +1774,98 @@ func (o *Tenant) AddRoles(exec boil.Executor, insert bool, related ...*Role) err
 			rel.R.Tenant = o
 		}
 	}
+	return nil
+}
+
+// SetRolesG removes all previously related items of the
+// tenant replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.Tenant's Roles accordingly.
+// Replaces o.R.Roles with related.
+// Sets related.R.Tenant's Roles accordingly.
+// Uses the global database handle.
+func (o *Tenant) SetRolesG(insert bool, related ...*Role) error {
+	return o.SetRoles(boil.GetDB(), insert, related...)
+}
+
+// SetRoles removes all previously related items of the
+// tenant replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.Tenant's Roles accordingly.
+// Replaces o.R.Roles with related.
+// Sets related.R.Tenant's Roles accordingly.
+func (o *Tenant) SetRoles(exec boil.Executor, insert bool, related ...*Role) error {
+	query := "update \"roles\" set \"tenant_id\" = null where \"tenant_id\" = $1"
+	values := []interface{}{o.ID}
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, query)
+		fmt.Fprintln(boil.DebugWriter, values)
+	}
+	_, err := exec.Exec(query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.Roles {
+			queries.SetScanner(&rel.TenantID, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.Tenant = nil
+		}
+		o.R.Roles = nil
+	}
+
+	return o.AddRoles(exec, insert, related...)
+}
+
+// RemoveRolesG relationships from objects passed in.
+// Removes related items from R.Roles (uses pointer comparison, removal does not keep order)
+// Sets related.R.Tenant.
+// Uses the global database handle.
+func (o *Tenant) RemoveRolesG(related ...*Role) error {
+	return o.RemoveRoles(boil.GetDB(), related...)
+}
+
+// RemoveRoles relationships from objects passed in.
+// Removes related items from R.Roles (uses pointer comparison, removal does not keep order)
+// Sets related.R.Tenant.
+func (o *Tenant) RemoveRoles(exec boil.Executor, related ...*Role) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.TenantID, nil)
+		if rel.R != nil {
+			rel.R.Tenant = nil
+		}
+		if _, err = rel.Update(exec, boil.Whitelist("tenant_id")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.Roles {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.Roles)
+			if ln > 1 && i < ln-1 {
+				o.R.Roles[i] = o.R.Roles[ln-1]
+			}
+			o.R.Roles = o.R.Roles[:ln-1]
+			break
+		}
+	}
+
 	return nil
 }
 

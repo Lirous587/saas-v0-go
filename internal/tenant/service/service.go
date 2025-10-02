@@ -43,6 +43,7 @@ func (s *service) Create(tenant *domain.Tenant, planID int64, userID int64) (*do
 	}
 
 	// 4.创建此租户的管理员角色
+
 	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
