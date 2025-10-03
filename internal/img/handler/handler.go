@@ -29,14 +29,17 @@ func NewHttpHandler(service domain.ImgService) *HttpHandler {
 
 func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
 	idStr := ctx.Param("id")
+	if idStr == "" {
+		return 0, errors.New("请传递id参数")
+	}
 	idInt, err := strconv.Atoi(idStr)
 	if err != nil {
-		return 0, err
+		return 0, errors.WithStack(err)
 	}
 	if idInt == 0 {
-		return 0, errors.New("无效的id")
+		return 0, errors.WithStack(errors.New("无效的id"))
 	}
-	return int64(idInt), err
+	return int64(idInt), nil
 }
 
 func isImage(file multipart.File) (bool, string, error) {
@@ -143,8 +146,8 @@ func (h *HttpHandler) Upload(ctx *gin.Context) {
 	}
 
 	res, err := h.service.Upload(file, &domain.Img{
-		Path:		imgPath,
-		Description:	req.Description,
+		Path:        imgPath,
+		Description: req.Description,
 	},
 		req.CategoryID,
 	)
@@ -224,11 +227,11 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 	}
 
 	list, err := h.service.List(&domain.ImgQuery{
-		Keyword:	req.KeyWord,
-		Page:		req.Page,
-		PageSize:	req.PageSize,
-		Deleted:	req.Deleted,
-		CategoryID:	req.CategoryID,
+		Keyword:    req.KeyWord,
+		Page:       req.Page,
+		PageSize:   req.PageSize,
+		Deleted:    req.Deleted,
+		CategoryID: req.CategoryID,
 	})
 
 	if err != nil {
@@ -319,8 +322,8 @@ func (h *HttpHandler) CreateCategory(ctx *gin.Context) {
 	}
 
 	res, err := h.service.CreateCategory(&domain.Category{
-		Title:	req.Title,
-		Prefix:	req.Prefix,
+		Title:  req.Title,
+		Prefix: req.Prefix,
 	})
 
 	if err != nil {
@@ -358,9 +361,9 @@ func (h *HttpHandler) UpdateCategory(ctx *gin.Context) {
 	}
 
 	res, err := h.service.UpdateCategory(&domain.Category{
-		ID:	id,
-		Title:	req.Title,
-		Prefix:	req.Prefix,
+		ID:     id,
+		Title:  req.Title,
+		Prefix: req.Prefix,
 	})
 
 	if err != nil {

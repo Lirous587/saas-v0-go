@@ -22,17 +22,17 @@ func NewHttpHandler(service domain.TenantService) *HttpHandler {
 
 func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
 	idStr := ctx.Param("id")
+	if idStr == "" {
+		return 0, errors.New("请传递id参数")
+	}
 	idInt, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.InvalidParams(ctx, err)
-		return 0, err
+		return 0, errors.WithStack(err)
 	}
 	if idInt == 0 {
-		err := errors.New("无效的id")
-		response.InvalidParams(ctx, err)
-		return 0, err
+		return 0, errors.WithStack(errors.New("无效的id"))
 	}
-	return int64(idInt), err
+	return int64(idInt), nil
 }
 
 // Create godoc
@@ -77,20 +77,21 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 }
 
 // Read godoc
-// @Summary      读取单条 Tenant
-// @Description  读取单条 Tenant
+// @Summary      查询租户基础信息
+// @Description  查询租户基础信息
 // @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
 // @Param        id   path int true "Tenant ID"
-// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "成功创建 Tenant"
+// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "成功查询 Tenant"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant/{id} [get]
 func (h *HttpHandler) Read(ctx *gin.Context) {
 	id, err := h.getID(ctx)
 	if err != nil {
+		response.InvalidParams(ctx, err)
 		return
 	}
 
@@ -120,6 +121,7 @@ func (h *HttpHandler) Read(ctx *gin.Context) {
 func (h *HttpHandler) Update(ctx *gin.Context) {
 	id, err := h.getID(ctx)
 	if err != nil {
+		response.InvalidParams(ctx, err)
 		return
 	}
 
@@ -143,6 +145,23 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 	response.Success(ctx, domainTenantToResponse(data))
 }
 
+// Upgrade godoc
+// @Summary      升级租户
+// @Description  升级租户计划
+// @Tags         tenant
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path int true "Tenant ID"
+// @Param        request body handler.UpgradeRequest true "升级 Tenant 请求"
+// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "成功升级 Tenant"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/tenant/{id} [put]
+func (h *HttpHandler) Upgrade(ctx *gin.Context) {
+
+}
+
 // Delete godoc
 // @Summary      删除 Tenant
 // @Description  根据ID删除 Tenant
@@ -158,6 +177,7 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 func (h *HttpHandler) Delete(ctx *gin.Context) {
 	id, err := h.getID(ctx)
 	if err != nil {
+		response.InvalidParams(ctx, err)
 		return
 	}
 

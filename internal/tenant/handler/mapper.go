@@ -48,8 +48,14 @@ type CreateRequest struct {
 }
 
 type UpdateRequest struct {
-	Name        string
+	ID          int64  `uri:"id" binding:"required"`
+	Name        string `json:"id" binding:"required"`
 	Description string `json:"description" binding:"max=120"`
+}
+
+type UpgradeRequest struct {
+	TenantID int64 `uri:"tenant_id" binding:"required"`
+	PlanID   int64 `json:"plan_id" binding:"required"`
 }
 
 type ListRequest struct {

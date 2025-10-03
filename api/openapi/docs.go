@@ -699,9 +699,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/plan": {
+        "/v1/mock": {
             "get": {
-                "description": "根据查询参数获取Plan列表，返回当前页数据和total数量",
+                "description": "根据查询参数获取Mock列表，返回当前页数据和total数量",
                 "consumes": [
                     "application/json"
                 ],
@@ -709,9 +709,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "plan"
+                    "mock"
                 ],
-                "summary": "获取 Plan 列表",
+                "summary": "获取 Mock 列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -734,6 +734,285 @@ const docTemplate = `{
                         "in": "query"
                     }
                 ],
+                "responses": {
+                    "200": {
+                        "description": "Mock列表",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.MockListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "创建新的 Mock",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mock"
+                ],
+                "summary": "创建 Mock",
+                "parameters": [
+                    {
+                        "description": "创建 Mock 请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/saas_internal_mock_handler.CreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功创建 Mock",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.MockResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/mock/{id}": {
+            "get": {
+                "description": "读取单条 Mock",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mock"
+                ],
+                "summary": "读取单条 Mock",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Mock ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功查询 Mock",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.MockResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID更新 Mock 信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mock"
+                ],
+                "summary": "更新 Mock",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Mock ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新 Mock 请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/saas_internal_mock_handler.UpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功更新 Mock",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.MockResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 Mock",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mock"
+                ],
+                "summary": "删除 Mock",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Mock ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功删除 Mock",
+                        "schema": {
+                            "$ref": "#/definitions/response.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/plan": {
+            "get": {
+                "description": "获取Plan列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plan"
+                ],
+                "summary": "获取 Plan 列表",
                 "responses": {
                     "200": {
                         "description": "Plan列表",
@@ -1012,7 +1291,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据查询参数获取Role列表，返回当前页数据和total数量",
+                "description": "获取Role列表",
                 "consumes": [
                     "application/json"
                 ],
@@ -1025,24 +1304,11 @@ const docTemplate = `{
                 "summary": "获取 Role 列表",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "关键词搜索",
-                        "name": "keyword",
-                        "in": "query"
-                    },
-                    {
                         "type": "integer",
-                        "default": 1,
-                        "description": "页码",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10,
-                        "description": "每页数量",
-                        "name": "page_size",
-                        "in": "query"
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1394,7 +1660,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "读取单条 Tenant",
+                "description": "查询租户基础信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -1404,7 +1670,7 @@ const docTemplate = `{
                 "tags": [
                     "tenant"
                 ],
-                "summary": "读取单条 Tenant",
+                "summary": "查询租户基础信息",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1416,7 +1682,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功创建 Tenant",
+                        "description": "成功查询 Tenant",
                         "schema": {
                             "allOf": [
                                 {
@@ -1453,7 +1719,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID更新 Tenant 信息",
+                "description": "升级租户计划",
                 "consumes": [
                     "application/json"
                 ],
@@ -1463,7 +1729,7 @@ const docTemplate = `{
                 "tags": [
                     "tenant"
                 ],
-                "summary": "更新 Tenant",
+                "summary": "升级租户",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1473,18 +1739,18 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "更新 Tenant 请求",
+                        "description": "升级 Tenant 请求",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/saas_internal_tenant_handler.UpdateRequest"
+                            "$ref": "#/definitions/handler.UpgradeRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功更新 Tenant",
+                        "description": "成功升级 Tenant",
                         "schema": {
                             "allOf": [
                                 {
@@ -1921,6 +2187,40 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.MockListResponse": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.MockResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.MockResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "integer"
+                }
+            }
+        },
         "handler.PlanListResponse": {
             "type": "object",
             "properties": {
@@ -1929,9 +2229,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/handler.PlanResponse"
                     }
-                },
-                "total": {
-                    "type": "integer"
                 }
             }
         },
@@ -1947,8 +2244,11 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "title": {
+                "name": {
                     "type": "string"
+                },
+                "price": {
+                    "type": "number"
                 },
                 "updated_at": {
                     "type": "integer"
@@ -2041,6 +2341,21 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.UpgradeRequest": {
+            "type": "object",
+            "required": [
+                "plan_id",
+                "tenantID"
+            ],
+            "properties": {
+                "plan_id": {
+                    "type": "integer"
+                },
+                "tenantID": {
+                    "type": "integer"
+                }
+            }
+        },
         "handler.UserResponse": {
             "type": "object",
             "properties": {
@@ -2116,7 +2431,7 @@ const docTemplate = `{
                 }
             }
         },
-        "saas_internal_plan_handler.CreateRequest": {
+        "saas_internal_mock_handler.CreateRequest": {
             "type": "object",
             "required": [
                 "title"
@@ -2132,7 +2447,7 @@ const docTemplate = `{
                 }
             }
         },
-        "saas_internal_plan_handler.UpdateRequest": {
+        "saas_internal_mock_handler.UpdateRequest": {
             "type": "object",
             "required": [
                 "title"
@@ -2145,6 +2460,46 @@ const docTemplate = `{
                 "title": {
                     "type": "string",
                     "maxLength": 30
+                }
+            }
+        },
+        "saas_internal_plan_handler.CreateRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "name",
+                "price"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "price": {
+                    "type": "number"
+                }
+            }
+        },
+        "saas_internal_plan_handler.UpdateRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "name",
+                "price"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "price": {
+                    "type": "number"
                 }
             }
         },
@@ -2216,12 +2571,16 @@ const docTemplate = `{
         },
         "saas_internal_tenant_handler.UpdateRequest": {
             "type": "object",
+            "required": [
+                "id",
+                "id"
+            ],
             "properties": {
                 "description": {
                     "type": "string",
                     "maxLength": 120
                 },
-                "name": {
+                "id": {
                     "type": "string"
                 }
             }

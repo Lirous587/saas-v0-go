@@ -61,3 +61,31 @@ func ormTenantsToDomain(ormTenants []*orm.Tenant) []*domain.Tenant {
 	}
 	return tenants
 }
+
+// func domainPlanToORM(plan *domain.Plan) *orm.Plan {
+// 	if plan == nil {
+// 		return nil
+// 	}
+
+// 	// 非null项
+// 	ormPlan := &orm.Plan{
+// 		ID:   plan.ID,
+// 		Name: plan.Name,
+// 	}
+
+// 	return ormPlan
+// }
+
+func ormPlanToDomain(ormPlan *orm.Plan) *domain.Plan {
+	if ormPlan == nil {
+		return nil
+	}
+
+	// 非null项
+	plan := &domain.Plan{
+		ID:   ormPlan.ID,
+		Name: ormPlan.Name,
+	}
+
+	return plan
+}

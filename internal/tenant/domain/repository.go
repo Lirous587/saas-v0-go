@@ -8,6 +8,7 @@ type TenantRepository interface {
 	BeginTx(option ...*sql.TxOptions) (*sql.Tx, error)
 
 	FindByID(id int64) (*Tenant, error)
+	FindTenantPlanByID(id int64) (*Plan, error)
 
 	InsertTx(tx *sql.Tx, tenant *Tenant) (*Tenant, error)
 

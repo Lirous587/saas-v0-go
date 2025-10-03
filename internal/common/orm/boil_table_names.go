@@ -10,6 +10,7 @@ var TableNames = struct {
 	ImgCategories  string
 	Imgs           string
 	Menus          string
+	Mock           string
 	Plans          string
 	RoleButton     string
 	RoleMenu       string
@@ -25,6 +26,7 @@ var TableNames = struct {
 	ImgCategories:  "img_categories",
 	Imgs:           "imgs",
 	Menus:          "menus",
+	Mock:           "mock",
 	Plans:          "plans",
 	RoleButton:     "role_button",
 	RoleMenu:       "role_menu",

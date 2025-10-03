@@ -21,17 +21,17 @@ func NewHttpHandler(service domain.RoleService) *HttpHandler {
 
 func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
 	idStr := ctx.Param("id")
+	if idStr == "" {
+		return 0, errors.New("请传递id参数")
+	}
 	idInt, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.InvalidParams(ctx, err)
-		return 0, err
+		return 0, errors.WithStack(err)
 	}
 	if idInt == 0 {
-		err := errors.New("无效的id")
-		response.InvalidParams(ctx, err)
-		return 0, err
+		return 0, errors.WithStack(errors.New("无效的id"))
 	}
-	return int64(idInt), err
+	return int64(idInt), nil
 }
 
 // Create godoc
@@ -82,6 +82,7 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 func (h *HttpHandler) Update(ctx *gin.Context) {
 	id, err := h.getID(ctx)
 	if err != nil {
+		response.InvalidParams(ctx, err)
 		return
 	}
 
@@ -120,6 +121,7 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 func (h *HttpHandler) Delete(ctx *gin.Context) {
 	id, err := h.getID(ctx)
 	if err != nil {
+		response.InvalidParams(ctx, err)
 		return
 	}
 
@@ -138,7 +140,7 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id  query     int64     true  "租户id" 
+// @Param        tenant_id  query     int64     true  "租户id"
 // @Success      200  {object}  response.successResponse{data=handler.RoleListResponse} "Role列表"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"

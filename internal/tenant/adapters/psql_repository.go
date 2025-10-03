@@ -44,6 +44,27 @@ func (repo *TenantPSQLRepository) FindByID(id int64) (*domain.Tenant, error) {
 	return ormTenantToDomain(ormTenant), nil
 }
 
+func (repo *TenantPSQLRepository) FindTenantPlanByID(id int64) (*domain.Plan, error) {
+	// 1.从tenant_plan中查询到plan_id
+	tp, err := orm.TenantPlans(
+		qm.Where(fmt.Sprintf("%s = ?", orm.TenantPlanColumns.TenantID), id),
+		qm.Load(orm.TenantPlanRels.Plan),
+	).OneG()
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, codes.ErrPlanNotFound
+		}
+		return nil, err
+	}
+
+	if tp.R == nil || tp.R.Plan == nil {
+		return nil, codes.ErrPlanNotFound
+	}
+
+	return ormPlanToDomain(tp.R.Plan), nil
+}
+
 func (repo *TenantPSQLRepository) InsertTx(tx *sql.Tx, tenant *domain.Tenant) (*domain.Tenant, error) {
 	ormTenant := domainTenantToORM(tenant)
 

@@ -12,6 +12,16 @@ type Tenant struct {
 	UpdatedAt   time.Time
 }
 
+type Plan struct {
+	ID   int64
+	Name string
+}
+
+type TenantWithPlan struct {
+	Tenant *Tenant
+	Plan   *Plan
+}
+
 type TenantQuery struct {
 	Keyword  string
 	Page     int

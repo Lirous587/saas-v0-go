@@ -25,17 +25,59 @@ func GetUserID(ctx *gin.Context) (int64, error) {
 
 const TenantIDKey = "tenant_id"
 
+func SetTenantID(key string) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		// 从请求头获取
+		if tenantIDStr := ctx.GetHeader(key); tenantIDStr != "" {
+			if tenantID, err := strconv.ParseInt(tenantIDStr, 10, 64); err == nil {
+				ctx.Set(TenantIDKey, tenantID)
+				return
+			}
+		}
+
+		// 从路径参数获取
+		if tenantIDStr := ctx.Param(key); tenantIDStr != "" {
+			if tenantID, err := strconv.ParseInt(tenantIDStr, 10, 64); err == nil {
+				ctx.Set(TenantIDKey, tenantID)
+				return
+			}
+		}
+
+		// 从查询参数获取
+		if tenantIDStr := ctx.Query(key); tenantIDStr != "" {
+			if tenantID, err := strconv.ParseInt(tenantIDStr, 10, 64); err == nil {
+				ctx.Set(TenantIDKey, tenantID)
+				return
+			}
+		}
+
+	}
+}
+
 func GetTenantID(ctx *gin.Context) (int64, error) {
+	var exist1 = false
 	tenantIDStr := ctx.Param(TenantIDKey)
 
 	if tenantIDStr == "" {
-		return 0, codes.ErrTenantNotFound
+		exist1 = false
 	}
 
-	tenantID, err := strconv.ParseInt(tenantIDStr, 10, 64)
-	if err != nil {
-		return 0, codes.ErrTenantIDInvalid.WithCause(err)
+	// 通过请求路径 /:tenant_id 设置租户id
+	if exist1 {
+		tenantID, err := strconv.ParseInt(tenantIDStr, 10, 64)
+		if err != nil {
+			return 0, codes.ErrInvalidRequest.WithCause(err)
+		}
+		return tenantID, nil
+	} else {
+		// 通过自定义扩展获取租户id
+		tid, exists := ctx.Get(TenantIDKey)
+		if exists {
+			id, ok := tid.(int64)
+			if ok {
+				return id, nil
+			}
+		}
+		return 0, codes.ErrInvalidRequest.WithSlug("无租户id来源")
 	}
-
-	return tenantID, nil
 }
