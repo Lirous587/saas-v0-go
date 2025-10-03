@@ -10,20 +10,20 @@ type Role struct {
 
 type RoleQuery struct {
 	TenantID int64
-	Keyword  string
-	Page     int
-	PageSize int
 }
 
 type RoleList struct {
-	Total int64
-	List  []*Role
+	List []*Role
 }
 
-func (r *Role) GetDefultManager() int64 {
-	return 1
+func (r *Role) GetDefultSuperadmin() *Role {
+	return &Role{
+		ID: 1,
+	}
 }
 
-func (r *Role) GetDefaultUser() int64 {
-	return 2
+func (r *Role) GetDefaultViewer() *Role {
+	return &Role{
+		ID: 2,
+	}
 }

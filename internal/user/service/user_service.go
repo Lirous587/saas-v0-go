@@ -1,9 +1,10 @@
 package service
 
 import (
-	"go.uber.org/zap"
 	"os"
 	"saas/internal/common/reskit/codes"
+
+	"go.uber.org/zap"
 
 	"github.com/pkg/errors"
 
@@ -11,13 +12,13 @@ import (
 )
 
 type userService struct {
-	userRepo	domain.UserRepository
-	tokenService	domain.TokenService
+	userRepo     domain.UserRepository
+	tokenService domain.TokenService
 }
 
 var (
-	githubClientID		string
-	githubClientSecret	string
+	githubClientID     string
+	githubClientSecret string
 )
 
 func NewUserService(userRepo domain.UserRepository, tokenService domain.TokenService) domain.UserService {
@@ -27,8 +28,8 @@ func NewUserService(userRepo domain.UserRepository, tokenService domain.TokenSer
 		panic("加载环境变量失败")
 	}
 	return &userService{
-		userRepo:	userRepo,
-		tokenService:	tokenService,
+		userRepo:     userRepo,
+		tokenService: tokenService,
 	}
 }
 
@@ -63,8 +64,8 @@ func (s *userService) AuthenticateWithOAuth(provider string, userInfo *domain.OA
 	}
 
 	return &domain.User2Token{
-		AccessToken:	accessToken,
-		RefreshToken:	refreshToken,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}, nil
 }
 
@@ -93,8 +94,8 @@ func (s *userService) RefreshUserToken(refreshToken string) (*domain.User2Token,
 	}
 
 	return &domain.User2Token{
-		AccessToken:	accessToken,
-		RefreshToken:	newRefreshToken,
+		AccessToken:  accessToken,
+		RefreshToken: newRefreshToken,
 	}, nil
 }
 
@@ -134,8 +135,8 @@ func (s *userService) findOrCreateUserByOAuth(provider string, userInfo *domain.
 
 func (s *userService) createUserFromOAuth(provider string, userInfo *domain.OAuthUserInfo) (*domain.User, error) {
 	user := &domain.User{
-		Email:		userInfo.Email,
-		Nickname:	userInfo.Nickname,
+		Email:    userInfo.Email,
+		Nickname: userInfo.Nickname,
 	}
 
 	// 设置 OAuth ID

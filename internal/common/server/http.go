@@ -1,8 +1,6 @@
 package server
 
 import (
-	"saas/internal/common/metrics"
-	"saas/internal/common/validator"
 	"context"
 	"fmt"
 	"github.com/gin-contrib/cors"
@@ -13,12 +11,14 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"saas/internal/common/metrics"
+	"saas/internal/common/validator"
 	"strings"
 	"syscall"
 	"time"
 )
 
-func RunHttpServer(port string, metricsClient metrics.Client, registerRouter func(r *gin.RouterGroup)) {
+func RunHttpServer(port string, metricsClient metrics.Client, registerRouter func(r *gin.RouterGroup), clearFunc ...func()) {
 	if port == "" {
 		panic(errors.New("RunHttpServer中的port无效"))
 	}
@@ -58,8 +58,8 @@ func RunHttpServer(port string, metricsClient metrics.Client, registerRouter fun
 
 	// 创建HTTP服务器
 	server := &http.Server{
-		Addr:		fmt.Sprintf(":%s", port),
-		Handler:	engine,
+		Addr:    fmt.Sprintf(":%s", port),
+		Handler: engine,
 	}
 
 	// 启动服务器
@@ -77,6 +77,11 @@ func RunHttpServer(port string, metricsClient metrics.Client, registerRouter fun
 
 	log.Println("正在关闭服务器...")
 
+	if len(clearFunc) > 0 {
+		log.Println("正在执行资源清理")
+		clearFunc[0]()
+	}
+
 	// 优雅关闭服务
 	shutdownServer(server)
 }
@@ -93,9 +98,9 @@ func shutdownServer(server *http.Server) {
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {
-		log.Fatalf("服务器关闭失败,err:%#v\n", err)
+		log.Fatalf("http服务器关闭失败,err:%#v\n", err)
 	}
-	log.Println("服务器已退出")
+	log.Println("http服务已退出")
 }
 
 func setCORS(r *gin.Engine) {

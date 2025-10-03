@@ -1,11 +1,10 @@
 package main
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
-	"os/signal"
 	_ "saas/api/openapi"
 	"saas/internal/common/logger"
 	"saas/internal/common/metrics"
@@ -15,7 +14,6 @@ import (
 	"saas/internal/role"
 	"saas/internal/tenant"
 	"saas/internal/user"
-	"syscall"
 
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/gin-gonic/gin"
@@ -23,7 +21,6 @@ import (
 	"github.com/subosito/gotenv"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"go.uber.org/zap"
 )
 
 func setGDB() {
@@ -67,21 +64,12 @@ func setGDB() {
 	}
 }
 
-func syncWorker(ctx context.Context) {
-
-}
-
-func sync(ctx context.Context, cancel context.CancelFunc) {
-	// 监听系统信号
-	go func() {
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-		<-c
-		zap.L().Info("收到退出信号，开始优雅关闭")
-		cancel()
-	}()
-
-	go syncWorker(ctx)
+// 关闭http服务清理资源
+func clear() {
+	if err := metrics.StopPrometheusServer(); err != nil {
+		log.Fatalf("Prometheus 服务成功关闭,err:%v", err)
+	}
+	log.Println("Prometheus 服务成功关闭")
 }
 
 // @title           自定义title
@@ -119,12 +107,16 @@ func main() {
 		panic(errors.WithMessage(err, "logger模块初始化失败"))
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	go sync(ctx, cancel)
+	// ctx, cancel := context.WithCancel(context.Background())
+	// defer cancel()
 
+	// 启动 Prometheus
 	metricsClient := metrics.NewPrometheusClient()
-	metrics.StartPrometheusServer()
+	if err = metrics.StartPrometheusServer(); err != nil {
+		panic(err)
+	}
 
+	// 启动 HTTP 服务器
 	server.RunHttpServer(os.Getenv("SERVER_PORT"), metricsClient, func(r *gin.RouterGroup) {
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler,
 			ginSwagger.PersistAuthorization(true)))
@@ -135,5 +127,7 @@ func main() {
 
 		tenant.InitV1(r)
 		role.InitV1(r)
-	})
+	},
+		clear,
+	)
 }

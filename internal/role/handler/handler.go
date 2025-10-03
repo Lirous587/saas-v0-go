@@ -45,7 +45,7 @@ func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
 // @Success      200  {object}  response.successResponse{data=handler.RoleResponse} "成功创建 Role"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/role [post]
+// @Router       /v1/role/:tenant_id [post]
 func (h *HttpHandler) Create(ctx *gin.Context) {
 	req := new(CreateRequest)
 
@@ -78,7 +78,7 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 // @Success      200  {object}  response.successResponse{data=handler.RoleResponse} "成功更新 Role"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/role/{id} [put]
+// @Router       /v1/role/:tenant_id/{id} [put]
 func (h *HttpHandler) Update(ctx *gin.Context) {
 	id, err := h.getID(ctx)
 	if err != nil {
@@ -116,7 +116,7 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 // @Success      200  {object}  response.successResponse "成功删除 Role"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/role/{id} [delete]
+// @Router       /v1/role/:tenant_id/{id} [delete]
 func (h *HttpHandler) Delete(ctx *gin.Context) {
 	id, err := h.getID(ctx)
 	if err != nil {
@@ -133,14 +133,12 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 
 // List godoc
 // @Summary      获取 Role 列表
-// @Description  根据查询参数获取Role列表，返回当前页数据和total数量
+// @Description  获取Role列表
 // @Tags         role
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        keyword    query     string  false  "关键词搜索"
-// @Param        page       query     int     false  "页码" default(1)
-// @Param        page_size  query     int     false  "每页数量" default(10)
+// @Param        tenant_id  query     int64     true  "租户id" 
 // @Success      200  {object}  response.successResponse{data=handler.RoleListResponse} "Role列表"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -153,9 +151,7 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 	}
 
 	data, err := h.service.List(&domain.RoleQuery{
-		Keyword:  req.KeyWord,
-		Page:     req.Page,
-		PageSize: req.PageSize,
+		TenantID: req.TenantID,
 	})
 
 	if err != nil {

@@ -20,6 +20,10 @@ func NewRoleService(repo domain.RoleRepository, cache domain.RoleCache) domain.R
 	}
 }
 
+func (s *service) NewRole() *domain.Role {
+	return new(domain.Role)
+}
+
 func (s *service) Create(role *domain.Role) (*domain.Role, error) {
 	return s.repo.Create(role)
 }

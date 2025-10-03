@@ -54,24 +54,6 @@ func (repo *TenantPSQLRepository) InsertTx(tx *sql.Tx, tenant *domain.Tenant) (*
 	return ormTenantToDomain(ormTenant), nil
 }
 
-func (repo *TenantPSQLRepository) InsertPlanTx(tx *sql.Tx, tenantID int64, planID int64) error {
-	ormTenantPlan := orm.TenantPlan{
-		TenantID: tenantID,
-		PlanID:   planID,
-	}
-
-	return ormTenantPlan.Insert(tx, boil.Infer())
-}
-
-func (repo *TenantPSQLRepository) InsertUserTx(tx *sql.Tx, tenantID int64, userID int64) error {
-	ormUserTenant := orm.UserTenant{
-		TenantID: tenantID,
-		UserID:   userID,
-	}
-
-	return ormUserTenant.Insert(tx, boil.Infer())
-}
-
 func (repo *TenantPSQLRepository) Update(tenant *domain.Tenant) (*domain.Tenant, error) {
 	ormTenant := domainTenantToORM(tenant)
 
@@ -132,4 +114,14 @@ func (repo *TenantPSQLRepository) List(query *domain.TenantQuery) (*domain.Tenan
 		Total: total,
 		List:  ormTenantsToDomain(tenant),
 	}, nil
+}
+
+func (repo *TenantPSQLRepository) AssignTenantUserRoleTx(tx *sql.Tx, tenantID, userID, roleID int64) error {
+	ormUserTenant := orm.TenantUserRole{
+		TenantID: tenantID,
+		UserID:   userID,
+		RoleID:   roleID,
+	}
+
+	return ormUserTenant.Insert(tx, boil.Infer())
 }

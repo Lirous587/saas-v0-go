@@ -112,12 +112,16 @@ definitions:
     type: object
   handler.PlanResponse:
     properties:
+      created_at:
+        type: integer
       description:
         type: string
       id:
         type: integer
       title:
         type: string
+      updated_at:
+        type: integer
     type: object
   handler.RefreshTokenResponse:
     properties:
@@ -132,8 +136,6 @@ definitions:
         items:
           $ref: '#/definitions/handler.RoleResponse'
         type: array
-      total:
-        type: integer
     type: object
   handler.RoleResponse:
     properties:
@@ -912,43 +914,6 @@ paths:
       summary: 更新 Plan
       tags:
       - plan
-  /v1/role:
-    post:
-      consumes:
-      - application/json
-      description: 创建新的 Role
-      parameters:
-      - description: 创建 Role 请求
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/saas_internal_role_handler.CreateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功创建 Role
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.RoleResponse'
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 创建 Role
-      tags:
-      - role
   /v1/role/:tenant_id:
     get:
       consumes:
@@ -994,7 +959,43 @@ paths:
       summary: 获取 Role 列表
       tags:
       - role
-  /v1/role/{id}:
+    post:
+      consumes:
+      - application/json
+      description: 创建新的 Role
+      parameters:
+      - description: 创建 Role 请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/saas_internal_role_handler.CreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功创建 Role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.RoleResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 创建 Role
+      tags:
+      - role
+  /v1/role/:tenant_id/{id}:
     delete:
       consumes:
       - application/json
@@ -1142,7 +1143,7 @@ paths:
             $ref: '#/definitions/response.errorResponse'
       security:
       - BearerAuth: []
-      summary: 用户新建租户
+      summary: 新建租户
       tags:
       - tenant
   /v1/tenant/{id}:

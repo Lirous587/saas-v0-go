@@ -55,15 +55,11 @@ type UpdateRequest struct {
 }
 
 type ListRequest struct {
-	TenantID int64  `form:"tenant_id"`
-	KeyWord  string `form:"keyword" binding:"max=20"`
-	Page     int    `form:"page,default=1" binding:"min=1"`
-	PageSize int    `form:"page_size,default=5" binding:"min=5,max=20"`
+	TenantID int64 `uri:"tenant_id" binding:"required"`
 }
 
 type RoleListResponse struct {
-	Total int64           `json:"total"`
-	List  []*RoleResponse `json:"list"`
+	List []*RoleResponse `json:"list"`
 }
 
 func domainRoleListToResponse(data *domain.RoleList) *RoleListResponse {
@@ -72,7 +68,6 @@ func domainRoleListToResponse(data *domain.RoleList) *RoleListResponse {
 	}
 
 	return &RoleListResponse{
-		Total: data.Total,
-		List:  domainRolesToResponse(data.List),
+		List: domainRolesToResponse(data.List),
 	}
 }

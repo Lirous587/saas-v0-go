@@ -28,3 +28,25 @@ up_plural = "Apis"   # 结构体切片类型名
 up_singular = "Api"    # 结构体类型名
 down_plural = "apis"   # 变量/方法名复数
 down_singular = "api"    # 变量/方法名单数
+
+
+# 将数据库 decimal/numeric 类型映射到 shopspring/decimal.Decimal
+[[types]]
+  [types.match]
+    db_type = "decimal"  # 匹配数据库的 decimal 类型
+
+  [types.replace]
+    type = "decimal.Decimal"  # 替换为 shopspring/decimal.Decimal
+
+  [types.imports]
+    third_party = ['"github.com/shopspring/decimal"']
+
+[[types]]
+  [types.match]
+    db_type = "numeric"  # 匹配数据库的 numeric 类型 (PostgreSQL 中 numeric 等价于 decimal)
+
+  [types.replace]
+    type = "decimal.Decimal"
+
+  [types.imports]
+    third_party = ['"github.com/shopspring/decimal"']

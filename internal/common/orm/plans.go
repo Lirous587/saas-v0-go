@@ -12,23 +12,23 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/aarondl/sqlboiler/v4/queries/qmhelper"
-	"github.com/aarondl/sqlboiler/v4/types"
 	"github.com/aarondl/strmangle"
 	"github.com/friendsofgo/errors"
+	"github.com/shopspring/decimal"
 )
 
 // Plan is an object representing the database table.
 type Plan struct {
-	ID          int64         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name        string        `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Price       types.Decimal `boil:"price" json:"price" toml:"price" yaml:"price"`
-	Description null.String   `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
-	CreatedAt   time.Time     `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	ID          int64           `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Name        string          `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Price       decimal.Decimal `boil:"price" json:"price" toml:"price" yaml:"price"`
+	Description string          `boil:"description" json:"description" toml:"description" yaml:"description"`
+	CreatedAt   time.Time       `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt   time.Time       `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *planR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L planL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -40,12 +40,14 @@ var PlanColumns = struct {
 	Price       string
 	Description string
 	CreatedAt   string
+	UpdatedAt   string
 }{
 	ID:          "id",
 	Name:        "name",
 	Price:       "price",
 	Description: "description",
 	CreatedAt:   "created_at",
+	UpdatedAt:   "updated_at",
 }
 
 var PlanTableColumns = struct {
@@ -54,49 +56,53 @@ var PlanTableColumns = struct {
 	Price       string
 	Description string
 	CreatedAt   string
+	UpdatedAt   string
 }{
 	ID:          "plans.id",
 	Name:        "plans.name",
 	Price:       "plans.price",
 	Description: "plans.description",
 	CreatedAt:   "plans.created_at",
+	UpdatedAt:   "plans.updated_at",
 }
 
 // Generated where
 
-type whereHelpertypes_Decimal struct{ field string }
+type whereHelperdecimal_Decimal struct{ field string }
 
-func (w whereHelpertypes_Decimal) EQ(x types.Decimal) qm.QueryMod {
+func (w whereHelperdecimal_Decimal) EQ(x decimal.Decimal) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.EQ, x)
 }
-func (w whereHelpertypes_Decimal) NEQ(x types.Decimal) qm.QueryMod {
+func (w whereHelperdecimal_Decimal) NEQ(x decimal.Decimal) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.NEQ, x)
 }
-func (w whereHelpertypes_Decimal) LT(x types.Decimal) qm.QueryMod {
+func (w whereHelperdecimal_Decimal) LT(x decimal.Decimal) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LT, x)
 }
-func (w whereHelpertypes_Decimal) LTE(x types.Decimal) qm.QueryMod {
+func (w whereHelperdecimal_Decimal) LTE(x decimal.Decimal) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LTE, x)
 }
-func (w whereHelpertypes_Decimal) GT(x types.Decimal) qm.QueryMod {
+func (w whereHelperdecimal_Decimal) GT(x decimal.Decimal) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GT, x)
 }
-func (w whereHelpertypes_Decimal) GTE(x types.Decimal) qm.QueryMod {
+func (w whereHelperdecimal_Decimal) GTE(x decimal.Decimal) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
 var PlanWhere = struct {
 	ID          whereHelperint64
 	Name        whereHelperstring
-	Price       whereHelpertypes_Decimal
-	Description whereHelpernull_String
+	Price       whereHelperdecimal_Decimal
+	Description whereHelperstring
 	CreatedAt   whereHelpertime_Time
+	UpdatedAt   whereHelpertime_Time
 }{
 	ID:          whereHelperint64{field: "\"plans\".\"id\""},
 	Name:        whereHelperstring{field: "\"plans\".\"name\""},
-	Price:       whereHelpertypes_Decimal{field: "\"plans\".\"price\""},
-	Description: whereHelpernull_String{field: "\"plans\".\"description\""},
+	Price:       whereHelperdecimal_Decimal{field: "\"plans\".\"price\""},
+	Description: whereHelperstring{field: "\"plans\".\"description\""},
 	CreatedAt:   whereHelpertime_Time{field: "\"plans\".\"created_at\""},
+	UpdatedAt:   whereHelpertime_Time{field: "\"plans\".\"updated_at\""},
 }
 
 // PlanRels is where relationship names are stored.
@@ -136,9 +142,9 @@ func (r *planR) GetTenantPlans() TenantPlanSlice {
 type planL struct{}
 
 var (
-	planAllColumns            = []string{"id", "name", "price", "description", "created_at"}
-	planColumnsWithoutDefault = []string{"name"}
-	planColumnsWithDefault    = []string{"id", "price", "description", "created_at"}
+	planAllColumns            = []string{"id", "name", "price", "description", "created_at", "updated_at"}
+	planColumnsWithoutDefault = []string{"name", "description"}
+	planColumnsWithDefault    = []string{"id", "price", "created_at", "updated_at"}
 	planPrimaryKeyColumns     = []string{"id"}
 	planGeneratedColumns      = []string{}
 )
@@ -684,6 +690,9 @@ func (o *Plan) Insert(exec boil.Executor, columns boil.Columns) error {
 	if o.CreatedAt.IsZero() {
 		o.CreatedAt = currTime
 	}
+	if o.UpdatedAt.IsZero() {
+		o.UpdatedAt = currTime
+	}
 
 	if err := o.doBeforeInsertHooks(exec); err != nil {
 		return err
@@ -764,6 +773,10 @@ func (o *Plan) UpdateG(columns boil.Columns) (int64, error) {
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *Plan) Update(exec boil.Executor, columns boil.Columns) (int64, error) {
+	currTime := time.Now().In(boil.GetLocation())
+
+	o.UpdatedAt = currTime
+
 	var err error
 	if err = o.doBeforeUpdateHooks(exec); err != nil {
 		return 0, err
@@ -912,6 +925,7 @@ func (o *Plan) Upsert(exec boil.Executor, updateOnConflict bool, conflictColumns
 	if o.CreatedAt.IsZero() {
 		o.CreatedAt = currTime
 	}
+	o.UpdatedAt = currTime
 
 	if err := o.doBeforeUpsertHooks(exec); err != nil {
 		return err

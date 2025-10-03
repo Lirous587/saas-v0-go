@@ -8,7 +8,6 @@ import (
 	"github.com/pkg/errors"
 	"saas/internal/common/orm"
 	"saas/internal/common/reskit/codes"
-	"saas/internal/common/utils"
 	"saas/internal/role/domain"
 )
 
@@ -71,41 +70,25 @@ func (repo *RolePSQLRepository) Delete(id int64) error {
 }
 
 func (repo *RolePSQLRepository) List(query *domain.RoleQuery) (*domain.RoleList, error) {
-	var whereMods []qm.QueryMod
-	if query.Keyword != "" {
-		like := "%" + query.Keyword + "%"
-		whereMods = append(whereMods, qm.Where(fmt.Sprintf("(%s LIKE ? OR %s LIKE ?)", orm.RoleColumns.Name, orm.RoleColumns.Description), like, like))
-	}
-	// 1.计算total
-	total, err := orm.Roles(whereMods...).CountG()
-	if err != nil {
-		return nil, err
-	}
-
-	// 2.计算offset
-	offset, err := utils.ComputeOffset(query.Page, query.PageSize)
-	if err != nil {
-		return nil, err
-	}
-
-	listMods := append(whereMods, qm.Offset(offset), qm.Limit(query.PageSize))
-
-	// 3.查询数据
-	role, err := orm.Roles(listMods...).AllG()
+	// 1.查询基础角色以及该domain下的自定义角色
+	roles, err := orm.Roles(
+		qm.Where(fmt.Sprintf("%s IS NULL", orm.RoleColumns.TenantID)),
+		qm.Or(fmt.Sprintf("%s = ?", orm.RoleColumns.TenantID), query.TenantID),
+		qm.OrderBy(fmt.Sprintf("%s NULLS FIRST, %s ASC", orm.RoleColumns.TenantID, orm.RoleColumns.Name)),
+	).AllG()
 	if err != nil {
 		return nil, err
 	}
 
 	return &domain.RoleList{
-		Total: total,
-		List:  ormRolesToDomain(role),
+		List: ormRolesToDomain(roles),
 	}, nil
 }
 
 func (repo *RolePSQLRepository) FindUserRoleInTenant(userID, tenantID int64) (*domain.Role, error) {
-	ut, err := orm.UserTenants(
-		qm.Where(fmt.Sprintf("%s = ? AND %s = ?", orm.UserTenantColumns.UserID, orm.UserTenantColumns.TenantID), userID, tenantID),
-		qm.Load(orm.UserTenantRels.Role),
+	ut, err := orm.TenantUserRoles(
+		qm.Where(fmt.Sprintf("%s = ? AND %s = ?", orm.TenantUserRoleColumns.UserID, orm.TenantUserRoleColumns.TenantID), userID, tenantID),
+		qm.Load(orm.TenantUserRoleRels.Role),
 	).OneG()
 
 	if err != nil {

@@ -43,8 +43,9 @@ CREATE TABLE public.plans
     id          bigserial PRIMARY KEY,
     name        varchar(50)    NOT NULL UNIQUE,
     price       numeric(12, 2) NOT NULL DEFAULT 0,
-    description text,
-    created_at  timestamptz(6) NOT NULL DEFAULT now()
+    description text NOT NULL,
+    created_at  timestamptz(6) NOT NULL DEFAULT now(),
+    updated_at  timestamptz(6) NOT NULL DEFAULT now()
 );
 
 -- 租户表
@@ -68,7 +69,6 @@ CREATE TABLE public.tenant_plan
     CONSTRAINT ux_tenant_plan_tenant UNIQUE (tenant_id),
     PRIMARY KEY (tenant_id, plan_id)
 );
-
 
 
 -- 角色表
@@ -159,9 +159,9 @@ CREATE INDEX IF NOT EXISTS idx_users_created_at ON public.users (created_at);
 CREATE INDEX IF NOT EXISTS idx_users_updated_at ON public.users (updated_at);
 CREATE INDEX IF NOT EXISTS idx_users_nickname ON public.users (nickname);
 
--- 用户-租户关联表
+-- 租户-用户-角色 关联表
 -- 一个用户在一个租户下只能有一个角色
-CREATE TABLE public.user_tenants
+CREATE TABLE public.tenant_user_role
 (
     user_id   bigint NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     tenant_id bigint NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
@@ -169,10 +169,11 @@ CREATE TABLE public.user_tenants
     PRIMARY KEY (user_id, tenant_id)
 );
 -- 常按 user 查租户、按 tenant 查用户；避免重复记录
-CREATE INDEX IF NOT EXISTS idx_user_tenants_user_id ON public.user_tenants (user_id);
-CREATE INDEX IF NOT EXISTS idx_user_tenants_tenant_id ON public.user_tenants (tenant_id);
-CREATE INDEX IF NOT EXISTS idx_user_tenants_role_id ON public.user_tenants (role_id);
-CREATE UNIQUE INDEX IF NOT EXISTS ux_user_tenants_user_tenant ON public.user_tenants (user_id, tenant_id);
+CREATE INDEX IF NOT EXISTS idx_tenant_user_role_user_id ON public.tenant_user_role (user_id);
+CREATE INDEX IF NOT EXISTS idx_tenant_user_role_tenant_id ON public.tenant_user_role (tenant_id);
+CREATE INDEX IF NOT EXISTS idx_tenant_user_role_role_id ON public.tenant_user_role (role_id);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_tenant_user_role_user_tenant ON public.tenant_user_role (user_id, tenant_id);
+
 
 -- img_categories
 CREATE TABLE public.img_categories

@@ -107,14 +107,14 @@ var UserWhere = struct {
 
 // UserRels is where relationship names are stored.
 var UserRels = struct {
-	UserTenants string
+	TenantUserRoles string
 }{
-	UserTenants: "UserTenants",
+	TenantUserRoles: "TenantUserRoles",
 }
 
 // userR is where relationships are stored.
 type userR struct {
-	UserTenants UserTenantSlice `boil:"UserTenants" json:"UserTenants" toml:"UserTenants" yaml:"UserTenants"`
+	TenantUserRoles TenantUserRoleSlice `boil:"TenantUserRoles" json:"TenantUserRoles" toml:"TenantUserRoles" yaml:"TenantUserRoles"`
 }
 
 // NewStruct creates a new relationship struct
@@ -122,20 +122,20 @@ func (*userR) NewStruct() *userR {
 	return &userR{}
 }
 
-func (o *User) GetUserTenants() UserTenantSlice {
+func (o *User) GetTenantUserRoles() TenantUserRoleSlice {
 	if o == nil {
 		return nil
 	}
 
-	return o.R.GetUserTenants()
+	return o.R.GetTenantUserRoles()
 }
 
-func (r *userR) GetUserTenants() UserTenantSlice {
+func (r *userR) GetTenantUserRoles() TenantUserRoleSlice {
 	if r == nil {
 		return nil
 	}
 
-	return r.UserTenants
+	return r.TenantUserRoles
 }
 
 // userL is where Load methods for each relationship are stored.
@@ -438,23 +438,23 @@ func (q userQuery) Exists(exec boil.Executor) (bool, error) {
 	return count > 0, nil
 }
 
-// UserTenants retrieves all the user_tenant's UserTenants with an executor.
-func (o *User) UserTenants(mods ...qm.QueryMod) userTenantQuery {
+// TenantUserRoles retrieves all the tenant_user_role's TenantUserRoles with an executor.
+func (o *User) TenantUserRoles(mods ...qm.QueryMod) tenantUserRoleQuery {
 	var queryMods []qm.QueryMod
 	if len(mods) != 0 {
 		queryMods = append(queryMods, mods...)
 	}
 
 	queryMods = append(queryMods,
-		qm.Where("\"user_tenants\".\"user_id\"=?", o.ID),
+		qm.Where("\"tenant_user_role\".\"user_id\"=?", o.ID),
 	)
 
-	return UserTenants(queryMods...)
+	return TenantUserRoles(queryMods...)
 }
 
-// LoadUserTenants allows an eager lookup of values, cached into the
+// LoadTenantUserRoles allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (userL) LoadUserTenants(e boil.Executor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+func (userL) LoadTenantUserRoles(e boil.Executor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
 	var slice []*User
 	var object *User
 
@@ -507,8 +507,8 @@ func (userL) LoadUserTenants(e boil.Executor, singular bool, maybeUser interface
 	}
 
 	query := NewQuery(
-		qm.From(`user_tenants`),
-		qm.WhereIn(`user_tenants.user_id in ?`, argsSlice...),
+		qm.From(`tenant_user_role`),
+		qm.WhereIn(`tenant_user_role.user_id in ?`, argsSlice...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -516,22 +516,22 @@ func (userL) LoadUserTenants(e boil.Executor, singular bool, maybeUser interface
 
 	results, err := query.Query(e)
 	if err != nil {
-		return errors.Wrap(err, "failed to eager load user_tenants")
+		return errors.Wrap(err, "failed to eager load tenant_user_role")
 	}
 
-	var resultSlice []*UserTenant
+	var resultSlice []*TenantUserRole
 	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice user_tenants")
+		return errors.Wrap(err, "failed to bind eager loaded slice tenant_user_role")
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on user_tenants")
+		return errors.Wrap(err, "failed to close results in eager load on tenant_user_role")
 	}
 	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for user_tenants")
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for tenant_user_role")
 	}
 
-	if len(userTenantAfterSelectHooks) != 0 {
+	if len(tenantUserRoleAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
 			if err := obj.doAfterSelectHooks(e); err != nil {
 				return err
@@ -539,10 +539,10 @@ func (userL) LoadUserTenants(e boil.Executor, singular bool, maybeUser interface
 		}
 	}
 	if singular {
-		object.R.UserTenants = resultSlice
+		object.R.TenantUserRoles = resultSlice
 		for _, foreign := range resultSlice {
 			if foreign.R == nil {
-				foreign.R = &userTenantR{}
+				foreign.R = &tenantUserRoleR{}
 			}
 			foreign.R.User = object
 		}
@@ -552,9 +552,9 @@ func (userL) LoadUserTenants(e boil.Executor, singular bool, maybeUser interface
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
 			if local.ID == foreign.UserID {
-				local.R.UserTenants = append(local.R.UserTenants, foreign)
+				local.R.TenantUserRoles = append(local.R.TenantUserRoles, foreign)
 				if foreign.R == nil {
-					foreign.R = &userTenantR{}
+					foreign.R = &tenantUserRoleR{}
 				}
 				foreign.R.User = local
 				break
@@ -565,20 +565,20 @@ func (userL) LoadUserTenants(e boil.Executor, singular bool, maybeUser interface
 	return nil
 }
 
-// AddUserTenantsG adds the given related objects to the existing relationships
+// AddTenantUserRolesG adds the given related objects to the existing relationships
 // of the user, optionally inserting them as new records.
-// Appends related to o.R.UserTenants.
+// Appends related to o.R.TenantUserRoles.
 // Sets related.R.User appropriately.
 // Uses the global database handle.
-func (o *User) AddUserTenantsG(insert bool, related ...*UserTenant) error {
-	return o.AddUserTenants(boil.GetDB(), insert, related...)
+func (o *User) AddTenantUserRolesG(insert bool, related ...*TenantUserRole) error {
+	return o.AddTenantUserRoles(boil.GetDB(), insert, related...)
 }
 
-// AddUserTenants adds the given related objects to the existing relationships
+// AddTenantUserRoles adds the given related objects to the existing relationships
 // of the user, optionally inserting them as new records.
-// Appends related to o.R.UserTenants.
+// Appends related to o.R.TenantUserRoles.
 // Sets related.R.User appropriately.
-func (o *User) AddUserTenants(exec boil.Executor, insert bool, related ...*UserTenant) error {
+func (o *User) AddTenantUserRoles(exec boil.Executor, insert bool, related ...*TenantUserRole) error {
 	var err error
 	for _, rel := range related {
 		if insert {
@@ -588,9 +588,9 @@ func (o *User) AddUserTenants(exec boil.Executor, insert bool, related ...*UserT
 			}
 		} else {
 			updateQuery := fmt.Sprintf(
-				"UPDATE \"user_tenants\" SET %s WHERE %s",
+				"UPDATE \"tenant_user_role\" SET %s WHERE %s",
 				strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
-				strmangle.WhereClause("\"", "\"", 2, userTenantPrimaryKeyColumns),
+				strmangle.WhereClause("\"", "\"", 2, tenantUserRolePrimaryKeyColumns),
 			)
 			values := []interface{}{o.ID, rel.UserID, rel.TenantID}
 
@@ -608,15 +608,15 @@ func (o *User) AddUserTenants(exec boil.Executor, insert bool, related ...*UserT
 
 	if o.R == nil {
 		o.R = &userR{
-			UserTenants: related,
+			TenantUserRoles: related,
 		}
 	} else {
-		o.R.UserTenants = append(o.R.UserTenants, related...)
+		o.R.TenantUserRoles = append(o.R.TenantUserRoles, related...)
 	}
 
 	for _, rel := range related {
 		if rel.R == nil {
-			rel.R = &userTenantR{
+			rel.R = &tenantUserRoleR{
 				User: o,
 			}
 		} else {

@@ -20,17 +20,17 @@ import (
 	"github.com/friendsofgo/errors"
 )
 
-// UserTenant is an object representing the database table.
-type UserTenant struct {
+// TenantUserRole is an object representing the database table.
+type TenantUserRole struct {
 	UserID   int64 `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
 	TenantID int64 `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
 	RoleID   int64 `boil:"role_id" json:"role_id" toml:"role_id" yaml:"role_id"`
 
-	R *userTenantR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L userTenantL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	R *tenantUserRoleR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L tenantUserRoleL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
-var UserTenantColumns = struct {
+var TenantUserRoleColumns = struct {
 	UserID   string
 	TenantID string
 	RoleID   string
@@ -40,30 +40,30 @@ var UserTenantColumns = struct {
 	RoleID:   "role_id",
 }
 
-var UserTenantTableColumns = struct {
+var TenantUserRoleTableColumns = struct {
 	UserID   string
 	TenantID string
 	RoleID   string
 }{
-	UserID:   "user_tenants.user_id",
-	TenantID: "user_tenants.tenant_id",
-	RoleID:   "user_tenants.role_id",
+	UserID:   "tenant_user_role.user_id",
+	TenantID: "tenant_user_role.tenant_id",
+	RoleID:   "tenant_user_role.role_id",
 }
 
 // Generated where
 
-var UserTenantWhere = struct {
+var TenantUserRoleWhere = struct {
 	UserID   whereHelperint64
 	TenantID whereHelperint64
 	RoleID   whereHelperint64
 }{
-	UserID:   whereHelperint64{field: "\"user_tenants\".\"user_id\""},
-	TenantID: whereHelperint64{field: "\"user_tenants\".\"tenant_id\""},
-	RoleID:   whereHelperint64{field: "\"user_tenants\".\"role_id\""},
+	UserID:   whereHelperint64{field: "\"tenant_user_role\".\"user_id\""},
+	TenantID: whereHelperint64{field: "\"tenant_user_role\".\"tenant_id\""},
+	RoleID:   whereHelperint64{field: "\"tenant_user_role\".\"role_id\""},
 }
 
-// UserTenantRels is where relationship names are stored.
-var UserTenantRels = struct {
+// TenantUserRoleRels is where relationship names are stored.
+var TenantUserRoleRels = struct {
 	Role   string
 	Tenant string
 	User   string
@@ -73,19 +73,19 @@ var UserTenantRels = struct {
 	User:   "User",
 }
 
-// userTenantR is where relationships are stored.
-type userTenantR struct {
+// tenantUserRoleR is where relationships are stored.
+type tenantUserRoleR struct {
 	Role   *Role   `boil:"Role" json:"Role" toml:"Role" yaml:"Role"`
 	Tenant *Tenant `boil:"Tenant" json:"Tenant" toml:"Tenant" yaml:"Tenant"`
 	User   *User   `boil:"User" json:"User" toml:"User" yaml:"User"`
 }
 
 // NewStruct creates a new relationship struct
-func (*userTenantR) NewStruct() *userTenantR {
-	return &userTenantR{}
+func (*tenantUserRoleR) NewStruct() *tenantUserRoleR {
+	return &tenantUserRoleR{}
 }
 
-func (o *UserTenant) GetRole() *Role {
+func (o *TenantUserRole) GetRole() *Role {
 	if o == nil {
 		return nil
 	}
@@ -93,7 +93,7 @@ func (o *UserTenant) GetRole() *Role {
 	return o.R.GetRole()
 }
 
-func (r *userTenantR) GetRole() *Role {
+func (r *tenantUserRoleR) GetRole() *Role {
 	if r == nil {
 		return nil
 	}
@@ -101,7 +101,7 @@ func (r *userTenantR) GetRole() *Role {
 	return r.Role
 }
 
-func (o *UserTenant) GetTenant() *Tenant {
+func (o *TenantUserRole) GetTenant() *Tenant {
 	if o == nil {
 		return nil
 	}
@@ -109,7 +109,7 @@ func (o *UserTenant) GetTenant() *Tenant {
 	return o.R.GetTenant()
 }
 
-func (r *userTenantR) GetTenant() *Tenant {
+func (r *tenantUserRoleR) GetTenant() *Tenant {
 	if r == nil {
 		return nil
 	}
@@ -117,7 +117,7 @@ func (r *userTenantR) GetTenant() *Tenant {
 	return r.Tenant
 }
 
-func (o *UserTenant) GetUser() *User {
+func (o *TenantUserRole) GetUser() *User {
 	if o == nil {
 		return nil
 	}
@@ -125,7 +125,7 @@ func (o *UserTenant) GetUser() *User {
 	return o.R.GetUser()
 }
 
-func (r *userTenantR) GetUser() *User {
+func (r *tenantUserRoleR) GetUser() *User {
 	if r == nil {
 		return nil
 	}
@@ -133,40 +133,40 @@ func (r *userTenantR) GetUser() *User {
 	return r.User
 }
 
-// userTenantL is where Load methods for each relationship are stored.
-type userTenantL struct{}
+// tenantUserRoleL is where Load methods for each relationship are stored.
+type tenantUserRoleL struct{}
 
 var (
-	userTenantAllColumns            = []string{"user_id", "tenant_id", "role_id"}
-	userTenantColumnsWithoutDefault = []string{"user_id", "tenant_id", "role_id"}
-	userTenantColumnsWithDefault    = []string{}
-	userTenantPrimaryKeyColumns     = []string{"user_id", "tenant_id"}
-	userTenantGeneratedColumns      = []string{}
+	tenantUserRoleAllColumns            = []string{"user_id", "tenant_id", "role_id"}
+	tenantUserRoleColumnsWithoutDefault = []string{"user_id", "tenant_id", "role_id"}
+	tenantUserRoleColumnsWithDefault    = []string{}
+	tenantUserRolePrimaryKeyColumns     = []string{"user_id", "tenant_id"}
+	tenantUserRoleGeneratedColumns      = []string{}
 )
 
 type (
-	// UserTenantSlice is an alias for a slice of pointers to UserTenant.
-	// This should almost always be used instead of []UserTenant.
-	UserTenantSlice []*UserTenant
-	// UserTenantHook is the signature for custom UserTenant hook methods
-	UserTenantHook func(boil.Executor, *UserTenant) error
+	// TenantUserRoleSlice is an alias for a slice of pointers to TenantUserRole.
+	// This should almost always be used instead of []TenantUserRole.
+	TenantUserRoleSlice []*TenantUserRole
+	// TenantUserRoleHook is the signature for custom TenantUserRole hook methods
+	TenantUserRoleHook func(boil.Executor, *TenantUserRole) error
 
-	userTenantQuery struct {
+	tenantUserRoleQuery struct {
 		*queries.Query
 	}
 )
 
 // Cache for insert, update and upsert
 var (
-	userTenantType                 = reflect.TypeOf(&UserTenant{})
-	userTenantMapping              = queries.MakeStructMapping(userTenantType)
-	userTenantPrimaryKeyMapping, _ = queries.BindMapping(userTenantType, userTenantMapping, userTenantPrimaryKeyColumns)
-	userTenantInsertCacheMut       sync.RWMutex
-	userTenantInsertCache          = make(map[string]insertCache)
-	userTenantUpdateCacheMut       sync.RWMutex
-	userTenantUpdateCache          = make(map[string]updateCache)
-	userTenantUpsertCacheMut       sync.RWMutex
-	userTenantUpsertCache          = make(map[string]insertCache)
+	tenantUserRoleType                 = reflect.TypeOf(&TenantUserRole{})
+	tenantUserRoleMapping              = queries.MakeStructMapping(tenantUserRoleType)
+	tenantUserRolePrimaryKeyMapping, _ = queries.BindMapping(tenantUserRoleType, tenantUserRoleMapping, tenantUserRolePrimaryKeyColumns)
+	tenantUserRoleInsertCacheMut       sync.RWMutex
+	tenantUserRoleInsertCache          = make(map[string]insertCache)
+	tenantUserRoleUpdateCacheMut       sync.RWMutex
+	tenantUserRoleUpdateCache          = make(map[string]updateCache)
+	tenantUserRoleUpsertCacheMut       sync.RWMutex
+	tenantUserRoleUpsertCache          = make(map[string]insertCache)
 )
 
 var (
@@ -177,32 +177,32 @@ var (
 	_ = qmhelper.Where
 )
 
-var userTenantAfterSelectMu sync.Mutex
-var userTenantAfterSelectHooks []UserTenantHook
+var tenantUserRoleAfterSelectMu sync.Mutex
+var tenantUserRoleAfterSelectHooks []TenantUserRoleHook
 
-var userTenantBeforeInsertMu sync.Mutex
-var userTenantBeforeInsertHooks []UserTenantHook
-var userTenantAfterInsertMu sync.Mutex
-var userTenantAfterInsertHooks []UserTenantHook
+var tenantUserRoleBeforeInsertMu sync.Mutex
+var tenantUserRoleBeforeInsertHooks []TenantUserRoleHook
+var tenantUserRoleAfterInsertMu sync.Mutex
+var tenantUserRoleAfterInsertHooks []TenantUserRoleHook
 
-var userTenantBeforeUpdateMu sync.Mutex
-var userTenantBeforeUpdateHooks []UserTenantHook
-var userTenantAfterUpdateMu sync.Mutex
-var userTenantAfterUpdateHooks []UserTenantHook
+var tenantUserRoleBeforeUpdateMu sync.Mutex
+var tenantUserRoleBeforeUpdateHooks []TenantUserRoleHook
+var tenantUserRoleAfterUpdateMu sync.Mutex
+var tenantUserRoleAfterUpdateHooks []TenantUserRoleHook
 
-var userTenantBeforeDeleteMu sync.Mutex
-var userTenantBeforeDeleteHooks []UserTenantHook
-var userTenantAfterDeleteMu sync.Mutex
-var userTenantAfterDeleteHooks []UserTenantHook
+var tenantUserRoleBeforeDeleteMu sync.Mutex
+var tenantUserRoleBeforeDeleteHooks []TenantUserRoleHook
+var tenantUserRoleAfterDeleteMu sync.Mutex
+var tenantUserRoleAfterDeleteHooks []TenantUserRoleHook
 
-var userTenantBeforeUpsertMu sync.Mutex
-var userTenantBeforeUpsertHooks []UserTenantHook
-var userTenantAfterUpsertMu sync.Mutex
-var userTenantAfterUpsertHooks []UserTenantHook
+var tenantUserRoleBeforeUpsertMu sync.Mutex
+var tenantUserRoleBeforeUpsertHooks []TenantUserRoleHook
+var tenantUserRoleAfterUpsertMu sync.Mutex
+var tenantUserRoleAfterUpsertHooks []TenantUserRoleHook
 
 // doAfterSelectHooks executes all "after Select" hooks.
-func (o *UserTenant) doAfterSelectHooks(exec boil.Executor) (err error) {
-	for _, hook := range userTenantAfterSelectHooks {
+func (o *TenantUserRole) doAfterSelectHooks(exec boil.Executor) (err error) {
+	for _, hook := range tenantUserRoleAfterSelectHooks {
 		if err := hook(exec, o); err != nil {
 			return err
 		}
@@ -212,8 +212,8 @@ func (o *UserTenant) doAfterSelectHooks(exec boil.Executor) (err error) {
 }
 
 // doBeforeInsertHooks executes all "before insert" hooks.
-func (o *UserTenant) doBeforeInsertHooks(exec boil.Executor) (err error) {
-	for _, hook := range userTenantBeforeInsertHooks {
+func (o *TenantUserRole) doBeforeInsertHooks(exec boil.Executor) (err error) {
+	for _, hook := range tenantUserRoleBeforeInsertHooks {
 		if err := hook(exec, o); err != nil {
 			return err
 		}
@@ -223,8 +223,8 @@ func (o *UserTenant) doBeforeInsertHooks(exec boil.Executor) (err error) {
 }
 
 // doAfterInsertHooks executes all "after Insert" hooks.
-func (o *UserTenant) doAfterInsertHooks(exec boil.Executor) (err error) {
-	for _, hook := range userTenantAfterInsertHooks {
+func (o *TenantUserRole) doAfterInsertHooks(exec boil.Executor) (err error) {
+	for _, hook := range tenantUserRoleAfterInsertHooks {
 		if err := hook(exec, o); err != nil {
 			return err
 		}
@@ -234,8 +234,8 @@ func (o *UserTenant) doAfterInsertHooks(exec boil.Executor) (err error) {
 }
 
 // doBeforeUpdateHooks executes all "before Update" hooks.
-func (o *UserTenant) doBeforeUpdateHooks(exec boil.Executor) (err error) {
-	for _, hook := range userTenantBeforeUpdateHooks {
+func (o *TenantUserRole) doBeforeUpdateHooks(exec boil.Executor) (err error) {
+	for _, hook := range tenantUserRoleBeforeUpdateHooks {
 		if err := hook(exec, o); err != nil {
 			return err
 		}
@@ -245,8 +245,8 @@ func (o *UserTenant) doBeforeUpdateHooks(exec boil.Executor) (err error) {
 }
 
 // doAfterUpdateHooks executes all "after Update" hooks.
-func (o *UserTenant) doAfterUpdateHooks(exec boil.Executor) (err error) {
-	for _, hook := range userTenantAfterUpdateHooks {
+func (o *TenantUserRole) doAfterUpdateHooks(exec boil.Executor) (err error) {
+	for _, hook := range tenantUserRoleAfterUpdateHooks {
 		if err := hook(exec, o); err != nil {
 			return err
 		}
@@ -256,8 +256,8 @@ func (o *UserTenant) doAfterUpdateHooks(exec boil.Executor) (err error) {
 }
 
 // doBeforeDeleteHooks executes all "before Delete" hooks.
-func (o *UserTenant) doBeforeDeleteHooks(exec boil.Executor) (err error) {
-	for _, hook := range userTenantBeforeDeleteHooks {
+func (o *TenantUserRole) doBeforeDeleteHooks(exec boil.Executor) (err error) {
+	for _, hook := range tenantUserRoleBeforeDeleteHooks {
 		if err := hook(exec, o); err != nil {
 			return err
 		}
@@ -267,8 +267,8 @@ func (o *UserTenant) doBeforeDeleteHooks(exec boil.Executor) (err error) {
 }
 
 // doAfterDeleteHooks executes all "after Delete" hooks.
-func (o *UserTenant) doAfterDeleteHooks(exec boil.Executor) (err error) {
-	for _, hook := range userTenantAfterDeleteHooks {
+func (o *TenantUserRole) doAfterDeleteHooks(exec boil.Executor) (err error) {
+	for _, hook := range tenantUserRoleAfterDeleteHooks {
 		if err := hook(exec, o); err != nil {
 			return err
 		}
@@ -278,8 +278,8 @@ func (o *UserTenant) doAfterDeleteHooks(exec boil.Executor) (err error) {
 }
 
 // doBeforeUpsertHooks executes all "before Upsert" hooks.
-func (o *UserTenant) doBeforeUpsertHooks(exec boil.Executor) (err error) {
-	for _, hook := range userTenantBeforeUpsertHooks {
+func (o *TenantUserRole) doBeforeUpsertHooks(exec boil.Executor) (err error) {
+	for _, hook := range tenantUserRoleBeforeUpsertHooks {
 		if err := hook(exec, o); err != nil {
 			return err
 		}
@@ -289,8 +289,8 @@ func (o *UserTenant) doBeforeUpsertHooks(exec boil.Executor) (err error) {
 }
 
 // doAfterUpsertHooks executes all "after Upsert" hooks.
-func (o *UserTenant) doAfterUpsertHooks(exec boil.Executor) (err error) {
-	for _, hook := range userTenantAfterUpsertHooks {
+func (o *TenantUserRole) doAfterUpsertHooks(exec boil.Executor) (err error) {
+	for _, hook := range tenantUserRoleAfterUpsertHooks {
 		if err := hook(exec, o); err != nil {
 			return err
 		}
@@ -299,56 +299,56 @@ func (o *UserTenant) doAfterUpsertHooks(exec boil.Executor) (err error) {
 	return nil
 }
 
-// AddUserTenantHook registers your hook function for all future operations.
-func AddUserTenantHook(hookPoint boil.HookPoint, userTenantHook UserTenantHook) {
+// AddTenantUserRoleHook registers your hook function for all future operations.
+func AddTenantUserRoleHook(hookPoint boil.HookPoint, tenantUserRoleHook TenantUserRoleHook) {
 	switch hookPoint {
 	case boil.AfterSelectHook:
-		userTenantAfterSelectMu.Lock()
-		userTenantAfterSelectHooks = append(userTenantAfterSelectHooks, userTenantHook)
-		userTenantAfterSelectMu.Unlock()
+		tenantUserRoleAfterSelectMu.Lock()
+		tenantUserRoleAfterSelectHooks = append(tenantUserRoleAfterSelectHooks, tenantUserRoleHook)
+		tenantUserRoleAfterSelectMu.Unlock()
 	case boil.BeforeInsertHook:
-		userTenantBeforeInsertMu.Lock()
-		userTenantBeforeInsertHooks = append(userTenantBeforeInsertHooks, userTenantHook)
-		userTenantBeforeInsertMu.Unlock()
+		tenantUserRoleBeforeInsertMu.Lock()
+		tenantUserRoleBeforeInsertHooks = append(tenantUserRoleBeforeInsertHooks, tenantUserRoleHook)
+		tenantUserRoleBeforeInsertMu.Unlock()
 	case boil.AfterInsertHook:
-		userTenantAfterInsertMu.Lock()
-		userTenantAfterInsertHooks = append(userTenantAfterInsertHooks, userTenantHook)
-		userTenantAfterInsertMu.Unlock()
+		tenantUserRoleAfterInsertMu.Lock()
+		tenantUserRoleAfterInsertHooks = append(tenantUserRoleAfterInsertHooks, tenantUserRoleHook)
+		tenantUserRoleAfterInsertMu.Unlock()
 	case boil.BeforeUpdateHook:
-		userTenantBeforeUpdateMu.Lock()
-		userTenantBeforeUpdateHooks = append(userTenantBeforeUpdateHooks, userTenantHook)
-		userTenantBeforeUpdateMu.Unlock()
+		tenantUserRoleBeforeUpdateMu.Lock()
+		tenantUserRoleBeforeUpdateHooks = append(tenantUserRoleBeforeUpdateHooks, tenantUserRoleHook)
+		tenantUserRoleBeforeUpdateMu.Unlock()
 	case boil.AfterUpdateHook:
-		userTenantAfterUpdateMu.Lock()
-		userTenantAfterUpdateHooks = append(userTenantAfterUpdateHooks, userTenantHook)
-		userTenantAfterUpdateMu.Unlock()
+		tenantUserRoleAfterUpdateMu.Lock()
+		tenantUserRoleAfterUpdateHooks = append(tenantUserRoleAfterUpdateHooks, tenantUserRoleHook)
+		tenantUserRoleAfterUpdateMu.Unlock()
 	case boil.BeforeDeleteHook:
-		userTenantBeforeDeleteMu.Lock()
-		userTenantBeforeDeleteHooks = append(userTenantBeforeDeleteHooks, userTenantHook)
-		userTenantBeforeDeleteMu.Unlock()
+		tenantUserRoleBeforeDeleteMu.Lock()
+		tenantUserRoleBeforeDeleteHooks = append(tenantUserRoleBeforeDeleteHooks, tenantUserRoleHook)
+		tenantUserRoleBeforeDeleteMu.Unlock()
 	case boil.AfterDeleteHook:
-		userTenantAfterDeleteMu.Lock()
-		userTenantAfterDeleteHooks = append(userTenantAfterDeleteHooks, userTenantHook)
-		userTenantAfterDeleteMu.Unlock()
+		tenantUserRoleAfterDeleteMu.Lock()
+		tenantUserRoleAfterDeleteHooks = append(tenantUserRoleAfterDeleteHooks, tenantUserRoleHook)
+		tenantUserRoleAfterDeleteMu.Unlock()
 	case boil.BeforeUpsertHook:
-		userTenantBeforeUpsertMu.Lock()
-		userTenantBeforeUpsertHooks = append(userTenantBeforeUpsertHooks, userTenantHook)
-		userTenantBeforeUpsertMu.Unlock()
+		tenantUserRoleBeforeUpsertMu.Lock()
+		tenantUserRoleBeforeUpsertHooks = append(tenantUserRoleBeforeUpsertHooks, tenantUserRoleHook)
+		tenantUserRoleBeforeUpsertMu.Unlock()
 	case boil.AfterUpsertHook:
-		userTenantAfterUpsertMu.Lock()
-		userTenantAfterUpsertHooks = append(userTenantAfterUpsertHooks, userTenantHook)
-		userTenantAfterUpsertMu.Unlock()
+		tenantUserRoleAfterUpsertMu.Lock()
+		tenantUserRoleAfterUpsertHooks = append(tenantUserRoleAfterUpsertHooks, tenantUserRoleHook)
+		tenantUserRoleAfterUpsertMu.Unlock()
 	}
 }
 
-// OneG returns a single userTenant record from the query using the global executor.
-func (q userTenantQuery) OneG() (*UserTenant, error) {
+// OneG returns a single tenantUserRole record from the query using the global executor.
+func (q tenantUserRoleQuery) OneG() (*TenantUserRole, error) {
 	return q.One(boil.GetDB())
 }
 
-// One returns a single userTenant record from the query.
-func (q userTenantQuery) One(exec boil.Executor) (*UserTenant, error) {
-	o := &UserTenant{}
+// One returns a single tenantUserRole record from the query.
+func (q tenantUserRoleQuery) One(exec boil.Executor) (*TenantUserRole, error) {
+	o := &TenantUserRole{}
 
 	queries.SetLimit(q.Query, 1)
 
@@ -357,7 +357,7 @@ func (q userTenantQuery) One(exec boil.Executor) (*UserTenant, error) {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "orm: failed to execute a one query for user_tenants")
+		return nil, errors.Wrap(err, "orm: failed to execute a one query for tenant_user_role")
 	}
 
 	if err := o.doAfterSelectHooks(exec); err != nil {
@@ -367,21 +367,21 @@ func (q userTenantQuery) One(exec boil.Executor) (*UserTenant, error) {
 	return o, nil
 }
 
-// AllG returns all UserTenant records from the query using the global executor.
-func (q userTenantQuery) AllG() (UserTenantSlice, error) {
+// AllG returns all TenantUserRole records from the query using the global executor.
+func (q tenantUserRoleQuery) AllG() (TenantUserRoleSlice, error) {
 	return q.All(boil.GetDB())
 }
 
-// All returns all UserTenant records from the query.
-func (q userTenantQuery) All(exec boil.Executor) (UserTenantSlice, error) {
-	var o []*UserTenant
+// All returns all TenantUserRole records from the query.
+func (q tenantUserRoleQuery) All(exec boil.Executor) (TenantUserRoleSlice, error) {
+	var o []*TenantUserRole
 
 	err := q.Bind(nil, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "orm: failed to assign all query results to UserTenant slice")
+		return nil, errors.Wrap(err, "orm: failed to assign all query results to TenantUserRole slice")
 	}
 
-	if len(userTenantAfterSelectHooks) != 0 {
+	if len(tenantUserRoleAfterSelectHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterSelectHooks(exec); err != nil {
 				return o, err
@@ -392,13 +392,13 @@ func (q userTenantQuery) All(exec boil.Executor) (UserTenantSlice, error) {
 	return o, nil
 }
 
-// CountG returns the count of all UserTenant records in the query using the global executor
-func (q userTenantQuery) CountG() (int64, error) {
+// CountG returns the count of all TenantUserRole records in the query using the global executor
+func (q tenantUserRoleQuery) CountG() (int64, error) {
 	return q.Count(boil.GetDB())
 }
 
-// Count returns the count of all UserTenant records in the query.
-func (q userTenantQuery) Count(exec boil.Executor) (int64, error) {
+// Count returns the count of all TenantUserRole records in the query.
+func (q tenantUserRoleQuery) Count(exec boil.Executor) (int64, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -406,19 +406,19 @@ func (q userTenantQuery) Count(exec boil.Executor) (int64, error) {
 
 	err := q.Query.QueryRow(exec).Scan(&count)
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: failed to count user_tenants rows")
+		return 0, errors.Wrap(err, "orm: failed to count tenant_user_role rows")
 	}
 
 	return count, nil
 }
 
 // ExistsG checks if the row exists in the table using the global executor.
-func (q userTenantQuery) ExistsG() (bool, error) {
+func (q tenantUserRoleQuery) ExistsG() (bool, error) {
 	return q.Exists(boil.GetDB())
 }
 
 // Exists checks if the row exists in the table.
-func (q userTenantQuery) Exists(exec boil.Executor) (bool, error) {
+func (q tenantUserRoleQuery) Exists(exec boil.Executor) (bool, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -427,14 +427,14 @@ func (q userTenantQuery) Exists(exec boil.Executor) (bool, error) {
 
 	err := q.Query.QueryRow(exec).Scan(&count)
 	if err != nil {
-		return false, errors.Wrap(err, "orm: failed to check if user_tenants exists")
+		return false, errors.Wrap(err, "orm: failed to check if tenant_user_role exists")
 	}
 
 	return count > 0, nil
 }
 
 // Role pointed to by the foreign key.
-func (o *UserTenant) Role(mods ...qm.QueryMod) roleQuery {
+func (o *TenantUserRole) Role(mods ...qm.QueryMod) roleQuery {
 	queryMods := []qm.QueryMod{
 		qm.Where("\"id\" = ?", o.RoleID),
 	}
@@ -445,7 +445,7 @@ func (o *UserTenant) Role(mods ...qm.QueryMod) roleQuery {
 }
 
 // Tenant pointed to by the foreign key.
-func (o *UserTenant) Tenant(mods ...qm.QueryMod) tenantQuery {
+func (o *TenantUserRole) Tenant(mods ...qm.QueryMod) tenantQuery {
 	queryMods := []qm.QueryMod{
 		qm.Where("\"id\" = ?", o.TenantID),
 	}
@@ -456,7 +456,7 @@ func (o *UserTenant) Tenant(mods ...qm.QueryMod) tenantQuery {
 }
 
 // User pointed to by the foreign key.
-func (o *UserTenant) User(mods ...qm.QueryMod) userQuery {
+func (o *TenantUserRole) User(mods ...qm.QueryMod) userQuery {
 	queryMods := []qm.QueryMod{
 		qm.Where("\"id\" = ?", o.UserID),
 	}
@@ -468,28 +468,28 @@ func (o *UserTenant) User(mods ...qm.QueryMod) userQuery {
 
 // LoadRole allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (userTenantL) LoadRole(e boil.Executor, singular bool, maybeUserTenant interface{}, mods queries.Applicator) error {
-	var slice []*UserTenant
-	var object *UserTenant
+func (tenantUserRoleL) LoadRole(e boil.Executor, singular bool, maybeTenantUserRole interface{}, mods queries.Applicator) error {
+	var slice []*TenantUserRole
+	var object *TenantUserRole
 
 	if singular {
 		var ok bool
-		object, ok = maybeUserTenant.(*UserTenant)
+		object, ok = maybeTenantUserRole.(*TenantUserRole)
 		if !ok {
-			object = new(UserTenant)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeUserTenant)
+			object = new(TenantUserRole)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeTenantUserRole)
 			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUserTenant))
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeTenantUserRole))
 			}
 		}
 	} else {
-		s, ok := maybeUserTenant.(*[]*UserTenant)
+		s, ok := maybeTenantUserRole.(*[]*TenantUserRole)
 		if ok {
 			slice = *s
 		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeUserTenant)
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeTenantUserRole)
 			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUserTenant))
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeTenantUserRole))
 			}
 		}
 	}
@@ -497,14 +497,14 @@ func (userTenantL) LoadRole(e boil.Executor, singular bool, maybeUserTenant inte
 	args := make(map[interface{}]struct{})
 	if singular {
 		if object.R == nil {
-			object.R = &userTenantR{}
+			object.R = &tenantUserRoleR{}
 		}
 		args[object.RoleID] = struct{}{}
 
 	} else {
 		for _, obj := range slice {
 			if obj.R == nil {
-				obj.R = &userTenantR{}
+				obj.R = &tenantUserRoleR{}
 			}
 
 			args[obj.RoleID] = struct{}{}
@@ -566,7 +566,7 @@ func (userTenantL) LoadRole(e boil.Executor, singular bool, maybeUserTenant inte
 		if foreign.R == nil {
 			foreign.R = &roleR{}
 		}
-		foreign.R.UserTenants = append(foreign.R.UserTenants, object)
+		foreign.R.TenantUserRoles = append(foreign.R.TenantUserRoles, object)
 		return nil
 	}
 
@@ -577,7 +577,7 @@ func (userTenantL) LoadRole(e boil.Executor, singular bool, maybeUserTenant inte
 				if foreign.R == nil {
 					foreign.R = &roleR{}
 				}
-				foreign.R.UserTenants = append(foreign.R.UserTenants, local)
+				foreign.R.TenantUserRoles = append(foreign.R.TenantUserRoles, local)
 				break
 			}
 		}
@@ -588,28 +588,28 @@ func (userTenantL) LoadRole(e boil.Executor, singular bool, maybeUserTenant inte
 
 // LoadTenant allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (userTenantL) LoadTenant(e boil.Executor, singular bool, maybeUserTenant interface{}, mods queries.Applicator) error {
-	var slice []*UserTenant
-	var object *UserTenant
+func (tenantUserRoleL) LoadTenant(e boil.Executor, singular bool, maybeTenantUserRole interface{}, mods queries.Applicator) error {
+	var slice []*TenantUserRole
+	var object *TenantUserRole
 
 	if singular {
 		var ok bool
-		object, ok = maybeUserTenant.(*UserTenant)
+		object, ok = maybeTenantUserRole.(*TenantUserRole)
 		if !ok {
-			object = new(UserTenant)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeUserTenant)
+			object = new(TenantUserRole)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeTenantUserRole)
 			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUserTenant))
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeTenantUserRole))
 			}
 		}
 	} else {
-		s, ok := maybeUserTenant.(*[]*UserTenant)
+		s, ok := maybeTenantUserRole.(*[]*TenantUserRole)
 		if ok {
 			slice = *s
 		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeUserTenant)
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeTenantUserRole)
 			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUserTenant))
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeTenantUserRole))
 			}
 		}
 	}
@@ -617,14 +617,14 @@ func (userTenantL) LoadTenant(e boil.Executor, singular bool, maybeUserTenant in
 	args := make(map[interface{}]struct{})
 	if singular {
 		if object.R == nil {
-			object.R = &userTenantR{}
+			object.R = &tenantUserRoleR{}
 		}
 		args[object.TenantID] = struct{}{}
 
 	} else {
 		for _, obj := range slice {
 			if obj.R == nil {
-				obj.R = &userTenantR{}
+				obj.R = &tenantUserRoleR{}
 			}
 
 			args[obj.TenantID] = struct{}{}
@@ -686,7 +686,7 @@ func (userTenantL) LoadTenant(e boil.Executor, singular bool, maybeUserTenant in
 		if foreign.R == nil {
 			foreign.R = &tenantR{}
 		}
-		foreign.R.UserTenants = append(foreign.R.UserTenants, object)
+		foreign.R.TenantUserRoles = append(foreign.R.TenantUserRoles, object)
 		return nil
 	}
 
@@ -697,7 +697,7 @@ func (userTenantL) LoadTenant(e boil.Executor, singular bool, maybeUserTenant in
 				if foreign.R == nil {
 					foreign.R = &tenantR{}
 				}
-				foreign.R.UserTenants = append(foreign.R.UserTenants, local)
+				foreign.R.TenantUserRoles = append(foreign.R.TenantUserRoles, local)
 				break
 			}
 		}
@@ -708,28 +708,28 @@ func (userTenantL) LoadTenant(e boil.Executor, singular bool, maybeUserTenant in
 
 // LoadUser allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (userTenantL) LoadUser(e boil.Executor, singular bool, maybeUserTenant interface{}, mods queries.Applicator) error {
-	var slice []*UserTenant
-	var object *UserTenant
+func (tenantUserRoleL) LoadUser(e boil.Executor, singular bool, maybeTenantUserRole interface{}, mods queries.Applicator) error {
+	var slice []*TenantUserRole
+	var object *TenantUserRole
 
 	if singular {
 		var ok bool
-		object, ok = maybeUserTenant.(*UserTenant)
+		object, ok = maybeTenantUserRole.(*TenantUserRole)
 		if !ok {
-			object = new(UserTenant)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeUserTenant)
+			object = new(TenantUserRole)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeTenantUserRole)
 			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUserTenant))
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeTenantUserRole))
 			}
 		}
 	} else {
-		s, ok := maybeUserTenant.(*[]*UserTenant)
+		s, ok := maybeTenantUserRole.(*[]*TenantUserRole)
 		if ok {
 			slice = *s
 		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeUserTenant)
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeTenantUserRole)
 			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUserTenant))
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeTenantUserRole))
 			}
 		}
 	}
@@ -737,14 +737,14 @@ func (userTenantL) LoadUser(e boil.Executor, singular bool, maybeUserTenant inte
 	args := make(map[interface{}]struct{})
 	if singular {
 		if object.R == nil {
-			object.R = &userTenantR{}
+			object.R = &tenantUserRoleR{}
 		}
 		args[object.UserID] = struct{}{}
 
 	} else {
 		for _, obj := range slice {
 			if obj.R == nil {
-				obj.R = &userTenantR{}
+				obj.R = &tenantUserRoleR{}
 			}
 
 			args[obj.UserID] = struct{}{}
@@ -806,7 +806,7 @@ func (userTenantL) LoadUser(e boil.Executor, singular bool, maybeUserTenant inte
 		if foreign.R == nil {
 			foreign.R = &userR{}
 		}
-		foreign.R.UserTenants = append(foreign.R.UserTenants, object)
+		foreign.R.TenantUserRoles = append(foreign.R.TenantUserRoles, object)
 		return nil
 	}
 
@@ -817,7 +817,7 @@ func (userTenantL) LoadUser(e boil.Executor, singular bool, maybeUserTenant inte
 				if foreign.R == nil {
 					foreign.R = &userR{}
 				}
-				foreign.R.UserTenants = append(foreign.R.UserTenants, local)
+				foreign.R.TenantUserRoles = append(foreign.R.TenantUserRoles, local)
 				break
 			}
 		}
@@ -826,18 +826,18 @@ func (userTenantL) LoadUser(e boil.Executor, singular bool, maybeUserTenant inte
 	return nil
 }
 
-// SetRoleG of the userTenant to the related item.
+// SetRoleG of the tenantUserRole to the related item.
 // Sets o.R.Role to related.
-// Adds o to related.R.UserTenants.
+// Adds o to related.R.TenantUserRoles.
 // Uses the global database handle.
-func (o *UserTenant) SetRoleG(insert bool, related *Role) error {
+func (o *TenantUserRole) SetRoleG(insert bool, related *Role) error {
 	return o.SetRole(boil.GetDB(), insert, related)
 }
 
-// SetRole of the userTenant to the related item.
+// SetRole of the tenantUserRole to the related item.
 // Sets o.R.Role to related.
-// Adds o to related.R.UserTenants.
-func (o *UserTenant) SetRole(exec boil.Executor, insert bool, related *Role) error {
+// Adds o to related.R.TenantUserRoles.
+func (o *TenantUserRole) SetRole(exec boil.Executor, insert bool, related *Role) error {
 	var err error
 	if insert {
 		if err = related.Insert(exec, boil.Infer()); err != nil {
@@ -846,9 +846,9 @@ func (o *UserTenant) SetRole(exec boil.Executor, insert bool, related *Role) err
 	}
 
 	updateQuery := fmt.Sprintf(
-		"UPDATE \"user_tenants\" SET %s WHERE %s",
+		"UPDATE \"tenant_user_role\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, []string{"role_id"}),
-		strmangle.WhereClause("\"", "\"", 2, userTenantPrimaryKeyColumns),
+		strmangle.WhereClause("\"", "\"", 2, tenantUserRolePrimaryKeyColumns),
 	)
 	values := []interface{}{related.ID, o.UserID, o.TenantID}
 
@@ -862,7 +862,7 @@ func (o *UserTenant) SetRole(exec boil.Executor, insert bool, related *Role) err
 
 	o.RoleID = related.ID
 	if o.R == nil {
-		o.R = &userTenantR{
+		o.R = &tenantUserRoleR{
 			Role: related,
 		}
 	} else {
@@ -871,27 +871,27 @@ func (o *UserTenant) SetRole(exec boil.Executor, insert bool, related *Role) err
 
 	if related.R == nil {
 		related.R = &roleR{
-			UserTenants: UserTenantSlice{o},
+			TenantUserRoles: TenantUserRoleSlice{o},
 		}
 	} else {
-		related.R.UserTenants = append(related.R.UserTenants, o)
+		related.R.TenantUserRoles = append(related.R.TenantUserRoles, o)
 	}
 
 	return nil
 }
 
-// SetTenantG of the userTenant to the related item.
+// SetTenantG of the tenantUserRole to the related item.
 // Sets o.R.Tenant to related.
-// Adds o to related.R.UserTenants.
+// Adds o to related.R.TenantUserRoles.
 // Uses the global database handle.
-func (o *UserTenant) SetTenantG(insert bool, related *Tenant) error {
+func (o *TenantUserRole) SetTenantG(insert bool, related *Tenant) error {
 	return o.SetTenant(boil.GetDB(), insert, related)
 }
 
-// SetTenant of the userTenant to the related item.
+// SetTenant of the tenantUserRole to the related item.
 // Sets o.R.Tenant to related.
-// Adds o to related.R.UserTenants.
-func (o *UserTenant) SetTenant(exec boil.Executor, insert bool, related *Tenant) error {
+// Adds o to related.R.TenantUserRoles.
+func (o *TenantUserRole) SetTenant(exec boil.Executor, insert bool, related *Tenant) error {
 	var err error
 	if insert {
 		if err = related.Insert(exec, boil.Infer()); err != nil {
@@ -900,9 +900,9 @@ func (o *UserTenant) SetTenant(exec boil.Executor, insert bool, related *Tenant)
 	}
 
 	updateQuery := fmt.Sprintf(
-		"UPDATE \"user_tenants\" SET %s WHERE %s",
+		"UPDATE \"tenant_user_role\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, []string{"tenant_id"}),
-		strmangle.WhereClause("\"", "\"", 2, userTenantPrimaryKeyColumns),
+		strmangle.WhereClause("\"", "\"", 2, tenantUserRolePrimaryKeyColumns),
 	)
 	values := []interface{}{related.ID, o.UserID, o.TenantID}
 
@@ -916,7 +916,7 @@ func (o *UserTenant) SetTenant(exec boil.Executor, insert bool, related *Tenant)
 
 	o.TenantID = related.ID
 	if o.R == nil {
-		o.R = &userTenantR{
+		o.R = &tenantUserRoleR{
 			Tenant: related,
 		}
 	} else {
@@ -925,27 +925,27 @@ func (o *UserTenant) SetTenant(exec boil.Executor, insert bool, related *Tenant)
 
 	if related.R == nil {
 		related.R = &tenantR{
-			UserTenants: UserTenantSlice{o},
+			TenantUserRoles: TenantUserRoleSlice{o},
 		}
 	} else {
-		related.R.UserTenants = append(related.R.UserTenants, o)
+		related.R.TenantUserRoles = append(related.R.TenantUserRoles, o)
 	}
 
 	return nil
 }
 
-// SetUserG of the userTenant to the related item.
+// SetUserG of the tenantUserRole to the related item.
 // Sets o.R.User to related.
-// Adds o to related.R.UserTenants.
+// Adds o to related.R.TenantUserRoles.
 // Uses the global database handle.
-func (o *UserTenant) SetUserG(insert bool, related *User) error {
+func (o *TenantUserRole) SetUserG(insert bool, related *User) error {
 	return o.SetUser(boil.GetDB(), insert, related)
 }
 
-// SetUser of the userTenant to the related item.
+// SetUser of the tenantUserRole to the related item.
 // Sets o.R.User to related.
-// Adds o to related.R.UserTenants.
-func (o *UserTenant) SetUser(exec boil.Executor, insert bool, related *User) error {
+// Adds o to related.R.TenantUserRoles.
+func (o *TenantUserRole) SetUser(exec boil.Executor, insert bool, related *User) error {
 	var err error
 	if insert {
 		if err = related.Insert(exec, boil.Infer()); err != nil {
@@ -954,9 +954,9 @@ func (o *UserTenant) SetUser(exec boil.Executor, insert bool, related *User) err
 	}
 
 	updateQuery := fmt.Sprintf(
-		"UPDATE \"user_tenants\" SET %s WHERE %s",
+		"UPDATE \"tenant_user_role\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
-		strmangle.WhereClause("\"", "\"", 2, userTenantPrimaryKeyColumns),
+		strmangle.WhereClause("\"", "\"", 2, tenantUserRolePrimaryKeyColumns),
 	)
 	values := []interface{}{related.ID, o.UserID, o.TenantID}
 
@@ -970,7 +970,7 @@ func (o *UserTenant) SetUser(exec boil.Executor, insert bool, related *User) err
 
 	o.UserID = related.ID
 	if o.R == nil {
-		o.R = &userTenantR{
+		o.R = &tenantUserRoleR{
 			User: related,
 		}
 	} else {
@@ -979,71 +979,71 @@ func (o *UserTenant) SetUser(exec boil.Executor, insert bool, related *User) err
 
 	if related.R == nil {
 		related.R = &userR{
-			UserTenants: UserTenantSlice{o},
+			TenantUserRoles: TenantUserRoleSlice{o},
 		}
 	} else {
-		related.R.UserTenants = append(related.R.UserTenants, o)
+		related.R.TenantUserRoles = append(related.R.TenantUserRoles, o)
 	}
 
 	return nil
 }
 
-// UserTenants retrieves all the records using an executor.
-func UserTenants(mods ...qm.QueryMod) userTenantQuery {
-	mods = append(mods, qm.From("\"user_tenants\""))
+// TenantUserRoles retrieves all the records using an executor.
+func TenantUserRoles(mods ...qm.QueryMod) tenantUserRoleQuery {
+	mods = append(mods, qm.From("\"tenant_user_role\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"\"user_tenants\".*"})
+		queries.SetSelect(q, []string{"\"tenant_user_role\".*"})
 	}
 
-	return userTenantQuery{q}
+	return tenantUserRoleQuery{q}
 }
 
-// FindUserTenantG retrieves a single record by ID.
-func FindUserTenantG(userID int64, tenantID int64, selectCols ...string) (*UserTenant, error) {
-	return FindUserTenant(boil.GetDB(), userID, tenantID, selectCols...)
+// FindTenantUserRoleG retrieves a single record by ID.
+func FindTenantUserRoleG(userID int64, tenantID int64, selectCols ...string) (*TenantUserRole, error) {
+	return FindTenantUserRole(boil.GetDB(), userID, tenantID, selectCols...)
 }
 
-// FindUserTenant retrieves a single record by ID with an executor.
+// FindTenantUserRole retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindUserTenant(exec boil.Executor, userID int64, tenantID int64, selectCols ...string) (*UserTenant, error) {
-	userTenantObj := &UserTenant{}
+func FindTenantUserRole(exec boil.Executor, userID int64, tenantID int64, selectCols ...string) (*TenantUserRole, error) {
+	tenantUserRoleObj := &TenantUserRole{}
 
 	sel := "*"
 	if len(selectCols) > 0 {
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"user_tenants\" where \"user_id\"=$1 AND \"tenant_id\"=$2", sel,
+		"select %s from \"tenant_user_role\" where \"user_id\"=$1 AND \"tenant_id\"=$2", sel,
 	)
 
 	q := queries.Raw(query, userID, tenantID)
 
-	err := q.Bind(nil, exec, userTenantObj)
+	err := q.Bind(nil, exec, tenantUserRoleObj)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "orm: unable to select from user_tenants")
+		return nil, errors.Wrap(err, "orm: unable to select from tenant_user_role")
 	}
 
-	if err = userTenantObj.doAfterSelectHooks(exec); err != nil {
-		return userTenantObj, err
+	if err = tenantUserRoleObj.doAfterSelectHooks(exec); err != nil {
+		return tenantUserRoleObj, err
 	}
 
-	return userTenantObj, nil
+	return tenantUserRoleObj, nil
 }
 
 // InsertG a single record. See Insert for whitelist behavior description.
-func (o *UserTenant) InsertG(columns boil.Columns) error {
+func (o *TenantUserRole) InsertG(columns boil.Columns) error {
 	return o.Insert(boil.GetDB(), columns)
 }
 
 // Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *UserTenant) Insert(exec boil.Executor, columns boil.Columns) error {
+func (o *TenantUserRole) Insert(exec boil.Executor, columns boil.Columns) error {
 	if o == nil {
-		return errors.New("orm: no user_tenants provided for insertion")
+		return errors.New("orm: no tenant_user_role provided for insertion")
 	}
 
 	var err error
@@ -1052,33 +1052,33 @@ func (o *UserTenant) Insert(exec boil.Executor, columns boil.Columns) error {
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(userTenantColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(tenantUserRoleColumnsWithDefault, o)
 
 	key := makeCacheKey(columns, nzDefaults)
-	userTenantInsertCacheMut.RLock()
-	cache, cached := userTenantInsertCache[key]
-	userTenantInsertCacheMut.RUnlock()
+	tenantUserRoleInsertCacheMut.RLock()
+	cache, cached := tenantUserRoleInsertCache[key]
+	tenantUserRoleInsertCacheMut.RUnlock()
 
 	if !cached {
 		wl, returnColumns := columns.InsertColumnSet(
-			userTenantAllColumns,
-			userTenantColumnsWithDefault,
-			userTenantColumnsWithoutDefault,
+			tenantUserRoleAllColumns,
+			tenantUserRoleColumnsWithDefault,
+			tenantUserRoleColumnsWithoutDefault,
 			nzDefaults,
 		)
 
-		cache.valueMapping, err = queries.BindMapping(userTenantType, userTenantMapping, wl)
+		cache.valueMapping, err = queries.BindMapping(tenantUserRoleType, tenantUserRoleMapping, wl)
 		if err != nil {
 			return err
 		}
-		cache.retMapping, err = queries.BindMapping(userTenantType, userTenantMapping, returnColumns)
+		cache.retMapping, err = queries.BindMapping(tenantUserRoleType, tenantUserRoleMapping, returnColumns)
 		if err != nil {
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO \"user_tenants\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO \"tenant_user_role\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO \"user_tenants\" %sDEFAULT VALUES%s"
+			cache.query = "INSERT INTO \"tenant_user_role\" %sDEFAULT VALUES%s"
 		}
 
 		var queryOutput, queryReturning string
@@ -1105,55 +1105,55 @@ func (o *UserTenant) Insert(exec boil.Executor, columns boil.Columns) error {
 	}
 
 	if err != nil {
-		return errors.Wrap(err, "orm: unable to insert into user_tenants")
+		return errors.Wrap(err, "orm: unable to insert into tenant_user_role")
 	}
 
 	if !cached {
-		userTenantInsertCacheMut.Lock()
-		userTenantInsertCache[key] = cache
-		userTenantInsertCacheMut.Unlock()
+		tenantUserRoleInsertCacheMut.Lock()
+		tenantUserRoleInsertCache[key] = cache
+		tenantUserRoleInsertCacheMut.Unlock()
 	}
 
 	return o.doAfterInsertHooks(exec)
 }
 
-// UpdateG a single UserTenant record using the global executor.
+// UpdateG a single TenantUserRole record using the global executor.
 // See Update for more documentation.
-func (o *UserTenant) UpdateG(columns boil.Columns) (int64, error) {
+func (o *TenantUserRole) UpdateG(columns boil.Columns) (int64, error) {
 	return o.Update(boil.GetDB(), columns)
 }
 
-// Update uses an executor to update the UserTenant.
+// Update uses an executor to update the TenantUserRole.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *UserTenant) Update(exec boil.Executor, columns boil.Columns) (int64, error) {
+func (o *TenantUserRole) Update(exec boil.Executor, columns boil.Columns) (int64, error) {
 	var err error
 	if err = o.doBeforeUpdateHooks(exec); err != nil {
 		return 0, err
 	}
 	key := makeCacheKey(columns, nil)
-	userTenantUpdateCacheMut.RLock()
-	cache, cached := userTenantUpdateCache[key]
-	userTenantUpdateCacheMut.RUnlock()
+	tenantUserRoleUpdateCacheMut.RLock()
+	cache, cached := tenantUserRoleUpdateCache[key]
+	tenantUserRoleUpdateCacheMut.RUnlock()
 
 	if !cached {
 		wl := columns.UpdateColumnSet(
-			userTenantAllColumns,
-			userTenantPrimaryKeyColumns,
+			tenantUserRoleAllColumns,
+			tenantUserRolePrimaryKeyColumns,
 		)
 
 		if !columns.IsWhitelist() {
 			wl = strmangle.SetComplement(wl, []string{"created_at"})
 		}
 		if len(wl) == 0 {
-			return 0, errors.New("orm: unable to update user_tenants, could not build whitelist")
+			return 0, errors.New("orm: unable to update tenant_user_role, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE \"user_tenants\" SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE \"tenant_user_role\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, wl),
-			strmangle.WhereClause("\"", "\"", len(wl)+1, userTenantPrimaryKeyColumns),
+			strmangle.WhereClause("\"", "\"", len(wl)+1, tenantUserRolePrimaryKeyColumns),
 		)
-		cache.valueMapping, err = queries.BindMapping(userTenantType, userTenantMapping, append(wl, userTenantPrimaryKeyColumns...))
+		cache.valueMapping, err = queries.BindMapping(tenantUserRoleType, tenantUserRoleMapping, append(wl, tenantUserRolePrimaryKeyColumns...))
 		if err != nil {
 			return 0, err
 		}
@@ -1168,52 +1168,52 @@ func (o *UserTenant) Update(exec boil.Executor, columns boil.Columns) (int64, er
 	var result sql.Result
 	result, err = exec.Exec(cache.query, values...)
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: unable to update user_tenants row")
+		return 0, errors.Wrap(err, "orm: unable to update tenant_user_role row")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: failed to get rows affected by update for user_tenants")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by update for tenant_user_role")
 	}
 
 	if !cached {
-		userTenantUpdateCacheMut.Lock()
-		userTenantUpdateCache[key] = cache
-		userTenantUpdateCacheMut.Unlock()
+		tenantUserRoleUpdateCacheMut.Lock()
+		tenantUserRoleUpdateCache[key] = cache
+		tenantUserRoleUpdateCacheMut.Unlock()
 	}
 
 	return rowsAff, o.doAfterUpdateHooks(exec)
 }
 
 // UpdateAllG updates all rows with the specified column values.
-func (q userTenantQuery) UpdateAllG(cols M) (int64, error) {
+func (q tenantUserRoleQuery) UpdateAllG(cols M) (int64, error) {
 	return q.UpdateAll(boil.GetDB(), cols)
 }
 
 // UpdateAll updates all rows with the specified column values.
-func (q userTenantQuery) UpdateAll(exec boil.Executor, cols M) (int64, error) {
+func (q tenantUserRoleQuery) UpdateAll(exec boil.Executor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
 
 	result, err := q.Query.Exec(exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: unable to update all for user_tenants")
+		return 0, errors.Wrap(err, "orm: unable to update all for tenant_user_role")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: unable to retrieve rows affected for user_tenants")
+		return 0, errors.Wrap(err, "orm: unable to retrieve rows affected for tenant_user_role")
 	}
 
 	return rowsAff, nil
 }
 
 // UpdateAllG updates all rows with the specified column values.
-func (o UserTenantSlice) UpdateAllG(cols M) (int64, error) {
+func (o TenantUserRoleSlice) UpdateAllG(cols M) (int64, error) {
 	return o.UpdateAll(boil.GetDB(), cols)
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
-func (o UserTenantSlice) UpdateAll(exec boil.Executor, cols M) (int64, error) {
+func (o TenantUserRoleSlice) UpdateAll(exec boil.Executor, cols M) (int64, error) {
 	ln := int64(len(o))
 	if ln == 0 {
 		return 0, nil
@@ -1235,13 +1235,13 @@ func (o UserTenantSlice) UpdateAll(exec boil.Executor, cols M) (int64, error) {
 
 	// Append all of the primary key values for each column
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), userTenantPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), tenantUserRolePrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE \"user_tenants\" SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE \"tenant_user_role\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, userTenantPrimaryKeyColumns, len(o)))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, tenantUserRolePrimaryKeyColumns, len(o)))
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -1249,33 +1249,33 @@ func (o UserTenantSlice) UpdateAll(exec boil.Executor, cols M) (int64, error) {
 	}
 	result, err := exec.Exec(sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: unable to update all in userTenant slice")
+		return 0, errors.Wrap(err, "orm: unable to update all in tenantUserRole slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: unable to retrieve rows affected all in update all userTenant")
+		return 0, errors.Wrap(err, "orm: unable to retrieve rows affected all in update all tenantUserRole")
 	}
 	return rowsAff, nil
 }
 
 // UpsertG attempts an insert, and does an update or ignore on conflict.
-func (o *UserTenant) UpsertG(updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns, opts ...UpsertOptionFunc) error {
+func (o *TenantUserRole) UpsertG(updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns, opts ...UpsertOptionFunc) error {
 	return o.Upsert(boil.GetDB(), updateOnConflict, conflictColumns, updateColumns, insertColumns, opts...)
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *UserTenant) Upsert(exec boil.Executor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns, opts ...UpsertOptionFunc) error {
+func (o *TenantUserRole) Upsert(exec boil.Executor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns, opts ...UpsertOptionFunc) error {
 	if o == nil {
-		return errors.New("orm: no user_tenants provided for upsert")
+		return errors.New("orm: no tenant_user_role provided for upsert")
 	}
 
 	if err := o.doBeforeUpsertHooks(exec); err != nil {
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(userTenantColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(tenantUserRoleColumnsWithDefault, o)
 
 	// Build cache key in-line uglily - mysql vs psql problems
 	buf := strmangle.GetBuffer()
@@ -1305,48 +1305,48 @@ func (o *UserTenant) Upsert(exec boil.Executor, updateOnConflict bool, conflictC
 	key := buf.String()
 	strmangle.PutBuffer(buf)
 
-	userTenantUpsertCacheMut.RLock()
-	cache, cached := userTenantUpsertCache[key]
-	userTenantUpsertCacheMut.RUnlock()
+	tenantUserRoleUpsertCacheMut.RLock()
+	cache, cached := tenantUserRoleUpsertCache[key]
+	tenantUserRoleUpsertCacheMut.RUnlock()
 
 	var err error
 
 	if !cached {
 		insert, _ := insertColumns.InsertColumnSet(
-			userTenantAllColumns,
-			userTenantColumnsWithDefault,
-			userTenantColumnsWithoutDefault,
+			tenantUserRoleAllColumns,
+			tenantUserRoleColumnsWithDefault,
+			tenantUserRoleColumnsWithoutDefault,
 			nzDefaults,
 		)
 
 		update := updateColumns.UpdateColumnSet(
-			userTenantAllColumns,
-			userTenantPrimaryKeyColumns,
+			tenantUserRoleAllColumns,
+			tenantUserRolePrimaryKeyColumns,
 		)
 
 		if updateOnConflict && len(update) == 0 {
-			return errors.New("orm: unable to upsert user_tenants, could not build update column list")
+			return errors.New("orm: unable to upsert tenant_user_role, could not build update column list")
 		}
 
-		ret := strmangle.SetComplement(userTenantAllColumns, strmangle.SetIntersect(insert, update))
+		ret := strmangle.SetComplement(tenantUserRoleAllColumns, strmangle.SetIntersect(insert, update))
 
 		conflict := conflictColumns
 		if len(conflict) == 0 && updateOnConflict && len(update) != 0 {
-			if len(userTenantPrimaryKeyColumns) == 0 {
-				return errors.New("orm: unable to upsert user_tenants, could not build conflict column list")
+			if len(tenantUserRolePrimaryKeyColumns) == 0 {
+				return errors.New("orm: unable to upsert tenant_user_role, could not build conflict column list")
 			}
 
-			conflict = make([]string, len(userTenantPrimaryKeyColumns))
-			copy(conflict, userTenantPrimaryKeyColumns)
+			conflict = make([]string, len(tenantUserRolePrimaryKeyColumns))
+			copy(conflict, tenantUserRolePrimaryKeyColumns)
 		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"user_tenants\"", updateOnConflict, ret, update, conflict, insert, opts...)
+		cache.query = buildUpsertQueryPostgres(dialect, "\"tenant_user_role\"", updateOnConflict, ret, update, conflict, insert, opts...)
 
-		cache.valueMapping, err = queries.BindMapping(userTenantType, userTenantMapping, insert)
+		cache.valueMapping, err = queries.BindMapping(tenantUserRoleType, tenantUserRoleMapping, insert)
 		if err != nil {
 			return err
 		}
 		if len(ret) != 0 {
-			cache.retMapping, err = queries.BindMapping(userTenantType, userTenantMapping, ret)
+			cache.retMapping, err = queries.BindMapping(tenantUserRoleType, tenantUserRoleMapping, ret)
 			if err != nil {
 				return err
 			}
@@ -1373,37 +1373,37 @@ func (o *UserTenant) Upsert(exec boil.Executor, updateOnConflict bool, conflictC
 		_, err = exec.Exec(cache.query, vals...)
 	}
 	if err != nil {
-		return errors.Wrap(err, "orm: unable to upsert user_tenants")
+		return errors.Wrap(err, "orm: unable to upsert tenant_user_role")
 	}
 
 	if !cached {
-		userTenantUpsertCacheMut.Lock()
-		userTenantUpsertCache[key] = cache
-		userTenantUpsertCacheMut.Unlock()
+		tenantUserRoleUpsertCacheMut.Lock()
+		tenantUserRoleUpsertCache[key] = cache
+		tenantUserRoleUpsertCacheMut.Unlock()
 	}
 
 	return o.doAfterUpsertHooks(exec)
 }
 
-// DeleteG deletes a single UserTenant record.
+// DeleteG deletes a single TenantUserRole record.
 // DeleteG will match against the primary key column to find the record to delete.
-func (o *UserTenant) DeleteG() (int64, error) {
+func (o *TenantUserRole) DeleteG() (int64, error) {
 	return o.Delete(boil.GetDB())
 }
 
-// Delete deletes a single UserTenant record with an executor.
+// Delete deletes a single TenantUserRole record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *UserTenant) Delete(exec boil.Executor) (int64, error) {
+func (o *TenantUserRole) Delete(exec boil.Executor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("orm: no UserTenant provided for delete")
+		return 0, errors.New("orm: no TenantUserRole provided for delete")
 	}
 
 	if err := o.doBeforeDeleteHooks(exec); err != nil {
 		return 0, err
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), userTenantPrimaryKeyMapping)
-	sql := "DELETE FROM \"user_tenants\" WHERE \"user_id\"=$1 AND \"tenant_id\"=$2"
+	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), tenantUserRolePrimaryKeyMapping)
+	sql := "DELETE FROM \"tenant_user_role\" WHERE \"user_id\"=$1 AND \"tenant_id\"=$2"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -1411,12 +1411,12 @@ func (o *UserTenant) Delete(exec boil.Executor) (int64, error) {
 	}
 	result, err := exec.Exec(sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: unable to delete from user_tenants")
+		return 0, errors.Wrap(err, "orm: unable to delete from tenant_user_role")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: failed to get rows affected by delete for user_tenants")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by delete for tenant_user_role")
 	}
 
 	if err := o.doAfterDeleteHooks(exec); err != nil {
@@ -1426,43 +1426,43 @@ func (o *UserTenant) Delete(exec boil.Executor) (int64, error) {
 	return rowsAff, nil
 }
 
-func (q userTenantQuery) DeleteAllG() (int64, error) {
+func (q tenantUserRoleQuery) DeleteAllG() (int64, error) {
 	return q.DeleteAll(boil.GetDB())
 }
 
 // DeleteAll deletes all matching rows.
-func (q userTenantQuery) DeleteAll(exec boil.Executor) (int64, error) {
+func (q tenantUserRoleQuery) DeleteAll(exec boil.Executor) (int64, error) {
 	if q.Query == nil {
-		return 0, errors.New("orm: no userTenantQuery provided for delete all")
+		return 0, errors.New("orm: no tenantUserRoleQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
 
 	result, err := q.Query.Exec(exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: unable to delete all from user_tenants")
+		return 0, errors.Wrap(err, "orm: unable to delete all from tenant_user_role")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: failed to get rows affected by deleteall for user_tenants")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by deleteall for tenant_user_role")
 	}
 
 	return rowsAff, nil
 }
 
 // DeleteAllG deletes all rows in the slice.
-func (o UserTenantSlice) DeleteAllG() (int64, error) {
+func (o TenantUserRoleSlice) DeleteAllG() (int64, error) {
 	return o.DeleteAll(boil.GetDB())
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o UserTenantSlice) DeleteAll(exec boil.Executor) (int64, error) {
+func (o TenantUserRoleSlice) DeleteAll(exec boil.Executor) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
 
-	if len(userTenantBeforeDeleteHooks) != 0 {
+	if len(tenantUserRoleBeforeDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doBeforeDeleteHooks(exec); err != nil {
 				return 0, err
@@ -1472,12 +1472,12 @@ func (o UserTenantSlice) DeleteAll(exec boil.Executor) (int64, error) {
 
 	var args []interface{}
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), userTenantPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), tenantUserRolePrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM \"user_tenants\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, userTenantPrimaryKeyColumns, len(o))
+	sql := "DELETE FROM \"tenant_user_role\" WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, tenantUserRolePrimaryKeyColumns, len(o))
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -1485,15 +1485,15 @@ func (o UserTenantSlice) DeleteAll(exec boil.Executor) (int64, error) {
 	}
 	result, err := exec.Exec(sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: unable to delete all from userTenant slice")
+		return 0, errors.Wrap(err, "orm: unable to delete all from tenantUserRole slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: failed to get rows affected by deleteall for user_tenants")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by deleteall for tenant_user_role")
 	}
 
-	if len(userTenantAfterDeleteHooks) != 0 {
+	if len(tenantUserRoleAfterDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterDeleteHooks(exec); err != nil {
 				return 0, err
@@ -1505,9 +1505,9 @@ func (o UserTenantSlice) DeleteAll(exec boil.Executor) (int64, error) {
 }
 
 // ReloadG refetches the object from the database using the primary keys.
-func (o *UserTenant) ReloadG() error {
+func (o *TenantUserRole) ReloadG() error {
 	if o == nil {
-		return errors.New("orm: no UserTenant provided for reload")
+		return errors.New("orm: no TenantUserRole provided for reload")
 	}
 
 	return o.Reload(boil.GetDB())
@@ -1515,8 +1515,8 @@ func (o *UserTenant) ReloadG() error {
 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
-func (o *UserTenant) Reload(exec boil.Executor) error {
-	ret, err := FindUserTenant(exec, o.UserID, o.TenantID)
+func (o *TenantUserRole) Reload(exec boil.Executor) error {
+	ret, err := FindTenantUserRole(exec, o.UserID, o.TenantID)
 	if err != nil {
 		return err
 	}
@@ -1527,9 +1527,9 @@ func (o *UserTenant) Reload(exec boil.Executor) error {
 
 // ReloadAllG refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *UserTenantSlice) ReloadAllG() error {
+func (o *TenantUserRoleSlice) ReloadAllG() error {
 	if o == nil {
-		return errors.New("orm: empty UserTenantSlice provided for reload all")
+		return errors.New("orm: empty TenantUserRoleSlice provided for reload all")
 	}
 
 	return o.ReloadAll(boil.GetDB())
@@ -1537,26 +1537,26 @@ func (o *UserTenantSlice) ReloadAllG() error {
 
 // ReloadAll refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *UserTenantSlice) ReloadAll(exec boil.Executor) error {
+func (o *TenantUserRoleSlice) ReloadAll(exec boil.Executor) error {
 	if o == nil || len(*o) == 0 {
 		return nil
 	}
 
-	slice := UserTenantSlice{}
+	slice := TenantUserRoleSlice{}
 	var args []interface{}
 	for _, obj := range *o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), userTenantPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), tenantUserRolePrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT \"user_tenants\".* FROM \"user_tenants\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, userTenantPrimaryKeyColumns, len(*o))
+	sql := "SELECT \"tenant_user_role\".* FROM \"tenant_user_role\" WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, tenantUserRolePrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
 
 	err := q.Bind(nil, exec, &slice)
 	if err != nil {
-		return errors.Wrap(err, "orm: unable to reload all in UserTenantSlice")
+		return errors.Wrap(err, "orm: unable to reload all in TenantUserRoleSlice")
 	}
 
 	*o = slice
@@ -1564,15 +1564,15 @@ func (o *UserTenantSlice) ReloadAll(exec boil.Executor) error {
 	return nil
 }
 
-// UserTenantExistsG checks if the UserTenant row exists.
-func UserTenantExistsG(userID int64, tenantID int64) (bool, error) {
-	return UserTenantExists(boil.GetDB(), userID, tenantID)
+// TenantUserRoleExistsG checks if the TenantUserRole row exists.
+func TenantUserRoleExistsG(userID int64, tenantID int64) (bool, error) {
+	return TenantUserRoleExists(boil.GetDB(), userID, tenantID)
 }
 
-// UserTenantExists checks if the UserTenant row exists.
-func UserTenantExists(exec boil.Executor, userID int64, tenantID int64) (bool, error) {
+// TenantUserRoleExists checks if the TenantUserRole row exists.
+func TenantUserRoleExists(exec boil.Executor, userID int64, tenantID int64) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"user_tenants\" where \"user_id\"=$1 AND \"tenant_id\"=$2 limit 1)"
+	sql := "select exists(select 1 from \"tenant_user_role\" where \"user_id\"=$1 AND \"tenant_id\"=$2 limit 1)"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -1582,13 +1582,13 @@ func UserTenantExists(exec boil.Executor, userID int64, tenantID int64) (bool, e
 
 	err := row.Scan(&exists)
 	if err != nil {
-		return false, errors.Wrap(err, "orm: unable to check if user_tenants exists")
+		return false, errors.Wrap(err, "orm: unable to check if tenant_user_role exists")
 	}
 
 	return exists, nil
 }
 
-// Exists checks if the UserTenant row exists.
-func (o *UserTenant) Exists(exec boil.Executor) (bool, error) {
-	return UserTenantExists(exec, o.UserID, o.TenantID)
+// Exists checks if the TenantUserRole row exists.
+func (o *TenantUserRole) Exists(exec boil.Executor) (bool, error) {
+	return TenantUserRoleExists(exec, o.UserID, o.TenantID)
 }
