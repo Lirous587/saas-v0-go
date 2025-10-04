@@ -22,10 +22,6 @@ type UpdateRequest struct {
 	Description string `json:"description" binding:"max=60"`
 }
 
-type ListRequest struct {
-	TenantID int64 `uri:"tenant_id" binding:"required"`
-}
-
 type RoleListResponse struct {
 	List []*RoleResponse `json:"list"`
 }

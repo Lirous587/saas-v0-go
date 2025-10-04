@@ -6,4 +6,8 @@ type TenantService interface {
 	Update(tenant *Tenant) (*Tenant, error)
 	Delete(id int64) error
 	List(query *TenantQuery) (*TenantList, error)
+
+	GenInviteToken(payload *GenInviteTokenPayload) (string, error)
+	Invite(payload *InvitePayload) error
+	Enter(paylod *EnterPayload) error
 }

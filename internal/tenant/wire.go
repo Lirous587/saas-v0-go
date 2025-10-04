@@ -4,8 +4,7 @@
 package tenant
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
+	"saas/internal/common/email"
 	planAdapters "saas/internal/plan/adapters"
 	planService "saas/internal/plan/service"
 	roleAdapters "saas/internal/role/adapters"
@@ -13,6 +12,11 @@ import (
 	"saas/internal/tenant/adapters"
 	"saas/internal/tenant/handler"
 	"saas/internal/tenant/service"
+	"saas/internal/tenant/templates"
+	userAdapters "saas/internal/user/adapters"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
 )
 
 func InitV1(r *gin.RouterGroup) func() {
@@ -21,6 +25,10 @@ func InitV1(r *gin.RouterGroup) func() {
 		handler.NewHttpHandler,
 		service.NewTenantService,
 		adapters.NewTenantPSQLRepository,
+		adapters.NewTenantRedisCache,
+
+		email.NewMailer,
+		templates.LoadTenantTemplates,
 
 		// plan服务
 		planAdapters.NewPlanPSQLRepository,
@@ -30,6 +38,9 @@ func InitV1(r *gin.RouterGroup) func() {
 		roleAdapters.NewRolePSQLRepository,
 		roleAdapters.NewRoleRedisCache,
 		roleService.NewRoleService,
+
+		// user repo
+		userAdapters.NewUserPSQLRepository,
 	)
 
 	return nil

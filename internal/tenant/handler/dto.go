@@ -1,5 +1,9 @@
 package handler
 
+import (
+	"saas/internal/tenant/domain"
+)
+
 type TenantResponse struct {
 	ID          int64  `json:"id"`
 	Name        string `json:"name"`
@@ -40,9 +44,32 @@ type UpgradeRequestBody struct {
 	PlanID int64 `json:"plan_id" binding:"required"`
 }
 
-type InviteWay string
+type GenInviteTokenRequest struct {
+	TenantID int64 `uri:"id" binding:"required"`
+	GenInviteTokenRequestBody
+}
+
+type GenInviteTokenRequestBody struct {
+	ExpireSecond int64 `json:"expire_second" binding:"required"`
+}
+
 type InviteRequest struct {
 	TenantID int64 `uri:"id" binding:"required"`
-	// 1.生成公共令牌 2.生成指定成员令牌(基于邮箱)
-	Way InviteWay `json:"way" binding:"required"`
+	InviteRequestBody
+}
+
+type InviteRequestBody struct {
+	ExpireSecond int64    `json:"expire_second" binding:"required"`
+	Emails       []string `json:"emails" binding:"required,dive,email"`
+}
+
+type EntryRequest struct {
+	TenantID int64 `json:"tenant_id" form:"tenant_id" binding:"required"`
+	EntryRequestBody
+}
+
+type EntryRequestBody struct {
+	TokenKind domain.InviteTokenKind `json:"token_kind" form:"token_kind" binding:"required,oneof=public secret"`
+	Token     string                 `json:"token" form:"token" binding:"required"`
+	Email     string                 `json:"email" form:"number" binding:"required,email"`
 }

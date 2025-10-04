@@ -10,9 +10,9 @@ import (
 func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 	g := r.Group("/v1/role")
 
-	protect := g.Use(auth.JWTValidate(), auth.CasbinValited())
+	protect := g.Use(auth.JWTValidate())
 	{
-		protect.GET("/:tenant_id", handler.List)
+		protect.GET("", handler.List)
 
 		// todo 系统管理员方可编辑角色
 		// protect.POST("/:tenant_id/:id", handler.Create)

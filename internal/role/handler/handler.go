@@ -145,12 +145,6 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/role/:tenant_id [get]
 func (h *HttpHandler) List(ctx *gin.Context) {
-	req := new(ListRequest)
-
-	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
-		return
-	}
-
 	data, err := h.service.List()
 
 	if err != nil {

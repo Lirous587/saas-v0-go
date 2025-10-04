@@ -73,24 +73,15 @@ CREATE TABLE public.tenant_plan
 );
 
 
--- 角色表
--- tenant_id 可为空 当计划等级较低时 仅有默认角色选择
+-- 角色表 
+-- 与租户无关 应预定义 避免去实现租户层面的权限分配 因为这对于非超大型SaaS系统而言是一个灾难设计
 CREATE TABLE public.roles
 (
     id          bigserial PRIMARY KEY,
-    tenant_id   bigint      NULL REFERENCES tenants (id) ON DELETE CASCADE,
     name        varchar(30) NOT NULL,
     description text,
-    is_default  boolean     NOT NULL DEFAULT true,
-    -- 防止无效数据组合
-    CONSTRAINT ux_roles_name CHECK (
-        (is_default = true AND tenant_id IS NULL) OR
-        (is_default = false AND tenant_id IS NOT NULL)
-    )
 );
-CREATE UNIQUE INDEX ux_roles_default_name ON public.roles (name) WHERE is_default = true;
-CREATE UNIQUE INDEX ux_roles_tenant_name ON public.roles (tenant_id, name) WHERE tenant_id IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_roles_tenant_id ON public.roles (tenant_id);
+CREATE UNIQUE INDEX ux_roles_default_name ON public.roles (name);
 
 
 -- 菜单表

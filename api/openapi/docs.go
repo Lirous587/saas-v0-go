@@ -1352,6 +1352,134 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/tenant/entry": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "加入指定租户 并分配指定角色",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tenant"
+                ],
+                "summary": "加入租户",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tenant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "加入租户请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.EntryRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/tenant/upgrade/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "升级租户计划",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tenant"
+                ],
+                "summary": "升级租户",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tenant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "升级 Tenant 请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.UpgradeRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功升级 Tenant",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.TenantResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/tenant/{id}": {
             "get": {
                 "security": [
@@ -1418,7 +1546,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "升级租户计划",
+                "description": "根据ID更新 Tenant 信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -1428,7 +1556,7 @@ const docTemplate = `{
                 "tags": [
                     "tenant"
                 ],
-                "summary": "升级租户",
+                "summary": "更新 Tenant",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1438,18 +1566,18 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "升级 Tenant 请求",
+                        "description": "更新 Tenant 请求",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.UpgradeRequestBody"
+                            "$ref": "#/definitions/saas_internal_tenant_handler.UpdateRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功升级 Tenant",
+                        "description": "成功更新 Tenant",
                         "schema": {
                             "allOf": [
                                 {
@@ -1528,14 +1656,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/tenant/{id}/{user_id}": {
+        "/v1/tenant/{id}/gen_invite_token": {
             "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "生成邀请令牌,以不同的方式去邀请成员",
+                "description": "生成邀请令牌",
                 "consumes": [
                     "application/json"
                 ],
@@ -1555,12 +1683,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "邀请 Tenant 请求",
+                        "description": "生成邀请令牌 Tenant 请求",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.InviteRequest"
+                            "$ref": "#/definitions/handler.GenInviteTokenRequestBody"
                         }
                     }
                 ],
@@ -1568,19 +1696,65 @@ const docTemplate = `{
                     "200": {
                         "description": "请求成功",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.successResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/handler.TenantResponse"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/tenant/{id}/invite": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "邀请指定人员,通过邮箱通知",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tenant"
+                ],
+                "summary": "邀请指定人员,通过邮箱通知",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tenant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "邀请参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.InviteRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.successResponse"
                         }
                     },
                     "400": {
@@ -1806,6 +1980,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "domain.InviteTokenKind": {
+            "type": "string",
+            "enum": [
+                "public",
+                "secret"
+            ],
+            "x-enum-varnames": [
+                "publicWay",
+                "secretWay"
+            ]
+        },
         "domain.VerifyWay": {
             "type": "string",
             "enum": [
@@ -1911,6 +2096,44 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.EntryRequestBody": {
+            "type": "object",
+            "required": [
+                "email",
+                "token",
+                "token_kind"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "token_kind": {
+                    "enum": [
+                        "public",
+                        "secret"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/domain.InviteTokenKind"
+                        }
+                    ]
+                }
+            }
+        },
+        "handler.GenInviteTokenRequestBody": {
+            "type": "object",
+            "required": [
+                "expire_second"
+            ],
+            "properties": {
+                "expire_second": {
+                    "type": "integer"
+                }
+            }
+        },
         "handler.GithubAuthRequest": {
             "type": "object",
             "required": [
@@ -1956,19 +2179,21 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.InviteRequest": {
+        "handler.InviteRequestBody": {
             "type": "object",
             "required": [
-                "tenantID",
-                "way"
+                "emails",
+                "expire_second"
             ],
             "properties": {
-                "tenantID": {
-                    "type": "integer"
+                "emails": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
-                "way": {
-                    "description": "1.生成公共令牌 2.生成指定成员令牌(基于邮箱)",
-                    "type": "string"
+                "expire_second": {
+                    "type": "integer"
                 }
             }
         },

@@ -146,3 +146,13 @@ func (repo *TenantPSQLRepository) AssignTenantUserRoleTx(tx *sql.Tx, tenantID, u
 
 	return ormUserTenant.Insert(tx, boil.Infer())
 }
+
+func (repo *TenantPSQLRepository) AssignTenantUserRole(tenantID, userID, roleID int64) error {
+	ormUserTenant := orm.TenantUserRole{
+		TenantID: tenantID,
+		UserID:   userID,
+		RoleID:   roleID,
+	}
+
+	return ormUserTenant.InsertG(boil.Infer())
+}

@@ -11,7 +11,6 @@ import (
 	useradapter "saas/internal/user/adapters"
 	userdomain "saas/internal/user/domain"
 	userService "saas/internal/user/service"
-	"strconv"
 	"strings"
 
 	"github.com/casbin/casbin/v2"
@@ -135,9 +134,9 @@ func CasbinValited() gin.HandlerFunc {
 		act := strings.ToLower(ctx.Request.Method)
 
 		// 将 tenantID 转换为字符串（确保与策略类型匹配）
-		tenantIDStr := strconv.FormatInt(tenantID, 10)
+		// tenantIDStr := strconv.FormatInt(tenantID, 10)
 
-		ok, err := enforcer.Enforce(role.Name, tenantIDStr, obj, act)
+		ok, err := enforcer.Enforce(role.Name, obj, act)
 		if err != nil {
 			response.Error(ctx, codes.ErrPermissionDenied)
 			ctx.Abort()

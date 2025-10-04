@@ -1,5 +1,13 @@
 basePath: /api
 definitions:
+  domain.InviteTokenKind:
+    enum:
+    - public
+    - secret
+    type: string
+    x-enum-varnames:
+    - publicWay
+    - secretWay
   domain.VerifyWay:
     enum:
     - image:click
@@ -72,6 +80,30 @@ definitions:
     - prefix
     - title
     type: object
+  handler.EntryRequestBody:
+    properties:
+      email:
+        type: string
+      token:
+        type: string
+      token_kind:
+        allOf:
+        - $ref: '#/definitions/domain.InviteTokenKind'
+        enum:
+        - public
+        - secret
+    required:
+    - email
+    - token
+    - token_kind
+    type: object
+  handler.GenInviteTokenRequestBody:
+    properties:
+      expire_second:
+        type: integer
+    required:
+    - expire_second
+    type: object
   handler.GithubAuthRequest:
     properties:
       code:
@@ -101,16 +133,17 @@ definitions:
       url:
         type: string
     type: object
-  handler.InviteRequest:
+  handler.InviteRequestBody:
     properties:
-      tenantID:
+      emails:
+        items:
+          type: string
+        type: array
+      expire_second:
         type: integer
-      way:
-        description: 1.生成公共令牌 2.生成指定成员令牌(基于邮箱)
-        type: string
     required:
-    - tenantID
-    - way
+    - emails
+    - expire_second
     type: object
   handler.PlanListResponse:
     properties:
@@ -1218,6 +1251,159 @@ paths:
     put:
       consumes:
       - application/json
+      description: 根据ID更新 Tenant 信息
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新 Tenant 请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/saas_internal_tenant_handler.UpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功更新 Tenant
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.TenantResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 更新 Tenant
+      tags:
+      - tenant
+  /v1/tenant/{id}/gen_invite_token:
+    post:
+      consumes:
+      - application/json
+      description: 生成邀请令牌
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 生成邀请令牌 Tenant 请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.GenInviteTokenRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 生成邀请令牌
+      tags:
+      - tenant
+  /v1/tenant/{id}/invite:
+    post:
+      consumes:
+      - application/json
+      description: 邀请指定人员,通过邮箱通知
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 邀请参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.InviteRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 邀请指定人员,通过邮箱通知
+      tags:
+      - tenant
+  /v1/tenant/entry:
+    get:
+      consumes:
+      - application/json
+      description: 加入指定租户 并分配指定角色
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 加入租户请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.EntryRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 加入租户
+      tags:
+      - tenant
+  /v1/tenant/upgrade/{id}:
+    put:
+      consumes:
+      - application/json
       description: 升级租户计划
       parameters:
       - description: Tenant ID
@@ -1254,48 +1440,6 @@ paths:
       security:
       - BearerAuth: []
       summary: 升级租户
-      tags:
-      - tenant
-  /v1/tenant/{id}/{user_id}:
-    post:
-      consumes:
-      - application/json
-      description: 生成邀请令牌,以不同的方式去邀请成员
-      parameters:
-      - description: Tenant ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 邀请 Tenant 请求
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/handler.InviteRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 请求成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.TenantResponse'
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 生成邀请令牌
       tags:
       - tenant
   /v1/user/auth:

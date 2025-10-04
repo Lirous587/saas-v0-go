@@ -5,14 +5,10 @@ package orm
 
 var TableNames = struct {
 	Apis           string
-	Buttons        string
 	CasbinRule     string
 	ImgCategories  string
 	Imgs           string
-	Menus          string
 	Plans          string
-	RoleButton     string
-	RoleMenu       string
 	Roles          string
 	TenantPlan     string
 	TenantUserRole string
@@ -20,14 +16,10 @@ var TableNames = struct {
 	Users          string
 }{
 	Apis:           "apis",
-	Buttons:        "buttons",
 	CasbinRule:     "casbin_rule",
 	ImgCategories:  "img_categories",
 	Imgs:           "imgs",
-	Menus:          "menus",
 	Plans:          "plans",
-	RoleButton:     "role_button",
-	RoleMenu:       "role_menu",
 	Roles:          "roles",
 	TenantPlan:     "tenant_plan",
 	TenantUserRole: "tenant_user_role",

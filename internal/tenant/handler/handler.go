@@ -145,23 +145,6 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 	response.Success(ctx, domainTenantToResponse(data))
 }
 
-// Upgrade godoc
-// @Summary      升级租户
-// @Description  升级租户计划
-// @Tags         tenant
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        id   path int true "Tenant ID"
-// @Param        request body handler.UpgradeRequestBody true "升级 Tenant 请求"
-// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "成功升级 Tenant"
-// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
-// @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/tenant/{id} [put]
-func (h *HttpHandler) Upgrade(ctx *gin.Context) {
-
-}
-
 // Delete godoc
 // @Summary      删除 Tenant
 // @Description  根据ID删除 Tenant
@@ -223,19 +206,121 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 	response.Success(ctx, domainTenantListToResponse(data))
 }
 
-// GenInviteToken godoc
-// @Summary      生成邀请令牌
-// @Description  生成邀请令牌,以不同的方式去邀请成员
+// Upgrade godoc
+// @Summary      升级租户
+// @Description  升级租户计划
 // @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
 // @Param        id   path int true "Tenant ID"
-// @Param        request body handler.InviteRequest true "邀请 Tenant 请求"
-// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "请求成功"
+// @Param        request body handler.UpgradeRequestBody true "升级 Tenant 请求"
+// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "成功升级 Tenant"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/tenant/{id}/{user_id} [post]
-func (h *HttpHandler) GenInviteToken(ctx *gin.Context) {
+// @Router       /v1/tenant/upgrade/{id} [put]
+func (h *HttpHandler) Upgrade(ctx *gin.Context) {
 
+}
+
+// GenInviteToken godoc
+// @Summary      生成邀请令牌
+// @Description  生成邀请令牌
+// @Tags         tenant
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path int true "Tenant ID"
+// @Param        request body handler.GenInviteTokenRequestBody true "生成邀请令牌 Tenant 请求"
+// @Success      200  {object}  response.successResponse "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/tenant/{id}/gen_invite_token [post]
+func (h *HttpHandler) GenInviteToken(ctx *gin.Context) {
+	req := new(GenInviteTokenRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	token, err := h.service.GenInviteToken(&domain.GenInviteTokenPayload{
+		TenantID:     req.TenantID,
+		ExpireSecond: req.ExpireSecond,
+	})
+
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx, token)
+}
+
+// Invite godoc
+// @Summary      邀请指定人员,通过邮箱通知
+// @Description  邀请指定人员,通过邮箱通知
+// @Tags         tenant
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path int true "Tenant ID"
+// @Param        request body handler.InviteRequestBody true  "邀请参数"
+// @Success      200  {object}  response.successResponse "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/tenant/{id}/invite [post]
+func (h *HttpHandler) Invite(ctx *gin.Context) {
+	req := new(InviteRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	err := h.service.Invite(&domain.InvitePayload{
+		TenantID:     req.TenantID,
+		ExpireSecond: req.ExpireSecond,
+		Emails:       req.Emails,
+	})
+
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx)
+}
+
+// Enter godoc
+// @Summary      加入租户
+// @Description  加入指定租户 并分配指定角色
+// @Tags         tenant
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path int true "Tenant ID"
+// @Param        request body handler.EntryRequestBody true "加入租户请求参数"
+// @Success      200  {object}  response.successResponse "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/tenant/entry [get]
+func (h *HttpHandler) Enter(ctx *gin.Context) {
+	req := new(EntryRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	err := h.service.Enter(&domain.EnterPayload{
+		TenantID:  req.TenantID,
+		TokenKind: req.TokenKind,
+		Token:     req.Token,
+		Email:     req.Email,
+	})
+
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx)
 }

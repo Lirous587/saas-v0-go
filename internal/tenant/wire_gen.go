@@ -8,6 +8,7 @@ package tenant
 
 import (
 	"github.com/gin-gonic/gin"
+	"saas/internal/common/email"
 	adapters2 "saas/internal/plan/adapters"
 	"saas/internal/plan/service"
 	adapters3 "saas/internal/role/adapters"
@@ -15,19 +16,25 @@ import (
 	"saas/internal/tenant/adapters"
 	"saas/internal/tenant/handler"
 	service3 "saas/internal/tenant/service"
+	"saas/internal/tenant/templates"
+	adapters4 "saas/internal/user/adapters"
 )
 
 // Injectors from wire.go:
 
 func InitV1(r *gin.RouterGroup) func() {
 	tenantRepository := adapters.NewTenantPSQLRepository()
+	tenantCache := adapters.NewTenantRedisCache()
+	v := templates.LoadTenantTemplates()
+	mailer := email.NewMailer(v)
 	planRepository := adapters2.NewPlanPSQLRepository()
 	planService := service.NewPlanService(planRepository)
 	roleRepository := adapters3.NewRolePSQLRepository()
 	roleCache := adapters3.NewRoleRedisCache()
 	roleService := service2.NewRoleService(roleRepository, roleCache)
-	tenantService := service3.NewTenantService(tenantRepository, planService, roleService)
+	userRepository := adapters4.NewUserPSQLRepository()
+	tenantService := service3.NewTenantService(tenantRepository, tenantCache, mailer, planService, roleService, userRepository)
 	httpHandler := handler.NewHttpHandler(tenantService)
-	v := RegisterV1(r, httpHandler)
-	return v
+	v2 := RegisterV1(r, httpHandler)
+	return v2
 }

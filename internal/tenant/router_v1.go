@@ -11,7 +11,8 @@ import (
 func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 	g := r.Group("/v1/tenant")
 	{
-		//g.GET("", handler.List)
+		// 因为要使用url来实现 故此只能用get
+		g.GET("/entry", handler.Enter)
 	}
 
 	protect := g.Use(auth.JWTValidate())
@@ -20,7 +21,8 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 		protect.POST("", handler.Create)
 		protect.GET("/:id", server.SetTenantID("id"), auth.CasbinValited(), handler.Read)
 		protect.POST("/:id/gen_invite_token", server.SetTenantID("id"), auth.CasbinValited(), handler.GenInviteToken)
-		//protect.DELETE("/:id", handler.Delete)
+		protect.POST("/:id/invite", server.SetTenantID("id"), auth.CasbinValited(), handler.Invite)
+
 		//protect.PUT("/:id", handler.Update)
 	}
 	return nil
