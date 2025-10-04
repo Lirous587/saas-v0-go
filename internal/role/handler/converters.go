@@ -11,7 +11,6 @@ func domainRoleToResponse(role *domain.Role) *RoleResponse {
 
 	return &RoleResponse{
 		ID:          role.ID,
-		TenantID:    role.TenantID,
 		Name:        role.Name,
 		Description: role.Description,
 	}

@@ -54,7 +54,6 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 	}
 
 	data, err := h.service.Create(&domain.Role{
-		TenantID:    req.TenantID,
 		Description: req.Description,
 	})
 
@@ -152,9 +151,7 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.service.List(&domain.RoleQuery{
-		TenantID: req.TenantID,
-	})
+	data, err := h.service.List()
 
 	if err != nil {
 		response.Error(ctx, err)

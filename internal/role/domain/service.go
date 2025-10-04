@@ -6,7 +6,7 @@ type RoleService interface {
 	Create(role *Role) (*Role, error)
 	Update(role *Role) (*Role, error)
 	Delete(id int64) error
-	List(query *RoleQuery) (*RoleList, error)
+	List() (*RoleList, error)
 
 	// GetUserRoleInTenant 获取指定用户在指定租户下的角色
 	GetUserRoleInTenant(userID, tenantID int64) (*Role, error)

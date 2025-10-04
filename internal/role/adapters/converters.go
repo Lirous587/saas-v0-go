@@ -18,12 +18,6 @@ func domainRoleToORM(role *domain.Role) *orm.Role {
 		IsDefault: role.IsDefault,
 	}
 
-	// 处理null项
-	if role.TenantID != 0 {
-		ormRole.TenantID = null.Int64From(role.TenantID)
-		ormRole.TenantID.Valid = true
-	}
-
 	if role.Description != "" {
 		ormRole.Description = null.StringFrom(role.Description)
 		ormRole.Description.Valid = true
@@ -46,9 +40,6 @@ func ormRoleToDomain(ormRole *orm.Role) *domain.Role {
 	}
 
 	// 处理null项
-	if ormRole.TenantID.Valid {
-		role.TenantID = ormRole.TenantID.Int64
-	}
 	if ormRole.Description.Valid {
 		role.Description = ormRole.Description.String
 	}

@@ -39,8 +39,8 @@ func (s *service) Delete(id int64) error {
 	return s.repo.Delete(id)
 }
 
-func (s *service) List(query *domain.RoleQuery) (*domain.RoleList, error) {
-	return s.repo.List(query)
+func (s *service) List() (*domain.RoleList, error) {
+	return s.repo.List()
 }
 
 func (s *service) GetUserRoleInTenant(userID, tenantID int64) (*domain.Role, error) {

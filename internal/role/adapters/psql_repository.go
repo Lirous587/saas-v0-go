@@ -69,12 +69,9 @@ func (repo *RolePSQLRepository) Delete(id int64) error {
 	return nil
 }
 
-func (repo *RolePSQLRepository) List(query *domain.RoleQuery) (*domain.RoleList, error) {
-	// 1.查询基础角色以及该domain下的自定义角色
+func (repo *RolePSQLRepository) List() (*domain.RoleList, error) {
 	roles, err := orm.Roles(
-		qm.Where(fmt.Sprintf("%s IS NULL", orm.RoleColumns.TenantID)),
-		qm.Or(fmt.Sprintf("%s = ?", orm.RoleColumns.TenantID), query.TenantID),
-		qm.OrderBy(fmt.Sprintf("%s NULLS FIRST, %s ASC", orm.RoleColumns.TenantID, orm.RoleColumns.Name)),
+		qm.OrderBy(fmt.Sprintf("%s ASC", orm.RoleColumns.ID)),
 	).AllG()
 	if err != nil {
 		return nil, err

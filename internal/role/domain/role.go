@@ -2,14 +2,9 @@
 
 type Role struct {
 	ID          int64
-	TenantID    int64
 	Name        string
 	Description string
 	IsDefault   bool
-}
-
-type RoleQuery struct {
-	TenantID int64
 }
 
 type RoleList struct {
