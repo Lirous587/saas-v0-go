@@ -153,7 +153,7 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        id   path int true "Tenant ID"
-// @Param        request body handler.UpgradeRequest true "升级 Tenant 请求"
+// @Param        request body handler.UpgradeRequestBody true "升级 Tenant 请求"
 // @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "成功升级 Tenant"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -221,4 +221,21 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 	}
 
 	response.Success(ctx, domainTenantListToResponse(data))
+}
+
+// GenInviteToken godoc
+// @Summary      生成邀请令牌
+// @Description  生成邀请令牌,以不同的方式去邀请成员
+// @Tags         tenant
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path int true "Tenant ID"
+// @Param        request body handler.InviteRequest true "邀请 Tenant 请求"
+// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/tenant/{id}/{user_id} [post]
+func (h *HttpHandler) GenInviteToken(ctx *gin.Context) {
+
 }

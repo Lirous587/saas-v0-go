@@ -101,27 +101,16 @@ definitions:
       url:
         type: string
     type: object
-  handler.MockListResponse:
+  handler.InviteRequest:
     properties:
-      list:
-        items:
-          $ref: '#/definitions/handler.MockResponse'
-        type: array
-      total:
+      tenantID:
         type: integer
-    type: object
-  handler.MockResponse:
-    properties:
-      created_at:
-        type: integer
-      description:
+      way:
+        description: 1.生成公共令牌 2.生成指定成员令牌(基于邮箱)
         type: string
-      id:
-        type: integer
-      title:
-        type: string
-      updated_at:
-        type: integer
+    required:
+    - tenantID
+    - way
     type: object
   handler.PlanListResponse:
     properties:
@@ -201,15 +190,12 @@ definitions:
         maxLength: 10
         type: string
     type: object
-  handler.UpgradeRequest:
+  handler.UpgradeRequestBody:
     properties:
       plan_id:
         type: integer
-      tenantID:
-        type: integer
     required:
     - plan_id
-    - tenantID
     type: object
   handler.UserResponse:
     properties:
@@ -261,28 +247,6 @@ definitions:
       message:
         example: 请求成功
         type: string
-    type: object
-  saas_internal_mock_handler.CreateRequest:
-    properties:
-      description:
-        maxLength: 60
-        type: string
-      title:
-        maxLength: 30
-        type: string
-    required:
-    - title
-    type: object
-  saas_internal_mock_handler.UpdateRequest:
-    properties:
-      description:
-        maxLength: 60
-        type: string
-      title:
-        maxLength: 30
-        type: string
-    required:
-    - title
     type: object
   saas_internal_plan_handler.CreateRequest:
     properties:
@@ -791,190 +755,6 @@ paths:
       summary: 上传图片
       tags:
       - img
-  /v1/mock:
-    get:
-      consumes:
-      - application/json
-      description: 根据查询参数获取Mock列表，返回当前页数据和total数量
-      parameters:
-      - description: 关键词搜索
-        in: query
-        name: keyword
-        type: string
-      - default: 1
-        description: 页码
-        in: query
-        name: page
-        type: integer
-      - default: 10
-        description: 每页数量
-        in: query
-        name: page_size
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Mock列表
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.MockListResponse'
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      summary: 获取 Mock 列表
-      tags:
-      - mock
-    post:
-      consumes:
-      - application/json
-      description: 创建新的 Mock
-      parameters:
-      - description: 创建 Mock 请求
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/saas_internal_mock_handler.CreateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功创建 Mock
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.MockResponse'
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 创建 Mock
-      tags:
-      - mock
-  /v1/mock/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: 根据ID删除 Mock
-      parameters:
-      - description: Mock ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功删除 Mock
-          schema:
-            $ref: '#/definitions/response.successResponse'
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 删除 Mock
-      tags:
-      - mock
-    get:
-      consumes:
-      - application/json
-      description: 读取单条 Mock
-      parameters:
-      - description: Mock ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功查询 Mock
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.MockResponse'
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      summary: 读取单条 Mock
-      tags:
-      - mock
-    put:
-      consumes:
-      - application/json
-      description: 根据ID更新 Mock 信息
-      parameters:
-      - description: Mock ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 更新 Mock 请求
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/saas_internal_mock_handler.UpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功更新 Mock
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.MockResponse'
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 更新 Mock
-      tags:
-      - mock
   /v1/plan:
     get:
       consumes:
@@ -1450,7 +1230,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.UpgradeRequest'
+          $ref: '#/definitions/handler.UpgradeRequestBody'
       produces:
       - application/json
       responses:
@@ -1474,6 +1254,48 @@ paths:
       security:
       - BearerAuth: []
       summary: 升级租户
+      tags:
+      - tenant
+  /v1/tenant/{id}/{user_id}:
+    post:
+      consumes:
+      - application/json
+      description: 生成邀请令牌,以不同的方式去邀请成员
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 邀请 Tenant 请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.InviteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.TenantResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 生成邀请令牌
       tags:
       - tenant
   /v1/user/auth:

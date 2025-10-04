@@ -16,8 +16,10 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 
 	protect := g.Use(auth.JWTValidate())
 	{
+		// todo 目前未接入交易中间件
 		protect.POST("", handler.Create)
 		protect.GET("/:id", server.SetTenantID("id"), auth.CasbinValited(), handler.Read)
+		protect.POST("/:id/gen_invite_token", server.SetTenantID("id"), auth.CasbinValited(), handler.GenInviteToken)
 		//protect.DELETE("/:id", handler.Delete)
 		//protect.PUT("/:id", handler.Update)
 	}

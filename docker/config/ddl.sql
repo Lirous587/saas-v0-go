@@ -43,6 +43,8 @@ CREATE TABLE public.plans
     id          bigserial PRIMARY KEY,
     name        varchar(50)    NOT NULL UNIQUE,
     price       numeric(12, 2) NOT NULL DEFAULT 0,
+    tenant_count int2 NOT NULL,
+    number_count int4 NOT NULL,
     description text NOT NULL,
     created_at  timestamptz(6) NOT NULL DEFAULT now(),
     updated_at  timestamptz(6) NOT NULL DEFAULT now()
@@ -92,21 +94,21 @@ CREATE INDEX IF NOT EXISTS idx_roles_tenant_id ON public.roles (tenant_id);
 
 
 -- 菜单表
-CREATE TABLE public.menus
-(
-    id        bigserial PRIMARY KEY,
-    tenant_id bigint      NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
-    name      varchar(50) NOT NULL,
-    path      varchar(100),
-    parent_id bigint,
-    sort      int,
-    UNIQUE (tenant_id, name)
-);
--- 按 tenant 查询、按 parent 查子节点并按 sort 排序、path 模糊搜索
-CREATE INDEX IF NOT EXISTS idx_menus_tenant_id ON public.menus (tenant_id);
-CREATE INDEX IF NOT EXISTS idx_menus_parent_id ON public.menus (parent_id);
-CREATE INDEX IF NOT EXISTS idx_menus_tenant_parent_sort ON public.menus (tenant_id, parent_id, sort);
-CREATE INDEX IF NOT EXISTS idx_menus_path_trgm ON public.menus USING gin (path gin_trgm_ops);
+-- CREATE TABLE public.menus
+-- (
+--     id        bigserial PRIMARY KEY,
+--     tenant_id bigint      NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+--     name      varchar(50) NOT NULL,
+--     path      varchar(100),
+--     parent_id bigint,
+--     sort      int,
+--     UNIQUE (tenant_id, name)
+-- );
+-- -- 按 tenant 查询、按 parent 查子节点并按 sort 排序、path 模糊搜索
+-- CREATE INDEX IF NOT EXISTS idx_menus_tenant_id ON public.menus (tenant_id);
+-- CREATE INDEX IF NOT EXISTS idx_menus_parent_id ON public.menus (parent_id);
+-- CREATE INDEX IF NOT EXISTS idx_menus_tenant_parent_sort ON public.menus (tenant_id, parent_id, sort);
+-- CREATE INDEX IF NOT EXISTS idx_menus_path_trgm ON public.menus USING gin (path gin_trgm_ops);
 
 
 -- -- 角色菜单关联

@@ -29,6 +29,8 @@ type Plan struct {
 	Description string          `boil:"description" json:"description" toml:"description" yaml:"description"`
 	CreatedAt   time.Time       `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt   time.Time       `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	TenantCount int16           `boil:"tenant_count" json:"tenant_count" toml:"tenant_count" yaml:"tenant_count"`
+	NumberCount int             `boil:"number_count" json:"number_count" toml:"number_count" yaml:"number_count"`
 
 	R *planR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L planL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -41,6 +43,8 @@ var PlanColumns = struct {
 	Description string
 	CreatedAt   string
 	UpdatedAt   string
+	TenantCount string
+	NumberCount string
 }{
 	ID:          "id",
 	Name:        "name",
@@ -48,6 +52,8 @@ var PlanColumns = struct {
 	Description: "description",
 	CreatedAt:   "created_at",
 	UpdatedAt:   "updated_at",
+	TenantCount: "tenant_count",
+	NumberCount: "number_count",
 }
 
 var PlanTableColumns = struct {
@@ -57,6 +63,8 @@ var PlanTableColumns = struct {
 	Description string
 	CreatedAt   string
 	UpdatedAt   string
+	TenantCount string
+	NumberCount string
 }{
 	ID:          "plans.id",
 	Name:        "plans.name",
@@ -64,6 +72,8 @@ var PlanTableColumns = struct {
 	Description: "plans.description",
 	CreatedAt:   "plans.created_at",
 	UpdatedAt:   "plans.updated_at",
+	TenantCount: "plans.tenant_count",
+	NumberCount: "plans.number_count",
 }
 
 // Generated where
@@ -89,6 +99,29 @@ func (w whereHelperdecimal_Decimal) GTE(x decimal.Decimal) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelperint16 struct{ field string }
+
+func (w whereHelperint16) EQ(x int16) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint16) NEQ(x int16) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint16) LT(x int16) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint16) LTE(x int16) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint16) GT(x int16) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint16) GTE(x int16) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperint16) IN(slice []int16) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperint16) NIN(slice []int16) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
 var PlanWhere = struct {
 	ID          whereHelperint64
 	Name        whereHelperstring
@@ -96,6 +129,8 @@ var PlanWhere = struct {
 	Description whereHelperstring
 	CreatedAt   whereHelpertime_Time
 	UpdatedAt   whereHelpertime_Time
+	TenantCount whereHelperint16
+	NumberCount whereHelperint
 }{
 	ID:          whereHelperint64{field: "\"plans\".\"id\""},
 	Name:        whereHelperstring{field: "\"plans\".\"name\""},
@@ -103,6 +138,8 @@ var PlanWhere = struct {
 	Description: whereHelperstring{field: "\"plans\".\"description\""},
 	CreatedAt:   whereHelpertime_Time{field: "\"plans\".\"created_at\""},
 	UpdatedAt:   whereHelpertime_Time{field: "\"plans\".\"updated_at\""},
+	TenantCount: whereHelperint16{field: "\"plans\".\"tenant_count\""},
+	NumberCount: whereHelperint{field: "\"plans\".\"number_count\""},
 }
 
 // PlanRels is where relationship names are stored.
@@ -142,8 +179,8 @@ func (r *planR) GetTenantPlans() TenantPlanSlice {
 type planL struct{}
 
 var (
-	planAllColumns            = []string{"id", "name", "price", "description", "created_at", "updated_at"}
-	planColumnsWithoutDefault = []string{"name", "description"}
+	planAllColumns            = []string{"id", "name", "price", "description", "created_at", "updated_at", "tenant_count", "number_count"}
+	planColumnsWithoutDefault = []string{"name", "description", "tenant_count", "number_count"}
 	planColumnsWithDefault    = []string{"id", "price", "created_at", "updated_at"}
 	planPrimaryKeyColumns     = []string{"id"}
 	planGeneratedColumns      = []string{}
