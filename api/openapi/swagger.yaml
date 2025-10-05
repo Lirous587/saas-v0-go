@@ -145,6 +145,16 @@ definitions:
     - emails
     - expire_second
     type: object
+  handler.ListUserWithRoleQueryRequestBody:
+    properties:
+      page:
+        minimum: 1
+        type: integer
+      page_size:
+        maximum: 20
+        minimum: 5
+        type: integer
+    type: object
   handler.PlanListResponse:
     properties:
       list:
@@ -1180,6 +1190,43 @@ paths:
       security:
       - BearerAuth: []
       summary: 新建租户
+      tags:
+      - tenant
+  /v1/tenant/:id/users:
+    get:
+      consumes:
+      - application/json
+      description: 获取租户下的用户的非敏感信息
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ListUserWithRoleQueryRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 获取租户下的用户
       tags:
       - tenant
   /v1/tenant/{id}:

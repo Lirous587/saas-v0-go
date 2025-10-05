@@ -10,4 +10,7 @@ type TenantService interface {
 	GenInviteToken(payload *GenInviteTokenPayload) (string, error)
 	Invite(payload *InvitePayload) error
 	Enter(paylod *EnterPayload) error
+
+	CheckRoleValidity(roleID int64) error
+	ListUsersWithRole(query *UserWithRoleQuery) (*UserWithRoleList, error)
 }

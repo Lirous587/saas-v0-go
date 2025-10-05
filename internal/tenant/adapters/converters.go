@@ -89,3 +89,29 @@ func ormPlanToDomain(ormPlan *orm.Plan) *domain.Plan {
 
 	return plan
 }
+
+func ormTenantUserRolesToDomain(tenantUserRoles []*orm.TenantUserRole) []*domain.UserWithRole {
+	if len(tenantUserRoles) == 0 {
+		return nil
+	}
+
+	var list []*domain.UserWithRole
+	for _, tur := range tenantUserRoles {
+		if tur.R == nil || tur.R.User == nil || tur.R.Role == nil {
+			continue // 跳过无效关联
+		}
+		userWithRole := &domain.UserWithRole{
+			User: domain.User{
+				ID:       tur.R.User.ID,
+				Email:    tur.R.User.Email,
+				Nickname: tur.R.User.Nickname,
+			},
+			Role: domain.Role{
+				ID:   tur.R.Role.ID,
+				Name: tur.R.Role.Name,
+			},
+		}
+		list = append(list, userWithRole)
+	}
+	return list
+}

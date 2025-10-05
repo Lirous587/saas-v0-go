@@ -1352,6 +1352,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/tenant/:id/users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取租户下的用户的非敏感信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tenant"
+                ],
+                "summary": "获取租户下的用户",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tenant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.ListUserWithRoleQueryRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/tenant/entry": {
             "get": {
                 "security": [
@@ -2194,6 +2252,20 @@ const docTemplate = `{
                 },
                 "expire_second": {
                     "type": "integer"
+                }
+            }
+        },
+        "handler.ListUserWithRoleQueryRequestBody": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "page_size": {
+                    "type": "integer",
+                    "maximum": 20,
+                    "minimum": 5
                 }
             }
         },

@@ -156,3 +156,55 @@ func (repo *TenantPSQLRepository) AssignTenantUserRole(tenantID, userID, roleID 
 
 	return ormUserTenant.InsertG(boil.Infer())
 }
+
+func (repo *TenantPSQLRepository) ListUsersWithRole(query *domain.UserWithRoleQuery) (*domain.UserWithRoleList, error) {
+	var whereMods []qm.QueryMod
+
+	// 同租户条件
+	whereMods = append(whereMods, qm.Where(fmt.Sprintf("%s = ?", orm.TenantUserRoleColumns.TenantID), query.TenantID))
+
+	// 高级查询：用户nickname（模糊匹配）
+	if query.Nickname != "" {
+		whereMods = append(whereMods, qm.InnerJoin(fmt.Sprintf("%s ON %s.%s = %s.%s", orm.TableNames.Users, orm.TableNames.TenantUserRole, orm.TenantUserRoleColumns.UserID, orm.TableNames.Users, orm.UserColumns.ID)))
+		whereMods = append(whereMods, qm.Where(fmt.Sprintf("%s LIKE ?", orm.UserColumns.Nickname), "%"+query.Nickname+"%"))
+	}
+
+	// 高级查询：角色ID（精确匹配）
+	if query.RoleID != 0 {
+		whereMods = append(whereMods, qm.InnerJoin(fmt.Sprintf("%s ON %s.%s = %s.%s", orm.TableNames.Roles, orm.TableNames.TenantUserRole, orm.TenantUserRoleColumns.RoleID, orm.TableNames.Roles, orm.RoleColumns.ID)))
+		whereMods = append(whereMods, qm.Where(fmt.Sprintf("%s.%s = ?", orm.TableNames.Roles, orm.RoleColumns.ID), query.RoleID))
+	}
+
+	// 1.计算total
+	total, err := orm.TenantUserRoles(whereMods...).CountG()
+	if err != nil {
+		return nil, err
+
+	}
+	// 2.计算offset
+	offset, err := utils.ComputeOffset(query.Page, query.PageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	listMods := append(
+		whereMods,
+		qm.Offset(offset),
+		qm.Limit(query.PageSize),
+		qm.Load(orm.TenantUserRoleRels.User), //加载关联的user
+		qm.Load(orm.TenantUserRoleRels.Role), //加载关联的role
+	)
+
+	// 3.查询数据
+	tenantUserRoles, err := orm.TenantUserRoles(
+		listMods...,
+	).AllG()
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.UserWithRoleList{
+		Total: total,
+		List:  ormTenantUserRolesToDomain(tenantUserRoles),
+	}, nil
+}

@@ -55,3 +55,33 @@ type EnterPayload struct {
 	Token     string
 	Email     string
 }
+
+type UserWithRoleQuery struct {
+	TenantID int64
+	RoleID   int64
+	Nickname string
+
+	Page     int
+	PageSize int
+}
+
+type User struct {
+	ID       int64
+	Email    string
+	Nickname string
+}
+
+type Role struct {
+	ID   int64
+	Name string
+}
+
+type UserWithRole struct {
+	User User
+	Role Role
+}
+
+type UserWithRoleList struct {
+	Total int64
+	List  []*UserWithRole
+}

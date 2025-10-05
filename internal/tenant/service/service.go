@@ -70,8 +70,8 @@ func (s *service) Create(tenant *domain.Tenant, planID int64, userID int64) (*do
 		return nil, errors.WithMessage(err, "向tenant_plan插入数据失败")
 	}
 
-	// 3.为此租户设置superadmin
-	superadmin := s.roleService.NewRole().GetDefultSuperadmin()
+	// 3.为此租户设置tenantadmin
+	superadmin := s.roleService.NewRole().GetTenantadmin()
 
 	if err = s.repo.AssignTenantUserRoleTx(tx, tenantID, userID, superadmin.ID); err != nil {
 		return nil, errors.WithMessage(err, "为此租户设置superadmin失败")
@@ -204,10 +204,18 @@ func (s *service) enterHelp(tenantID int64, email string) error {
 	}
 
 	// 3.将用户加入到租户
-	viewer := s.roleService.NewRole().GetDefaultViewer()
+	viewer := s.roleService.NewRole().GetViewer()
 	if err := s.repo.AssignTenantUserRole(tenantID, resUser.ID, viewer.ID); err != nil {
 		return errors.WithStack(err)
 	}
 
 	return nil
+}
+
+func (s *service) ListUsersWithRole(query *domain.UserWithRoleQuery) (*domain.UserWithRoleList, error) {
+	return s.repo.ListUsersWithRole(query)
+}
+
+func (s *service) CheckRoleValidity(roleID int64) error {
+	return s.roleService.NewRole().CheckRoleID(roleID)
 }

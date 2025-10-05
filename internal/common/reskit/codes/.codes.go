@@ -21,4 +21,8 @@ const (
 	// 租户模块(1600-1799)
 	TenantErrorStart = 1600
 	TenantErrorEnd   = 1799
+
+	// 角色模块(1800-1999)
+	RoleErrorStart = 1800
+	RoleErrorEnd   = 1999
 )

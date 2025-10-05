@@ -17,13 +17,19 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 
 	protect := g.Use(auth.JWTValidate())
 	{
-		// todo 目前未接入交易中间件
-		protect.POST("", handler.Create)
+		// 此租户信息
 		protect.GET("/:id", server.SetTenantID("id"), auth.CasbinValited(), handler.Read)
+		// todo 创建租户 目前未接入交易中间件
+		protect.POST("", handler.Create)
+		// protect.PUT("/:id", handler.Update)
 		protect.POST("/:id/gen_invite_token", server.SetTenantID("id"), auth.CasbinValited(), handler.GenInviteToken)
 		protect.POST("/:id/invite", server.SetTenantID("id"), auth.CasbinValited(), handler.Invite)
 
-		//protect.PUT("/:id", handler.Update)
+		// 租户下的用户信息及其角色
+		protect.GET("/:id/users", server.SetTenantID("id"), auth.CasbinValited(), handler.GetUserWithRole)
+
+		// todo 分配角色
+		// protect.GET("/:id/:user_id", server.SetTenantID("id"), auth.CasbinValited(), handler.xx)
 	}
 	return nil
 }
