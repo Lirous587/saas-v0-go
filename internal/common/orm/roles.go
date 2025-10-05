@@ -26,7 +26,6 @@ type Role struct {
 	ID          int64       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Name        string      `boil:"name" json:"name" toml:"name" yaml:"name"`
 	Description null.String `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
-	IsDefault   bool        `boil:"is_default" json:"is_default" toml:"is_default" yaml:"is_default"`
 
 	R *roleR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L roleL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -36,47 +35,32 @@ var RoleColumns = struct {
 	ID          string
 	Name        string
 	Description string
-	IsDefault   string
 }{
 	ID:          "id",
 	Name:        "name",
 	Description: "description",
-	IsDefault:   "is_default",
 }
 
 var RoleTableColumns = struct {
 	ID          string
 	Name        string
 	Description string
-	IsDefault   string
 }{
 	ID:          "roles.id",
 	Name:        "roles.name",
 	Description: "roles.description",
-	IsDefault:   "roles.is_default",
 }
 
 // Generated where
-
-type whereHelperbool struct{ field string }
-
-func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 var RoleWhere = struct {
 	ID          whereHelperint64
 	Name        whereHelperstring
 	Description whereHelpernull_String
-	IsDefault   whereHelperbool
 }{
 	ID:          whereHelperint64{field: "\"roles\".\"id\""},
 	Name:        whereHelperstring{field: "\"roles\".\"name\""},
 	Description: whereHelpernull_String{field: "\"roles\".\"description\""},
-	IsDefault:   whereHelperbool{field: "\"roles\".\"is_default\""},
 }
 
 // RoleRels is where relationship names are stored.
@@ -116,9 +100,9 @@ func (r *roleR) GetTenantUserRoles() TenantUserRoleSlice {
 type roleL struct{}
 
 var (
-	roleAllColumns            = []string{"id", "name", "description", "is_default"}
+	roleAllColumns            = []string{"id", "name", "description"}
 	roleColumnsWithoutDefault = []string{"name"}
-	roleColumnsWithDefault    = []string{"id", "description", "is_default"}
+	roleColumnsWithDefault    = []string{"id", "description"}
 	rolePrimaryKeyColumns     = []string{"id"}
 	roleGeneratedColumns      = []string{}
 )

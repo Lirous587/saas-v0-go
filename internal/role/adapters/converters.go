@@ -13,9 +13,8 @@ func domainRoleToORM(role *domain.Role) *orm.Role {
 
 	// 非null项
 	ormRole := &orm.Role{
-		ID:        role.ID,
-		Name:      role.Name,
-		IsDefault: role.IsDefault,
+		ID:   role.ID,
+		Name: role.Name,
 	}
 
 	if role.Description != "" {
@@ -34,9 +33,8 @@ func ormRoleToDomain(ormRole *orm.Role) *domain.Role {
 
 	// 非null项
 	role := &domain.Role{
-		ID:        ormRole.ID,
-		Name:      ormRole.Name,
-		IsDefault: ormRole.IsDefault,
+		ID:   ormRole.ID,
+		Name: ormRole.Name,
 	}
 
 	// 处理null项

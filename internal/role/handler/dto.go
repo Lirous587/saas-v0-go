@@ -12,7 +12,6 @@ type CreateRequest struct {
 	TenantID    int64  `json:"tenant_id"`
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description" binding:"max=60"`
-	IsDefault   bool   `json:"is_default"`
 }
 
 type UpdateRequest struct {
