@@ -530,7 +530,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "彻底删除回收站中的图片",
+                "description": "移除删除回收站中的图片",
                 "consumes": [
                     "application/json"
                 ],
@@ -540,7 +540,7 @@ const docTemplate = `{
                 "tags": [
                     "img"
                 ],
-                "summary": "清空回收站图片",
+                "summary": "移除回收站图片",
                 "parameters": [
                     {
                         "type": "integer",

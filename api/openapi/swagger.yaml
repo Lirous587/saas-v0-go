@@ -689,7 +689,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 彻底删除回收站中的图片
+      description: 移除删除回收站中的图片
       parameters:
       - description: 图片ID
         in: path
@@ -713,7 +713,7 @@ paths:
             $ref: '#/definitions/response.errorResponse'
       security:
       - BearerAuth: []
-      summary: 清空回收站图片
+      summary: 移除回收站图片
       tags:
       - img
     put:

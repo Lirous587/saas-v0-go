@@ -223,8 +223,8 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 }
 
 // ClearRecycleBin godoc
-// @Summary      清空回收站图片
-// @Description  彻底删除回收站中的图片
+// @Summary      移除回收站图片
+// @Description  移除删除回收站中的图片
 // @Tags         img
 // @Accept       json
 // @Produce      json
