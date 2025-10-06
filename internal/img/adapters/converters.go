@@ -159,7 +159,7 @@ func ormR2ConfigToDomian(ormR2Config *orm.TenantR2Config) *domain.R2Config {
 		AccountID:       ormR2Config.AccountID,
 		AccessKeyID:     ormR2Config.AccessKeyID,
 		PublicBucket:    ormR2Config.PublicBucket,
-		PublicURLPrefix: ormR2Config.PublicBucket,
+		PublicURLPrefix: ormR2Config.PublicURLPrefix,
 		DeleteBucket:    ormR2Config.DeleteBucket,
 	}
 

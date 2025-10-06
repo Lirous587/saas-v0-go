@@ -11,30 +11,30 @@ type ImgResponse struct {
 }
 
 type UploadRequest struct {
-	TenantID    domain.TenantID `uri:"tenant_id" binding:"required"`
+	TenantID    domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 	Path        string          `form:"path"`
 	Description string          `form:"description" binding:"max=60"`
 	CategoryID  int64           `form:"category_id"`
 }
 
 type DeleteRequest struct {
-	TenantID domain.TenantID `uri:"tenant_id" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 	ID       int64           `uri:"id" binding:"required"`
 	Hard     bool            `form:"hard,default=false"`
 }
 
 type ClearRecycleBinRequest struct {
-	TenantID domain.TenantID `uri:"tenant_id" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 	ID       int64           `uri:"id" binding:"required"`
 }
 
 type RestoreFromRecycleBinRequest struct {
-	TenantID domain.TenantID `uri:"tenant_id" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 	ID       int64           `uri:"id" binding:"required"`
 }
 
 type ListRequest struct {
-	TenantID   domain.TenantID `uri:"tenant_id" binding:"required"`
+	TenantID   domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 	KeyWord    string          `form:"keyword" binding:"max=20"`
 	CategoryID int64           `form:"category_id"`
 	Deleted    bool            `form:"deleted,default=false"`
@@ -55,23 +55,23 @@ type CategoryResponse struct {
 }
 
 type CreateCategoryRequest struct {
-	TenantID domain.TenantID `uri:"tenant_id" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 	Title    string          `json:"title" binding:"required,max=10"`
 	Prefix   string          `json:"prefix" binding:"required,max=20,slug"`
 }
 
 type UpdateCategoryRequest struct {
 	ID       int64           `uri:"id" binding:"required"`
-	TenantID domain.TenantID `uri:"tenant_id" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 	Title    string          `json:"title" binding:"max=10"`
 	Prefix   string          `json:"prefix" binding:"max=20"`
 }
 
 type DeleteCategoryRequest struct {
 	ID       int64           `uri:"id" binding:"required"`
-	TenantID domain.TenantID `uri:"tenant_id" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 }
 
 type ListCategoryRequest struct {
-	TenantID domain.TenantID `uri:"tenant_id" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 }

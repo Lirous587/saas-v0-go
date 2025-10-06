@@ -2141,16 +2141,12 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "prefix",
-                "tenantID",
                 "title"
             ],
             "properties": {
                 "prefix": {
                     "type": "string",
                     "maxLength": 20
-                },
-                "tenantID": {
-                    "type": "integer"
                 },
                 "title": {
                     "type": "string",
@@ -2372,8 +2368,7 @@ const docTemplate = `{
         "handler.UpdateCategoryRequest": {
             "type": "object",
             "required": [
-                "id",
-                "tenantID"
+                "id"
             ],
             "properties": {
                 "id": {
@@ -2382,9 +2377,6 @@ const docTemplate = `{
                 "prefix": {
                     "type": "string",
                     "maxLength": 20
-                },
-                "tenantID": {
-                    "type": "integer"
                 },
                 "title": {
                     "type": "string",

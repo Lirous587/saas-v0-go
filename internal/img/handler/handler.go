@@ -117,6 +117,10 @@ func (h *HttpHandler) Upload(ctx *gin.Context) {
 
 	var imgPath string
 
+	fmt.Println(req.Path)
+
+	fmt.Println(imgPath)
+
 	// 无path则生成path
 	if strings.TrimSpace(req.Path) != "" {
 		ext := filepath.Ext(req.Path)
@@ -129,22 +133,23 @@ func (h *HttpHandler) Upload(ctx *gin.Context) {
 		imgPath = generateImgPath(getExtByContentType(realType))
 	}
 
-	res, err := h.service.Upload(
-		file,
-		&domain.Img{
-			TenantID:    req.TenantID,
-			Path:        imgPath,
-			Description: req.Description,
-		},
-		req.CategoryID,
-	)
+	// res, err := h.service.Upload(
+	// 	file,
+	// 	&domain.Img{
+	// 		TenantID:    req.TenantID,
+	// 		Path:        imgPath,
+	// 		Description: req.Description,
+	// 	},
+	// 	req.CategoryID,
+	// )
 
 	if err != nil {
 		response.Error(ctx, err)
 		return
 	}
 
-	response.Success(ctx, domainImgToResponse(res))
+	response.Success(ctx)
+	// response.Success(ctx, domainImgToResponse(res))
 }
 
 // Delete godoc

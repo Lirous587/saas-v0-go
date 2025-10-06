@@ -73,14 +73,11 @@ definitions:
       prefix:
         maxLength: 20
         type: string
-      tenantID:
-        type: integer
       title:
         maxLength: 10
         type: string
     required:
     - prefix
-    - tenantID
     - title
     type: object
   handler.EntryRequestBody:
@@ -227,14 +224,11 @@ definitions:
       prefix:
         maxLength: 20
         type: string
-      tenantID:
-        type: integer
       title:
         maxLength: 10
         type: string
     required:
     - id
-    - tenantID
     type: object
   handler.UpgradeRequestBody:
     properties:

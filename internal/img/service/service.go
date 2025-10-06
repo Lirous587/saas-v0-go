@@ -29,6 +29,7 @@ type tenantR2Config struct {
 	accessKeyID     string
 	secretAccessKey string
 	publicBucket    bucket
+	publicURLPrefix string
 	deleteBucket    bucket
 	s3Client        *s3.Client
 	presignClient   *s3.PresignClient
@@ -119,6 +120,7 @@ func (s *service) loadTenantR2Config(tenantID domain.TenantID) (*tenantR2Config,
 		accessKeyID:     cfg.AccessKeyID,
 		secretAccessKey: decryptedSecret,
 		publicBucket:    bucket(cfg.PublicBucket),
+		publicURLPrefix: cfg.PublicURLPrefix,
 		deleteBucket:    bucket(cfg.DeleteBucket),
 		s3Client:        client,
 		presignClient:   presignClient,
@@ -230,6 +232,8 @@ func (s *service) Upload(src io.Reader, img *domain.Img, categoryID int64) (*dom
 		}
 	}
 
+	res.SetPublicPreURL(r2Config.publicURLPrefix)
+
 	return res, err
 }
 
@@ -332,11 +336,6 @@ func (s *service) ClearRecycleBin(tenantID domain.TenantID, id int64) error {
 const deletedPresignExpired = 1 * time.Minute
 
 func (s *service) List(query *domain.ImgQuery) (*domain.ImgList, error) {
-	// e, _ := s.ace256Encryptor.Encrypt("e27bb67562067dafedc8e4992dfa2200214fb761c9ed20fe8ad0fa094468c498")
-	// fmt.Println(e)
-
-	// return nil, nil
-
 	// 加载配置
 	r2Config, err := s.getTenantR2Config(query.TenantID)
 	if err != nil {
@@ -366,6 +365,11 @@ func (s *service) List(query *domain.ImgQuery) (*domain.ImgList, error) {
 		}
 
 	}
+
+	for i := range res.List {
+		res.List[i].SetPublicPreURL(r2Config.publicURLPrefix)
+	}
+
 	return res, nil
 }
 
@@ -456,6 +460,8 @@ func (s *service) RestoreFromRecycleBin(tenantID domain.TenantID, id int64) (*do
 			zap.Error(err),
 		)
 	}
+
+	res.SetPublicPreURL(r2Config.publicURLPrefix)
 
 	return res, nil
 }

@@ -14,9 +14,8 @@ func domainImgToResponse(img *domain.Img) *ImgResponse {
 
 	// 默认访问public
 	resp := &ImgResponse{
-		ID: img.ID,
-		// Url:         r2PublicUrlPrefix + "/" + encodedPath,
-		Url:         encodedPath,
+		ID:          img.ID,
+		Url:         img.GetPublicPreURL() + "/" + encodedPath,
 		Description: img.Description,
 		CreatedAt:   img.CreatedAt.Unix(),
 		UpdatedAt:   img.UpdatedAt.Unix(),

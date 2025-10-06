@@ -7,14 +7,15 @@ import (
 type TenantID int64
 
 type Img struct {
-	ID          int64
-	TenantID    TenantID
-	Path        string
-	Description string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   time.Time
-	deleted     bool
+	ID           int64
+	TenantID     TenantID
+	Path         string
+	Description  string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	DeletedAt    time.Time
+	publicPreURL string
+	deleted      bool
 }
 
 func (img *Img) SetDeletedStatus(deleted bool) {
@@ -23,6 +24,14 @@ func (img *Img) SetDeletedStatus(deleted bool) {
 
 func (img *Img) IsDelete() bool {
 	return img.deleted
+}
+
+func (img *Img) SetPublicPreURL(preURL string) {
+	img.publicPreURL = preURL
+}
+
+func (img *Img) GetPublicPreURL() string {
+	return img.publicPreURL
 }
 
 type ImgQuery struct {
