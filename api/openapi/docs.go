@@ -1410,7 +1410,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/tenant/entry": {
+        "/v1/tenant/entry/{id}": {
             "get": {
                 "security": [
                     {
@@ -1442,7 +1442,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.EntryRequestBody"
+                            "$ref": "#/definitions/handler.EntryRequest"
                         }
                     }
                 ],
@@ -1500,7 +1500,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.UpgradeRequestBody"
+                            "$ref": "#/definitions/handler.UpgradeRequest"
                         }
                     }
                 ],
@@ -1746,7 +1746,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.GenInviteTokenRequestBody"
+                            "$ref": "#/definitions/handler.GenInviteTokenRequest"
                         }
                     }
                 ],
@@ -1804,7 +1804,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.InviteRequestBody"
+                            "$ref": "#/definitions/handler.InviteRequest"
                         }
                     }
                 ],
@@ -2154,7 +2154,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.EntryRequestBody": {
+        "handler.EntryRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -2181,7 +2181,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.GenInviteTokenRequestBody": {
+        "handler.GenInviteTokenRequest": {
             "type": "object",
             "required": [
                 "expire_second"
@@ -2237,7 +2237,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.InviteRequestBody": {
+        "handler.InviteRequest": {
             "type": "object",
             "required": [
                 "emails",
@@ -2384,7 +2384,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.UpgradeRequestBody": {
+        "handler.UpgradeRequest": {
             "type": "object",
             "required": [
                 "plan_id"

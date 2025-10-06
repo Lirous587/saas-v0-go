@@ -170,6 +170,9 @@ func (s *service) Compress(src io.Reader) (io.Reader, error) {
 }
 
 func (s *service) Upload(src io.Reader, img *domain.Img, categoryID int64) (*domain.Img, error) {
+	a, _ := s.ace256Encryptor.Encrypt("a818de318a6b9e2dbdb8974b685deb46bb644c95270a582cc7563bacfd56ac26")
+	fmt.Println(a)
+
 	// 加载配置
 	r2Config, err := s.getTenantR2Config(img.TenantID)
 	if err != nil {

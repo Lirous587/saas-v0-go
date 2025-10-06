@@ -26,7 +26,7 @@ func (repo *ImgPSQLRepository) FindByID(tenantID domain.TenantID, id int64, dele
 	var whereMods []qm.QueryMod
 	whereMods = append(whereMods,
 		qm.Where(fmt.Sprintf("%s = ?", orm.ImgColumns.TenantID), tenantID),
-		qm.And(fmt.Sprintf("%s = ?", orm.ImgColumns.ID), orm.ImgColumns.ID),
+		qm.And(fmt.Sprintf("%s = ?", orm.ImgColumns.ID), id),
 	)
 
 	if selectDeleted {

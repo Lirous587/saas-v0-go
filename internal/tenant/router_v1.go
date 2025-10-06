@@ -12,7 +12,7 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 	g := r.Group("/v1/tenant")
 	{
 		// 因为要使用url来实现 故此只能用get
-		g.GET("/entry", handler.Enter)
+		g.GET("/entry/:id", handler.Enter)
 	}
 
 	protect := g.Use(auth.JWTValidate())

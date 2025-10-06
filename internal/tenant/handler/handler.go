@@ -214,7 +214,7 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        id   path int true "Tenant ID"
-// @Param        request body handler.UpgradeRequestBody true "升级 Tenant 请求"
+// @Param        request body handler.UpgradeRequest true "升级 Tenant 请求"
 // @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "成功升级 Tenant"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -231,7 +231,7 @@ func (h *HttpHandler) Upgrade(ctx *gin.Context) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        id   path int true "Tenant ID"
-// @Param        request body handler.GenInviteTokenRequestBody true "生成邀请令牌 Tenant 请求"
+// @Param        request body handler.GenInviteTokenRequest true "生成邀请令牌 Tenant 请求"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -264,7 +264,7 @@ func (h *HttpHandler) GenInviteToken(ctx *gin.Context) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        id   path int true "Tenant ID"
-// @Param        request body handler.InviteRequestBody true  "邀请参数"
+// @Param        request body handler.InviteRequest true  "邀请参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -298,11 +298,11 @@ func (h *HttpHandler) Invite(ctx *gin.Context) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        id   path int true "Tenant ID"
-// @Param        request body handler.EntryRequestBody true "加入租户请求参数"
+// @Param        request body handler.EntryRequest true "加入租户请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/tenant/entry [get]
+// @Router       /v1/tenant/entry/{id} [get]
 func (h *HttpHandler) Enter(ctx *gin.Context) {
 	req := new(EntryRequest)
 

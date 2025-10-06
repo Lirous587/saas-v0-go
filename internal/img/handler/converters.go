@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"net/url"
 	"saas/internal/img/domain"
 )
 
@@ -10,12 +9,10 @@ func domainImgToResponse(img *domain.Img) *ImgResponse {
 		return nil
 	}
 
-	encodedPath := url.PathEscape(img.Path)
-
 	// 默认访问public
 	resp := &ImgResponse{
 		ID:          img.ID,
-		Url:         img.GetPublicPreURL() + "/" + encodedPath,
+		Url:         img.GetPublicPreURL() + "/" + img.Path,
 		Description: img.Description,
 		CreatedAt:   img.CreatedAt.Unix(),
 		UpdatedAt:   img.UpdatedAt.Unix(),

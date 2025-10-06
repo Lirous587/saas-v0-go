@@ -80,7 +80,7 @@ definitions:
     - prefix
     - title
     type: object
-  handler.EntryRequestBody:
+  handler.EntryRequest:
     properties:
       email:
         type: string
@@ -97,7 +97,7 @@ definitions:
     - token
     - token_kind
     type: object
-  handler.GenInviteTokenRequestBody:
+  handler.GenInviteTokenRequest:
     properties:
       expire_second:
         type: integer
@@ -133,7 +133,7 @@ definitions:
       url:
         type: string
     type: object
-  handler.InviteRequestBody:
+  handler.InviteRequest:
     properties:
       emails:
         items:
@@ -230,7 +230,7 @@ definitions:
     required:
     - id
     type: object
-  handler.UpgradeRequestBody:
+  handler.UpgradeRequest:
     properties:
       plan_id:
         type: integer
@@ -1358,7 +1358,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.GenInviteTokenRequestBody'
+          $ref: '#/definitions/handler.GenInviteTokenRequest'
       produces:
       - application/json
       responses:
@@ -1395,7 +1395,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.InviteRequestBody'
+          $ref: '#/definitions/handler.InviteRequest'
       produces:
       - application/json
       responses:
@@ -1416,7 +1416,7 @@ paths:
       summary: 邀请指定人员,通过邮箱通知
       tags:
       - tenant
-  /v1/tenant/entry:
+  /v1/tenant/entry/{id}:
     get:
       consumes:
       - application/json
@@ -1432,7 +1432,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.EntryRequestBody'
+          $ref: '#/definitions/handler.EntryRequest'
       produces:
       - application/json
       responses:
@@ -1469,7 +1469,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.UpgradeRequestBody'
+          $ref: '#/definitions/handler.UpgradeRequest'
       produces:
       - application/json
       responses:

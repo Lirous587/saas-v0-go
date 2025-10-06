@@ -36,39 +36,23 @@ type TenantListResponse struct {
 }
 
 type UpgradeRequest struct {
-	TenantID int64 `uri:"id" binding:"required"`
-	UpgradeRequestBody
-}
-
-type UpgradeRequestBody struct {
-	PlanID int64 `json:"plan_id" binding:"required"`
+	TenantID int64 `json:"-" uri:"id" binding:"required"`
+	PlanID   int64 `json:"plan_id" binding:"required"`
 }
 
 type GenInviteTokenRequest struct {
-	TenantID int64 `uri:"id" binding:"required"`
-	GenInviteTokenRequestBody
-}
-
-type GenInviteTokenRequestBody struct {
+	TenantID     int64 `json:"-" uri:"id" binding:"required"`
 	ExpireSecond int64 `json:"expire_second" binding:"required"`
 }
 
 type InviteRequest struct {
-	TenantID int64 `uri:"id" binding:"required"`
-	InviteRequestBody
-}
-
-type InviteRequestBody struct {
+	TenantID     int64    `json:"-" uri:"id" binding:"required"`
 	ExpireSecond int64    `json:"expire_second" binding:"required"`
 	Emails       []string `json:"emails" binding:"required,dive,email"`
 }
 
 type EntryRequest struct {
-	TenantID int64 `json:"tenant_id" form:"tenant_id" binding:"required"`
-	EntryRequestBody
-}
-
-type EntryRequestBody struct {
+	TenantID  int64                  `json:"-" uri:"id" binding:"required"`
 	TokenKind domain.InviteTokenKind `json:"token_kind" form:"token_kind" binding:"required,oneof=public secret"`
 	Token     string                 `json:"token" form:"token" binding:"required"`
 	Email     string                 `json:"email" form:"number" binding:"required,email"`

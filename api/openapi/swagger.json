@@ -1404,7 +1404,7 @@
                 }
             }
         },
-        "/v1/tenant/entry": {
+        "/v1/tenant/entry/{id}": {
             "get": {
                 "security": [
                     {
@@ -1436,7 +1436,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.EntryRequestBody"
+                            "$ref": "#/definitions/handler.EntryRequest"
                         }
                     }
                 ],
@@ -1494,7 +1494,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.UpgradeRequestBody"
+                            "$ref": "#/definitions/handler.UpgradeRequest"
                         }
                     }
                 ],
@@ -1740,7 +1740,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.GenInviteTokenRequestBody"
+                            "$ref": "#/definitions/handler.GenInviteTokenRequest"
                         }
                     }
                 ],
@@ -1798,7 +1798,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.InviteRequestBody"
+                            "$ref": "#/definitions/handler.InviteRequest"
                         }
                     }
                 ],
@@ -2148,7 +2148,7 @@
                 }
             }
         },
-        "handler.EntryRequestBody": {
+        "handler.EntryRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -2175,7 +2175,7 @@
                 }
             }
         },
-        "handler.GenInviteTokenRequestBody": {
+        "handler.GenInviteTokenRequest": {
             "type": "object",
             "required": [
                 "expire_second"
@@ -2231,7 +2231,7 @@
                 }
             }
         },
-        "handler.InviteRequestBody": {
+        "handler.InviteRequest": {
             "type": "object",
             "required": [
                 "emails",
@@ -2378,7 +2378,7 @@
                 }
             }
         },
-        "handler.UpgradeRequestBody": {
+        "handler.UpgradeRequest": {
             "type": "object",
             "required": [
                 "plan_id"
