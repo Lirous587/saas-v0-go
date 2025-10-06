@@ -21,7 +21,7 @@ definitions:
       refresh_token:
         type: string
       user:
-        $ref: '#/definitions/handler.UserResponse'
+        $ref: '#/definitions/saas_internal_user_handler.UserResponse'
     type: object
   handler.CaptchaAnswerResponse:
     properties:
@@ -73,11 +73,14 @@ definitions:
       prefix:
         maxLength: 20
         type: string
+      tenantID:
+        type: integer
       title:
         maxLength: 10
         type: string
     required:
     - prefix
+    - tenantID
     - title
     type: object
   handler.EntryRequestBody:
@@ -147,12 +150,16 @@ definitions:
     type: object
   handler.ListUserWithRoleQueryRequestBody:
     properties:
+      nickname:
+        type: string
       page:
         minimum: 1
         type: integer
       page_size:
         maximum: 20
         minimum: 5
+        type: integer
+      role_id:
         type: integer
     type: object
   handler.PlanListResponse:
@@ -188,19 +195,8 @@ definitions:
     properties:
       list:
         items:
-          $ref: '#/definitions/handler.RoleResponse'
+          $ref: '#/definitions/saas_internal_role_handler.RoleResponse'
         type: array
-    type: object
-  handler.RoleResponse:
-    properties:
-      description:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      tenant_id:
-        type: integer
     type: object
   handler.TenantListResponse:
     properties:
@@ -226,12 +222,19 @@ definitions:
     type: object
   handler.UpdateCategoryRequest:
     properties:
+      id:
+        type: integer
       prefix:
         maxLength: 20
         type: string
+      tenantID:
+        type: integer
       title:
         maxLength: 10
         type: string
+    required:
+    - id
+    - tenantID
     type: object
   handler.UpgradeRequestBody:
     properties:
@@ -239,25 +242,6 @@ definitions:
         type: integer
     required:
     - plan_id
-    type: object
-  handler.UserResponse:
-    properties:
-      avatar_url:
-        type: string
-      created_at:
-        type: integer
-      email:
-        type: string
-      email_verified:
-        type: boolean
-      id:
-        type: integer
-      last_login_at:
-        type: integer
-      updated_at:
-        type: integer
-      username:
-        type: string
     type: object
   response.errorResponse:
     properties:
@@ -326,8 +310,6 @@ definitions:
         type: string
       id:
         type: integer
-      is_default:
-        type: boolean
       name:
         type: string
       tenant_id:
@@ -335,6 +317,17 @@ definitions:
     required:
     - id
     - name
+    type: object
+  saas_internal_role_handler.RoleResponse:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      tenant_id:
+        type: integer
     type: object
   saas_internal_role_handler.UpdateRequest:
     properties:
@@ -374,6 +367,25 @@ definitions:
     required:
     - id
     - id
+    type: object
+  saas_internal_user_handler.UserResponse:
+    properties:
+      avatar_url:
+        type: string
+      created_at:
+        type: integer
+      email:
+        type: string
+      email_verified:
+        type: boolean
+      id:
+        type: integer
+      last_login_at:
+        type: integer
+      updated_at:
+        type: integer
+      username:
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -461,7 +473,7 @@ paths:
       summary: 生成带答案的验证码
       tags:
       - captcha
-  /v1/img:
+  /v1/img/{tenant_id}:
     get:
       consumes:
       - application/json
@@ -512,17 +524,12 @@ paths:
       summary: 图片列表
       tags:
       - img
-  /v1/img/{id}:
+  /v1/img/{tenant_id}/{id}:
     delete:
       consumes:
       - application/json
       description: 删除图片（软删除或硬删除）
       parameters:
-      - description: 图片ID
-        in: path
-        name: id
-        required: true
-        type: integer
       - description: 是否硬删除（默认false）
         in: query
         name: hard
@@ -547,7 +554,7 @@ paths:
       summary: 删除图片
       tags:
       - img
-  /v1/img/categories:
+  /v1/img/{tenant_id}/categories:
     get:
       consumes:
       - application/json
@@ -575,7 +582,7 @@ paths:
       summary: 分类列表
       tags:
       - img-category
-  /v1/img/category:
+  /v1/img/{tenant_id}/category:
     post:
       consumes:
       - application/json
@@ -612,7 +619,7 @@ paths:
       summary: 创建图片分类
       tags:
       - img-category
-  /v1/img/category/{id}:
+  /v1/img/{tenant_id}/category/{id}:
     delete:
       consumes:
       - application/json
@@ -684,7 +691,7 @@ paths:
       summary: 更新图片分类
       tags:
       - img-category
-  /v1/img/recycle/{id}:
+  /v1/img/{tenant_id}/recycle/{id}:
     delete:
       consumes:
       - application/json
@@ -725,6 +732,11 @@ paths:
         name: id
         required: true
         type: integer
+      - description: 图片ID
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -750,7 +762,7 @@ paths:
       summary: 恢复回收站图片
       tags:
       - img
-  /v1/img/upload:
+  /v1/img/{tenant_id}/upload:
     post:
       consumes:
       - multipart/form-data
@@ -1026,7 +1038,7 @@ paths:
             - $ref: '#/definitions/response.successResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/handler.RoleResponse'
+                  $ref: '#/definitions/saas_internal_role_handler.RoleResponse'
               type: object
         "400":
           description: 参数错误
@@ -1098,7 +1110,7 @@ paths:
             - $ref: '#/definitions/response.successResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/handler.RoleResponse'
+                  $ref: '#/definitions/saas_internal_role_handler.RoleResponse'
               type: object
         "400":
           description: 参数错误
@@ -1196,7 +1208,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 获取租户下的用户的非敏感信息
+      description: 获取租户下的用户的非敏感信息以及角色信息
       parameters:
       - description: Tenant ID
         in: path
@@ -1560,7 +1572,7 @@ paths:
             - $ref: '#/definitions/response.successResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/handler.UserResponse'
+                  $ref: '#/definitions/saas_internal_user_handler.UserResponse'
               type: object
         "401":
           description: 未授权

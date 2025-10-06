@@ -80,11 +80,13 @@ var TenantWhere = struct {
 // TenantRels is where relationship names are stored.
 var TenantRels = struct {
 	TenantPlan      string
+	TenantR2Config  string
 	ImgCategories   string
 	Imgs            string
 	TenantUserRoles string
 }{
 	TenantPlan:      "TenantPlan",
+	TenantR2Config:  "TenantR2Config",
 	ImgCategories:   "ImgCategories",
 	Imgs:            "Imgs",
 	TenantUserRoles: "TenantUserRoles",
@@ -93,6 +95,7 @@ var TenantRels = struct {
 // tenantR is where relationships are stored.
 type tenantR struct {
 	TenantPlan      *TenantPlan         `boil:"TenantPlan" json:"TenantPlan" toml:"TenantPlan" yaml:"TenantPlan"`
+	TenantR2Config  *TenantR2Config     `boil:"TenantR2Config" json:"TenantR2Config" toml:"TenantR2Config" yaml:"TenantR2Config"`
 	ImgCategories   ImgCategorySlice    `boil:"ImgCategories" json:"ImgCategories" toml:"ImgCategories" yaml:"ImgCategories"`
 	Imgs            ImgSlice            `boil:"Imgs" json:"Imgs" toml:"Imgs" yaml:"Imgs"`
 	TenantUserRoles TenantUserRoleSlice `boil:"TenantUserRoles" json:"TenantUserRoles" toml:"TenantUserRoles" yaml:"TenantUserRoles"`
@@ -117,6 +120,22 @@ func (r *tenantR) GetTenantPlan() *TenantPlan {
 	}
 
 	return r.TenantPlan
+}
+
+func (o *Tenant) GetTenantR2Config() *TenantR2Config {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetTenantR2Config()
+}
+
+func (r *tenantR) GetTenantR2Config() *TenantR2Config {
+	if r == nil {
+		return nil
+	}
+
+	return r.TenantR2Config
 }
 
 func (o *Tenant) GetImgCategories() ImgCategorySlice {
@@ -478,6 +497,17 @@ func (o *Tenant) TenantPlan(mods ...qm.QueryMod) tenantPlanQuery {
 	return TenantPlans(queryMods...)
 }
 
+// TenantR2Config pointed to by the foreign key.
+func (o *Tenant) TenantR2Config(mods ...qm.QueryMod) tenantR2ConfigQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"tenant_id\" = ?", o.ID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return TenantR2Configs(queryMods...)
+}
+
 // ImgCategories retrieves all the img_category's ImgCategories with an executor.
 func (o *Tenant) ImgCategories(mods ...qm.QueryMod) imgCategoryQuery {
 	var queryMods []qm.QueryMod
@@ -627,6 +657,123 @@ func (tenantL) LoadTenantPlan(e boil.Executor, singular bool, maybeTenant interf
 				local.R.TenantPlan = foreign
 				if foreign.R == nil {
 					foreign.R = &tenantPlanR{}
+				}
+				foreign.R.Tenant = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadTenantR2Config allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-1 relationship.
+func (tenantL) LoadTenantR2Config(e boil.Executor, singular bool, maybeTenant interface{}, mods queries.Applicator) error {
+	var slice []*Tenant
+	var object *Tenant
+
+	if singular {
+		var ok bool
+		object, ok = maybeTenant.(*Tenant)
+		if !ok {
+			object = new(Tenant)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeTenant)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeTenant))
+			}
+		}
+	} else {
+		s, ok := maybeTenant.(*[]*Tenant)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeTenant)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeTenant))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &tenantR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &tenantR{}
+			}
+
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`tenant_r2_config`),
+		qm.WhereIn(`tenant_r2_config.tenant_id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.Query(e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load TenantR2Config")
+	}
+
+	var resultSlice []*TenantR2Config
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice TenantR2Config")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for tenant_r2_config")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for tenant_r2_config")
+	}
+
+	if len(tenantR2ConfigAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.TenantR2Config = foreign
+		if foreign.R == nil {
+			foreign.R = &tenantR2ConfigR{}
+		}
+		foreign.R.Tenant = object
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.ID == foreign.TenantID {
+				local.R.TenantR2Config = foreign
+				if foreign.R == nil {
+					foreign.R = &tenantR2ConfigR{}
 				}
 				foreign.R.Tenant = local
 				break
@@ -1026,6 +1173,63 @@ func (o *Tenant) SetTenantPlan(exec boil.Executor, insert bool, related *TenantP
 
 	if related.R == nil {
 		related.R = &tenantPlanR{
+			Tenant: o,
+		}
+	} else {
+		related.R.Tenant = o
+	}
+	return nil
+}
+
+// SetTenantR2ConfigG of the tenant to the related item.
+// Sets o.R.TenantR2Config to related.
+// Adds o to related.R.Tenant.
+// Uses the global database handle.
+func (o *Tenant) SetTenantR2ConfigG(insert bool, related *TenantR2Config) error {
+	return o.SetTenantR2Config(boil.GetDB(), insert, related)
+}
+
+// SetTenantR2Config of the tenant to the related item.
+// Sets o.R.TenantR2Config to related.
+// Adds o to related.R.Tenant.
+func (o *Tenant) SetTenantR2Config(exec boil.Executor, insert bool, related *TenantR2Config) error {
+	var err error
+
+	if insert {
+		related.TenantID = o.ID
+
+		if err = related.Insert(exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	} else {
+		updateQuery := fmt.Sprintf(
+			"UPDATE \"tenant_r2_config\" SET %s WHERE %s",
+			strmangle.SetParamNames("\"", "\"", 1, []string{"tenant_id"}),
+			strmangle.WhereClause("\"", "\"", 2, tenantR2ConfigPrimaryKeyColumns),
+		)
+		values := []interface{}{o.ID, related.TenantID}
+
+		if boil.DebugMode {
+			fmt.Fprintln(boil.DebugWriter, updateQuery)
+			fmt.Fprintln(boil.DebugWriter, values)
+		}
+		if _, err = exec.Exec(updateQuery, values...); err != nil {
+			return errors.Wrap(err, "failed to update foreign table")
+		}
+
+		related.TenantID = o.ID
+	}
+
+	if o.R == nil {
+		o.R = &tenantR{
+			TenantR2Config: related,
+		}
+	} else {
+		o.R.TenantR2Config = related
+	}
+
+	if related.R == nil {
+		related.R = &tenantR2ConfigR{
 			Tenant: o,
 		}
 	} else {

@@ -4,8 +4,11 @@ import (
 	"time"
 )
 
+type TenantID int64
+
 type Img struct {
 	ID          int64
+	TenantID    TenantID
 	Path        string
 	Description string
 	CreatedAt   time.Time
@@ -23,11 +26,12 @@ func (img *Img) IsDelete() bool {
 }
 
 type ImgQuery struct {
+	TenantID   TenantID
+	CategoryID int64
 	Keyword    string
 	Page       int
 	PageSize   int
 	Deleted    bool
-	CategoryID int64
 }
 
 type ImgList struct {
@@ -37,7 +41,26 @@ type ImgList struct {
 
 type Category struct {
 	ID        int64
+	TenantID  TenantID
 	Title     string
 	Prefix    string
 	CreatedAt time.Time
+}
+
+type R2Config struct {
+	TenantID        int64
+	AccountID       string
+	AccessKeyID     string
+	secretAccessKey string
+	PublicBucket    string
+	PublicURLPrefix string
+	DeleteBucket    string
+}
+
+func (r *R2Config) GetSecretAccessKey() string {
+	return r.secretAccessKey
+}
+
+func (r *R2Config) SetSecretAccessKey(key string) {
+	r.secretAccessKey = key
 }

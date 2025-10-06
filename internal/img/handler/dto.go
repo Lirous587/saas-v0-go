@@ -1,17 +1,6 @@
 package handler
 
-import (
-	"os"
-)
-
-var r2PublicUrlPrefix = ""
-
-func init() {
-	r2PublicUrlPrefix = os.Getenv("R2_PUBLIC_URL_PREFIX")
-	if r2PublicUrlPrefix == "" {
-		panic("加载 R2_PUBLIC_URL_PREFIX 环境变量失败")
-	}
-}
+import "saas/internal/img/domain"
 
 type ImgResponse struct {
 	ID          int64  `json:"id"`
@@ -22,21 +11,35 @@ type ImgResponse struct {
 }
 
 type UploadRequest struct {
-	Path        string `form:"path"`
-	Description string `form:"description" binding:"max=60"`
-	CategoryID  int64  `form:"category_id"`
+	TenantID    domain.TenantID `uri:"tenant_id" binding:"required"`
+	Path        string          `form:"path"`
+	Description string          `form:"description" binding:"max=60"`
+	CategoryID  int64           `form:"category_id"`
 }
 
 type DeleteRequest struct {
-	Hard bool `form:"hard,default=false"`
+	TenantID domain.TenantID `uri:"tenant_id" binding:"required"`
+	ID       int64           `uri:"id" binding:"required"`
+	Hard     bool            `form:"hard,default=false"`
+}
+
+type ClearRecycleBinRequest struct {
+	TenantID domain.TenantID `uri:"tenant_id" binding:"required"`
+	ID       int64           `uri:"id" binding:"required"`
+}
+
+type RestoreFromRecycleBinRequest struct {
+	TenantID domain.TenantID `uri:"tenant_id" binding:"required"`
+	ID       int64           `uri:"id" binding:"required"`
 }
 
 type ListRequest struct {
-	Page       int    `form:"page,default=1" binding:"min=1"`
-	PageSize   int    `form:"page_size,default=5" binding:"min=5,max=50"`
-	KeyWord    string `form:"keyword" binding:"max=20"`
-	Deleted    bool   `form:"deleted,default=false"`
-	CategoryID int64  `form:"category_id"`
+	TenantID   domain.TenantID `uri:"tenant_id" binding:"required"`
+	KeyWord    string          `form:"keyword" binding:"max=20"`
+	CategoryID int64           `form:"category_id"`
+	Deleted    bool            `form:"deleted,default=false"`
+	PageSize   int             `form:"page_size,default=5" binding:"min=5,max=50"`
+	Page       int             `form:"page,default=1" binding:"min=1"`
 }
 
 type ImgListResponse struct {
@@ -52,11 +55,23 @@ type CategoryResponse struct {
 }
 
 type CreateCategoryRequest struct {
-	Title  string `json:"title" binding:"required,max=10"`
-	Prefix string `json:"prefix" binding:"required,max=20,slug"`
+	TenantID domain.TenantID `uri:"tenant_id" binding:"required"`
+	Title    string          `json:"title" binding:"required,max=10"`
+	Prefix   string          `json:"prefix" binding:"required,max=20,slug"`
 }
 
 type UpdateCategoryRequest struct {
-	Title  string `json:"title" binding:"max=10"`
-	Prefix string `json:"prefix" binding:"max=20"`
+	ID       int64           `uri:"id" binding:"required"`
+	TenantID domain.TenantID `uri:"tenant_id" binding:"required"`
+	Title    string          `json:"title" binding:"max=10"`
+	Prefix   string          `json:"prefix" binding:"max=20"`
+}
+
+type DeleteCategoryRequest struct {
+	ID       int64           `uri:"id" binding:"required"`
+	TenantID domain.TenantID `uri:"tenant_id" binding:"required"`
+}
+
+type ListCategoryRequest struct {
+	TenantID domain.TenantID `uri:"tenant_id" binding:"required"`
 }

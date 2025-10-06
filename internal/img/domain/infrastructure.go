@@ -1,36 +1,31 @@
 package domain
 
-import (
-	"context"
-	"database/sql"
-)
-
 type ImgRepository interface {
-	FindByID(id int64, deleted ...bool) (*Img, error)
-	ExistByPath(path string) (bool, error)
+	FindByID(tenantID TenantID, id int64, deleted ...bool) (*Img, error)
+	ExistByPath(tenantID TenantID, path string) (bool, error)
 
-	// WithTX 开启事务,允许传递空值
-	WithTX(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error)
 	Create(img *Img, categoryID int64) (*Img, error)
-	Delete(id int64, hard bool) error
-	Restore(id int64) (*Img, error)
+	Delete(tenantID TenantID, id int64, hard bool) error
+	Restore(tenantID TenantID, id int64) (*Img, error)
 	List(query *ImgQuery) (*ImgList, error)
 
 	CreateCategory(category *Category) (*Category, error)
 	UpdateCategory(category *Category) (*Category, error)
-	DeleteCategory(id int64) error
-	ListCategories() ([]*Category, error)
-	FindCategoryByID(id int64) (*Category, error)
-	FindCategoryByTitle(title string) (*Category, error)
-	CategoryExistByTitle(title string) (bool, error)
-	CategoryExistByID(id int64) (bool, error)
-	CountCategory() (int64, error)
-	IsCategoryExistImg(id int64) (bool, error)
+	DeleteCategory(tenantID TenantID, id int64) error
+	ListCategories(tenantID TenantID) ([]*Category, error)
+	FindCategoryByID(tenantID TenantID, id int64) (*Category, error)
+	FindCategoryByTitle(tenantID TenantID, title string) (*Category, error)
+	CategoryExistByTitle(tenantID TenantID, title string) (bool, error)
+	CategoryExistByID(tenantID TenantID, id int64) (bool, error)
+	CountCategory(tenantID TenantID) (int64, error)
+	IsCategoryExistImg(tenantID TenantID, id int64) (bool, error)
+
+	GetTenantR2Config(tenantID TenantID) (*R2Config, error)
+	SetTenantR2Config(Config *R2Config) error
 }
 
 type ImgMsgQueue interface {
-	AddToDeleteQueue(imgID int64) error
-	ListenDeleteQueue(onExpire func(imgID int64))
-	//SendDeleteMsg(imgID int64) error
-	RemoveFromDeleteQueue(imgID int64) error
+	AddToDeleteQueue(tenantID TenantID, imgID int64) error
+	ListenDeleteQueue(onExpire func(tenantID TenantID, imgID int64))
+	RemoveFromDeleteQueue(tenantID TenantID, imgID int64) error
 }

@@ -12,9 +12,10 @@ func domainImgToORM(img *domain.Img) *orm.Img {
 	}
 
 	ormImg := &orm.Img{
-		ID:		img.ID,
-		Path:		img.Path,
-		UpdatedAt:	img.UpdatedAt,
+		ID:        img.ID,
+		TenantID:  int64(img.TenantID),
+		Path:      img.Path,
+		UpdatedAt: img.UpdatedAt,
 	}
 
 	// 处理null项
@@ -36,10 +37,11 @@ func ormImgToDomain(ormImg *orm.Img, isDeleted ...bool) *domain.Img {
 	}
 
 	img := &domain.Img{
-		ID:		ormImg.ID,
-		Path:		ormImg.Path,
-		CreatedAt:	ormImg.CreatedAt,
-		UpdatedAt:	ormImg.UpdatedAt,
+		ID:        ormImg.ID,
+		TenantID:  domain.TenantID(ormImg.TenantID),
+		Path:      ormImg.Path,
+		CreatedAt: ormImg.CreatedAt,
+		UpdatedAt: ormImg.UpdatedAt,
 	}
 
 	img.SetDeletedStatus(deleted)
@@ -84,9 +86,10 @@ func domainCategoryToORM(category *domain.Category) *orm.ImgCategory {
 	}
 
 	ormImg := &orm.ImgCategory{
-		ID:	category.ID,
-		Title:	category.Title,
-		Prefix:	category.Prefix,
+		ID:       category.ID,
+		TenantID: int64(category.TenantID),
+		Title:    category.Title,
+		Prefix:   category.Prefix,
 	}
 
 	// 处理null项
@@ -100,10 +103,11 @@ func ormCategoryToDomain(ormCategory *orm.ImgCategory) *domain.Category {
 	}
 
 	img := &domain.Category{
-		ID:		ormCategory.ID,
-		Title:		ormCategory.Title,
-		Prefix:		ormCategory.Prefix,
-		CreatedAt:	ormCategory.CreatedAt,
+		ID:        ormCategory.ID,
+		TenantID:  domain.TenantID(ormCategory.TenantID),
+		Title:     ormCategory.Title,
+		Prefix:    ormCategory.Prefix,
+		CreatedAt: ormCategory.CreatedAt,
 	}
 
 	// 处理null项
@@ -125,4 +129,41 @@ func ormCategoriesToDomain(ormCategories []*orm.ImgCategory) []*domain.Category 
 	}
 
 	return categories
+}
+
+func doaminR2ConfigToORM(r2Config *domain.R2Config) *orm.TenantR2Config {
+	if r2Config == nil {
+		return nil
+	}
+
+	ormR2Config := &orm.TenantR2Config{
+		TenantID:        r2Config.TenantID,
+		AccountID:       r2Config.AccountID,
+		AccessKeyID:     r2Config.AccessKeyID,
+		SecretAccessKey: r2Config.GetSecretAccessKey(),
+		PublicBucket:    r2Config.PublicBucket,
+		PublicURLPrefix: r2Config.PublicBucket,
+		DeleteBucket:    r2Config.DeleteBucket,
+	}
+
+	return ormR2Config
+}
+
+func ormR2ConfigToDomian(ormR2Config *orm.TenantR2Config) *domain.R2Config {
+	if ormR2Config == nil {
+		return nil
+	}
+
+	r2Config := &domain.R2Config{
+		TenantID:        ormR2Config.TenantID,
+		AccountID:       ormR2Config.AccountID,
+		AccessKeyID:     ormR2Config.AccessKeyID,
+		PublicBucket:    ormR2Config.PublicBucket,
+		PublicURLPrefix: ormR2Config.PublicBucket,
+		DeleteBucket:    ormR2Config.DeleteBucket,
+	}
+
+	r2Config.SetSecretAccessKey(ormR2Config.SecretAccessKey)
+
+	return r2Config
 }

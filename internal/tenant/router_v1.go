@@ -29,7 +29,7 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 		protect.GET("/:id/users", server.SetTenantID("id"), auth.CasbinValited(), handler.GetUserWithRole)
 
 		// todo 分配角色
-		// protect.GET("/:id/:user_id", server.SetTenantID("id"), auth.CasbinValited(), handler.xx)
+		// protect.POST("/:id/:user_id", server.SetTenantID("id"), auth.CasbinValited(), handler.xx)
 	}
 	return nil
 }

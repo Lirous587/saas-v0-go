@@ -7,9 +7,9 @@ import (
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
+	"saas/internal/common/reqkit/bind"
 	"saas/internal/common/reskit/response"
 	"saas/internal/img/domain"
-	"strconv"
 	"strings"
 	"time"
 
@@ -25,21 +25,6 @@ func NewHttpHandler(service domain.ImgService) *HttpHandler {
 	return &HttpHandler{
 		service: service,
 	}
-}
-
-func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
-	idStr := ctx.Param("id")
-	if idStr == "" {
-		return 0, errors.New("请传递id参数")
-	}
-	idInt, err := strconv.Atoi(idStr)
-	if err != nil {
-		return 0, errors.WithStack(err)
-	}
-	if idInt == 0 {
-		return 0, errors.WithStack(errors.New("无效的id"))
-	}
-	return int64(idInt), nil
 }
 
 func isImage(file multipart.File) (bool, string, error) {
@@ -102,7 +87,7 @@ func getExtByContentType(realType string) (ext string) {
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
-// @Router       /v1/img/upload [post]
+// @Router       /v1/img/{tenant_id}/upload [post]
 func (h *HttpHandler) Upload(ctx *gin.Context) {
 	fileHeader, _ := ctx.FormFile("object")
 	if fileHeader == nil {
@@ -126,8 +111,7 @@ func (h *HttpHandler) Upload(ctx *gin.Context) {
 
 	req := new(UploadRequest)
 
-	if err := ctx.ShouldBind(req); err != nil {
-		response.InvalidParams(ctx, err)
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
@@ -145,10 +129,13 @@ func (h *HttpHandler) Upload(ctx *gin.Context) {
 		imgPath = generateImgPath(getExtByContentType(realType))
 	}
 
-	res, err := h.service.Upload(file, &domain.Img{
-		Path:        imgPath,
-		Description: req.Description,
-	},
+	res, err := h.service.Upload(
+		file,
+		&domain.Img{
+			TenantID:    req.TenantID,
+			Path:        imgPath,
+			Description: req.Description,
+		},
 		req.CategoryID,
 	)
 
@@ -166,34 +153,26 @@ func (h *HttpHandler) Upload(ctx *gin.Context) {
 // @Tags         img
 // @Accept       json
 // @Produce      json
-// @Param        id    path   int64  true  "图片ID"
 // @Param        hard  query  bool   false "是否硬删除（默认false）"
 // @Success      200 {object} response.successResponse "删除成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
-// @Router       /v1/img/{id} [delete]
+// @Router       /v1/img/{tenant_id}/{id} [delete]
 func (h *HttpHandler) Delete(ctx *gin.Context) {
 	req := new(DeleteRequest)
 
-	if err := ctx.ShouldBindQuery(req); err != nil {
-		response.InvalidParams(ctx, err)
-		return
-	}
-
-	id, err := h.getID(ctx)
-	if err != nil {
-		response.InvalidParams(ctx, err)
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
 	if req.Hard {
-		if err := h.service.Delete(id, true); err != nil {
+		if err := h.service.Delete(req.TenantID, req.ID, true); err != nil {
 			response.Error(ctx, err)
 			return
 		}
 	} else {
-		if err := h.service.Delete(id, false); err != nil {
+		if err := h.service.Delete(req.TenantID, req.ID, false); err != nil {
 			response.Error(ctx, err)
 			return
 		}
@@ -217,16 +196,17 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
-// @Router       /v1/img [get]
+// @Router       /v1/img/{tenant_id} [get]
 func (h *HttpHandler) List(ctx *gin.Context) {
 	req := new(ListRequest)
 
-	if err := ctx.ShouldBindQuery(req); err != nil {
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		response.InvalidParams(ctx, err)
 		return
 	}
 
 	list, err := h.service.List(&domain.ImgQuery{
+		TenantID:   req.TenantID,
 		Keyword:    req.KeyWord,
 		Page:       req.Page,
 		PageSize:   req.PageSize,
@@ -253,15 +233,15 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
-// @Router       /v1/img/recycle/{id} [delete]
+// @Router       /v1/img/{tenant_id}/recycle/{id} [delete]
 func (h *HttpHandler) ClearRecycleBin(ctx *gin.Context) {
-	id, err := h.getID(ctx)
-	if err != nil {
-		response.InvalidParams(ctx, err)
+	req := new(ClearRecycleBinRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
-	if err := h.service.ClearRecycleBin(id); err != nil {
+	if err := h.service.ClearRecycleBin(req.TenantID, req.ID); err != nil {
 		response.Error(ctx, err)
 		return
 	}
@@ -276,18 +256,20 @@ func (h *HttpHandler) ClearRecycleBin(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        id path int64 true "图片ID"
+// @Param        id path int64 true "图片ID"
 // @Success      200 {object} response.successResponse{data=handler.ImgResponse} "恢复成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
-// @Router       /v1/img/recycle/{id} [put]
+// @Router       /v1/img/{tenant_id}/recycle/{id} [put]
 func (h *HttpHandler) RestoreFromRecycleBin(ctx *gin.Context) {
-	id, err := h.getID(ctx)
-	if err != nil {
-		response.InvalidParams(ctx, err)
+	req := new(RestoreFromRecycleBinRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
-	res, err := h.service.RestoreFromRecycleBin(id)
+
+	res, err := h.service.RestoreFromRecycleBin(req.TenantID, req.ID)
 	if err != nil {
 		response.Error(ctx, err)
 		return
@@ -313,17 +295,17 @@ func (h *HttpHandler) ListenDeleteQueue() {
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
-// @Router       /v1/img/category [post]
+// @Router       /v1/img/{tenant_id}/category [post]
 func (h *HttpHandler) CreateCategory(ctx *gin.Context) {
 	req := new(CreateCategoryRequest)
-	if err := ctx.ShouldBindJSON(req); err != nil {
-		response.InvalidParams(ctx, err)
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
 	res, err := h.service.CreateCategory(&domain.Category{
-		Title:  req.Title,
-		Prefix: req.Prefix,
+		TenantID: req.TenantID,
+		Title:    req.Title,
+		Prefix:   req.Prefix,
 	})
 
 	if err != nil {
@@ -346,24 +328,18 @@ func (h *HttpHandler) CreateCategory(ctx *gin.Context) {
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
-// @Router       /v1/img/category/{id} [put]
+// @Router       /v1/img/{tenant_id}/category/{id} [put]
 func (h *HttpHandler) UpdateCategory(ctx *gin.Context) {
-	id, err := h.getID(ctx)
-	if err != nil {
-		response.InvalidParams(ctx, err)
-		return
-	}
-
 	req := new(UpdateCategoryRequest)
-	if err := ctx.ShouldBindJSON(req); err != nil {
-		response.InvalidParams(ctx, err)
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
 	res, err := h.service.UpdateCategory(&domain.Category{
-		ID:     id,
-		Title:  req.Title,
-		Prefix: req.Prefix,
+		ID:       req.ID,
+		TenantID: req.TenantID,
+		Title:    req.Title,
+		Prefix:   req.Prefix,
 	})
 
 	if err != nil {
@@ -385,15 +361,14 @@ func (h *HttpHandler) UpdateCategory(ctx *gin.Context) {
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
-// @Router       /v1/img/category/{id} [delete]
+// @Router       /v1/img/{tenant_id}/category/{id} [delete]
 func (h *HttpHandler) DeleteCategory(ctx *gin.Context) {
-	id, err := h.getID(ctx)
-	if err != nil {
-		response.InvalidParams(ctx, err)
+	req := new(UpdateCategoryRequest)
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
-	if err := h.service.DeleteCategory(id); err != nil {
+	if err := h.service.DeleteCategory(req.TenantID, req.ID); err != nil {
 		response.Error(ctx, err)
 		return
 	}
@@ -410,9 +385,14 @@ func (h *HttpHandler) DeleteCategory(ctx *gin.Context) {
 // @Success      200 {object} response.successResponse{data=[]handler.CategoryResponse} "查询成功"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
-// @Router       /v1/img/categories [get]
+// @Router       /v1/img/{tenant_id}/categories [get]
 func (h *HttpHandler) ListCategories(ctx *gin.Context) {
-	res, err := h.service.ListCategories()
+	req := new(ListCategoryRequest)
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	res, err := h.service.ListCategories(req.TenantID)
 	if err != nil {
 		response.Error(ctx, err)
 		return

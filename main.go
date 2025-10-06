@@ -11,6 +11,7 @@ import (
 	"saas/internal/common/middleware/auth"
 	"saas/internal/common/server"
 	"saas/internal/common/uid"
+	"saas/internal/img"
 	"saas/internal/role"
 	"saas/internal/tenant"
 	"saas/internal/user"
@@ -122,8 +123,8 @@ func main() {
 			ginSwagger.PersistAuthorization(true)))
 
 		user.InitV1(r)
+		img.InitV1(r)
 		//captcha.InitV1(r)
-		//img.InitV1(r)
 
 		tenant.InitV1(r)
 		role.InitV1(r)

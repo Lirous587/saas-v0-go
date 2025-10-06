@@ -3,13 +3,15 @@ package adapters
 import (
 	"context"
 	"fmt"
-	"github.com/redis/go-redis/v9"
 	"os"
 	"saas/internal/common/utils"
 	"saas/internal/img/domain"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 )
 
 type ImgRedisCache struct {
@@ -29,10 +31,10 @@ func NewImgRedisCache() domain.ImgMsgQueue {
 	addr := host + ":" + port
 
 	client := redis.NewClient(&redis.Options{
-		Addr:		addr,
-		DB:		db,
-		Password:	password,
-		PoolSize:	poolSize,
+		Addr:     addr,
+		DB:       db,
+		Password: password,
+		PoolSize: poolSize,
 	})
 
 	// 可选：ping 检查连接
@@ -44,45 +46,51 @@ func NewImgRedisCache() domain.ImgMsgQueue {
 }
 
 const (
-	keyImgDeleteQueueKey	= "img:delete"
-	deleteImgExpire		= time.Hour * 24 * 7
+	keyImgDeleteQueueKey = "img:delete"
+	deleteImgExpire      = time.Hour * 24 * 7
 	//deleteImgExpire = time.Second * 20
 )
 
+func (c *ImgRedisCache) buildDeletedQueueKey(tenantID domain.TenantID, imgID int64) string {
+	return fmt.Sprintf("%s:%d:%d", utils.GetRedisKey(keyImgDeleteQueueKey), tenantID, imgID)
+}
+
 // AddToDeleteQueue 软删除时写入 redis 并设置过期
-func (c *ImgRedisCache) AddToDeleteQueue(imgID int64) error {
-	key := fmt.Sprintf("%s:%d", utils.GetRedisKey(keyImgDeleteQueueKey), imgID)
+func (c *ImgRedisCache) AddToDeleteQueue(tenantID domain.TenantID, imgID int64) error {
+	key := c.buildDeletedQueueKey(tenantID, imgID)
 	return c.client.SetEx(context.Background(), key, "", deleteImgExpire).Err()
 }
 
 // ListenDeleteQueue 后台监听 key 过期事件
-func (c *ImgRedisCache) ListenDeleteQueue(onExpire func(imgID int64)) {
+func (c *ImgRedisCache) ListenDeleteQueue(onExpire func(tenantID domain.TenantID, imgID int64)) {
 	pubsub := c.client.PSubscribe(context.Background(), "__keyevent@0__:expired")
-	defer pubsub.Close()	// 确保资源释放
+	defer pubsub.Close() // 确保资源释放
 
 	preKey := utils.GetRedisKey(keyImgDeleteQueueKey) + ":"
 
 	for msg := range pubsub.Channel() {
-		// 解析 key
+		// 解析 key: img:delete:tenantID:imgID
 		if strings.HasPrefix(msg.Payload, preKey) {
-			idStr := strings.TrimPrefix(msg.Payload, preKey)
-			if imgID, err := strconv.ParseInt(idStr, 10, 64); err == nil {
-				onExpire(imgID)
+			parts := strings.Split(msg.Payload, ":")
+			if len(parts) == 4 { // 确保格式正确：img:delete:tenantID:imgID
+				tenantID, err1 := strconv.ParseInt(parts[2], 10, 64)
+				imgID, err2 := strconv.ParseInt(parts[3], 10, 64)
+				if err1 == nil && err2 == nil {
+					onExpire(domain.TenantID(tenantID), imgID)
+				} else {
+					zap.L().Error("Failed to parse tenantID or imgID from expired key",
+						zap.String("key", msg.Payload),
+						zap.Error(err1),
+						zap.Error(err2),
+					)
+				}
 			}
 		}
 	}
 }
 
-// SendDeleteMsg 发送删除消息
-func (c *ImgRedisCache) SendDeleteMsg(imgID int64) error {
-	key := fmt.Sprintf("%s:%d", utils.GetRedisKey(keyImgDeleteQueueKey), imgID)
-
-	// 使用 SETEX 设置过期时间为 1 毫秒，几乎立即过期
-	return c.client.SetEx(context.Background(), key, "manual_delete", time.Millisecond).Err()
-}
-
 // RemoveFromDeleteQueue 从删除队列中移除指定图片ID
-func (c *ImgRedisCache) RemoveFromDeleteQueue(imgID int64) error {
-	key := fmt.Sprintf("%s:%d", utils.GetRedisKey(keyImgDeleteQueueKey), imgID)
+func (c *ImgRedisCache) RemoveFromDeleteQueue(tenantID domain.TenantID, imgID int64) error {
+	key := c.buildDeletedQueueKey(tenantID, imgID)
 	return c.client.Del(context.Background(), key).Err()
 }

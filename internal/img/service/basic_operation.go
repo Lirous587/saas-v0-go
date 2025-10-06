@@ -15,8 +15,8 @@ func (b bucket) string() string {
 	return string(b)
 }
 
-func (s *service) getPresignURL(bucket bucket, object string, expired time.Duration) (string, error) {
-	presignResult, err := s.presignClient.PresignGetObject(context.TODO(), &s3.GetObjectInput{
+func (s *service) getPresignURL(presignClient *s3.PresignClient, bucket bucket, object string, expired time.Duration) (string, error) {
+	presignResult, err := presignClient.PresignGetObject(context.TODO(), &s3.GetObjectInput{
 		Bucket: aws.String(bucket.string()),
 		Key:    aws.String(object),
 	}, func(options *s3.PresignOptions) {
@@ -28,20 +28,20 @@ func (s *service) getPresignURL(bucket bucket, object string, expired time.Durat
 	return presignResult.URL, err
 }
 
-func (s *service) UploadFile(file io.Reader, path string) error {
-	_, err := s.s3Client.PutObject(context.TODO(), &s3.PutObjectInput{
-		Bucket: aws.String(s.publicBucket.string()),
+func (s *service) UploadFile(client *s3.Client, bucket bucket, file io.Reader, path string) error {
+	_, err := client.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket: aws.String(bucket.string()),
 		Key:    aws.String(path),
 		Body:   file,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to upload file to %s/%s: %w", s.publicBucket, path, err)
+		return fmt.Errorf("failed to upload file to %s/%s: %w", bucket, path, err)
 	}
 	return nil
 }
 
-func (s *service) CopyFileToAnotherBucket(path string, oldBucket bucket, newBucket bucket) error {
-	_, err := s.s3Client.CopyObject(context.TODO(), &s3.CopyObjectInput{
+func (s *service) CopyFileToAnotherBucket(client *s3.Client, oldBucket bucket, newBucket bucket, path string) error {
+	_, err := client.CopyObject(context.TODO(), &s3.CopyObjectInput{
 		Bucket:     aws.String(newBucket.string()),
 		CopySource: aws.String(fmt.Sprintf("%s/%s", oldBucket.string(), path)),
 		Key:        aws.String(path),
@@ -52,24 +52,24 @@ func (s *service) CopyFileToAnotherBucket(path string, oldBucket bucket, newBuck
 	return nil
 }
 
-func (s *service) DeleteFile(path string, b bucket) error {
-	_, err := s.s3Client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
-		Bucket: aws.String(b.string()),
+func (s *service) DeleteFile(client *s3.Client, bucket bucket, path string) error {
+	_, err := client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
+		Bucket: aws.String(bucket.string()),
 		Key:    aws.String(path),
 	})
 	if err != nil {
-		return fmt.Errorf("failed to delete object %s/%s: %w", s.publicBucket, path, err)
+		return fmt.Errorf("failed to delete object %s/%s: %w", bucket, path, err)
 	}
 	return nil
 }
 
-func (s *service) ReadFile(path string) ([]byte, error) {
-	output, err := s.s3Client.GetObject(context.TODO(), &s3.GetObjectInput{
-		Bucket: aws.String(s.publicBucket.string()),
+func (s *service) ReadFile(client *s3.Client, bucket bucket, path string) ([]byte, error) {
+	output, err := client.GetObject(context.TODO(), &s3.GetObjectInput{
+		Bucket: aws.String(bucket.string()),
 		Key:    aws.String(path),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to get object %s/%s: %w", s.publicBucket, path, err)
+		return nil, fmt.Errorf("failed to get object %s/%s: %w", bucket, path, err)
 	}
 	defer output.Body.Close()
 
@@ -80,9 +80,9 @@ func (s *service) ReadFile(path string) ([]byte, error) {
 	return content, nil
 }
 
-func (s *service) ListFiles() error {
-	output, err := s.s3Client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
-		Bucket:                   aws.String(s.publicBucket.string()),
+func (s *service) ListFiles(client *s3.Client, bucket bucket) error {
+	output, err := client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
+		Bucket:                   aws.String(bucket.string()),
 		ContinuationToken:        nil,
 		Delimiter:                nil,
 		EncodingType:             "",
@@ -93,7 +93,7 @@ func (s *service) ListFiles() error {
 		StartAfter:               nil,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to list objects in bucket %s: %w", s.publicBucket, err)
+		return fmt.Errorf("failed to list objects in bucket %s: %w", bucket, err)
 	}
 
 	fmt.Println(output)

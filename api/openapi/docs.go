@@ -144,7 +144,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/img": {
+        "/v1/img/{tenant_id}": {
             "get": {
                 "security": [
                     {
@@ -228,7 +228,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/img/categories": {
+        "/v1/img/{tenant_id}/categories": {
             "get": {
                 "security": [
                     {
@@ -277,7 +277,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/img/category": {
+        "/v1/img/{tenant_id}/category": {
             "post": {
                 "security": [
                     {
@@ -340,7 +340,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/img/category/{id}": {
+        "/v1/img/{tenant_id}/category/{id}": {
             "put": {
                 "security": [
                     {
@@ -457,7 +457,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/img/recycle/{id}": {
+        "/v1/img/{tenant_id}/recycle/{id}": {
             "put": {
                 "security": [
                     {
@@ -476,6 +476,13 @@ const docTemplate = `{
                 ],
                 "summary": "恢复回收站图片",
                 "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "图片ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "图片ID",
@@ -565,7 +572,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/img/upload": {
+        "/v1/img/{tenant_id}/upload": {
             "post": {
                 "security": [
                     {
@@ -644,7 +651,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/img/{id}": {
+        "/v1/img/{tenant_id}/{id}": {
             "delete": {
                 "security": [
                     {
@@ -663,13 +670,6 @@ const docTemplate = `{
                 ],
                 "summary": "删除图片",
                 "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "图片ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "boolean",
                         "description": "是否硬删除（默认false）",
@@ -1083,7 +1083,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/handler.RoleResponse"
+                                            "$ref": "#/definitions/saas_internal_role_handler.RoleResponse"
                                         }
                                     }
                                 }
@@ -1153,7 +1153,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/handler.RoleResponse"
+                                            "$ref": "#/definitions/saas_internal_role_handler.RoleResponse"
                                         }
                                     }
                                 }
@@ -1359,7 +1359,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "获取租户下的用户的非敏感信息",
+                "description": "获取租户下的用户的非敏感信息以及角色信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -1952,7 +1952,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/handler.UserResponse"
+                                            "$ref": "#/definitions/saas_internal_user_handler.UserResponse"
                                         }
                                     }
                                 }
@@ -2068,7 +2068,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/handler.UserResponse"
+                    "$ref": "#/definitions/saas_internal_user_handler.UserResponse"
                 }
             }
         },
@@ -2141,12 +2141,16 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "prefix",
+                "tenantID",
                 "title"
             ],
             "properties": {
                 "prefix": {
                     "type": "string",
                     "maxLength": 20
+                },
+                "tenantID": {
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string",
@@ -2258,6 +2262,9 @@ const docTemplate = `{
         "handler.ListUserWithRoleQueryRequestBody": {
             "type": "object",
             "properties": {
+                "nickname": {
+                    "type": "string"
+                },
                 "page": {
                     "type": "integer",
                     "minimum": 1
@@ -2266,6 +2273,9 @@ const docTemplate = `{
                     "type": "integer",
                     "maximum": 20,
                     "minimum": 5
+                },
+                "role_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -2320,25 +2330,8 @@ const docTemplate = `{
                 "list": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/handler.RoleResponse"
+                        "$ref": "#/definitions/saas_internal_role_handler.RoleResponse"
                     }
-                }
-            }
-        },
-        "handler.RoleResponse": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "tenant_id": {
-                    "type": "integer"
                 }
             }
         },
@@ -2378,10 +2371,20 @@ const docTemplate = `{
         },
         "handler.UpdateCategoryRequest": {
             "type": "object",
+            "required": [
+                "id",
+                "tenantID"
+            ],
             "properties": {
+                "id": {
+                    "type": "integer"
+                },
                 "prefix": {
                     "type": "string",
                     "maxLength": 20
+                },
+                "tenantID": {
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string",
@@ -2397,35 +2400,6 @@ const docTemplate = `{
             "properties": {
                 "plan_id": {
                     "type": "integer"
-                }
-            }
-        },
-        "handler.UserResponse": {
-            "type": "object",
-            "properties": {
-                "avatar_url": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "integer"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "email_verified": {
-                    "type": "boolean"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "last_login_at": {
-                    "type": "integer"
-                },
-                "updated_at": {
-                    "type": "integer"
-                },
-                "username": {
-                    "type": "string"
                 }
             }
         },
@@ -2529,8 +2503,22 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "is_default": {
-                    "type": "boolean"
+                "name": {
+                    "type": "string"
+                },
+                "tenant_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "saas_internal_role_handler.RoleResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
@@ -2593,6 +2581,35 @@ const docTemplate = `{
                     "maxLength": 120
                 },
                 "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "saas_internal_user_handler.UserResponse": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "email_verified": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_login_at": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "integer"
+                },
+                "username": {
                     "type": "string"
                 }
             }
