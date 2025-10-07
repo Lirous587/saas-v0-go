@@ -18,8 +18,8 @@ func domainImgToResponse(img *domain.Img) *ImgResponse {
 		UpdatedAt:   img.UpdatedAt.Unix(),
 	}
 
-	// 如果是要访问已删除文件
-	if img.IsDelete() {
+	// 如果是要访问软删除文件
+	if img.IsDeleted() {
 		resp.Url = img.Path
 	}
 

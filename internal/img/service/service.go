@@ -36,10 +36,17 @@ type tenantR2Config struct {
 	expireAt        time.Time
 }
 
+type tenantR2ConfigWithOnce struct {
+	config *tenantR2Config
+	once   sync.Once
+	err    error
+}
+
 type service struct {
 	repo            domain.ImgRepository
 	msgQueue        domain.ImgMsgQueue
 	tenantR2        sync.Map // key: int64 (tenant_id), value: *TenantR2Config
+	imgMutex     sync.Map // key: int64 (imgID), value: *sync.Mutex
 	ace256Encryptor *utils.AES256Encryptor
 }
 
@@ -67,25 +74,35 @@ func NewImgService(repo domain.ImgRepository, msgQueue domain.ImgMsgQueue) domai
 }
 
 func (s *service) getTenantR2Config(tenantID domain.TenantID) (*tenantR2Config, error) {
-	value, exist := s.tenantR2.Load(tenantID)
+	// 用 LoadOrStore 获取或创建 wrapper
+	value, _ := s.tenantR2.LoadOrStore(tenantID, &tenantR2ConfigWithOnce{})
+	wrapper := value.(*tenantR2ConfigWithOnce)
 
-	if exist {
-		cfg, ok := value.(*tenantR2Config)
-		if !ok {
-			return nil, errors.New("value.(*tenantR2Config)断言失败")
+	// 用 once.Do 确保只加载一次
+	wrapper.once.Do(func() {
+		cfg, err := s.loadTenantR2Config(tenantID)
+		if err != nil {
+			wrapper.err = err
+			return
 		}
+		wrapper.config = cfg
+	})
 
-		// 延长ttl
-		cfg.expireAt = time.Now().Add(tenantR2ConfigTTL)
+	// 如果加载失败，返回错误
+	if wrapper.err != nil {
+		return nil, wrapper.err
 	}
 
-	cfg, err := s.loadTenantR2Config(tenantID)
-	if err != nil {
-		return nil, err
+	// 检查是否过期
+	if time.Now().After(wrapper.config.expireAt) {
+		// 过期：删除旧的，递归重新加载（会创建新 once）
+		s.tenantR2.Delete(tenantID)
+		return s.getTenantR2Config(tenantID)
 	}
 
-	s.tenantR2.Store(tenantID, cfg)
-	return cfg, nil
+	// 未过期：延长 TTL 并返回
+	wrapper.config.expireAt = time.Now().Add(tenantR2ConfigTTL)
+	return wrapper.config, nil
 }
 
 func (s *service) loadTenantR2Config(tenantID domain.TenantID) (*tenantR2Config, error) {
@@ -135,8 +152,8 @@ func (s *service) cleanupExpiredConfigs() {
 
 	for range ticker.C {
 		s.tenantR2.Range(func(key, value interface{}) bool {
-			cfg := value.(*tenantR2Config)
-			if time.Now().After(cfg.expireAt) {
+			wrapper := value.(*tenantR2ConfigWithOnce)
+			if wrapper.config != nil && time.Now().After(wrapper.config.expireAt) {
 				s.tenantR2.Delete(key)
 			}
 			return true
@@ -170,14 +187,6 @@ func (s *service) Compress(src io.Reader) (io.Reader, error) {
 }
 
 func (s *service) Upload(src io.Reader, img *domain.Img, categoryID int64) (*domain.Img, error) {
-	a, _ := s.ace256Encryptor.Encrypt("a818de318a6b9e2dbdb8974b685deb46bb644c95270a582cc7563bacfd56ac26")
-	fmt.Println(a)
-
-	// 加载配置
-	r2Config, err := s.getTenantR2Config(img.TenantID)
-	if err != nil {
-		return nil, err
-	}
 
 	// 压缩图片
 	compressed, err := s.Compress(src)
@@ -200,16 +209,24 @@ func (s *service) Upload(src io.Reader, img *domain.Img, categoryID int64) (*dom
 	if category != nil {
 		nowPath = category.Prefix + "/" + img.Path
 	}
+
 	exist, err := s.repo.ExistByPath(img.TenantID, nowPath)
 	if err != nil {
 		return nil, err
 	}
+
 	if exist {
 		return nil, codes.ErrImgPathRepeat
 	}
 
 	// 3.入库
 	res, err := s.repo.Create(img, categoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	// 加载配置
+	r2Config, err := s.getTenantR2Config(img.TenantID)
 	if err != nil {
 		return nil, err
 	}
@@ -244,26 +261,30 @@ func (s *service) Upload(src io.Reader, img *domain.Img, categoryID int64) (*dom
 // 硬删除 -> 直接删除 publicBucket 中的对象
 // 软删除 -> 复制原有对象到不可公共访问的 deleteBucket 删除 publicBucket 中的对象 -> 类似于回收站功能
 func (s *service) Delete(tenantID domain.TenantID, id int64, hard ...bool) error {
-	// 加载配置
-	r2Config, err := s.getTenantR2Config(tenantID)
-	if err != nil {
-		return err
-	}
+	// 为每个图片创建或获取锁
+	value, _ := s.imgMutex.LoadOrStore(id, &sync.Mutex{})
+	mu := value.(*sync.Mutex)
+	mu.Lock()
+	defer mu.Unlock()
 
 	img, err := s.repo.FindByID(tenantID, id)
 	if err != nil {
 		return err
 	}
 
-	var ifHard bool
-
-	if len(hard) == 0 {
-		ifHard = false
-	} else if hard[0] {
-		ifHard = true
+	if !img.CanDeleted() {
+		return nil
 	}
 
-	if ifHard {
+	// 加载配置
+	r2Config, err := s.getTenantR2Config(tenantID)
+	if err != nil {
+		return err
+	}
+
+	isHardDelete := len(hard) > 0 && hard[0]
+
+	if isHardDelete {
 		// 1.删除r3
 		if err := s.DeleteFile(r2Config.s3Client, r2Config.publicBucket, img.Path); err != nil {
 			return err
@@ -295,42 +316,6 @@ func (s *service) Delete(tenantID domain.TenantID, id int64, hard ...bool) error
 				zap.Error(err),
 			)
 		}
-	}
-
-	return nil
-}
-
-// ClearRecycleBin 删除被软删除的数据
-// 此时删除 deleteBucket对象 数据库记录 消息队列key
-func (s *service) ClearRecycleBin(tenantID domain.TenantID, id int64) error {
-	// 加载配置
-	r2Config, err := s.getTenantR2Config(tenantID)
-	if err != nil {
-		return err
-	}
-
-	// 1.先查询图片信息
-	img, err := s.repo.FindByID(tenantID, id, true)
-	if err != nil {
-		return err
-	}
-
-	// 2.删除 deleteBucket 中的文件
-	if err := s.DeleteFile(r2Config.s3Client, r2Config.deleteBucket, img.Path); err != nil {
-		return err
-	}
-
-	// 3.硬删除数据库记录
-	if err := s.repo.Delete(tenantID, id, true); err != nil {
-		return err
-	}
-
-	// 4.从删除队列中移除（防止定时器重复删除）
-	if err := s.msgQueue.RemoveFromDeleteQueue(tenantID, id); err != nil {
-		zap.L().Error("清空回收站：移除定时删除任务失败",
-			zap.Int64("imgID", id),
-			zap.Error(err),
-		)
 	}
 
 	return nil
@@ -427,15 +412,69 @@ func (s *service) ListenDeleteQueue() {
 	})
 }
 
-func (s *service) RestoreFromRecycleBin(tenantID domain.TenantID, id int64) (*domain.Img, error) {
+// ClearRecycleBin 删除被软删除的数据
+// 此时删除 deleteBucket对象 数据库记录 消息队列key
+func (s *service) ClearRecycleBin(tenantID domain.TenantID, id int64) error {
+	value, _ := s.imgMutex.LoadOrStore(id, &sync.Mutex{})
+	mu := value.(*sync.Mutex)
+	mu.Lock()
+	defer mu.Unlock()
+
+	// 1.先查询图片信息
+	img, err := s.repo.FindByID(tenantID, id, true)
+	if err != nil {
+		return err
+	}
+
+	if !img.IsDeleted() {
+		return codes.ErrImgIllegalOperation
+	}
+
 	// 加载配置
 	r2Config, err := s.getTenantR2Config(tenantID)
+	if err != nil {
+		return err
+	}
+
+	// 2.删除 deleteBucket 中的文件
+	if err := s.DeleteFile(r2Config.s3Client, r2Config.deleteBucket, img.Path); err != nil {
+		return err
+	}
+
+	// 3.硬删除数据库记录
+	if err := s.repo.Delete(tenantID, id, true); err != nil {
+		return err
+	}
+
+	// 4.从删除队列中移除（防止定时器重复删除）
+	if err := s.msgQueue.RemoveFromDeleteQueue(tenantID, id); err != nil {
+		zap.L().Error("清空回收站：移除定时删除任务失败",
+			zap.Int64("imgID", id),
+			zap.Error(err),
+		)
+	}
+
+	return nil
+}
+
+func (s *service) RestoreFromRecycleBin(tenantID domain.TenantID, id int64) (*domain.Img, error) {
+	value, _ := s.imgMutex.LoadOrStore(id, &sync.Mutex{})
+	mu := value.(*sync.Mutex)
+	mu.Lock()
+	defer mu.Unlock()
+
+	// 1.查询已软删除的图片信息
+	img, err := s.repo.FindByID(tenantID, id, true)
 	if err != nil {
 		return nil, err
 	}
 
-	// 1.查询已软删除的图片信息
-	img, err := s.repo.FindByID(tenantID, id, true)
+	if !img.IsDeleted() {
+		return nil, codes.ErrImgIllegalOperation
+	}
+
+	// 加载配置
+	r2Config, err := s.getTenantR2Config(tenantID)
 	if err != nil {
 		return nil, err
 	}

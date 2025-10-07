@@ -275,7 +275,7 @@ func (h *HttpHandler) RestoreFromRecycleBin(ctx *gin.Context) {
 		return
 	}
 
-	response.Success(ctx, res)
+	response.Success(ctx, domainImgToResponse(res))
 }
 
 func (h *HttpHandler) ListenDeleteQueue() {

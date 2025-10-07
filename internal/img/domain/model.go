@@ -15,15 +15,16 @@ type Img struct {
 	UpdatedAt    time.Time
 	DeletedAt    time.Time
 	publicPreURL string
-	deleted      bool
 }
 
-func (img *Img) SetDeletedStatus(deleted bool) {
-	img.deleted = deleted
+func (img *Img) IsDeleted() bool {
+	// deleted_time非零值则为软删除记录
+	return !img.DeletedAt.IsZero()
 }
 
-func (img *Img) IsDelete() bool {
-	return img.deleted
+// CanDeleted 状态转换 当前图片是否可以软删除或硬删除
+func (img *Img) CanDeleted() bool {
+	return !img.IsDeleted()
 }
 
 func (img *Img) SetPublicPreURL(preURL string) {

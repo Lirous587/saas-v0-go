@@ -48,6 +48,7 @@ func (repo *ImgPSQLRepository) ExistByPath(tenantID domain.TenantID, path string
 	exist, err := orm.Imgs(
 		qm.Where(fmt.Sprintf("%s = ?", orm.ImgColumns.TenantID), tenantID),
 		qm.And(fmt.Sprintf("%s = ?", orm.ImgColumns.Path), path),
+		qm.WithDeleted(),
 	).ExistsG()
 	if err != nil {
 		return false, err

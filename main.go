@@ -49,7 +49,6 @@ func setGDB() {
 
 	boil.SetDB(db)
 
-	// 设置时区
 	boil.DebugMode = true
 
 	logMode := os.Getenv("LOG_MODE")

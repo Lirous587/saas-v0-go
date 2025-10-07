@@ -31,11 +31,6 @@ func ormImgToDomain(ormImg *orm.Img, isDeleted ...bool) *domain.Img {
 		return nil
 	}
 
-	deleted := false
-	if len(isDeleted) > 0 {
-		deleted = isDeleted[0]
-	}
-
 	img := &domain.Img{
 		ID:        ormImg.ID,
 		TenantID:  domain.TenantID(ormImg.TenantID),
@@ -43,8 +38,6 @@ func ormImgToDomain(ormImg *orm.Img, isDeleted ...bool) *domain.Img {
 		CreatedAt: ormImg.CreatedAt,
 		UpdatedAt: ormImg.UpdatedAt,
 	}
-
-	img.SetDeletedStatus(deleted)
 
 	// 处理null项
 	if ormImg.Description.Valid {
