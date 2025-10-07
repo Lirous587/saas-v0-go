@@ -41,7 +41,7 @@ func (repo *ImgPSQLRepository) FindByID(tenantID domain.TenantID, id int64, dele
 		return nil, err
 	}
 
-	return ormImgToDomain(ormImg, selectDeleted), err
+	return ormImgToDomain(ormImg), err
 }
 
 func (repo *ImgPSQLRepository) ExistByPath(tenantID domain.TenantID, path string) (bool, error) {
@@ -163,7 +163,7 @@ func (repo *ImgPSQLRepository) List(query *domain.ImgQuery) (*domain.ImgList, er
 
 	return &domain.ImgList{
 		Total: total,
-		List:  ormImgsToDomain(imgs, query.Deleted),
+		List:  ormImgsToDomain(imgs),
 	}, nil
 }
 
