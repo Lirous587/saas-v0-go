@@ -41,6 +41,7 @@ func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
+// @Param        id   path int true "Role ID"
 // @Param        request body handler.CreateRequest true "创建 Role 请求"
 // @Success      200  {object}  response.successResponse{data=handler.RoleResponse} "成功创建 Role"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
@@ -54,6 +55,8 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 	}
 
 	data, err := h.service.Create(&domain.Role{
+		ID:          req.ID,
+		Name:        req.Name,
 		Description: req.Description,
 	})
 
@@ -79,12 +82,6 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/role/:tenant_id/{id} [put]
 func (h *HttpHandler) Update(ctx *gin.Context) {
-	id, err := h.getID(ctx)
-	if err != nil {
-		response.InvalidParams(ctx, err)
-		return
-	}
-
 	req := new(UpdateRequest)
 
 	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
@@ -92,8 +89,8 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 	}
 
 	data, err := h.service.Update(&domain.Role{
-		ID: id,
-		// Title:       req.Title,
+		ID:          req.ID,
+		Name:        req.Name,
 		Description: req.Description,
 	})
 

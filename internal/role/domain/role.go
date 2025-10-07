@@ -8,7 +8,6 @@ type Role struct {
 	ID          int64
 	Name        string
 	Description string
-	IsDefault   bool
 }
 
 type RoleList struct {

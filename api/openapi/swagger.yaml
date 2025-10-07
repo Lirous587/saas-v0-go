@@ -254,16 +254,12 @@ definitions:
     type: object
   handler.UpdateCategoryRequest:
     properties:
-      id:
-        type: integer
       prefix:
         maxLength: 20
         type: string
       title:
         maxLength: 10
         type: string
-    required:
-    - id
     type: object
   handler.UpgradeRequest:
     properties:
@@ -337,14 +333,9 @@ definitions:
       description:
         maxLength: 60
         type: string
-      id:
-        type: integer
       name:
         type: string
-      tenant_id:
-        type: integer
     required:
-    - id
     - name
     type: object
   saas_internal_role_handler.RoleResponse:
@@ -363,14 +354,9 @@ definitions:
       description:
         maxLength: 60
         type: string
-      id:
-        type: integer
       name:
         type: string
-      tenant_id:
-        type: integer
     required:
-    - id
     - name
     type: object
   saas_internal_tenant_handler.CreateRequest:
@@ -394,7 +380,6 @@ definitions:
       id:
         type: string
     required:
-    - id
     - id
     type: object
   saas_internal_user_handler.UserResponse:
@@ -617,6 +602,11 @@ paths:
       - application/json
       description: 新建图片分类
       parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: integer
       - description: 创建分类请求
         in: body
         name: request
@@ -654,9 +644,14 @@ paths:
       - application/json
       description: 删除指定图片分类
       parameters:
-      - description: 分类ID
+      - description: 分类id
         in: path
         name: id
+        required: true
+        type: integer
+      - description: 租户id
+        in: path
+        name: tenant_id
         required: true
         type: integer
       produces:
@@ -684,9 +679,14 @@ paths:
       - application/json
       description: 修改图片分类信息
       parameters:
-      - description: 分类ID
+      - description: 分类id
         in: path
         name: id
+        required: true
+        type: integer
+      - description: 租户id
+        in: path
+        name: tenant_id
         required: true
         type: integer
       - description: 更新分类请求
@@ -1109,6 +1109,11 @@ paths:
       - application/json
       description: 创建新的 Role
       parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
       - description: 创建 Role 请求
         in: body
         name: request

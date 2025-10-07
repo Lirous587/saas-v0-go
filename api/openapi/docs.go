@@ -297,6 +297,13 @@ const docTemplate = `{
                 "summary": "创建图片分类",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "创建分类请求",
                         "name": "request",
                         "in": "body",
@@ -361,8 +368,15 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "分类ID",
+                        "description": "分类id",
                         "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "租户id",
+                        "name": "tenant_id",
                         "in": "path",
                         "required": true
                     },
@@ -429,8 +443,15 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "分类ID",
+                        "description": "分类id",
                         "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "租户id",
+                        "name": "tenant_id",
                         "in": "path",
                         "required": true
                     }
@@ -1157,6 +1178,13 @@ const docTemplate = `{
                 ],
                 "summary": "创建 Role",
                 "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "创建 Role 请求",
                         "name": "request",
@@ -2514,13 +2542,7 @@ const docTemplate = `{
         },
         "handler.UpdateCategoryRequest": {
             "type": "object",
-            "required": [
-                "id"
-            ],
             "properties": {
-                "id": {
-                    "type": "integer"
-                },
                 "prefix": {
                     "type": "string",
                     "maxLength": 20
@@ -2631,7 +2653,6 @@ const docTemplate = `{
         "saas_internal_role_handler.CreateRequest": {
             "type": "object",
             "required": [
-                "id",
                 "name"
             ],
             "properties": {
@@ -2639,14 +2660,8 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 60
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "name": {
                     "type": "string"
-                },
-                "tenant_id": {
-                    "type": "integer"
                 }
             }
         },
@@ -2670,7 +2685,6 @@ const docTemplate = `{
         "saas_internal_role_handler.UpdateRequest": {
             "type": "object",
             "required": [
-                "id",
                 "name"
             ],
             "properties": {
@@ -2678,14 +2692,8 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 60
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "name": {
                     "type": "string"
-                },
-                "tenant_id": {
-                    "type": "integer"
                 }
             }
         },
@@ -2711,7 +2719,6 @@ const docTemplate = `{
         "saas_internal_tenant_handler.UpdateRequest": {
             "type": "object",
             "required": [
-                "id",
                 "id"
             ],
             "properties": {

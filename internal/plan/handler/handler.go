@@ -110,12 +110,6 @@ func (h *HttpHandler) Read(ctx *gin.Context) {
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/plan/{id} [put]
 func (h *HttpHandler) Update(ctx *gin.Context) {
-	id, err := h.getID(ctx)
-	if err != nil {
-		response.InvalidParams(ctx, err)
-		return
-	}
-
 	req := new(UpdateRequest)
 
 	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
@@ -123,7 +117,7 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 	}
 
 	data, err := h.service.Update(&domain.Plan{
-		ID:          id,
+		ID:          req.ID,
 		Name:        req.Name,
 		Price:       req.Price,
 		Description: req.Description,

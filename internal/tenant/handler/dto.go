@@ -19,7 +19,7 @@ type CreateRequest struct {
 }
 
 type UpdateRequest struct {
-	ID          int64  `uri:"id" binding:"required"`
+	ID          int64  `json:"-" uri:"id" binding:"required"`
 	Name        string `json:"id" binding:"required"`
 	Description string `json:"description" binding:"max=120"`
 }
@@ -59,7 +59,7 @@ type EntryRequest struct {
 }
 
 type ListUserWithRoleQueryRequest struct {
-	TenantID int64 `uri:"id" binding:"required"`
+	TenantID int64 `json:"-" uri:"id" binding:"required"`
 	ListUserWithRoleQueryRequestBody
 }
 

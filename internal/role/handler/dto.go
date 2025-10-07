@@ -8,15 +8,13 @@ type RoleResponse struct {
 }
 
 type CreateRequest struct {
-	ID          int64  `json:"id" binding:"required"`
-	TenantID    int64  `json:"tenant_id"`
+	ID          int64  `json:"-" uri:"id" binding:"required"`
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description" binding:"max=60"`
 }
 
 type UpdateRequest struct {
-	ID          int64  `json:"id" binding:"required"`
-	TenantID    int64  `json:"tenant_id"`
+	ID          int64  `json:"-" uri:"id" binding:"required"`
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description" binding:"max=60"`
 }
