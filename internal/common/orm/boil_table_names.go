@@ -6,6 +6,7 @@ package orm
 var TableNames = struct {
 	Apis           string
 	CasbinRule     string
+	Comments       string
 	ImgCategories  string
 	Imgs           string
 	Plans          string
@@ -18,6 +19,7 @@ var TableNames = struct {
 }{
 	Apis:           "apis",
 	CasbinRule:     "casbin_rule",
+	Comments:       "comments",
 	ImgCategories:  "img_categories",
 	Imgs:           "imgs",
 	Plans:          "plans",

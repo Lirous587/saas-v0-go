@@ -68,6 +68,28 @@ definitions:
       title:
         type: string
     type: object
+  handler.CommentListResponse:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/handler.CommentResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  handler.CommentResponse:
+    properties:
+      created_at:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: integer
+    type: object
   handler.CreateCategoryRequest:
     properties:
       prefix:
@@ -300,6 +322,28 @@ definitions:
         example: 请求成功
         type: string
     type: object
+  saas_internal_comment_handler.CreateRequest:
+    properties:
+      description:
+        maxLength: 60
+        type: string
+      title:
+        maxLength: 30
+        type: string
+    required:
+    - title
+    type: object
+  saas_internal_comment_handler.UpdateRequest:
+    properties:
+      description:
+        maxLength: 60
+        type: string
+      title:
+        maxLength: 30
+        type: string
+    required:
+    - title
+    type: object
   saas_internal_plan_handler.CreateRequest:
     properties:
       description:
@@ -487,6 +531,190 @@ paths:
       summary: 生成带答案的验证码
       tags:
       - captcha
+  /v1/comment:
+    get:
+      consumes:
+      - application/json
+      description: 根据查询参数获取Comment列表，返回当前页数据和total数量
+      parameters:
+      - description: 关键词搜索
+        in: query
+        name: keyword
+        type: string
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Comment列表
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.CommentListResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      summary: 获取 Comment 列表
+      tags:
+      - comment
+    post:
+      consumes:
+      - application/json
+      description: 创建新的 Comment
+      parameters:
+      - description: 创建 Comment 请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/saas_internal_comment_handler.CreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功创建 Comment
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.CommentResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 创建 Comment
+      tags:
+      - comment
+  /v1/comment/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 根据ID删除 Comment
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功删除 Comment
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 删除 Comment
+      tags:
+      - comment
+    get:
+      consumes:
+      - application/json
+      description: 读取单条 Comment
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功查询 Comment
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.CommentResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      summary: 读取单条 Comment
+      tags:
+      - comment
+    put:
+      consumes:
+      - application/json
+      description: 根据ID更新 Comment 信息
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新 Comment 请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/saas_internal_comment_handler.UpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功更新 Comment
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.CommentResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 更新 Comment
+      tags:
+      - comment
   /v1/img/{tenant_id}:
     get:
       consumes:

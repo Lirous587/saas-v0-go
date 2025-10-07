@@ -211,3 +211,48 @@ CREATE TABLE public.tenant_r2_config (
 
 
 
+-- ...existing code...
+
+-- 评论表
+CREATE TABLE public.comments
+(
+    id         bigserial PRIMARY KEY,
+    tenant_id  bigint         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
+    -- tag text NOT NULL,
+    user_id    bigint         NOT NULL REFERENCES public.users (id) ON DELETE CASCADE,
+    -- 支持多级评论(评论的评论)
+    parent_id     bigint      NULL REFERENCES public.comments (id) ON DELETE CASCADE,
+    root_id       bigint      NULL REFERENCES public.comments (id) ON DELETE CASCADE, -- 根评论ID,便于查询整个评论树
+    content    text           NOT NULL,
+    -- 点赞数
+    -- like_count int4           NOT NULL DEFAULT 0,
+    -- 软删除
+    created_at timestamptz(6) NOT NULL DEFAULT now(),
+    updated_at timestamptz(6) NOT NULL DEFAULT now(),
+    deleted_at timestamptz(6) NULL,
+);
+
+-- 索引优化
+-- 按租户查询
+CREATE INDEX IF NOT EXISTS idx_comments_tenant_id ON public.comments (tenant_id);
+
+-- 按用户查询其评论
+CREATE INDEX IF NOT EXISTS idx_comments_user_id ON public.comments (user_id, deleted_at);
+
+-- 查询子评论
+CREATE INDEX IF NOT EXISTS idx_comments_parent_id ON public.comments (parent_id, deleted_at);
+
+-- 查询整个评论树
+CREATE INDEX IF NOT EXISTS idx_comments_root_id ON public.comments (root_id, created_at);
+
+-- 软删除索引
+CREATE INDEX IF NOT EXISTS idx_comments_deleted_at ON public.comments (deleted_at);
+
+-- 全文搜索
+CREATE INDEX IF NOT EXISTS idx_comments_content_trgm ON public.comments USING gin (content gin_trgm_ops);
+
+-- 按时间排序查询
+CREATE INDEX IF NOT EXISTS idx_comments_created_at ON public.comments (created_at DESC);
+
+-- 热门评论查询
+-- CREATE INDEX IF NOT EXISTS idx_comments_like_count ON public.comments (like_count DESC) WHERE deleted_at IS NULL;

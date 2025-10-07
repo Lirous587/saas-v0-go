@@ -11,6 +11,7 @@ import (
 	"saas/internal/common/middleware/auth"
 	"saas/internal/common/server"
 	"saas/internal/common/uid"
+	"saas/internal/comment"
 	"saas/internal/img"
 	"saas/internal/role"
 	"saas/internal/tenant"
@@ -127,6 +128,7 @@ func main() {
 
 		tenant.InitV1(r)
 		role.InitV1(r)
+		comment.InitV1(r)
 	},
 		clear,
 	)
