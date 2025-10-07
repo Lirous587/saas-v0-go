@@ -130,12 +130,12 @@ func doaminR2ConfigToORM(r2Config *domain.R2Config) *orm.TenantR2Config {
 	}
 
 	ormR2Config := &orm.TenantR2Config{
-		TenantID:        r2Config.TenantID,
+		TenantID:        int64(r2Config.TenantID),
 		AccountID:       r2Config.AccountID,
 		AccessKeyID:     r2Config.AccessKeyID,
 		SecretAccessKey: r2Config.GetSecretAccessKey(),
 		PublicBucket:    r2Config.PublicBucket,
-		PublicURLPrefix: r2Config.PublicBucket,
+		PublicURLPrefix: r2Config.PublicURLPrefix,
 		DeleteBucket:    r2Config.DeleteBucket,
 	}
 
@@ -148,7 +148,7 @@ func ormR2ConfigToDomian(ormR2Config *orm.TenantR2Config) *domain.R2Config {
 	}
 
 	r2Config := &domain.R2Config{
-		TenantID:        ormR2Config.TenantID,
+		TenantID:        domain.TenantID(ormR2Config.TenantID),
 		AccountID:       ormR2Config.AccountID,
 		AccessKeyID:     ormR2Config.AccessKeyID,
 		PublicBucket:    ormR2Config.PublicBucket,

@@ -264,7 +264,10 @@ func (repo *ImgPSQLRepository) CategoryExistByID(tenantID domain.TenantID, id in
 }
 
 func (repo *ImgPSQLRepository) CategoryExistByTitle(tenantID domain.TenantID, title string) (bool, error) {
-	exist, err := orm.ImgCategories(qm.Where(fmt.Sprintf("%s = ?", orm.ImgCategoryColumns.Title), title)).ExistsG()
+	exist, err := orm.ImgCategories(
+		qm.Where(fmt.Sprintf("%s = ?", orm.ImgCategoryColumns.TenantID), tenantID),
+		qm.And(fmt.Sprintf("%s = ?", orm.ImgCategoryColumns.Title), title),
+	).ExistsG()
 	if err != nil {
 		return false, err
 	}
@@ -310,8 +313,22 @@ func (repo *ImgPSQLRepository) GetTenantR2Config(tenantID domain.TenantID) (*dom
 }
 
 func (repo *ImgPSQLRepository) SetTenantR2Config(config *domain.R2Config) error {
-	// ormR2Config := doaminR2ConfigToORM(config)
+	ormR2Config := doaminR2ConfigToORM(config)
 
-	// ormR2Config.UpsertG()
-	return nil
+	err := ormR2Config.UpsertG(
+		true,
+		[]string{"tenant_id"}, // conflictColumns: 冲突时依据的列
+		boil.Whitelist( // updateColumns: 冲突时要更新的列
+			orm.TenantR2ConfigColumns.AccountID,
+			orm.TenantR2ConfigColumns.AccessKeyID,
+			orm.TenantR2ConfigColumns.SecretAccessKey,
+			orm.TenantR2ConfigColumns.PublicBucket,
+			orm.TenantR2ConfigColumns.PublicURLPrefix,
+			orm.TenantR2ConfigColumns.DeleteBucket,
+			orm.TenantR2ConfigColumns.UpdatedAt,
+		),
+		boil.Infer(),
+	)
+
+	return err
 }

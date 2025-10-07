@@ -61,17 +61,39 @@ type CreateCategoryRequest struct {
 }
 
 type UpdateCategoryRequest struct {
-	ID       int64           `uri:"id" binding:"required"`
+	ID       int64           `json:"-" uri:"id" binding:"required"`
 	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 	Title    string          `json:"title" binding:"max=10"`
-	Prefix   string          `json:"prefix" binding:"max=20"`
+	Prefix   string          `json:"prefix" binding:"max=20,slug"`
 }
 
 type DeleteCategoryRequest struct {
-	ID       int64           `uri:"id" binding:"required"`
+	ID       int64           `json:"-" uri:"id" binding:"required"`
 	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 }
 
 type ListCategoryRequest struct {
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+}
+
+type R2Configure struct {
+	AccountID       string `json:"account_id"`
+	AccessKeyID     string `json:"access_key_id"`
+	PublicBucket    string `json:"public_bucket"`
+	PublicURLPrefix string `json:"public_url_prefix"`
+	DeleteBucket    string `json:"delete_bucket"`
+}
+
+type SetR2ConfigureRequest struct {
+	TenantID        domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	AccountID       string          `json:"account_id" binding:"required"`
+	AccessKeyID     string          `json:"access_key_id" binding:"required"`
+	SecretAccessKey string          `json:"secret_access_key" binding:"required"`
+	PublicBucket    string          `json:"public_bucket" binding:"required"`
+	PublicURLPrefix string          `json:"public_url_prefix" binding:"required"`
+	DeleteBucket    string          `json:"delete_bucket" binding:"required"`
+}
+
+type GetR2ConfigureRequest struct {
 	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 }

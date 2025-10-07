@@ -18,6 +18,6 @@ var (
 	ErrImgCompress         = ErrCode{Msg: "压缩图片失败", Type: ErrorTypeInternal, Code: 1420}
 	ErrImgUploadToR3Failed = ErrCode{Msg: "上传图片到R3失败", Type: ErrorTypeInternal, Code: 1421}
 
-	// 图库配置
+	// 图库配置 (1440-1459)
 	ErrImgR2ConfigNotFound = ErrCode{Msg: "图库R2配置不存在", Type: ErrorTypeNotFound, Code: 1440}
 )

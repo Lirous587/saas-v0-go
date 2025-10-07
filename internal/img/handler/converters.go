@@ -81,3 +81,20 @@ func domainCategoriesToResponse(categories []*domain.Category) []*CategoryRespon
 
 	return list
 }
+
+func domainR2ConfigureToResponse(r2Config *domain.R2Config) *R2Configure {
+	if r2Config == nil {
+		return nil
+	}
+
+	// 默认访问public
+	resp := &R2Configure{
+		AccountID:       r2Config.AccountID,
+		AccessKeyID:     r2Config.AccessKeyID,
+		PublicBucket:    r2Config.PublicBucket,
+		PublicURLPrefix: r2Config.PublicURLPrefix,
+		DeleteBucket:    r2Config.DeleteBucket,
+	}
+
+	return resp
+}

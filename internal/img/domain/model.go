@@ -58,7 +58,7 @@ type Category struct {
 }
 
 type R2Config struct {
-	TenantID        int64
+	TenantID        TenantID
 	AccountID       string
 	AccessKeyID     string
 	secretAccessKey string

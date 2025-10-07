@@ -20,8 +20,8 @@ type ImgRepository interface {
 	CountCategory(tenantID TenantID) (int64, error)
 	IsCategoryExistImg(tenantID TenantID, id int64) (bool, error)
 
+	SetTenantR2Config(config *R2Config) error
 	GetTenantR2Config(tenantID TenantID) (*R2Config, error)
-	SetTenantR2Config(Config *R2Config) error
 }
 
 type ImgMsgQueue interface {

@@ -290,6 +290,7 @@ func (h *HttpHandler) ListenDeleteQueue() {
 // @Tags         img-category
 // @Accept       json
 // @Produce      json
+// @Param        tenant_id    path   int64  true  "租户id"
 // @Param        request body handler.CreateCategoryRequest true "创建分类请求"
 // @Success      200 {object} response.successResponse{data=handler.CategoryResponse} "创建成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
@@ -322,7 +323,8 @@ func (h *HttpHandler) CreateCategory(ctx *gin.Context) {
 // @Tags         img-category
 // @Accept       json
 // @Produce      json
-// @Param        id      path   int64  true  "分类ID"
+// @Param        id      		path   int64  true  "分类id"
+// @Param        tenant_id  path   int64  true  "租户id"
 // @Param        request body   handler.UpdateCategoryRequest true "更新分类请求"
 // @Success      200 {object} response.successResponse{data=handler.CategoryResponse} "更新成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
@@ -356,14 +358,15 @@ func (h *HttpHandler) UpdateCategory(ctx *gin.Context) {
 // @Tags         img-category
 // @Accept       json
 // @Produce      json
-// @Param        id path int64 true "分类ID"
+// @Param        id path int64 true "分类id"
+// @Param        tenant_id path int64 true "租户id"
 // @Success      200 {object} response.successResponse "删除成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
 // @Router       /v1/img/{tenant_id}/category/{id} [delete]
 func (h *HttpHandler) DeleteCategory(ctx *gin.Context) {
-	req := new(UpdateCategoryRequest)
+	req := new(DeleteCategoryRequest)
 	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
@@ -399,4 +402,67 @@ func (h *HttpHandler) ListCategories(ctx *gin.Context) {
 	}
 
 	response.Success(ctx, domainCategoriesToResponse(res))
+}
+
+// SetConfigureR2 godoc
+// @Summary      配置图库R2配置
+// @Description  配置图库R2配置
+// @Tags         img
+// @Accept       json
+// @Produce      json
+// @Param        tenant_id      path   int64  true  "租户id"
+// @Param        request body   handler.SetR2ConfigureRequest true "请求参数"
+// @Success      200 {object} response.successResponse "查询成功"
+// @Failure      500 {object} response.errorResponse "服务器错误"
+// @Security     BearerAuth
+// @Router       /v1/img/{tenant_id}/configure_r2 [put]
+func (h *HttpHandler) SetConfigureR2(ctx *gin.Context) {
+	req := new(SetR2ConfigureRequest)
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	config := &domain.R2Config{
+		TenantID:        req.TenantID,
+		AccountID:       req.AccountID,
+		AccessKeyID:     req.AccessKeyID,
+		PublicBucket:    req.PublicBucket,
+		PublicURLPrefix: req.PublicURLPrefix,
+		DeleteBucket:    req.DeleteBucket,
+	}
+
+	err := h.service.SetR2Configure(req.SecretAccessKey, config)
+
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx)
+}
+
+// GetConfigureR2 godoc
+// @Summary      获取配置图库R2配置
+// @Description  获取配置图库R2配置
+// @Tags         img
+// @Accept       json
+// @Produce      json
+// @Success      200 {object} response.successResponse{data=handler.R2Configure} "查询成功"
+// @Failure      500 {object} response.errorResponse "服务器错误"
+// @Security     BearerAuth
+// @Router       /v1/img/{tenant_id}/configure_r2 [get]
+func (h *HttpHandler) GetConfigureR2(ctx *gin.Context) {
+	req := new(GetR2ConfigureRequest)
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	res, err := h.service.GetR2Configure(req.TenantID)
+
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx, domainR2ConfigureToResponse(res))
 }

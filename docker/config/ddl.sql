@@ -22,19 +22,19 @@ CREATE INDEX IF NOT EXISTS idx_casbin_rule_ptype_v0_v1_v2 ON public.casbin_rule 
 
 -- API表
 -- 定义项目所有的api 便于后续sys为权限分配api
-CREATE TABLE public.apis
-(
-    id          bigserial PRIMARY KEY,
-    method      varchar(10) NOT NULL,
-    path        varchar(60) NOT NULL,
-    description varchar(60) NULL,
-    CONSTRAINT api_check CHECK (
-        method IN ('get', 'post', 'put', 'delete', 'patch')
-        ),
-    CONSTRAINT apis_method_path_unique UNIQUE (method, path)
-);
-CREATE INDEX IF NOT EXISTS idx_apis_path ON public.apis (path);
-CREATE INDEX IF NOT EXISTS idx_apis_path_trgm ON public.apis USING gin (path gin_trgm_ops);
+-- CREATE TABLE public.apis
+-- (
+--     id          bigserial PRIMARY KEY,
+--     method      varchar(10) NOT NULL,
+--     path        varchar(60) NOT NULL,
+--     description varchar(60) NULL,
+--     CONSTRAINT api_check CHECK (
+--         method IN ('get', 'post', 'put', 'delete', 'patch')
+--         ),
+--     CONSTRAINT apis_method_path_unique UNIQUE (method, path)
+-- );
+-- CREATE INDEX IF NOT EXISTS idx_apis_path ON public.apis (path);
+-- CREATE INDEX IF NOT EXISTS idx_apis_path_trgm ON public.apis USING gin (path gin_trgm_ops);
 
 
 -- 计划表
@@ -208,3 +208,6 @@ CREATE TABLE public.tenant_r2_config (
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now()
 );
+
+
+

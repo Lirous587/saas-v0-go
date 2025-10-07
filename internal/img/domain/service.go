@@ -17,4 +17,8 @@ type ImgService interface {
 	UpdateCategory(category *Category) (*Category, error)
 	DeleteCategory(tenantID TenantID, id int64) error
 	ListCategories(tenantID TenantID) (categories []*Category, err error)
+
+	// 配置
+	SetR2Configure(secretAccessKey string, config *R2Config) error
+	GetR2Configure(tenantID TenantID) (*R2Config, error)
 }

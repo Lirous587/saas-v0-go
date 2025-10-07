@@ -457,6 +457,102 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/img/{tenant_id}/configure_r2": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取配置图库R2配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "img"
+                ],
+                "summary": "获取配置图库R2配置",
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.R2Configure"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "配置图库R2配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "img"
+                ],
+                "summary": "配置图库R2配置",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.SetR2ConfigureRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.successResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/img/{tenant_id}/recycle/{id}": {
             "put": {
                 "security": [
@@ -2309,6 +2405,26 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.R2Configure": {
+            "type": "object",
+            "properties": {
+                "access_key_id": {
+                    "type": "string"
+                },
+                "account_id": {
+                    "type": "string"
+                },
+                "delete_bucket": {
+                    "type": "string"
+                },
+                "public_bucket": {
+                    "type": "string"
+                },
+                "public_url_prefix": {
+                    "type": "string"
+                }
+            }
+        },
         "handler.RefreshTokenResponse": {
             "type": "object",
             "properties": {
@@ -2328,6 +2444,37 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/saas_internal_role_handler.RoleResponse"
                     }
+                }
+            }
+        },
+        "handler.SetR2ConfigureRequest": {
+            "type": "object",
+            "required": [
+                "access_key_id",
+                "account_id",
+                "delete_bucket",
+                "public_bucket",
+                "public_url_prefix",
+                "secret_access_key"
+            ],
+            "properties": {
+                "access_key_id": {
+                    "type": "string"
+                },
+                "account_id": {
+                    "type": "string"
+                },
+                "delete_bucket": {
+                    "type": "string"
+                },
+                "public_bucket": {
+                    "type": "string"
+                },
+                "public_url_prefix": {
+                    "type": "string"
+                },
+                "secret_access_key": {
+                    "type": "string"
                 }
             }
         },

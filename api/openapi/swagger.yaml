@@ -181,6 +181,19 @@ definitions:
       updated_at:
         type: integer
     type: object
+  handler.R2Configure:
+    properties:
+      access_key_id:
+        type: string
+      account_id:
+        type: string
+      delete_bucket:
+        type: string
+      public_bucket:
+        type: string
+      public_url_prefix:
+        type: string
+    type: object
   handler.RefreshTokenResponse:
     properties:
       access_token:
@@ -194,6 +207,28 @@ definitions:
         items:
           $ref: '#/definitions/saas_internal_role_handler.RoleResponse'
         type: array
+    type: object
+  handler.SetR2ConfigureRequest:
+    properties:
+      access_key_id:
+        type: string
+      account_id:
+        type: string
+      delete_bucket:
+        type: string
+      public_bucket:
+        type: string
+      public_url_prefix:
+        type: string
+      secret_access_key:
+        type: string
+    required:
+    - access_key_id
+    - account_id
+    - delete_bucket
+    - public_bucket
+    - public_url_prefix
+    - secret_access_key
     type: object
   handler.TenantListResponse:
     properties:
@@ -685,6 +720,64 @@ paths:
       summary: 更新图片分类
       tags:
       - img-category
+  /v1/img/{tenant_id}/configure_r2:
+    get:
+      consumes:
+      - application/json
+      description: 获取配置图库R2配置
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.R2Configure'
+              type: object
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 获取配置图库R2配置
+      tags:
+      - img
+    put:
+      consumes:
+      - application/json
+      description: 配置图库R2配置
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.SetR2ConfigureRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 配置图库R2配置
+      tags:
+      - img
   /v1/img/{tenant_id}/recycle/{id}:
     delete:
       consumes:

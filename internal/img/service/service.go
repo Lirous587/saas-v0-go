@@ -46,7 +46,7 @@ type service struct {
 	repo            domain.ImgRepository
 	msgQueue        domain.ImgMsgQueue
 	tenantR2        sync.Map // key: int64 (tenant_id), value: *TenantR2Config
-	imgMutex     sync.Map // key: int64 (imgID), value: *sync.Mutex
+	imgMutex        sync.Map // key: int64 (imgID), value: *sync.Mutex
 	ace256Encryptor *utils.AES256Encryptor
 }
 
@@ -583,4 +583,19 @@ func (s *service) DeleteCategory(tenantID domain.TenantID, id int64) error {
 
 func (s *service) ListCategories(tenantID domain.TenantID) (categories []*domain.Category, err error) {
 	return s.repo.ListCategories(tenantID)
+}
+
+func (s *service) SetR2Configure(secretAccessKey string, config *domain.R2Config) error {
+	encryptSecret, err := s.ace256Encryptor.Encrypt(secretAccessKey)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	config.SetSecretAccessKey(encryptSecret)
+
+	return s.repo.SetTenantR2Config(config)
+}
+
+func (s *service) GetR2Configure(tenantID domain.TenantID) (*domain.R2Config, error) {
+	return s.repo.GetTenantR2Config(tenantID)
 }

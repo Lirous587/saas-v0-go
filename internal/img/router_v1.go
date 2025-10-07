@@ -33,11 +33,15 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 		protect.DELETE("/category/:id", handler.DeleteCategory)
 		protect.PUT("/category/:id", handler.UpdateCategory)
 		protect.GET("/categories", handler.ListCategories)
+
+		// 图库配置
+		protect.PUT("/configure_r2", handler.SetConfigureR2)
+		protect.GET("/configure_r2", handler.GetConfigureR2)
 	}
 
-	// go func() {
-	// 	handler.ListenDeleteQueue()
-	// }()
+	go func() {
+		handler.ListenDeleteQueue()
+	}()
 
 	return nil
 }
