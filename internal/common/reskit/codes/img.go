@@ -11,7 +11,6 @@ var (
 	ErrImgCategoryExistImg    = ErrCode{
 		Msg: "当前图片分类下存在图片,请检查图库和回收站", Type: ErrorTypeExternal, Code: 1405,
 	}
-
 	ErrImgIllegalOperation = ErrCode{Msg: "非法的图片操作", Type: ErrorTypeExternal, Code: 1406}
 
 	// 图片处理 (1420-1439)

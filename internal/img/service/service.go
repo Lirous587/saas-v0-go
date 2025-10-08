@@ -273,7 +273,7 @@ func (s *service) Delete(tenantID domain.TenantID, id int64, hard ...bool) error
 	}
 
 	if !img.CanDeleted() {
-		return nil
+		return codes.ErrImgIllegalOperation
 	}
 
 	// 加载配置
