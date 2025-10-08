@@ -7,6 +7,7 @@ var TableNames = struct {
 	Apis                string
 	CasbinRule          string
 	CommentConfigs      string
+	CommentLikes        string
 	Comments            string
 	ImgCategories       string
 	Imgs                string
@@ -22,6 +23,7 @@ var TableNames = struct {
 	Apis:                "apis",
 	CasbinRule:          "casbin_rule",
 	CommentConfigs:      "comment_configs",
+	CommentLikes:        "comment_likes",
 	Comments:            "comments",
 	ImgCategories:       "img_categories",
 	Imgs:                "imgs",

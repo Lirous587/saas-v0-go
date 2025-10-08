@@ -4,6 +4,10 @@ import (
 	"time"
 )
 
+type CommentStatus string
+
+const CommentStatusApprove CommentStatus = ""
+
 type Comment struct {
 	ID          int64
 	Title       string

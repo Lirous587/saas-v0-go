@@ -2,6 +2,7 @@
 CREATE
     EXTENSION IF NOT EXISTS pg_trgm;
 
+
 -- casbin_rule
 CREATE TABLE public.casbin_rule
 (
@@ -19,6 +20,7 @@ CREATE INDEX idx_casbin_rule_ptype ON public.casbin_rule USING btree (ptype);
 CREATE INDEX idx_casbin_rule_v0 ON public.casbin_rule USING btree (v0);
 CREATE INDEX idx_casbin_rule_v1 ON public.casbin_rule USING btree (v1);
 CREATE INDEX IF NOT EXISTS idx_casbin_rule_ptype_v0_v1_v2 ON public.casbin_rule (ptype, v0, v1, v2);
+
 
 -- API表
 -- 定义项目所有的api 便于后续sys为权限分配api
@@ -50,6 +52,7 @@ CREATE TABLE public.plans
     updated_at  timestamptz(6) NOT NULL DEFAULT now()
 );
 
+
 -- 租户表
 CREATE TABLE public.tenants
 (
@@ -60,6 +63,7 @@ CREATE TABLE public.tenants
     description varchar(120)
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_tenants_name ON public.tenants (name);
+
 
 -- 租户计划关联表
 CREATE TABLE public.tenant_plan
@@ -126,6 +130,7 @@ CREATE UNIQUE INDEX ux_roles_default_name ON public.roles (name);
 -- CREATE INDEX IF NOT EXISTS idx_buttons_tenant_id ON public.buttons (tenant_id);
 -- CREATE INDEX IF NOT EXISTS idx_buttons_menu_id ON public.buttons (menu_id);
 
+
 -- -- 角色按钮关联
 -- CREATE TABLE public.role_button
 -- (
@@ -134,6 +139,7 @@ CREATE UNIQUE INDEX ux_roles_default_name ON public.roles (name);
 --     button_id bigint NOT NULL REFERENCES buttons (id) ON DELETE CASCADE,
 --     UNIQUE (role_id, button_id)
 -- );
+
 
 -- 用户表
 CREATE TABLE public.users
@@ -151,6 +157,7 @@ CREATE TABLE public.users
 CREATE INDEX IF NOT EXISTS idx_users_created_at ON public.users (created_at);
 CREATE INDEX IF NOT EXISTS idx_users_updated_at ON public.users (updated_at);
 CREATE INDEX IF NOT EXISTS idx_users_nickname ON public.users (nickname);
+
 
 -- 租户-用户-角色 关联表
 -- 一个用户在一个租户下只能有一个角色
@@ -178,6 +185,7 @@ CREATE TABLE public.img_categories
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     UNIQUE (tenant_id, title)
 );
+
 
 -- img 表
 CREATE TABLE public.imgs
@@ -208,6 +216,7 @@ CREATE TABLE public.tenant_r2_configs (
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now()
 );
+
 
 -- 评论表
 CREATE TABLE public.comments
@@ -242,6 +251,19 @@ CREATE INDEX IF NOT EXISTS idx_comments_content_trgm ON public.comments USING gi
 CREATE INDEX IF NOT EXISTS idx_comments_created_at ON public.comments (created_at DESC);
 -- 热门评论查询（按点赞数）
 CREATE INDEX IF NOT EXISTS idx_comments_like_count ON public.comments (like_count DESC);
+
+
+-- 评论点赞表
+CREATE TABLE public.comment_likes
+(
+    comment_id bigint         NOT NULL REFERENCES public.comments (id) ON DELETE CASCADE,
+    user_id    bigint         NOT NULL REFERENCES public.users (id) ON DELETE CASCADE,
+    created_at timestamptz(6) NOT NULL DEFAULT now(),
+    PRIMARY KEY (comment_id, user_id)  -- 确保一个用户对一个评论只能点赞一次
+);
+-- 索引优化
+CREATE INDEX IF NOT EXISTS idx_comment_likes_user_id ON public.comment_likes (user_id);  -- 用户的点赞列表
+CREATE INDEX IF NOT EXISTS idx_comment_likes_comment_id ON public.comment_likes (comment_id);  -- 评论的点赞列表
 
 
 -- 租户评论全局配置（默认配置）
