@@ -874,7 +874,6 @@ func (tenantL) LoadComments(e boil.Executor, singular bool, maybeTenant interfac
 	query := NewQuery(
 		qm.From(`comments`),
 		qm.WhereIn(`comments.tenant_id in ?`, argsSlice...),
-		qmhelper.WhereIsNull(`comments.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)

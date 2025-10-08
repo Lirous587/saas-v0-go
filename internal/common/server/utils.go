@@ -55,29 +55,19 @@ func SetTenantID(key string) gin.HandlerFunc {
 }
 
 func GetTenantID(ctx *gin.Context) (int64, error) {
-	var exist1 = false
-	tenantIDStr := ctx.Param(TenantIDKey)
-
-	if tenantIDStr == "" {
-		exist1 = false
-	}
-
-	// 通过请求路径 /:tenant_id 设置租户id
-	if exist1 {
+	if tenantIDStr := ctx.Param(TenantIDKey); tenantIDStr != "" {
 		tenantID, err := strconv.ParseInt(tenantIDStr, 10, 64)
 		if err != nil {
 			return 0, codes.ErrInvalidRequest.WithCause(err)
 		}
 		return tenantID, nil
-	} else {
-		// 通过自定义扩展获取租户id
-		tid, exists := ctx.Get(TenantIDKey)
-		if exists {
-			id, ok := tid.(int64)
-			if ok {
-				return id, nil
-			}
-		}
-		return 0, codes.ErrInvalidRequest.WithSlug("无租户id来源")
 	}
+
+	if tid, exists := ctx.Get(TenantIDKey); exists {
+		if id, ok := tid.(int64); ok {
+			return id, nil
+		}
+	}
+
+	return 0, codes.ErrInvalidRequest.WithSlug("无租户id来源")
 }

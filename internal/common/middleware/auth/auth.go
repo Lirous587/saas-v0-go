@@ -133,9 +133,6 @@ func CasbinValited() gin.HandlerFunc {
 		obj := ctx.Request.URL.Path
 		act := strings.ToLower(ctx.Request.Method)
 
-		// 将 tenantID 转换为字符串（确保与策略类型匹配）
-		// tenantIDStr := strconv.FormatInt(tenantID, 10)
-
 		ok, err := enforcer.Enforce(role.Name, obj, act)
 		if err != nil {
 			response.Error(ctx, codes.ErrPermissionDenied)

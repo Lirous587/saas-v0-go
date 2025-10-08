@@ -5,9 +5,9 @@ import (
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/pkg/errors"
-	"saas/internal/common/reskit/codes"
 	"saas/internal/comment/domain"
 	"saas/internal/common/orm"
+	"saas/internal/common/reskit/codes"
 	"saas/internal/common/utils"
 )
 
@@ -29,7 +29,7 @@ func (repo *CommentPSQLRepository) FindByID(id int64) (*domain.Comment, error) {
 	return ormCommentToDomain(ormComment), nil
 }
 
-func (repo *CommentPSQLRepository) Create(comment *domain.Comment) (*domain.Comment,error)  {
+func (repo *CommentPSQLRepository) Create(comment *domain.Comment) (*domain.Comment, error) {
 	ormComment := domainCommentToORM(comment)
 
 	if err := ormComment.InsertG(boil.Infer()); err != nil {
@@ -39,7 +39,7 @@ func (repo *CommentPSQLRepository) Create(comment *domain.Comment) (*domain.Comm
 	return ormCommentToDomain(ormComment), nil
 }
 
-func (repo *CommentPSQLRepository) Update(comment *domain.Comment) (*domain.Comment,error) {
+func (repo *CommentPSQLRepository) Update(comment *domain.Comment) (*domain.Comment, error) {
 	ormComment := domainCommentToORM(comment)
 
 	rows, err := ormComment.UpdateG(boil.Infer())
@@ -58,7 +58,7 @@ func (repo *CommentPSQLRepository) Delete(id int64) error {
 	ormComment := orm.Comment{
 		ID: id,
 	}
-	rows, err := ormComment.DeleteG(false)
+	rows, err := ormComment.DeleteG()
 
 	if err != nil {
 		return err

@@ -15,7 +15,6 @@ func domainCommentToORM(comment *domain.Comment) *orm.Comment {
 		ID: comment.ID,
 		// Title:     		comment.Title,
 		CreatedAt: comment.CreatedAt,
-		UpdatedAt: comment.UpdatedAt,
 	}
 
 	// 处理null项
@@ -37,7 +36,6 @@ func ormCommentToDomain(ormComment *orm.Comment) *domain.Comment {
 		ID: ormComment.ID,
 		// Title:     		ormComment.Title,
 		CreatedAt: ormComment.CreatedAt,
-		UpdatedAt: ormComment.UpdatedAt,
 	}
 
 	// 处理null项

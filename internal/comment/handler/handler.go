@@ -3,35 +3,35 @@
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-    "strconv"
+	"saas/internal/comment/domain"
 	"saas/internal/common/reqkit/bind"
 	"saas/internal/common/reskit/response"
-	"saas/internal/comment/domain"
+	"strconv"
 )
 
 type HttpHandler struct {
-    service domain.CommentService
+	service domain.CommentService
 }
 
 func NewHttpHandler(service domain.CommentService) *HttpHandler {
-    return &HttpHandler{
-        service: service,
-    }
+	return &HttpHandler{
+		service: service,
+	}
 }
 
 func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
-    idStr := ctx.Param("id")
-    if idStr == "" {
-        return 0,errors.New("请传递id参数")
+	idStr := ctx.Param("id")
+	if idStr == "" {
+		return 0, errors.New("请传递id参数")
 	}
-    idInt, err := strconv.Atoi(idStr)
-    if err != nil {
-        return 0, errors.WithStack(err)
-    }
-    if idInt == 0 {
-       	return 0, errors.WithStack(errors.New("无效的id"))
-    }
-    return int64(idInt), nil
+	idInt, err := strconv.Atoi(idStr)
+	if err != nil {
+		return 0, errors.WithStack(err)
+	}
+	if idInt == 0 {
+		return 0, errors.WithStack(errors.New("无效的id"))
+	}
+	return int64(idInt), nil
 }
 
 // Create godoc
@@ -47,44 +47,16 @@ func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/comment [post]
 func (h *HttpHandler) Create(ctx *gin.Context) {
-    req := new(CreateRequest)
+	req := new(CreateRequest)
 
-	if err := bind.BindingRegularAndResponse(ctx,req); err != nil {
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
-    data, err := h.service.Create(&domain.Comment{
-        Title:    req.Title,
-        Description:  req.Description,
-    })
-
-    if err != nil {
-        response.Error(ctx, err)
-        return
-    }
-
-    response.Success(ctx, domainCommentToResponse(data))
-}
-
-// Read godoc
-// @Summary      读取单条 Comment
-// @Description  读取单条 Comment
-// @Tags         comment
-// @Accept       json
-// @Produce      json
-// @Param        id   path int true "Comment ID"
-// @Success      200  {object}  response.successResponse{data=handler.CommentResponse} "成功查询 Comment"
-// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
-// @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/comment/{id} [get]
-func (h *HttpHandler) Read(ctx *gin.Context) {
-	id, err := h.getID(ctx)
-	if err != nil {
-		response.InvalidParams(ctx, err)
-		return
-	}
-
-	data, err := h.service.Read(id)
+	data, err := h.service.Create(&domain.Comment{
+		Title:       req.Title,
+		Description: req.Description,
+	})
 
 	if err != nil {
 		response.Error(ctx, err)
@@ -92,40 +64,6 @@ func (h *HttpHandler) Read(ctx *gin.Context) {
 	}
 
 	response.Success(ctx, domainCommentToResponse(data))
-}
-
-// Update godoc
-// @Summary      更新 Comment
-// @Description  根据ID更新 Comment 信息
-// @Tags         comment
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        id   path int true "Comment ID"
-// @Param        request body handler.UpdateRequest true "更新 Comment 请求"
-// @Success      200  {object}  response.successResponse{data=handler.CommentResponse} "成功更新 Comment"
-// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
-// @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/comment/{id} [put]
-func (h *HttpHandler) Update(ctx *gin.Context) {
-    req := new(UpdateRequest)
-
-	if err := bind.BindingRegularAndResponse(ctx,req); err != nil {
-		return
-	}
-
-    data, err := h.service.Update(&domain.Comment{
-        ID:           req.ID,
-        Title:        req.Title,
-        Description:  req.Description,
-    })
-
-    if err != nil {
-        response.Error(ctx, err)
-        return
-    }
-
-    response.Success(ctx, domainCommentToResponse(data))
 }
 
 // Delete godoc
@@ -141,18 +79,18 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/comment/{id} [delete]
 func (h *HttpHandler) Delete(ctx *gin.Context) {
-    id, err := h.getID(ctx)
-    if err != nil {
+	id, err := h.getID(ctx)
+	if err != nil {
 		response.InvalidParams(ctx, err)
-        return
-    }
+		return
+	}
 
-    if err := h.service.Delete(id); err != nil {
-        response.Error(ctx, err)
-        return
-    }
+	if err := h.service.Delete(id); err != nil {
+		response.Error(ctx, err)
+		return
+	}
 
-    response.Success(ctx)
+	response.Success(ctx)
 }
 
 // List godoc
@@ -169,22 +107,22 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/comment [get]
 func (h *HttpHandler) List(ctx *gin.Context) {
-    req := new(ListRequest)
+	req := new(ListRequest)
 
-	if err := bind.BindingRegularAndResponse(ctx,req); err != nil {
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
-    data, err := h.service.List(&domain.CommentQuery{
-        Keyword:  req.KeyWord,
-        Page:     req.Page,
-        PageSize: req.PageSize,
-    })
+	data, err := h.service.List(&domain.CommentQuery{
+		Keyword:  req.KeyWord,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+	})
 
-    if err != nil {
-        response.Error(ctx, err)
-        return
-    }
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
 
-    response.Success(ctx, domainCommentListToResponse(data))
+	response.Success(ctx, domainCommentListToResponse(data))
 }

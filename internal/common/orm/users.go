@@ -542,7 +542,6 @@ func (userL) LoadComments(e boil.Executor, singular bool, maybeUser interface{},
 	query := NewQuery(
 		qm.From(`comments`),
 		qm.WhereIn(`comments.user_id in ?`, argsSlice...),
-		qmhelper.WhereIsNull(`comments.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)

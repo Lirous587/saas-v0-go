@@ -2,7 +2,6 @@ package img
 
 import (
 	"saas/internal/common/middleware/auth"
-	"saas/internal/common/server"
 	"saas/internal/img/handler"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +12,7 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 	{
 	}
 
-	protect := g.Use(auth.JWTValidate(), server.SetTenantID("tenant_id"), auth.CasbinValited())
+	protect := g.Use(auth.JWTValidate(), auth.CasbinValited())
 	{
 		// 如果上传文件过大 可能导致连接重置 后端解决方案如下
 		//g.POST("/upload",middlewares.FullRequest() ,auth.Validate(), handler.Upload)
