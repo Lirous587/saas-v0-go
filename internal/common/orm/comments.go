@@ -126,27 +126,6 @@ func (w whereHelpernull_Int64) NIN(slice []int64) qm.QueryMod {
 func (w whereHelpernull_Int64) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
 func (w whereHelpernull_Int64) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
-type whereHelpertime_Time struct{ field string }
-
-func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.EQ, x)
-}
-func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.NEQ, x)
-}
-func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 var CommentWhere = struct {
 	ID        whereHelperint64
 	BelongKey whereHelperstring

@@ -213,7 +213,7 @@ CREATE TABLE public.tenant_r2_config (
 CREATE TABLE public.comments
 (
     id         bigserial PRIMARY KEY,
-    belong_key varchar(50)    NOT NULL,
+    belong_key varchar(50)    NOT NULL,  -- 资源标识，如 "article:123"
     tenant_id  bigint         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
     user_id    bigint         NOT NULL REFERENCES public.users (id) ON DELETE CASCADE,
     parent_id  bigint         NULL REFERENCES public.comments (id) ON DELETE CASCADE,
@@ -222,35 +222,51 @@ CREATE TABLE public.comments
     status     varchar(10)    NOT NULL DEFAULT 'pending',
     like_count int4           NOT NULL DEFAULT 0,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
-    UNIQUE (tenant_id, belong_key),
     CONSTRAINT comments_status_check CHECK (
         status IN ('pending', 'approved', 'rejected')
     )
 );
-
 -- 按租户查询
 CREATE INDEX IF NOT EXISTS idx_comments_tenant_id ON public.comments (tenant_id);
-
--- 按资源查询评论
-CREATE INDEX IF NOT EXISTS idx_comments_tenant_belong_key ON public.comments (tenant_id, belong_key);
-
--- 按用户查询其评论
--- CREATE INDEX IF NOT EXISTS idx_comments_user_id ON public.comments (user_id);
-
+-- 查询资源的所有评论
+CREATE INDEX IF NOT EXISTS idx_comments_tenant_belong_key ON public.comments (tenant_id, belong_key);  
 -- 查询子评论
 CREATE INDEX IF NOT EXISTS idx_comments_parent_id ON public.comments (parent_id);
-
 -- 查询整个评论树
 CREATE INDEX IF NOT EXISTS idx_comments_root_id ON public.comments (root_id, created_at);
-
 -- 按状态查询
 CREATE INDEX IF NOT EXISTS idx_comments_status ON public.comments (status);
-
 -- 全文搜索内容
 CREATE INDEX IF NOT EXISTS idx_comments_content_trgm ON public.comments USING gin (content gin_trgm_ops);
-
 -- 按时间排序查询
 CREATE INDEX IF NOT EXISTS idx_comments_created_at ON public.comments (created_at DESC);
-
 -- 热门评论查询（按点赞数）
 CREATE INDEX IF NOT EXISTS idx_comments_like_count ON public.comments (like_count DESC);
+
+
+-- 租户评论全局配置（默认配置）
+CREATE TABLE public.tenant_comment_config
+(
+    tenant_id    bigint      NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE PRIMARY KEY,
+    if_audit     boolean     NOT NULL DEFAULT true,   -- 默认是否开启审核
+    allow_anon   boolean     NOT NULL DEFAULT false,  -- 默认是否允许匿名评论
+    max_comments int4        NULL,  -- 默认最大评论数（NULL 表示无限制）
+    created_at   timestamptz(6) NOT NULL DEFAULT now(),
+    updated_at   timestamptz(6) NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_tenant_comment_config_if_audit ON public.tenant_comment_config (if_audit);
+
+-- 租户评论配置（资源级别，高精细度）
+CREATE TABLE public.comment_configs
+(
+    tenant_id     bigint      NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
+    belong_key    varchar(50) NOT NULL,  -- 与 comments.belong_key 对应
+    if_audit      boolean     NOT NULL DEFAULT true,  -- 是否开启审核
+    allow_anon    boolean     NOT NULL DEFAULT false, -- 是否允许匿名评论
+    max_comments  int4        NULL,  -- 最大评论数（NULL 表示无限制）
+    created_at    timestamptz(6) NOT NULL DEFAULT now(),
+    updated_at    timestamptz(6) NOT NULL DEFAULT now(),
+    PRIMARY KEY (tenant_id, belong_key)
+);
+CREATE INDEX IF NOT EXISTS idx_comment_configs_tenant_id ON public.comment_configs (tenant_id);
+CREATE INDEX IF NOT EXISTS idx_comment_configs_if_audit ON public.comment_configs (if_audit);  

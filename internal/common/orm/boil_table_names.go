@@ -4,29 +4,33 @@
 package orm
 
 var TableNames = struct {
-	Apis           string
-	CasbinRule     string
-	Comments       string
-	ImgCategories  string
-	Imgs           string
-	Plans          string
-	Roles          string
-	TenantPlan     string
-	TenantR2Config string
-	TenantUserRole string
-	Tenants        string
-	Users          string
+	Apis                string
+	CasbinRule          string
+	CommentConfigs      string
+	Comments            string
+	ImgCategories       string
+	Imgs                string
+	Plans               string
+	Roles               string
+	TenantCommentConfig string
+	TenantPlan          string
+	TenantR2Config      string
+	TenantUserRole      string
+	Tenants             string
+	Users               string
 }{
-	Apis:           "apis",
-	CasbinRule:     "casbin_rule",
-	Comments:       "comments",
-	ImgCategories:  "img_categories",
-	Imgs:           "imgs",
-	Plans:          "plans",
-	Roles:          "roles",
-	TenantPlan:     "tenant_plan",
-	TenantR2Config: "tenant_r2_config",
-	TenantUserRole: "tenant_user_role",
-	Tenants:        "tenants",
-	Users:          "users",
+	Apis:                "apis",
+	CasbinRule:          "casbin_rule",
+	CommentConfigs:      "comment_configs",
+	Comments:            "comments",
+	ImgCategories:       "img_categories",
+	Imgs:                "imgs",
+	Plans:               "plans",
+	Roles:               "roles",
+	TenantCommentConfig: "tenant_comment_config",
+	TenantPlan:          "tenant_plan",
+	TenantR2Config:      "tenant_r2_config",
+	TenantUserRole:      "tenant_user_role",
+	Tenants:             "tenants",
+	Users:               "users",
 }
