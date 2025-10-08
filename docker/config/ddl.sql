@@ -197,7 +197,7 @@ CREATE INDEX idx_img_description_trgm ON public.imgs USING gin (description gin_
 
 
 -- 租户r2配置表
-CREATE TABLE public.tenant_r2_config (
+CREATE TABLE public.tenant_r2_configs (
     tenant_id bigint NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE PRIMARY KEY,  
     account_id varchar(255) NOT NULL,
     access_key_id varchar(255) NOT NULL,

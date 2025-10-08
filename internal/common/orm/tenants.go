@@ -936,8 +936,8 @@ func (tenantL) LoadTenantR2Config(e boil.Executor, singular bool, maybeTenant in
 	}
 
 	query := NewQuery(
-		qm.From(`tenant_r2_config`),
-		qm.WhereIn(`tenant_r2_config.tenant_id in ?`, argsSlice...),
+		qm.From(`tenant_r2_configs`),
+		qm.WhereIn(`tenant_r2_configs.tenant_id in ?`, argsSlice...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -954,10 +954,10 @@ func (tenantL) LoadTenantR2Config(e boil.Executor, singular bool, maybeTenant in
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for tenant_r2_config")
+		return errors.Wrap(err, "failed to close results of eager load for tenant_r2_configs")
 	}
 	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for tenant_r2_config")
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for tenant_r2_configs")
 	}
 
 	if len(tenantR2ConfigAfterSelectHooks) != 0 {
@@ -1699,7 +1699,7 @@ func (o *Tenant) SetTenantR2Config(exec boil.Executor, insert bool, related *Ten
 		}
 	} else {
 		updateQuery := fmt.Sprintf(
-			"UPDATE \"tenant_r2_config\" SET %s WHERE %s",
+			"UPDATE \"tenant_r2_configs\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, []string{"tenant_id"}),
 			strmangle.WhereClause("\"", "\"", 2, tenantR2ConfigPrimaryKeyColumns),
 		)

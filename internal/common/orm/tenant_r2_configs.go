@@ -69,15 +69,15 @@ var TenantR2ConfigTableColumns = struct {
 	CreatedAt       string
 	UpdatedAt       string
 }{
-	TenantID:        "tenant_r2_config.tenant_id",
-	AccountID:       "tenant_r2_config.account_id",
-	AccessKeyID:     "tenant_r2_config.access_key_id",
-	SecretAccessKey: "tenant_r2_config.secret_access_key",
-	PublicBucket:    "tenant_r2_config.public_bucket",
-	PublicURLPrefix: "tenant_r2_config.public_url_prefix",
-	DeleteBucket:    "tenant_r2_config.delete_bucket",
-	CreatedAt:       "tenant_r2_config.created_at",
-	UpdatedAt:       "tenant_r2_config.updated_at",
+	TenantID:        "tenant_r2_configs.tenant_id",
+	AccountID:       "tenant_r2_configs.account_id",
+	AccessKeyID:     "tenant_r2_configs.access_key_id",
+	SecretAccessKey: "tenant_r2_configs.secret_access_key",
+	PublicBucket:    "tenant_r2_configs.public_bucket",
+	PublicURLPrefix: "tenant_r2_configs.public_url_prefix",
+	DeleteBucket:    "tenant_r2_configs.delete_bucket",
+	CreatedAt:       "tenant_r2_configs.created_at",
+	UpdatedAt:       "tenant_r2_configs.updated_at",
 }
 
 // Generated where
@@ -93,15 +93,15 @@ var TenantR2ConfigWhere = struct {
 	CreatedAt       whereHelpertime_Time
 	UpdatedAt       whereHelpertime_Time
 }{
-	TenantID:        whereHelperint64{field: "\"tenant_r2_config\".\"tenant_id\""},
-	AccountID:       whereHelperstring{field: "\"tenant_r2_config\".\"account_id\""},
-	AccessKeyID:     whereHelperstring{field: "\"tenant_r2_config\".\"access_key_id\""},
-	SecretAccessKey: whereHelperstring{field: "\"tenant_r2_config\".\"secret_access_key\""},
-	PublicBucket:    whereHelperstring{field: "\"tenant_r2_config\".\"public_bucket\""},
-	PublicURLPrefix: whereHelperstring{field: "\"tenant_r2_config\".\"public_url_prefix\""},
-	DeleteBucket:    whereHelperstring{field: "\"tenant_r2_config\".\"delete_bucket\""},
-	CreatedAt:       whereHelpertime_Time{field: "\"tenant_r2_config\".\"created_at\""},
-	UpdatedAt:       whereHelpertime_Time{field: "\"tenant_r2_config\".\"updated_at\""},
+	TenantID:        whereHelperint64{field: "\"tenant_r2_configs\".\"tenant_id\""},
+	AccountID:       whereHelperstring{field: "\"tenant_r2_configs\".\"account_id\""},
+	AccessKeyID:     whereHelperstring{field: "\"tenant_r2_configs\".\"access_key_id\""},
+	SecretAccessKey: whereHelperstring{field: "\"tenant_r2_configs\".\"secret_access_key\""},
+	PublicBucket:    whereHelperstring{field: "\"tenant_r2_configs\".\"public_bucket\""},
+	PublicURLPrefix: whereHelperstring{field: "\"tenant_r2_configs\".\"public_url_prefix\""},
+	DeleteBucket:    whereHelperstring{field: "\"tenant_r2_configs\".\"delete_bucket\""},
+	CreatedAt:       whereHelpertime_Time{field: "\"tenant_r2_configs\".\"created_at\""},
+	UpdatedAt:       whereHelpertime_Time{field: "\"tenant_r2_configs\".\"updated_at\""},
 }
 
 // TenantR2ConfigRels is where relationship names are stored.
@@ -361,7 +361,7 @@ func (q tenantR2ConfigQuery) One(exec boil.Executor) (*TenantR2Config, error) {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "orm: failed to execute a one query for tenant_r2_config")
+		return nil, errors.Wrap(err, "orm: failed to execute a one query for tenant_r2_configs")
 	}
 
 	if err := o.doAfterSelectHooks(exec); err != nil {
@@ -410,7 +410,7 @@ func (q tenantR2ConfigQuery) Count(exec boil.Executor) (int64, error) {
 
 	err := q.Query.QueryRow(exec).Scan(&count)
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: failed to count tenant_r2_config rows")
+		return 0, errors.Wrap(err, "orm: failed to count tenant_r2_configs rows")
 	}
 
 	return count, nil
@@ -431,7 +431,7 @@ func (q tenantR2ConfigQuery) Exists(exec boil.Executor) (bool, error) {
 
 	err := q.Query.QueryRow(exec).Scan(&count)
 	if err != nil {
-		return false, errors.Wrap(err, "orm: failed to check if tenant_r2_config exists")
+		return false, errors.Wrap(err, "orm: failed to check if tenant_r2_configs exists")
 	}
 
 	return count > 0, nil
@@ -588,7 +588,7 @@ func (o *TenantR2Config) SetTenant(exec boil.Executor, insert bool, related *Ten
 	}
 
 	updateQuery := fmt.Sprintf(
-		"UPDATE \"tenant_r2_config\" SET %s WHERE %s",
+		"UPDATE \"tenant_r2_configs\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, []string{"tenant_id"}),
 		strmangle.WhereClause("\"", "\"", 2, tenantR2ConfigPrimaryKeyColumns),
 	)
@@ -624,10 +624,10 @@ func (o *TenantR2Config) SetTenant(exec boil.Executor, insert bool, related *Ten
 
 // TenantR2Configs retrieves all the records using an executor.
 func TenantR2Configs(mods ...qm.QueryMod) tenantR2ConfigQuery {
-	mods = append(mods, qm.From("\"tenant_r2_config\""))
+	mods = append(mods, qm.From("\"tenant_r2_configs\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"\"tenant_r2_config\".*"})
+		queries.SetSelect(q, []string{"\"tenant_r2_configs\".*"})
 	}
 
 	return tenantR2ConfigQuery{q}
@@ -648,7 +648,7 @@ func FindTenantR2Config(exec boil.Executor, tenantID int64, selectCols ...string
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"tenant_r2_config\" where \"tenant_id\"=$1", sel,
+		"select %s from \"tenant_r2_configs\" where \"tenant_id\"=$1", sel,
 	)
 
 	q := queries.Raw(query, tenantID)
@@ -658,7 +658,7 @@ func FindTenantR2Config(exec boil.Executor, tenantID int64, selectCols ...string
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "orm: unable to select from tenant_r2_config")
+		return nil, errors.Wrap(err, "orm: unable to select from tenant_r2_configs")
 	}
 
 	if err = tenantR2ConfigObj.doAfterSelectHooks(exec); err != nil {
@@ -677,7 +677,7 @@ func (o *TenantR2Config) InsertG(columns boil.Columns) error {
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
 func (o *TenantR2Config) Insert(exec boil.Executor, columns boil.Columns) error {
 	if o == nil {
-		return errors.New("orm: no tenant_r2_config provided for insertion")
+		return errors.New("orm: no tenant_r2_configs provided for insertion")
 	}
 
 	var err error
@@ -718,9 +718,9 @@ func (o *TenantR2Config) Insert(exec boil.Executor, columns boil.Columns) error 
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO \"tenant_r2_config\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO \"tenant_r2_configs\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO \"tenant_r2_config\" %sDEFAULT VALUES%s"
+			cache.query = "INSERT INTO \"tenant_r2_configs\" %sDEFAULT VALUES%s"
 		}
 
 		var queryOutput, queryReturning string
@@ -747,7 +747,7 @@ func (o *TenantR2Config) Insert(exec boil.Executor, columns boil.Columns) error 
 	}
 
 	if err != nil {
-		return errors.Wrap(err, "orm: unable to insert into tenant_r2_config")
+		return errors.Wrap(err, "orm: unable to insert into tenant_r2_configs")
 	}
 
 	if !cached {
@@ -792,10 +792,10 @@ func (o *TenantR2Config) Update(exec boil.Executor, columns boil.Columns) (int64
 			wl = strmangle.SetComplement(wl, []string{"created_at"})
 		}
 		if len(wl) == 0 {
-			return 0, errors.New("orm: unable to update tenant_r2_config, could not build whitelist")
+			return 0, errors.New("orm: unable to update tenant_r2_configs, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE \"tenant_r2_config\" SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE \"tenant_r2_configs\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, wl),
 			strmangle.WhereClause("\"", "\"", len(wl)+1, tenantR2ConfigPrimaryKeyColumns),
 		)
@@ -814,12 +814,12 @@ func (o *TenantR2Config) Update(exec boil.Executor, columns boil.Columns) (int64
 	var result sql.Result
 	result, err = exec.Exec(cache.query, values...)
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: unable to update tenant_r2_config row")
+		return 0, errors.Wrap(err, "orm: unable to update tenant_r2_configs row")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: failed to get rows affected by update for tenant_r2_config")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by update for tenant_r2_configs")
 	}
 
 	if !cached {
@@ -842,12 +842,12 @@ func (q tenantR2ConfigQuery) UpdateAll(exec boil.Executor, cols M) (int64, error
 
 	result, err := q.Query.Exec(exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: unable to update all for tenant_r2_config")
+		return 0, errors.Wrap(err, "orm: unable to update all for tenant_r2_configs")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: unable to retrieve rows affected for tenant_r2_config")
+		return 0, errors.Wrap(err, "orm: unable to retrieve rows affected for tenant_r2_configs")
 	}
 
 	return rowsAff, nil
@@ -885,7 +885,7 @@ func (o TenantR2ConfigSlice) UpdateAll(exec boil.Executor, cols M) (int64, error
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE \"tenant_r2_config\" SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE \"tenant_r2_configs\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, tenantR2ConfigPrimaryKeyColumns, len(o)))
 
@@ -914,7 +914,7 @@ func (o *TenantR2Config) UpsertG(updateOnConflict bool, conflictColumns []string
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
 func (o *TenantR2Config) Upsert(exec boil.Executor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns, opts ...UpsertOptionFunc) error {
 	if o == nil {
-		return errors.New("orm: no tenant_r2_config provided for upsert")
+		return errors.New("orm: no tenant_r2_configs provided for upsert")
 	}
 	currTime := time.Now().In(boil.GetLocation())
 
@@ -977,7 +977,7 @@ func (o *TenantR2Config) Upsert(exec boil.Executor, updateOnConflict bool, confl
 		)
 
 		if updateOnConflict && len(update) == 0 {
-			return errors.New("orm: unable to upsert tenant_r2_config, could not build update column list")
+			return errors.New("orm: unable to upsert tenant_r2_configs, could not build update column list")
 		}
 
 		ret := strmangle.SetComplement(tenantR2ConfigAllColumns, strmangle.SetIntersect(insert, update))
@@ -985,13 +985,13 @@ func (o *TenantR2Config) Upsert(exec boil.Executor, updateOnConflict bool, confl
 		conflict := conflictColumns
 		if len(conflict) == 0 && updateOnConflict && len(update) != 0 {
 			if len(tenantR2ConfigPrimaryKeyColumns) == 0 {
-				return errors.New("orm: unable to upsert tenant_r2_config, could not build conflict column list")
+				return errors.New("orm: unable to upsert tenant_r2_configs, could not build conflict column list")
 			}
 
 			conflict = make([]string, len(tenantR2ConfigPrimaryKeyColumns))
 			copy(conflict, tenantR2ConfigPrimaryKeyColumns)
 		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"tenant_r2_config\"", updateOnConflict, ret, update, conflict, insert, opts...)
+		cache.query = buildUpsertQueryPostgres(dialect, "\"tenant_r2_configs\"", updateOnConflict, ret, update, conflict, insert, opts...)
 
 		cache.valueMapping, err = queries.BindMapping(tenantR2ConfigType, tenantR2ConfigMapping, insert)
 		if err != nil {
@@ -1025,7 +1025,7 @@ func (o *TenantR2Config) Upsert(exec boil.Executor, updateOnConflict bool, confl
 		_, err = exec.Exec(cache.query, vals...)
 	}
 	if err != nil {
-		return errors.Wrap(err, "orm: unable to upsert tenant_r2_config")
+		return errors.Wrap(err, "orm: unable to upsert tenant_r2_configs")
 	}
 
 	if !cached {
@@ -1055,7 +1055,7 @@ func (o *TenantR2Config) Delete(exec boil.Executor) (int64, error) {
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), tenantR2ConfigPrimaryKeyMapping)
-	sql := "DELETE FROM \"tenant_r2_config\" WHERE \"tenant_id\"=$1"
+	sql := "DELETE FROM \"tenant_r2_configs\" WHERE \"tenant_id\"=$1"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -1063,12 +1063,12 @@ func (o *TenantR2Config) Delete(exec boil.Executor) (int64, error) {
 	}
 	result, err := exec.Exec(sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: unable to delete from tenant_r2_config")
+		return 0, errors.Wrap(err, "orm: unable to delete from tenant_r2_configs")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: failed to get rows affected by delete for tenant_r2_config")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by delete for tenant_r2_configs")
 	}
 
 	if err := o.doAfterDeleteHooks(exec); err != nil {
@@ -1092,12 +1092,12 @@ func (q tenantR2ConfigQuery) DeleteAll(exec boil.Executor) (int64, error) {
 
 	result, err := q.Query.Exec(exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: unable to delete all from tenant_r2_config")
+		return 0, errors.Wrap(err, "orm: unable to delete all from tenant_r2_configs")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: failed to get rows affected by deleteall for tenant_r2_config")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by deleteall for tenant_r2_configs")
 	}
 
 	return rowsAff, nil
@@ -1128,7 +1128,7 @@ func (o TenantR2ConfigSlice) DeleteAll(exec boil.Executor) (int64, error) {
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM \"tenant_r2_config\" WHERE " +
+	sql := "DELETE FROM \"tenant_r2_configs\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, tenantR2ConfigPrimaryKeyColumns, len(o))
 
 	if boil.DebugMode {
@@ -1142,7 +1142,7 @@ func (o TenantR2ConfigSlice) DeleteAll(exec boil.Executor) (int64, error) {
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "orm: failed to get rows affected by deleteall for tenant_r2_config")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by deleteall for tenant_r2_configs")
 	}
 
 	if len(tenantR2ConfigAfterDeleteHooks) != 0 {
@@ -1201,7 +1201,7 @@ func (o *TenantR2ConfigSlice) ReloadAll(exec boil.Executor) error {
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT \"tenant_r2_config\".* FROM \"tenant_r2_config\" WHERE " +
+	sql := "SELECT \"tenant_r2_configs\".* FROM \"tenant_r2_configs\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, tenantR2ConfigPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
@@ -1224,7 +1224,7 @@ func TenantR2ConfigExistsG(tenantID int64) (bool, error) {
 // TenantR2ConfigExists checks if the TenantR2Config row exists.
 func TenantR2ConfigExists(exec boil.Executor, tenantID int64) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"tenant_r2_config\" where \"tenant_id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"tenant_r2_configs\" where \"tenant_id\"=$1 limit 1)"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -1234,7 +1234,7 @@ func TenantR2ConfigExists(exec boil.Executor, tenantID int64) (bool, error) {
 
 	err := row.Scan(&exists)
 	if err != nil {
-		return false, errors.Wrap(err, "orm: unable to check if tenant_r2_config exists")
+		return false, errors.Wrap(err, "orm: unable to check if tenant_r2_configs exists")
 	}
 
 	return exists, nil

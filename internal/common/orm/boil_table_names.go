@@ -14,7 +14,7 @@ var TableNames = struct {
 	Roles               string
 	TenantCommentConfig string
 	TenantPlan          string
-	TenantR2Config      string
+	TenantR2Configs     string
 	TenantUserRole      string
 	Tenants             string
 	Users               string
@@ -29,7 +29,7 @@ var TableNames = struct {
 	Roles:               "roles",
 	TenantCommentConfig: "tenant_comment_config",
 	TenantPlan:          "tenant_plan",
-	TenantR2Config:      "tenant_r2_config",
+	TenantR2Configs:     "tenant_r2_configs",
 	TenantUserRole:      "tenant_user_role",
 	Tenants:             "tenants",
 	Users:               "users",
