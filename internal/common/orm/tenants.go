@@ -79,7 +79,7 @@ var TenantWhere = struct {
 
 // TenantRels is where relationship names are stored.
 var TenantRels = struct {
-	TenantCommentConfig string
+	CommentTenantConfig string
 	TenantPlan          string
 	TenantR2Config      string
 	CommentConfigs      string
@@ -88,7 +88,7 @@ var TenantRels = struct {
 	Imgs                string
 	TenantUserRoles     string
 }{
-	TenantCommentConfig: "TenantCommentConfig",
+	CommentTenantConfig: "CommentTenantConfig",
 	TenantPlan:          "TenantPlan",
 	TenantR2Config:      "TenantR2Config",
 	CommentConfigs:      "CommentConfigs",
@@ -100,7 +100,7 @@ var TenantRels = struct {
 
 // tenantR is where relationships are stored.
 type tenantR struct {
-	TenantCommentConfig *TenantCommentConfig `boil:"TenantCommentConfig" json:"TenantCommentConfig" toml:"TenantCommentConfig" yaml:"TenantCommentConfig"`
+	CommentTenantConfig *CommentTenantConfig `boil:"CommentTenantConfig" json:"CommentTenantConfig" toml:"CommentTenantConfig" yaml:"CommentTenantConfig"`
 	TenantPlan          *TenantPlan          `boil:"TenantPlan" json:"TenantPlan" toml:"TenantPlan" yaml:"TenantPlan"`
 	TenantR2Config      *TenantR2Config      `boil:"TenantR2Config" json:"TenantR2Config" toml:"TenantR2Config" yaml:"TenantR2Config"`
 	CommentConfigs      CommentConfigSlice   `boil:"CommentConfigs" json:"CommentConfigs" toml:"CommentConfigs" yaml:"CommentConfigs"`
@@ -115,20 +115,20 @@ func (*tenantR) NewStruct() *tenantR {
 	return &tenantR{}
 }
 
-func (o *Tenant) GetTenantCommentConfig() *TenantCommentConfig {
+func (o *Tenant) GetCommentTenantConfig() *CommentTenantConfig {
 	if o == nil {
 		return nil
 	}
 
-	return o.R.GetTenantCommentConfig()
+	return o.R.GetCommentTenantConfig()
 }
 
-func (r *tenantR) GetTenantCommentConfig() *TenantCommentConfig {
+func (r *tenantR) GetCommentTenantConfig() *CommentTenantConfig {
 	if r == nil {
 		return nil
 	}
 
-	return r.TenantCommentConfig
+	return r.CommentTenantConfig
 }
 
 func (o *Tenant) GetTenantPlan() *TenantPlan {
@@ -543,15 +543,15 @@ func (q tenantQuery) Exists(exec boil.Executor) (bool, error) {
 	return count > 0, nil
 }
 
-// TenantCommentConfig pointed to by the foreign key.
-func (o *Tenant) TenantCommentConfig(mods ...qm.QueryMod) tenantCommentConfigQuery {
+// CommentTenantConfig pointed to by the foreign key.
+func (o *Tenant) CommentTenantConfig(mods ...qm.QueryMod) commentTenantConfigQuery {
 	queryMods := []qm.QueryMod{
 		qm.Where("\"tenant_id\" = ?", o.ID),
 	}
 
 	queryMods = append(queryMods, mods...)
 
-	return TenantCommentConfigs(queryMods...)
+	return CommentTenantConfigs(queryMods...)
 }
 
 // TenantPlan pointed to by the foreign key.
@@ -646,9 +646,9 @@ func (o *Tenant) TenantUserRoles(mods ...qm.QueryMod) tenantUserRoleQuery {
 	return TenantUserRoles(queryMods...)
 }
 
-// LoadTenantCommentConfig allows an eager lookup of values, cached into the
+// LoadCommentTenantConfig allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-1 relationship.
-func (tenantL) LoadTenantCommentConfig(e boil.Executor, singular bool, maybeTenant interface{}, mods queries.Applicator) error {
+func (tenantL) LoadCommentTenantConfig(e boil.Executor, singular bool, maybeTenant interface{}, mods queries.Applicator) error {
 	var slice []*Tenant
 	var object *Tenant
 
@@ -702,8 +702,8 @@ func (tenantL) LoadTenantCommentConfig(e boil.Executor, singular bool, maybeTena
 	}
 
 	query := NewQuery(
-		qm.From(`tenant_comment_config`),
-		qm.WhereIn(`tenant_comment_config.tenant_id in ?`, argsSlice...),
+		qm.From(`comment_tenant_configs`),
+		qm.WhereIn(`comment_tenant_configs.tenant_id in ?`, argsSlice...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -711,22 +711,22 @@ func (tenantL) LoadTenantCommentConfig(e boil.Executor, singular bool, maybeTena
 
 	results, err := query.Query(e)
 	if err != nil {
-		return errors.Wrap(err, "failed to eager load TenantCommentConfig")
+		return errors.Wrap(err, "failed to eager load CommentTenantConfig")
 	}
 
-	var resultSlice []*TenantCommentConfig
+	var resultSlice []*CommentTenantConfig
 	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice TenantCommentConfig")
+		return errors.Wrap(err, "failed to bind eager loaded slice CommentTenantConfig")
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for tenant_comment_config")
+		return errors.Wrap(err, "failed to close results of eager load for comment_tenant_configs")
 	}
 	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for tenant_comment_config")
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for comment_tenant_configs")
 	}
 
-	if len(tenantCommentConfigAfterSelectHooks) != 0 {
+	if len(commentTenantConfigAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
 			if err := obj.doAfterSelectHooks(e); err != nil {
 				return err
@@ -740,9 +740,9 @@ func (tenantL) LoadTenantCommentConfig(e boil.Executor, singular bool, maybeTena
 
 	if singular {
 		foreign := resultSlice[0]
-		object.R.TenantCommentConfig = foreign
+		object.R.CommentTenantConfig = foreign
 		if foreign.R == nil {
-			foreign.R = &tenantCommentConfigR{}
+			foreign.R = &commentTenantConfigR{}
 		}
 		foreign.R.Tenant = object
 	}
@@ -750,9 +750,9 @@ func (tenantL) LoadTenantCommentConfig(e boil.Executor, singular bool, maybeTena
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
 			if local.ID == foreign.TenantID {
-				local.R.TenantCommentConfig = foreign
+				local.R.CommentTenantConfig = foreign
 				if foreign.R == nil {
-					foreign.R = &tenantCommentConfigR{}
+					foreign.R = &commentTenantConfigR{}
 				}
 				foreign.R.Tenant = local
 				break
@@ -1563,18 +1563,18 @@ func (tenantL) LoadTenantUserRoles(e boil.Executor, singular bool, maybeTenant i
 	return nil
 }
 
-// SetTenantCommentConfigG of the tenant to the related item.
-// Sets o.R.TenantCommentConfig to related.
+// SetCommentTenantConfigG of the tenant to the related item.
+// Sets o.R.CommentTenantConfig to related.
 // Adds o to related.R.Tenant.
 // Uses the global database handle.
-func (o *Tenant) SetTenantCommentConfigG(insert bool, related *TenantCommentConfig) error {
-	return o.SetTenantCommentConfig(boil.GetDB(), insert, related)
+func (o *Tenant) SetCommentTenantConfigG(insert bool, related *CommentTenantConfig) error {
+	return o.SetCommentTenantConfig(boil.GetDB(), insert, related)
 }
 
-// SetTenantCommentConfig of the tenant to the related item.
-// Sets o.R.TenantCommentConfig to related.
+// SetCommentTenantConfig of the tenant to the related item.
+// Sets o.R.CommentTenantConfig to related.
 // Adds o to related.R.Tenant.
-func (o *Tenant) SetTenantCommentConfig(exec boil.Executor, insert bool, related *TenantCommentConfig) error {
+func (o *Tenant) SetCommentTenantConfig(exec boil.Executor, insert bool, related *CommentTenantConfig) error {
 	var err error
 
 	if insert {
@@ -1585,9 +1585,9 @@ func (o *Tenant) SetTenantCommentConfig(exec boil.Executor, insert bool, related
 		}
 	} else {
 		updateQuery := fmt.Sprintf(
-			"UPDATE \"tenant_comment_config\" SET %s WHERE %s",
+			"UPDATE \"comment_tenant_configs\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, []string{"tenant_id"}),
-			strmangle.WhereClause("\"", "\"", 2, tenantCommentConfigPrimaryKeyColumns),
+			strmangle.WhereClause("\"", "\"", 2, commentTenantConfigPrimaryKeyColumns),
 		)
 		values := []interface{}{o.ID, related.TenantID}
 
@@ -1604,14 +1604,14 @@ func (o *Tenant) SetTenantCommentConfig(exec boil.Executor, insert bool, related
 
 	if o.R == nil {
 		o.R = &tenantR{
-			TenantCommentConfig: related,
+			CommentTenantConfig: related,
 		}
 	} else {
-		o.R.TenantCommentConfig = related
+		o.R.CommentTenantConfig = related
 	}
 
 	if related.R == nil {
-		related.R = &tenantCommentConfigR{
+		related.R = &commentTenantConfigR{
 			Tenant: o,
 		}
 	} else {

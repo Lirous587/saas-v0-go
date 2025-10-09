@@ -4,35 +4,35 @@
 package orm
 
 var TableNames = struct {
-	Apis                string
-	CasbinRule          string
-	CommentConfigs      string
-	CommentLikes        string
-	Comments            string
-	ImgCategories       string
-	Imgs                string
-	Plans               string
-	Roles               string
-	TenantCommentConfig string
-	TenantPlan          string
-	TenantR2Configs     string
-	TenantUserRole      string
-	Tenants             string
-	Users               string
+	Apis                 string
+	CasbinRule           string
+	CommentConfigs       string
+	CommentLikes         string
+	CommentTenantConfigs string
+	Comments             string
+	ImgCategories        string
+	Imgs                 string
+	Plans                string
+	Roles                string
+	TenantPlan           string
+	TenantR2Configs      string
+	TenantUserRole       string
+	Tenants              string
+	Users                string
 }{
-	Apis:                "apis",
-	CasbinRule:          "casbin_rule",
-	CommentConfigs:      "comment_configs",
-	CommentLikes:        "comment_likes",
-	Comments:            "comments",
-	ImgCategories:       "img_categories",
-	Imgs:                "imgs",
-	Plans:               "plans",
-	Roles:               "roles",
-	TenantCommentConfig: "tenant_comment_config",
-	TenantPlan:          "tenant_plan",
-	TenantR2Configs:     "tenant_r2_configs",
-	TenantUserRole:      "tenant_user_role",
-	Tenants:             "tenants",
-	Users:               "users",
+	Apis:                 "apis",
+	CasbinRule:           "casbin_rule",
+	CommentConfigs:       "comment_configs",
+	CommentLikes:         "comment_likes",
+	CommentTenantConfigs: "comment_tenant_configs",
+	Comments:             "comments",
+	ImgCategories:        "img_categories",
+	Imgs:                 "imgs",
+	Plans:                "plans",
+	Roles:                "roles",
+	TenantPlan:           "tenant_plan",
+	TenantR2Configs:      "tenant_r2_configs",
+	TenantUserRole:       "tenant_user_role",
+	Tenants:              "tenants",
+	Users:                "users",
 }

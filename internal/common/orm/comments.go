@@ -31,7 +31,7 @@ type Comment struct {
 	RootID    null.Int64 `boil:"root_id" json:"root_id,omitempty" toml:"root_id" yaml:"root_id,omitempty"`
 	Content   string     `boil:"content" json:"content" toml:"content" yaml:"content"`
 	Status    string     `boil:"status" json:"status" toml:"status" yaml:"status"`
-	LikeCount int        `boil:"like_count" json:"like_count" toml:"like_count" yaml:"like_count"`
+	LikeCount int64      `boil:"like_count" json:"like_count" toml:"like_count" yaml:"like_count"`
 	CreatedAt time.Time  `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 
 	R *commentR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -135,7 +135,7 @@ var CommentWhere = struct {
 	RootID    whereHelpernull_Int64
 	Content   whereHelperstring
 	Status    whereHelperstring
-	LikeCount whereHelperint
+	LikeCount whereHelperint64
 	CreatedAt whereHelpertime_Time
 }{
 	ID:        whereHelperint64{field: "\"comments\".\"id\""},
@@ -146,7 +146,7 @@ var CommentWhere = struct {
 	RootID:    whereHelpernull_Int64{field: "\"comments\".\"root_id\""},
 	Content:   whereHelperstring{field: "\"comments\".\"content\""},
 	Status:    whereHelperstring{field: "\"comments\".\"status\""},
-	LikeCount: whereHelperint{field: "\"comments\".\"like_count\""},
+	LikeCount: whereHelperint64{field: "\"comments\".\"like_count\""},
 	CreatedAt: whereHelpertime_Time{field: "\"comments\".\"created_at\""},
 }
 

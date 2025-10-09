@@ -12,7 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
@@ -25,9 +24,8 @@ import (
 type CommentConfig struct {
 	TenantID    int64     `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
 	BelongKey   string    `boil:"belong_key" json:"belong_key" toml:"belong_key" yaml:"belong_key"`
+	ClientToken string    `boil:"client_token" json:"client_token" toml:"client_token" yaml:"client_token"`
 	IfAudit     bool      `boil:"if_audit" json:"if_audit" toml:"if_audit" yaml:"if_audit"`
-	AllowAnon   bool      `boil:"allow_anon" json:"allow_anon" toml:"allow_anon" yaml:"allow_anon"`
-	MaxComments null.Int  `boil:"max_comments" json:"max_comments,omitempty" toml:"max_comments" yaml:"max_comments,omitempty"`
 	CreatedAt   time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt   time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
@@ -38,17 +36,15 @@ type CommentConfig struct {
 var CommentConfigColumns = struct {
 	TenantID    string
 	BelongKey   string
+	ClientToken string
 	IfAudit     string
-	AllowAnon   string
-	MaxComments string
 	CreatedAt   string
 	UpdatedAt   string
 }{
 	TenantID:    "tenant_id",
 	BelongKey:   "belong_key",
+	ClientToken: "client_token",
 	IfAudit:     "if_audit",
-	AllowAnon:   "allow_anon",
-	MaxComments: "max_comments",
 	CreatedAt:   "created_at",
 	UpdatedAt:   "updated_at",
 }
@@ -56,17 +52,15 @@ var CommentConfigColumns = struct {
 var CommentConfigTableColumns = struct {
 	TenantID    string
 	BelongKey   string
+	ClientToken string
 	IfAudit     string
-	AllowAnon   string
-	MaxComments string
 	CreatedAt   string
 	UpdatedAt   string
 }{
 	TenantID:    "comment_configs.tenant_id",
 	BelongKey:   "comment_configs.belong_key",
+	ClientToken: "comment_configs.client_token",
 	IfAudit:     "comment_configs.if_audit",
-	AllowAnon:   "comment_configs.allow_anon",
-	MaxComments: "comment_configs.max_comments",
 	CreatedAt:   "comment_configs.created_at",
 	UpdatedAt:   "comment_configs.updated_at",
 }
@@ -81,44 +75,6 @@ func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field
 func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
 func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
 func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-
-type whereHelpernull_Int struct{ field string }
-
-func (w whereHelpernull_Int) EQ(x null.Int) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Int) NEQ(x null.Int) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Int) LT(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Int) LTE(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Int) GT(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-func (w whereHelpernull_Int) IN(slice []int) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelpernull_Int) NIN(slice []int) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
-func (w whereHelpernull_Int) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Int) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 type whereHelpertime_Time struct{ field string }
 
@@ -144,17 +100,15 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 var CommentConfigWhere = struct {
 	TenantID    whereHelperint64
 	BelongKey   whereHelperstring
+	ClientToken whereHelperstring
 	IfAudit     whereHelperbool
-	AllowAnon   whereHelperbool
-	MaxComments whereHelpernull_Int
 	CreatedAt   whereHelpertime_Time
 	UpdatedAt   whereHelpertime_Time
 }{
 	TenantID:    whereHelperint64{field: "\"comment_configs\".\"tenant_id\""},
 	BelongKey:   whereHelperstring{field: "\"comment_configs\".\"belong_key\""},
+	ClientToken: whereHelperstring{field: "\"comment_configs\".\"client_token\""},
 	IfAudit:     whereHelperbool{field: "\"comment_configs\".\"if_audit\""},
-	AllowAnon:   whereHelperbool{field: "\"comment_configs\".\"allow_anon\""},
-	MaxComments: whereHelpernull_Int{field: "\"comment_configs\".\"max_comments\""},
 	CreatedAt:   whereHelpertime_Time{field: "\"comment_configs\".\"created_at\""},
 	UpdatedAt:   whereHelpertime_Time{field: "\"comment_configs\".\"updated_at\""},
 }
@@ -196,9 +150,9 @@ func (r *commentConfigR) GetTenant() *Tenant {
 type commentConfigL struct{}
 
 var (
-	commentConfigAllColumns            = []string{"tenant_id", "belong_key", "if_audit", "allow_anon", "max_comments", "created_at", "updated_at"}
-	commentConfigColumnsWithoutDefault = []string{"tenant_id", "belong_key"}
-	commentConfigColumnsWithDefault    = []string{"if_audit", "allow_anon", "max_comments", "created_at", "updated_at"}
+	commentConfigAllColumns            = []string{"tenant_id", "belong_key", "client_token", "if_audit", "created_at", "updated_at"}
+	commentConfigColumnsWithoutDefault = []string{"tenant_id", "belong_key", "client_token"}
+	commentConfigColumnsWithDefault    = []string{"if_audit", "created_at", "updated_at"}
 	commentConfigPrimaryKeyColumns     = []string{"tenant_id", "belong_key"}
 	commentConfigGeneratedColumns      = []string{}
 )
