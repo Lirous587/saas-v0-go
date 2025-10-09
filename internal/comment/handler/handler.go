@@ -1,12 +1,13 @@
 ﻿package handler
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 	"saas/internal/comment/domain"
 	"saas/internal/common/reqkit/bind"
 	"saas/internal/common/reskit/response"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 )
 
 type HttpHandler struct {
@@ -54,8 +55,8 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 	}
 
 	data, err := h.service.Create(&domain.Comment{
-		Title:       req.Title,
-		Description: req.Description,
+		// Title:       req.Title,
+		// Description: req.Description,
 	})
 
 	if err != nil {
@@ -114,7 +115,7 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 	}
 
 	data, err := h.service.List(&domain.CommentQuery{
-		Keyword:  req.KeyWord,
+		// Keyword:  req.KeyWord,
 		Page:     req.Page,
 		PageSize: req.PageSize,
 	})
@@ -125,4 +126,69 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 	}
 
 	response.Success(ctx, domainCommentListToResponse(data))
+}
+
+func (h *HttpHandler) SetCommentTenantConfig(ctx *gin.Context) {
+	req := new(SetCommentTenantConfigRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	if err := h.service.SetCommentTenantConfig(&domain.CommentTenantConfig{
+		TenantID: req.TenantID,
+		IfAudit:  req.IfAudit,
+	}); err != nil {
+		return
+	}
+
+	response.Success(ctx)
+}
+
+func (h *HttpHandler) GetCommentTenantConfig(ctx *gin.Context) {
+	req := new(GetCommentConfigRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	res, err := h.service.GetCommentTenantConfig(req.TenantID)
+	if err != nil {
+		return
+	}
+
+	response.Success(ctx, domainCommentTenantConfigToResponse(res))
+}
+
+func (h *HttpHandler) SetCommentConfig(ctx *gin.Context) {
+	req := new(SetCommentConfigRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	if err := h.service.SetCommentConfig(&domain.CommentConfig{
+		TenantID:  req.TenantID,
+		BelongKey: req.BelongKey,
+		IfAudit:   req.IfAudit,
+	}); err != nil {
+		return
+	}
+
+	response.Success(ctx)
+}
+
+func (h *HttpHandler) GetCommentConfig(ctx *gin.Context) {
+	req := new(GetCommentConfigRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	res, err := h.service.GetCommentConfig(req.TenantID, req.BelongKey)
+	if err != nil {
+		return
+	}
+
+	response.Success(ctx, domainCommentConfigToResponse(res))
 }

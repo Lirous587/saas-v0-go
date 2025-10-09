@@ -1,11 +1,12 @@
 ﻿package adapters
 
 import (
-	"saas/internal/comment/domain"
 	"context"
-	"github.com/redis/go-redis/v9"
 	"os"
+	"saas/internal/comment/domain"
 	"strconv"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type CommentRedisCache struct {
@@ -37,4 +38,25 @@ func NewCommentRedisCache() domain.CommentCache {
 	}
 
 	return &CommentRedisCache{client: client}
+}
+
+// const CommentTenantConfigKey = "tenant:comment:config"
+// const commentConfigKey = "tenant:comment:config"
+
+func (cache *CommentRedisCache) SetTenantCommentClientToken(tenantID domain.TenantID, clientToken string) error {
+
+	return nil
+}
+
+func (cache *CommentRedisCache) GetTenantCommentClientToken(tenantID domain.TenantID, benlongKey domain.BelongKey) (string, error) {
+
+	return "", nil
+}
+
+func (cache *CommentRedisCache) SetCommentClientToken(tenantID domain.TenantID, belongKey domain.BelongKey, clientToken string) error {
+	return nil
+}
+
+func (cache *CommentRedisCache) GetCommentClientToken(tenantID domain.TenantID, benlongKey domain.BelongKey) (string, error) {
+	return "", nil
 }

@@ -17,6 +17,7 @@ func InitV1(r *gin.RouterGroup) func() {
 		handler.NewHttpHandler,
 		service.NewCommentService,
 		adapters.NewCommentPSQLRepository,
+		adapters.NewCommentRedisCache,
 	)
 
 	return nil

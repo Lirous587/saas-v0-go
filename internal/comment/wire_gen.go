@@ -6,7 +6,6 @@
 
 package comment
 
-
 import (
 	"github.com/gin-gonic/gin"
 	"saas/internal/comment/adapters"
@@ -18,7 +17,8 @@ import (
 
 func InitV1(r *gin.RouterGroup) func() {
 	commentRepository := adapters.NewCommentPSQLRepository()
-	commentService := service.NewCommentService(commentRepository)
+	commentCache := adapters.NewCommentRedisCache()
+	commentService := service.NewCommentService(commentRepository, commentCache)
 	httpHandler := handler.NewHttpHandler(commentService)
 	v := RegisterV1(r, httpHandler)
 	return v

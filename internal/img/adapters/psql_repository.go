@@ -317,7 +317,7 @@ func (repo *ImgPSQLRepository) SetTenantR2Config(config *domain.R2Config) error 
 
 	err := ormR2Config.UpsertG(
 		true,
-		[]string{"tenant_id"}, // conflictColumns: 冲突时依据的列
+		[]string{orm.TenantR2ConfigColumns.TenantID}, // conflictColumns: 冲突时依据的列
 		boil.Whitelist( // updateColumns: 冲突时要更新的列
 			orm.TenantR2ConfigColumns.AccountID,
 			orm.TenantR2ConfigColumns.AccessKeyID,

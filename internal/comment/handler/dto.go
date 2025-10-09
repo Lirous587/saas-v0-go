@@ -2,8 +2,15 @@ package handler
 
 import "saas/internal/comment/domain"
 
+type UserInfo struct {
+	ID       int64  `json:"id"`
+	NikeName string `json:"nickname"`
+	Avatar   string `json:"avatar,omitempty"`
+}
+
 type CommentResponse struct {
 	ID        int64                `json:"id"`
+	User      *UserInfo            `json:"user"`
 	ParentID  int64                `json:"parent_id"`
 	RootID    int64                `json:"root_id"`
 	Content   string               `json:"content"`
@@ -14,9 +21,10 @@ type CommentResponse struct {
 }
 
 type CreateRequest struct {
-	ParentID int64 `json:"parent_id"`
-	// RootID   int64  `json:"root_id"`
-	Content string `json:"content" binding:"required"`
+	BelongKey domain.BelongKey `json:"belong_key" binding:"required"`
+	TenantID  domain.TenantID  `uri:"tenant_id" binding:"required"`
+	ParentID  int64            `json:"parent_id"`
+	Content   string           `json:"content" binding:"required"`
 }
 
 type ListRequest struct {
@@ -25,7 +33,44 @@ type ListRequest struct {
 	KeyWord  string `form:"keyword" binding:"max=20"`
 }
 
+type AdvancedListRequest struct {
+}
+
 type CommentListResponse struct {
 	Total int64              `json:"total"`
 	List  []*CommentResponse `json:"list"`
+}
+
+type CommentTenantConfigResponse struct {
+	ClientToken string
+	IfAudit     bool
+	CreatedAt   int64
+	UpdatedAt   int64
+}
+
+type SetCommentTenantConfigRequest struct {
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	IfAudit  bool            `json:"if_audit" binding:"required"`
+}
+
+type GetCommentTenantConfigRequest struct {
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+}
+
+type CommentConfigResponse struct {
+	ClientToken string
+	IfAudit     bool
+	CreatedAt   int64
+	UpdatedAt   int64
+}
+
+type SetCommentConfigRequest struct {
+	TenantID  domain.TenantID  `json:"-" uri:"tenant_id" binding:"required"`
+	BelongKey domain.BelongKey `uri:"belong_key" binding:"required"`
+	IfAudit   bool             `json:"if_audit" binding:"required"`
+}
+
+type GetCommentConfigRequest struct {
+	TenantID  domain.TenantID  `json:"-" uri:"tenant_id" binding:"required"`
+	BelongKey domain.BelongKey `json:"-" uri:"belong_key" binding:"required"`
 }
