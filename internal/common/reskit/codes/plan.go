@@ -1,6 +1,6 @@
 package codes
 
-// Plan相关错误 (xx00-xx99)
+// Plan相关错误 (1400-1599)
 var (
-    ErrPlanNotFound = ErrCode{Msg: "Plan不存在", Type: ErrorTypeNotFound, Code: 0000}
+	ErrPlanNotFound = ErrCode{Msg: "计划不存在", Type: ErrorTypeNotFound, Code: 1400}
 )

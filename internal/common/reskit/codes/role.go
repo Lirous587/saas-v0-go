@@ -1,8 +1,8 @@
 package codes
 
-// Role相关错误 (1800-1999)
+// Role相关错误 (1200-1399)
 var (
-	ErrRoleNotFound = ErrCode{Msg: "Role不存在", Type: ErrorTypeNotFound, Code: 1800}
+	ErrRoleNotFound = ErrCode{Msg: "角色不存在", Type: ErrorTypeNotFound, Code: 1200}
 
-	ErrRoleInvalid = ErrCode{Msg: "无效的Role", Type: ErrorTypeExternal, Code: 1820}
+	ErrRoleInvalid = ErrCode{Msg: "无效的角色", Type: ErrorTypeExternal, Code: 1220}
 )
