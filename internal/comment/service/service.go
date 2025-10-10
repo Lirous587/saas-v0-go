@@ -57,14 +57,6 @@ func (s *service) GetCommentTenantConfig(tenantID domain.TenantID) (*domain.Comm
 }
 
 func (s *service) SetCommentConfig(config *domain.CommentConfig) error {
-	// 生成client_token
-	clientToken, err := utils.GenRandomHexToken()
-	if err != nil {
-		return err
-	}
-
-	config.ClientToken = clientToken
-
 	return s.repo.SetCommentConfig(config)
 }
 

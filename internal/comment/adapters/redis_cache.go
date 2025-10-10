@@ -52,11 +52,3 @@ func (cache *CommentRedisCache) GetTenantCommentClientToken(tenantID domain.Tena
 
 	return "", nil
 }
-
-func (cache *CommentRedisCache) SetCommentClientToken(tenantID domain.TenantID, belongKey domain.BelongKey, clientToken string) error {
-	return nil
-}
-
-func (cache *CommentRedisCache) GetCommentClientToken(tenantID domain.TenantID, benlongKey domain.BelongKey) (string, error) {
-	return "", nil
-}

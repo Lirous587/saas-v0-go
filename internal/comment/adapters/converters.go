@@ -123,7 +123,6 @@ func domainCommentConfigToORM(config *domain.CommentConfig) *orm.CommentConfig {
 	ormConfig := &orm.CommentConfig{
 		BelongKey:   string(config.BelongKey),
 		TenantID:    int64(config.TenantID),
-		ClientToken: config.ClientToken,
 		IfAudit:     config.IfAudit,
 	}
 
@@ -141,7 +140,6 @@ func ormCommentConfigToDomain(ormConfig *orm.CommentConfig) *domain.CommentConfi
 	config := &domain.CommentConfig{
 		BelongKey:   domain.BelongKey(ormConfig.BelongKey),
 		TenantID:    domain.TenantID(ormConfig.TenantID),
-		ClientToken: ormConfig.ClientToken,
 		IfAudit:     ormConfig.IfAudit,
 		CreatedAt:   ormConfig.CreatedAt,
 		UpdatedAt:   ormConfig.UpdatedAt,

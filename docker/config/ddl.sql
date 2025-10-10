@@ -282,7 +282,6 @@ CREATE TABLE public.comment_configs
 (
     tenant_id     bigint      NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
     belong_key    varchar(50) NOT NULL,  -- 与 comments.belong_key 对应
-    client_token text         NOT NULL,  -- 客户端令牌，用于 API 访问控制，防止接口被刷
     if_audit      boolean     NOT NULL DEFAULT true,  -- 是否开启审核
     created_at    timestamptz(6) NOT NULL DEFAULT now(),
     updated_at    timestamptz(6) NOT NULL DEFAULT now(),

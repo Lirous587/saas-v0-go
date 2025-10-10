@@ -2693,9 +2693,6 @@ const docTemplate = `{
         "handler.CommentConfigResponse": {
             "type": "object",
             "properties": {
-                "client_token": {
-                    "type": "string"
-                },
                 "created_at": {
                     "type": "integer"
                 },

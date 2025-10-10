@@ -17,7 +17,4 @@ type CommentRepository interface {
 type CommentCache interface {
 	SetTenantCommentClientToken(tenantID TenantID, clientToken string) error
 	GetTenantCommentClientToken(tenantID TenantID, benlongKey BelongKey) (string, error)
-
-	SetCommentClientToken(tenantID TenantID, belongKey BelongKey, clientToken string) error
-	GetCommentClientToken(tenantID TenantID, benlongKey BelongKey) (string, error)
 }

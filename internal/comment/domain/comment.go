@@ -60,7 +60,6 @@ type CommentTenantConfig struct {
 type CommentConfig struct {
 	TenantID    TenantID
 	BelongKey   BelongKey
-	ClientToken string
 	IfAudit     bool
 	CreatedAt   time.Time
 	UpdatedAt   time.Time

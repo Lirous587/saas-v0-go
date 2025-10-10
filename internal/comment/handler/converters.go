@@ -71,7 +71,6 @@ func domainCommentConfigToResponse(config *domain.CommentConfig) *CommentConfigR
 	}
 
 	return &CommentConfigResponse{
-		ClientToken: config.ClientToken,
 		IfAudit:     config.IfAudit,
 		CreatedAt:   config.CreatedAt.Unix(),
 		UpdatedAt:   config.UpdatedAt.Unix(),

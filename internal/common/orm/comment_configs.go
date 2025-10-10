@@ -22,47 +22,42 @@ import (
 
 // CommentConfig is an object representing the database table.
 type CommentConfig struct {
-	TenantID    int64     `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
-	BelongKey   string    `boil:"belong_key" json:"belong_key" toml:"belong_key" yaml:"belong_key"`
-	ClientToken string    `boil:"client_token" json:"client_token" toml:"client_token" yaml:"client_token"`
-	IfAudit     bool      `boil:"if_audit" json:"if_audit" toml:"if_audit" yaml:"if_audit"`
-	CreatedAt   time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt   time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	TenantID  int64     `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
+	BelongKey string    `boil:"belong_key" json:"belong_key" toml:"belong_key" yaml:"belong_key"`
+	IfAudit   bool      `boil:"if_audit" json:"if_audit" toml:"if_audit" yaml:"if_audit"`
+	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *commentConfigR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L commentConfigL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var CommentConfigColumns = struct {
-	TenantID    string
-	BelongKey   string
-	ClientToken string
-	IfAudit     string
-	CreatedAt   string
-	UpdatedAt   string
+	TenantID  string
+	BelongKey string
+	IfAudit   string
+	CreatedAt string
+	UpdatedAt string
 }{
-	TenantID:    "tenant_id",
-	BelongKey:   "belong_key",
-	ClientToken: "client_token",
-	IfAudit:     "if_audit",
-	CreatedAt:   "created_at",
-	UpdatedAt:   "updated_at",
+	TenantID:  "tenant_id",
+	BelongKey: "belong_key",
+	IfAudit:   "if_audit",
+	CreatedAt: "created_at",
+	UpdatedAt: "updated_at",
 }
 
 var CommentConfigTableColumns = struct {
-	TenantID    string
-	BelongKey   string
-	ClientToken string
-	IfAudit     string
-	CreatedAt   string
-	UpdatedAt   string
+	TenantID  string
+	BelongKey string
+	IfAudit   string
+	CreatedAt string
+	UpdatedAt string
 }{
-	TenantID:    "comment_configs.tenant_id",
-	BelongKey:   "comment_configs.belong_key",
-	ClientToken: "comment_configs.client_token",
-	IfAudit:     "comment_configs.if_audit",
-	CreatedAt:   "comment_configs.created_at",
-	UpdatedAt:   "comment_configs.updated_at",
+	TenantID:  "comment_configs.tenant_id",
+	BelongKey: "comment_configs.belong_key",
+	IfAudit:   "comment_configs.if_audit",
+	CreatedAt: "comment_configs.created_at",
+	UpdatedAt: "comment_configs.updated_at",
 }
 
 // Generated where
@@ -98,19 +93,17 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 }
 
 var CommentConfigWhere = struct {
-	TenantID    whereHelperint64
-	BelongKey   whereHelperstring
-	ClientToken whereHelperstring
-	IfAudit     whereHelperbool
-	CreatedAt   whereHelpertime_Time
-	UpdatedAt   whereHelpertime_Time
+	TenantID  whereHelperint64
+	BelongKey whereHelperstring
+	IfAudit   whereHelperbool
+	CreatedAt whereHelpertime_Time
+	UpdatedAt whereHelpertime_Time
 }{
-	TenantID:    whereHelperint64{field: "\"comment_configs\".\"tenant_id\""},
-	BelongKey:   whereHelperstring{field: "\"comment_configs\".\"belong_key\""},
-	ClientToken: whereHelperstring{field: "\"comment_configs\".\"client_token\""},
-	IfAudit:     whereHelperbool{field: "\"comment_configs\".\"if_audit\""},
-	CreatedAt:   whereHelpertime_Time{field: "\"comment_configs\".\"created_at\""},
-	UpdatedAt:   whereHelpertime_Time{field: "\"comment_configs\".\"updated_at\""},
+	TenantID:  whereHelperint64{field: "\"comment_configs\".\"tenant_id\""},
+	BelongKey: whereHelperstring{field: "\"comment_configs\".\"belong_key\""},
+	IfAudit:   whereHelperbool{field: "\"comment_configs\".\"if_audit\""},
+	CreatedAt: whereHelpertime_Time{field: "\"comment_configs\".\"created_at\""},
+	UpdatedAt: whereHelpertime_Time{field: "\"comment_configs\".\"updated_at\""},
 }
 
 // CommentConfigRels is where relationship names are stored.
@@ -150,8 +143,8 @@ func (r *commentConfigR) GetTenant() *Tenant {
 type commentConfigL struct{}
 
 var (
-	commentConfigAllColumns            = []string{"tenant_id", "belong_key", "client_token", "if_audit", "created_at", "updated_at"}
-	commentConfigColumnsWithoutDefault = []string{"tenant_id", "belong_key", "client_token"}
+	commentConfigAllColumns            = []string{"tenant_id", "belong_key", "if_audit", "created_at", "updated_at"}
+	commentConfigColumnsWithoutDefault = []string{"tenant_id", "belong_key"}
 	commentConfigColumnsWithDefault    = []string{"if_audit", "created_at", "updated_at"}
 	commentConfigPrimaryKeyColumns     = []string{"tenant_id", "belong_key"}
 	commentConfigGeneratedColumns      = []string{}

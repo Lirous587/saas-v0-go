@@ -58,7 +58,6 @@ type GetCommentTenantConfigRequest struct {
 }
 
 type CommentConfigResponse struct {
-	ClientToken string `json:"client_token"`
 	IfAudit     bool   `json:"if_audit"`
 	CreatedAt   int64  `json:"created_at"`
 	UpdatedAt   int64  `json:"updated_at"`
