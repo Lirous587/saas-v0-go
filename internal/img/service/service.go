@@ -593,7 +593,15 @@ func (s *service) SetR2Configure(secretAccessKey string, config *domain.R2Config
 
 	config.SetSecretAccessKey(encryptSecret)
 
-	return s.repo.SetTenantR2Config(config)
+	if err := s.repo.SetTenantR2Config(config); err != nil {
+		return err
+	}
+
+	// 删除缓存中的旧配置，强制下次重新加载
+	s.tenantR2.Delete(config.TenantID)
+
+	return nil
+
 }
 
 func (s *service) GetR2Configure(tenantID domain.TenantID) (*domain.R2Config, error) {
