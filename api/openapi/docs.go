@@ -26,7 +26,6 @@ const docTemplate = `{
     "paths": {
         "/v1/captcha": {
             "post": {
-                "description": "创建新的验证码",
                 "consumes": [
                     "application/json"
                 ],
@@ -52,7 +51,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功创建验证码",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -112,7 +111,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功创建验证码并返回答案",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
