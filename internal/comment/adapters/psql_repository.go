@@ -108,12 +108,12 @@ func (repo *CommentPSQLRepository) SetCommentTenantConfig(config *domain.Comment
 	if err := ormConfig.UpsertG(
 		true,
 		[]string{orm.CommentTenantConfigColumns.TenantID},
-		boil.Whitelist(
+		boil.Greylist( // 手动指定 insertColumns，确保包含 if_audit
 			orm.CommentTenantConfigColumns.IfAudit,
-			orm.CommentTenantConfigColumns.ClientToken,
-			orm.CommentTenantConfigColumns.UpdatedAt,
 		),
-		boil.Infer(),
+		boil.Greylist( // 手动指定 insertColumns，确保包含 if_audit
+			orm.CommentTenantConfigColumns.IfAudit,
+		),
 	); err != nil {
 		return errors.WithStack(err)
 	}
@@ -141,12 +141,12 @@ func (repo *CommentPSQLRepository) SetCommentConfig(config *domain.CommentConfig
 	if err := ormConfig.UpsertG(
 		true,
 		[]string{orm.CommentConfigColumns.TenantID, orm.CommentConfigColumns.BelongKey}, // 冲突列：复合主键的两个字段
-		boil.Whitelist(
+		boil.Greylist(
 			orm.CommentConfigColumns.IfAudit,
-			orm.CommentConfigColumns.ClientToken,
-			orm.CommentConfigColumns.UpdatedAt,
 		),
-		boil.Infer(),
+		boil.Greylist(
+			orm.CommentConfigColumns.IfAudit,
+		),
 	); err != nil {
 		return errors.WithStack(err)
 	}

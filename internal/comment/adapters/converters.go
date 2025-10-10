@@ -87,7 +87,7 @@ func domainCommentTenantConfigToORM(config *domain.CommentTenantConfig) *orm.Com
 	ormConfig := &orm.CommentTenantConfig{
 		TenantID:    int64(config.TenantID),
 		ClientToken: config.ClientToken,
-		CreatedAt:   config.CreatedAt,
+		IfAudit:     config.IfAudit,
 	}
 
 	// 处理null项
@@ -104,7 +104,9 @@ func ormCommentTenantConfigToDomain(ormConfig *orm.CommentTenantConfig) *domain.
 	config := &domain.CommentTenantConfig{
 		TenantID:    domain.TenantID(ormConfig.TenantID),
 		ClientToken: ormConfig.ClientToken,
+		IfAudit:     ormConfig.IfAudit,
 		CreatedAt:   ormConfig.CreatedAt,
+		UpdatedAt:   ormConfig.UpdatedAt,
 	}
 
 	// 处理null项
@@ -122,7 +124,7 @@ func domainCommentConfigToORM(config *domain.CommentConfig) *orm.CommentConfig {
 		BelongKey:   string(config.BelongKey),
 		TenantID:    int64(config.TenantID),
 		ClientToken: config.ClientToken,
-		CreatedAt:   config.CreatedAt,
+		IfAudit:     config.IfAudit,
 	}
 
 	// 处理null项
@@ -140,7 +142,9 @@ func ormCommentConfigToDomain(ormConfig *orm.CommentConfig) *domain.CommentConfi
 		BelongKey:   domain.BelongKey(ormConfig.BelongKey),
 		TenantID:    domain.TenantID(ormConfig.TenantID),
 		ClientToken: ormConfig.ClientToken,
+		IfAudit:     ormConfig.IfAudit,
 		CreatedAt:   ormConfig.CreatedAt,
+		UpdatedAt:   ormConfig.UpdatedAt,
 	}
 
 	// 处理null项

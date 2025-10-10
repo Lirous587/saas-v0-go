@@ -42,15 +42,15 @@ type CommentListResponse struct {
 }
 
 type CommentTenantConfigResponse struct {
-	ClientToken string
-	IfAudit     bool
-	CreatedAt   int64
-	UpdatedAt   int64
+	ClientToken string `json:"client_token"`
+	IfAudit     bool   `json:"if_audit"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
 }
 
 type SetCommentTenantConfigRequest struct {
 	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
-	IfAudit  bool            `json:"if_audit" binding:"required"`
+	IfAudit  *bool           `json:"if_audit" binding:"required"`
 }
 
 type GetCommentTenantConfigRequest struct {
@@ -58,16 +58,16 @@ type GetCommentTenantConfigRequest struct {
 }
 
 type CommentConfigResponse struct {
-	ClientToken string
-	IfAudit     bool
-	CreatedAt   int64
-	UpdatedAt   int64
+	ClientToken string `json:"client_token"`
+	IfAudit     bool   `json:"if_audit"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
 }
 
 type SetCommentConfigRequest struct {
 	TenantID  domain.TenantID  `json:"-" uri:"tenant_id" binding:"required"`
-	BelongKey domain.BelongKey `uri:"belong_key" binding:"required"`
-	IfAudit   bool             `json:"if_audit" binding:"required"`
+	BelongKey domain.BelongKey `json:"-" uri:"belong_key" binding:"required"`
+	IfAudit   *bool            `json:"if_audit" binding:"required"`
 }
 
 type GetCommentConfigRequest struct {

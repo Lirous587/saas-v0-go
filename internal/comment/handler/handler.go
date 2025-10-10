@@ -128,6 +128,19 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 	response.Success(ctx, domainCommentListToResponse(data))
 }
 
+// SetCommentTenantConfig godoc
+// @Summary      设置租户级别的评论系统配置
+// @Description  设置租户级别的评论系统配置
+// @Tags         comment
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        tenant_id   path int true "租户id"
+// @Param        request body handler.SetCommentTenantConfigRequest true "租户评论系统配置"
+// @Success      200  {object}  response.successResponse "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/comment/{tenant_id}/config [put]
 func (h *HttpHandler) SetCommentTenantConfig(ctx *gin.Context) {
 	req := new(SetCommentTenantConfigRequest)
 
@@ -137,16 +150,29 @@ func (h *HttpHandler) SetCommentTenantConfig(ctx *gin.Context) {
 
 	if err := h.service.SetCommentTenantConfig(&domain.CommentTenantConfig{
 		TenantID: req.TenantID,
-		IfAudit:  req.IfAudit,
+		IfAudit:  *req.IfAudit,
 	}); err != nil {
+		response.Error(ctx, err)
 		return
 	}
 
 	response.Success(ctx)
 }
 
+// GetCommentTenantConfig godoc
+// @Summary      获取租户级别的评论系统配置
+// @Description  获取租户级别的评论系统配置
+// @Tags         comment
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        tenant_id   path int true "租户id"
+// @Success      200  {object}  response.successResponse{data=handler.CommentTenantConfigResponse} "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/comment/{tenant_id}/config [get]
 func (h *HttpHandler) GetCommentTenantConfig(ctx *gin.Context) {
-	req := new(GetCommentConfigRequest)
+	req := new(GetCommentTenantConfigRequest)
 
 	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
@@ -154,12 +180,27 @@ func (h *HttpHandler) GetCommentTenantConfig(ctx *gin.Context) {
 
 	res, err := h.service.GetCommentTenantConfig(req.TenantID)
 	if err != nil {
+		response.Error(ctx, err)
 		return
 	}
 
 	response.Success(ctx, domainCommentTenantConfigToResponse(res))
 }
 
+// SetCommentConfig godoc
+// @Summary      设置板块级别的评论系统配置
+// @Description  设置板块级别的评论系统配置
+// @Tags         comment
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        tenant_id   	path int true "租户id"
+// @Param        belong_key   path string true "板块唯一键"
+// @Param        request body handler.SetCommentConfigRequest true "租户评论系统配置"
+// @Success      200  {object}  response.successResponse "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/comment/{tenant_id}/{belong_key}/config [put]
 func (h *HttpHandler) SetCommentConfig(ctx *gin.Context) {
 	req := new(SetCommentConfigRequest)
 
@@ -170,14 +211,27 @@ func (h *HttpHandler) SetCommentConfig(ctx *gin.Context) {
 	if err := h.service.SetCommentConfig(&domain.CommentConfig{
 		TenantID:  req.TenantID,
 		BelongKey: req.BelongKey,
-		IfAudit:   req.IfAudit,
+		IfAudit:   *req.IfAudit,
 	}); err != nil {
+		response.Error(ctx, err)
 		return
 	}
 
 	response.Success(ctx)
 }
 
+// GetCommentConfig godoc
+// @Summary      获取板块级别的评论系统配置
+// @Description  获取板块级别的评论系统配置
+// @Tags         comment
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        tenant_id   path int true "租户id"
+// @Success      200  {object}  response.successResponse{data=handler.CommentConfigResponse} "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/comment/{tenant_id}/{belong_key}/config [get]
 func (h *HttpHandler) GetCommentConfig(ctx *gin.Context) {
 	req := new(GetCommentConfigRequest)
 
@@ -187,6 +241,7 @@ func (h *HttpHandler) GetCommentConfig(ctx *gin.Context) {
 
 	res, err := h.service.GetCommentConfig(req.TenantID, req.BelongKey)
 	if err != nil {
+		response.Error(ctx, err)
 		return
 	}
 

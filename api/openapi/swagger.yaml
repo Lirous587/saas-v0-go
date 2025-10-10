@@ -1,5 +1,11 @@
 basePath: /api
 definitions:
+  domain.CommentStatus:
+    enum:
+    - ""
+    type: string
+    x-enum-varnames:
+    - CommentStatusApprove
   domain.InviteTokenKind:
     enum:
     - public
@@ -68,6 +74,17 @@ definitions:
       title:
         type: string
     type: object
+  handler.CommentConfigResponse:
+    properties:
+      client_token:
+        type: string
+      created_at:
+        type: integer
+      if_audit:
+        type: boolean
+      updated_at:
+        type: integer
+    type: object
   handler.CommentListResponse:
     properties:
       list:
@@ -79,14 +96,33 @@ definitions:
     type: object
   handler.CommentResponse:
     properties:
+      content:
+        type: string
       created_at:
         type: integer
-      description:
-        type: string
       id:
         type: integer
-      title:
+      is_liked:
+        type: boolean
+      like_count:
+        type: integer
+      parent_id:
+        type: integer
+      root_id:
+        type: integer
+      status:
+        $ref: '#/definitions/domain.CommentStatus'
+      user:
+        $ref: '#/definitions/handler.UserInfo'
+    type: object
+  handler.CommentTenantConfigResponse:
+    properties:
+      client_token:
         type: string
+      created_at:
+        type: integer
+      if_audit:
+        type: boolean
       updated_at:
         type: integer
     type: object
@@ -230,6 +266,20 @@ definitions:
           $ref: '#/definitions/saas_internal_role_handler.RoleResponse'
         type: array
     type: object
+  handler.SetCommentConfigRequest:
+    properties:
+      if_audit:
+        type: boolean
+    required:
+    - if_audit
+    type: object
+  handler.SetCommentTenantConfigRequest:
+    properties:
+      if_audit:
+        type: boolean
+    required:
+    - if_audit
+    type: object
   handler.SetR2ConfigureRequest:
     properties:
       access_key_id:
@@ -290,6 +340,15 @@ definitions:
     required:
     - plan_id
     type: object
+  handler.UserInfo:
+    properties:
+      avatar:
+        type: string
+      id:
+        type: integer
+      nickname:
+        type: string
+    type: object
   response.errorResponse:
     properties:
       code:
@@ -324,25 +383,18 @@ definitions:
     type: object
   saas_internal_comment_handler.CreateRequest:
     properties:
-      description:
-        maxLength: 60
+      belong_key:
         type: string
-      title:
-        maxLength: 30
+      content:
         type: string
+      parent_id:
+        type: integer
+      tenantID:
+        type: integer
     required:
-    - title
-    type: object
-  saas_internal_comment_handler.UpdateRequest:
-    properties:
-      description:
-        maxLength: 60
-        type: string
-      title:
-        maxLength: 30
-        type: string
-    required:
-    - title
+    - belong_key
+    - content
+    - tenantID
     type: object
   saas_internal_plan_handler.CreateRequest:
     properties:
@@ -641,66 +693,28 @@ paths:
       summary: 删除 Comment
       tags:
       - comment
+  /v1/comment/{tenant_id}/{belong_key}/config:
     get:
       consumes:
       - application/json
-      description: 读取单条 Comment
+      description: 获取板块级别的评论系统配置
       parameters:
-      - description: Comment ID
+      - description: 租户id
         in: path
-        name: id
+        name: tenant_id
         required: true
         type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: 成功查询 Comment
+          description: 请求成功
           schema:
             allOf:
             - $ref: '#/definitions/response.successResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/handler.CommentResponse'
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      summary: 读取单条 Comment
-      tags:
-      - comment
-    put:
-      consumes:
-      - application/json
-      description: 根据ID更新 Comment 信息
-      parameters:
-      - description: Comment ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 更新 Comment 请求
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/saas_internal_comment_handler.UpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功更新 Comment
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.CommentResponse'
+                  $ref: '#/definitions/handler.CommentConfigResponse'
               type: object
         "400":
           description: 参数错误
@@ -712,7 +726,120 @@ paths:
             $ref: '#/definitions/response.errorResponse'
       security:
       - BearerAuth: []
-      summary: 更新 Comment
+      summary: 获取板块级别的评论系统配置
+      tags:
+      - comment
+    put:
+      consumes:
+      - application/json
+      description: 设置板块级别的评论系统配置
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: integer
+      - description: 板块唯一键
+        in: path
+        name: belong_key
+        required: true
+        type: string
+      - description: 租户评论系统配置
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.SetCommentConfigRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 设置板块级别的评论系统配置
+      tags:
+      - comment
+  /v1/comment/{tenant_id}/config:
+    get:
+      consumes:
+      - application/json
+      description: 获取租户级别的评论系统配置
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.CommentTenantConfigResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 获取租户级别的评论系统配置
+      tags:
+      - comment
+    put:
+      consumes:
+      - application/json
+      description: 设置租户级别的评论系统配置
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: integer
+      - description: 租户评论系统配置
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.SetCommentTenantConfigRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 设置租户级别的评论系统配置
       tags:
       - comment
   /v1/img/{tenant_id}:

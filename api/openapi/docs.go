@@ -275,128 +275,6 @@ const docTemplate = `{
             }
         },
         "/v1/comment/{id}": {
-            "get": {
-                "description": "读取单条 Comment",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "comment"
-                ],
-                "summary": "读取单条 Comment",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Comment ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功查询 Comment",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.successResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/handler.CommentResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "参数错误",
-                        "schema": {
-                            "$ref": "#/definitions/response.invalidParamsResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器错误",
-                        "schema": {
-                            "$ref": "#/definitions/response.errorResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "根据ID更新 Comment 信息",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "comment"
-                ],
-                "summary": "更新 Comment",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Comment ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "更新 Comment 请求",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/saas_internal_comment_handler.UpdateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功更新 Comment",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.successResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/handler.CommentResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "参数错误",
-                        "schema": {
-                            "$ref": "#/definitions/response.invalidParamsResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器错误",
-                        "schema": {
-                            "$ref": "#/definitions/response.errorResponse"
-                        }
-                    }
-                }
-            },
             "delete": {
                 "security": [
                     {
@@ -426,6 +304,247 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "成功删除 Comment",
+                        "schema": {
+                            "$ref": "#/definitions/response.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/comment/{tenant_id}/config": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取租户级别的评论系统配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "获取租户级别的评论系统配置",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.CommentTenantConfigResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "设置租户级别的评论系统配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "设置租户级别的评论系统配置",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "租户评论系统配置",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.SetCommentTenantConfigRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/comment/{tenant_id}/{belong_key}/config": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取板块级别的评论系统配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "获取板块级别的评论系统配置",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.CommentConfigResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "设置板块级别的评论系统配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "设置板块级别的评论系统配置",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "板块唯一键",
+                        "name": "belong_key",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "租户评论系统配置",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.SetCommentConfigRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
                         "schema": {
                             "$ref": "#/definitions/response.successResponse"
                         }
@@ -2463,6 +2582,15 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "domain.CommentStatus": {
+            "type": "string",
+            "enum": [
+                ""
+            ],
+            "x-enum-varnames": [
+                "CommentStatusApprove"
+            ]
+        },
         "domain.InviteTokenKind": {
             "type": "string",
             "enum": [
@@ -2562,6 +2690,23 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.CommentConfigResponse": {
+            "type": "object",
+            "properties": {
+                "client_token": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "if_audit": {
+                    "type": "boolean"
+                },
+                "updated_at": {
+                    "type": "integer"
+                }
+            }
+        },
         "handler.CommentListResponse": {
             "type": "object",
             "properties": {
@@ -2579,17 +2724,46 @@ const docTemplate = `{
         "handler.CommentResponse": {
             "type": "object",
             "properties": {
+                "content": {
+                    "type": "string"
+                },
                 "created_at": {
                     "type": "integer"
-                },
-                "description": {
-                    "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "title": {
+                "is_liked": {
+                    "type": "boolean"
+                },
+                "like_count": {
+                    "type": "integer"
+                },
+                "parent_id": {
+                    "type": "integer"
+                },
+                "root_id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/domain.CommentStatus"
+                },
+                "user": {
+                    "$ref": "#/definitions/handler.UserInfo"
+                }
+            }
+        },
+        "handler.CommentTenantConfigResponse": {
+            "type": "object",
+            "properties": {
+                "client_token": {
                     "type": "string"
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "if_audit": {
+                    "type": "boolean"
                 },
                 "updated_at": {
                     "type": "integer"
@@ -2810,6 +2984,28 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.SetCommentConfigRequest": {
+            "type": "object",
+            "required": [
+                "if_audit"
+            ],
+            "properties": {
+                "if_audit": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "handler.SetCommentTenantConfigRequest": {
+            "type": "object",
+            "required": [
+                "if_audit"
+            ],
+            "properties": {
+                "if_audit": {
+                    "type": "boolean"
+                }
+            }
+        },
         "handler.SetR2ConfigureRequest": {
             "type": "object",
             "required": [
@@ -2899,6 +3095,20 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.UserInfo": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "nickname": {
+                    "type": "string"
+                }
+            }
+        },
         "response.errorResponse": {
             "type": "object",
             "properties": {
@@ -2948,32 +3158,22 @@ const docTemplate = `{
         "saas_internal_comment_handler.CreateRequest": {
             "type": "object",
             "required": [
-                "title"
+                "belong_key",
+                "content",
+                "tenantID"
             ],
             "properties": {
-                "description": {
-                    "type": "string",
-                    "maxLength": 60
+                "belong_key": {
+                    "type": "string"
                 },
-                "title": {
-                    "type": "string",
-                    "maxLength": 30
-                }
-            }
-        },
-        "saas_internal_comment_handler.UpdateRequest": {
-            "type": "object",
-            "required": [
-                "title"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string",
-                    "maxLength": 60
+                "content": {
+                    "type": "string"
                 },
-                "title": {
-                    "type": "string",
-                    "maxLength": 30
+                "parent_id": {
+                    "type": "integer"
+                },
+                "tenantID": {
+                    "type": "integer"
                 }
             }
         },

@@ -41,10 +41,10 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 
 		// 管理员
 		// 全局配置
-		protect.POST("/config", handler.SetCommentTenantConfig)
+		protect.PUT("/config", handler.SetCommentTenantConfig)
 		protect.GET("/config", handler.GetCommentTenantConfig)
 		// belong_key颗粒度
-		protect.POST("/:belong_key/config", handler.SetCommentConfig)
+		protect.PUT("/:belong_key/config", handler.SetCommentConfig)
 		protect.GET("/:belong_key/config", handler.GetCommentConfig)
 	}
 
