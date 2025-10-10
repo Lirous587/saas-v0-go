@@ -21,10 +21,10 @@ type CommentResponse struct {
 }
 
 type CreateRequest struct {
-	BelongKey domain.BelongKey `json:"belong_key" binding:"required"`
-	TenantID  domain.TenantID  `uri:"tenant_id" binding:"required"`
-	ParentID  int64            `json:"parent_id"`
-	Content   string           `json:"content" binding:"required"`
+	Plate    string          `json:"plate" binding:"required"`
+	TenantID domain.TenantID `uri:"tenant_id" binding:"required"`
+	ParentID int64           `json:"parent_id"`
+	Content  string          `json:"content" binding:"required"`
 }
 
 type ListRequest struct {
@@ -41,35 +41,70 @@ type CommentListResponse struct {
 	List  []*CommentResponse `json:"list"`
 }
 
-type CommentTenantConfigResponse struct {
+// --- 评论板块
+
+type PlateResponse struct {
+	ID          int64  `json:"id"`
+	Plate       string `json:"plate"`
+	Description string `json:"description,omitempty"`
+}
+
+type PlateListResponse struct {
+	Total int64            `json:"total"`
+	List  []*PlateResponse `json:"list"`
+}
+
+type CreatePlateRequest struct {
+	TenantID    domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	Plate       string          `json:"plate" binding:"required,max=50"`
+	Description string          `json:"description" binding:"max=60"`
+}
+
+type DeletePlateRequest struct {
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	ID       int64           `json:"-" uri:"id" binding:"required"`
+}
+
+type PlateListRequest struct {
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	Page     int             `form:"page,default=1" binding:"min=1"`
+	PageSize int             `form:"page_size,default=5" binding:"min=5,max=20"`
+	Keyword  string          `form:"keyword" binding:"max=20"`
+}
+
+// --- 租户级别配置
+
+type SetTenantConfigRequest struct {
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	IfAudit  *bool           `json:"if_audit" binding:"required"`
+}
+
+type GetTenantConfigRequest struct {
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+}
+
+type TenantConfigResponse struct {
 	ClientToken string `json:"client_token"`
 	IfAudit     bool   `json:"if_audit"`
 	CreatedAt   int64  `json:"created_at"`
 	UpdatedAt   int64  `json:"updated_at"`
 }
 
-type SetCommentTenantConfigRequest struct {
+// --- 板块级别配置
+
+type SetPlateConfigRequest struct {
 	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	Plate    string          `json:"-" uri:"plate" binding:"required"`
 	IfAudit  *bool           `json:"if_audit" binding:"required"`
 }
 
-type GetCommentTenantConfigRequest struct {
+type GetPlateConfigRequest struct {
 	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	Plate    string          `json:"-" uri:"plate" binding:"required"`
 }
 
-type CommentConfigResponse struct {
-	IfAudit     bool   `json:"if_audit"`
-	CreatedAt   int64  `json:"created_at"`
-	UpdatedAt   int64  `json:"updated_at"`
-}
-
-type SetCommentConfigRequest struct {
-	TenantID  domain.TenantID  `json:"-" uri:"tenant_id" binding:"required"`
-	BelongKey domain.BelongKey `json:"-" uri:"belong_key" binding:"required"`
-	IfAudit   *bool            `json:"if_audit" binding:"required"`
-}
-
-type GetCommentConfigRequest struct {
-	TenantID  domain.TenantID  `json:"-" uri:"tenant_id" binding:"required"`
-	BelongKey domain.BelongKey `json:"-" uri:"belong_key" binding:"required"`
+type PlateConfigResponse struct {
+	IfAudit   bool  `json:"if_audit"`
+	CreatedAt int64 `json:"created_at"`
+	UpdatedAt int64 `json:"updated_at"`
 }

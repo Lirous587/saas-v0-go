@@ -23,7 +23,7 @@ import (
 // CommentConfig is an object representing the database table.
 type CommentConfig struct {
 	TenantID  int64     `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
-	BelongKey string    `boil:"belong_key" json:"belong_key" toml:"belong_key" yaml:"belong_key"`
+	Plate     string    `boil:"plate" json:"plate" toml:"plate" yaml:"plate"`
 	IfAudit   bool      `boil:"if_audit" json:"if_audit" toml:"if_audit" yaml:"if_audit"`
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
@@ -34,13 +34,13 @@ type CommentConfig struct {
 
 var CommentConfigColumns = struct {
 	TenantID  string
-	BelongKey string
+	Plate     string
 	IfAudit   string
 	CreatedAt string
 	UpdatedAt string
 }{
 	TenantID:  "tenant_id",
-	BelongKey: "belong_key",
+	Plate:     "plate",
 	IfAudit:   "if_audit",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
@@ -48,13 +48,13 @@ var CommentConfigColumns = struct {
 
 var CommentConfigTableColumns = struct {
 	TenantID  string
-	BelongKey string
+	Plate     string
 	IfAudit   string
 	CreatedAt string
 	UpdatedAt string
 }{
 	TenantID:  "comment_configs.tenant_id",
-	BelongKey: "comment_configs.belong_key",
+	Plate:     "comment_configs.plate",
 	IfAudit:   "comment_configs.if_audit",
 	CreatedAt: "comment_configs.created_at",
 	UpdatedAt: "comment_configs.updated_at",
@@ -94,13 +94,13 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 
 var CommentConfigWhere = struct {
 	TenantID  whereHelperint64
-	BelongKey whereHelperstring
+	Plate     whereHelperstring
 	IfAudit   whereHelperbool
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 }{
 	TenantID:  whereHelperint64{field: "\"comment_configs\".\"tenant_id\""},
-	BelongKey: whereHelperstring{field: "\"comment_configs\".\"belong_key\""},
+	Plate:     whereHelperstring{field: "\"comment_configs\".\"plate\""},
 	IfAudit:   whereHelperbool{field: "\"comment_configs\".\"if_audit\""},
 	CreatedAt: whereHelpertime_Time{field: "\"comment_configs\".\"created_at\""},
 	UpdatedAt: whereHelpertime_Time{field: "\"comment_configs\".\"updated_at\""},
@@ -143,10 +143,10 @@ func (r *commentConfigR) GetTenant() *Tenant {
 type commentConfigL struct{}
 
 var (
-	commentConfigAllColumns            = []string{"tenant_id", "belong_key", "if_audit", "created_at", "updated_at"}
-	commentConfigColumnsWithoutDefault = []string{"tenant_id", "belong_key"}
+	commentConfigAllColumns            = []string{"tenant_id", "plate", "if_audit", "created_at", "updated_at"}
+	commentConfigColumnsWithoutDefault = []string{"tenant_id", "plate"}
 	commentConfigColumnsWithDefault    = []string{"if_audit", "created_at", "updated_at"}
-	commentConfigPrimaryKeyColumns     = []string{"tenant_id", "belong_key"}
+	commentConfigPrimaryKeyColumns     = []string{"tenant_id", "plate"}
 	commentConfigGeneratedColumns      = []string{}
 )
 
@@ -594,7 +594,7 @@ func (o *CommentConfig) SetTenant(exec boil.Executor, insert bool, related *Tena
 		strmangle.SetParamNames("\"", "\"", 1, []string{"tenant_id"}),
 		strmangle.WhereClause("\"", "\"", 2, commentConfigPrimaryKeyColumns),
 	)
-	values := []interface{}{related.ID, o.TenantID, o.BelongKey}
+	values := []interface{}{related.ID, o.TenantID, o.Plate}
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, updateQuery)
@@ -636,13 +636,13 @@ func CommentConfigs(mods ...qm.QueryMod) commentConfigQuery {
 }
 
 // FindCommentConfigG retrieves a single record by ID.
-func FindCommentConfigG(tenantID int64, belongKey string, selectCols ...string) (*CommentConfig, error) {
-	return FindCommentConfig(boil.GetDB(), tenantID, belongKey, selectCols...)
+func FindCommentConfigG(tenantID int64, plate string, selectCols ...string) (*CommentConfig, error) {
+	return FindCommentConfig(boil.GetDB(), tenantID, plate, selectCols...)
 }
 
 // FindCommentConfig retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindCommentConfig(exec boil.Executor, tenantID int64, belongKey string, selectCols ...string) (*CommentConfig, error) {
+func FindCommentConfig(exec boil.Executor, tenantID int64, plate string, selectCols ...string) (*CommentConfig, error) {
 	commentConfigObj := &CommentConfig{}
 
 	sel := "*"
@@ -650,10 +650,10 @@ func FindCommentConfig(exec boil.Executor, tenantID int64, belongKey string, sel
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"comment_configs\" where \"tenant_id\"=$1 AND \"belong_key\"=$2", sel,
+		"select %s from \"comment_configs\" where \"tenant_id\"=$1 AND \"plate\"=$2", sel,
 	)
 
-	q := queries.Raw(query, tenantID, belongKey)
+	q := queries.Raw(query, tenantID, plate)
 
 	err := q.Bind(nil, exec, commentConfigObj)
 	if err != nil {
@@ -1057,7 +1057,7 @@ func (o *CommentConfig) Delete(exec boil.Executor) (int64, error) {
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), commentConfigPrimaryKeyMapping)
-	sql := "DELETE FROM \"comment_configs\" WHERE \"tenant_id\"=$1 AND \"belong_key\"=$2"
+	sql := "DELETE FROM \"comment_configs\" WHERE \"tenant_id\"=$1 AND \"plate\"=$2"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -1170,7 +1170,7 @@ func (o *CommentConfig) ReloadG() error {
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *CommentConfig) Reload(exec boil.Executor) error {
-	ret, err := FindCommentConfig(exec, o.TenantID, o.BelongKey)
+	ret, err := FindCommentConfig(exec, o.TenantID, o.Plate)
 	if err != nil {
 		return err
 	}
@@ -1219,20 +1219,20 @@ func (o *CommentConfigSlice) ReloadAll(exec boil.Executor) error {
 }
 
 // CommentConfigExistsG checks if the CommentConfig row exists.
-func CommentConfigExistsG(tenantID int64, belongKey string) (bool, error) {
-	return CommentConfigExists(boil.GetDB(), tenantID, belongKey)
+func CommentConfigExistsG(tenantID int64, plate string) (bool, error) {
+	return CommentConfigExists(boil.GetDB(), tenantID, plate)
 }
 
 // CommentConfigExists checks if the CommentConfig row exists.
-func CommentConfigExists(exec boil.Executor, tenantID int64, belongKey string) (bool, error) {
+func CommentConfigExists(exec boil.Executor, tenantID int64, plate string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"comment_configs\" where \"tenant_id\"=$1 AND \"belong_key\"=$2 limit 1)"
+	sql := "select exists(select 1 from \"comment_configs\" where \"tenant_id\"=$1 AND \"plate\"=$2 limit 1)"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
-		fmt.Fprintln(boil.DebugWriter, tenantID, belongKey)
+		fmt.Fprintln(boil.DebugWriter, tenantID, plate)
 	}
-	row := exec.QueryRow(sql, tenantID, belongKey)
+	row := exec.QueryRow(sql, tenantID, plate)
 
 	err := row.Scan(&exists)
 	if err != nil {
@@ -1244,5 +1244,5 @@ func CommentConfigExists(exec boil.Executor, tenantID int64, belongKey string) (
 
 // Exists checks if the CommentConfig row exists.
 func (o *CommentConfig) Exists(exec boil.Executor) (bool, error) {
-	return CommentConfigExists(exec, o.TenantID, o.BelongKey)
+	return CommentConfigExists(exec, o.TenantID, o.Plate)
 }

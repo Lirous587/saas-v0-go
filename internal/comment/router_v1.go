@@ -30,10 +30,10 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 	protect := g.Use(auth.JWTValidate(), auth.CasbinValited())
 	{
 		// 用户：创建评论
-		protect.POST("/:belong_key", handler.Create)
+		protect.POST("/:plate", handler.Create)
 
 		// 用户：删除评论（只能删自己的，或管理员删任意）
-		protect.DELETE("/:belong_key/:id", handler.Delete)
+		protect.DELETE("/:plate/:id", handler.Delete)
 
 		// 低优先级：点赞/取消点赞
 		// protect.POST("/:id/like", handler.Like)
@@ -44,12 +44,18 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 		// protect.GET("/advanced", handler.AdvancedList)
 		// 审计
 		// protect.PUT("/:id")
+
+		// 板块管理
+		protect.POST("/plate", handler.CreatePlate)
+		protect.DELETE("/plate/:id", handler.DeletePlate)
+		protect.GET("/plate", handler.ListPlate)
+
 		// 全局配置
-		protect.PUT("/config", handler.SetCommentTenantConfig)
-		protect.GET("/config", handler.GetCommentTenantConfig)
+		protect.PUT("/config", handler.SetTenantConfig)
+		protect.GET("/config", handler.GetTenantConfig)
 		// 板块配置
-		protect.PUT("/:belong_key/config", handler.SetCommentConfig)
-		protect.GET("/:belong_key/config", handler.GetCommentConfig)
+		protect.PUT("/:plate/config", handler.SetPlateConfig)
+		protect.GET("/:plate/config", handler.GetPlateConfig)
 	}
 
 	return nil

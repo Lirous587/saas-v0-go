@@ -52,12 +52,12 @@ func domainCommentListToResponse(data *domain.CommentList) *CommentListResponse 
 	}
 }
 
-func domainCommentTenantConfigToResponse(config *domain.CommentTenantConfig) *CommentTenantConfigResponse {
+func domainTenantConfigToResponse(config *domain.TenantConfig) *TenantConfigResponse {
 	if config == nil {
 		return nil
 	}
 
-	return &CommentTenantConfigResponse{
+	return &TenantConfigResponse{
 		ClientToken: config.ClientToken,
 		IfAudit:     config.IfAudit,
 		CreatedAt:   config.CreatedAt.Unix(),
@@ -65,14 +65,52 @@ func domainCommentTenantConfigToResponse(config *domain.CommentTenantConfig) *Co
 	}
 }
 
-func domainCommentConfigToResponse(config *domain.CommentConfig) *CommentConfigResponse {
+func domainPlateConfigToResponse(config *domain.PlateConfig) *PlateConfigResponse {
 	if config == nil {
 		return nil
 	}
 
-	return &CommentConfigResponse{
-		IfAudit:     config.IfAudit,
-		CreatedAt:   config.CreatedAt.Unix(),
-		UpdatedAt:   config.UpdatedAt.Unix(),
+	return &PlateConfigResponse{
+		IfAudit:   config.IfAudit,
+		CreatedAt: config.CreatedAt.Unix(),
+		UpdatedAt: config.UpdatedAt.Unix(),
+	}
+}
+
+func domainPlateToResponse(plate *domain.Plate) *PlateResponse {
+	if plate == nil {
+		return nil
+	}
+
+	return &PlateResponse{
+		ID:          plate.ID,
+		Plate:       plate.Plate,
+		Description: plate.Description,
+	}
+}
+
+func domainPlatesToResponse(plates []*domain.Plate) []*PlateResponse {
+	if len(plates) == 0 {
+		return nil
+	}
+
+	ret := make([]*PlateResponse, 0, len(plates))
+
+	for i := range plates {
+		if plates[i] != nil {
+			ret = append(ret, domainPlateToResponse(plates[i]))
+		}
+	}
+	return ret
+}
+
+func domainPlateListToResponse(data *domain.PlateList) *PlateListResponse {
+	if data == nil {
+		return nil
+	}
+
+	return &PlateListResponse{
+		Total: data.Total,
+		List:  domainPlatesToResponse(data.List),
 	}
 }

@@ -2,7 +2,10 @@ package service
 
 import (
 	"saas/internal/comment/domain"
+	"saas/internal/common/reskit/codes"
 	"saas/internal/common/utils"
+
+	"github.com/pkg/errors"
 )
 
 type service struct {
@@ -18,7 +21,13 @@ func NewCommentService(repo domain.CommentRepository, cache domain.CommentCache)
 }
 
 func (s *service) Create(comment *domain.Comment) (*domain.Comment, error) {
-	return s.repo.Create(comment)
+	// 1.plate 是否存在
+
+	// parent_id
+	// user_id
+	s.repo.Create(comment)
+
+	return nil, nil
 }
 
 func (s *service) Read(id int64) (*domain.Comment, error) {
@@ -40,7 +49,31 @@ func (s *service) List(query *domain.CommentQuery) (*domain.CommentList, error) 
 	return s.repo.List(query)
 }
 
-func (s *service) SetCommentTenantConfig(config *domain.CommentTenantConfig) error {
+func (s *service) CreatePlate(plate *domain.Plate) error {
+	exist, err := s.repo.ExistPlate(plate.TenantID, plate.Plate)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	if exist {
+		return codes.ErrCommentPlateNotFound
+	}
+
+	if err := s.repo.CreatePlate(plate); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
+func (s *service) DeletePlate(tenantID domain.TenantID, id int64) error {
+	return s.repo.DeletePlate(tenantID, id)
+}
+
+func (s *service) ListPlate(query *domain.PlateQuery) (*domain.PlateList, error) {
+	return s.repo.ListPlate(query)
+}
+
+func (s *service) SetTenantConfig(config *domain.TenantConfig) error {
 	// 生成client_token
 	clientToken, err := utils.GenRandomHexToken()
 	if err != nil {
@@ -49,17 +82,31 @@ func (s *service) SetCommentTenantConfig(config *domain.CommentTenantConfig) err
 
 	config.ClientToken = clientToken
 
-	return s.repo.SetCommentTenantConfig(config)
+	return s.repo.SetTenantConfig(config)
 }
 
-func (s *service) GetCommentTenantConfig(tenantID domain.TenantID) (*domain.CommentTenantConfig, error) {
-	return s.repo.GetCommentTenantConfig(tenantID)
+func (s *service) GetTenantConfig(tenantID domain.TenantID) (*domain.TenantConfig, error) {
+	return s.repo.GetTenantConfig(tenantID)
 }
 
-func (s *service) SetCommentConfig(config *domain.CommentConfig) error {
-	return s.repo.SetCommentConfig(config)
+func (s *service) SetPlateConfig(config *domain.PlateConfig) error {
+	// 查询该板块是否存在
+	exist, err := s.repo.ExistPlate(config.TenantID, config.Plate)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	if !exist {
+		return codes.ErrCommentPlateNotFound
+	}
+
+	if err := s.repo.SetPlateConfig(config); err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
 }
 
-func (s *service) GetCommentConfig(tenantID domain.TenantID, benlongKey domain.BelongKey) (*domain.CommentConfig, error) {
-	return s.repo.GetCommentConfig(tenantID, benlongKey)
+func (s *service) GetPlateConfig(tenantID domain.TenantID, plate string) (*domain.PlateConfig, error) {
+	return s.repo.GetPlateConfig(tenantID, plate)
 }

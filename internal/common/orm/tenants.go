@@ -83,6 +83,7 @@ var TenantRels = struct {
 	TenantPlan          string
 	TenantR2Config      string
 	CommentConfigs      string
+	CommentPlates       string
 	Comments            string
 	ImgCategories       string
 	Imgs                string
@@ -92,6 +93,7 @@ var TenantRels = struct {
 	TenantPlan:          "TenantPlan",
 	TenantR2Config:      "TenantR2Config",
 	CommentConfigs:      "CommentConfigs",
+	CommentPlates:       "CommentPlates",
 	Comments:            "Comments",
 	ImgCategories:       "ImgCategories",
 	Imgs:                "Imgs",
@@ -104,6 +106,7 @@ type tenantR struct {
 	TenantPlan          *TenantPlan          `boil:"TenantPlan" json:"TenantPlan" toml:"TenantPlan" yaml:"TenantPlan"`
 	TenantR2Config      *TenantR2Config      `boil:"TenantR2Config" json:"TenantR2Config" toml:"TenantR2Config" yaml:"TenantR2Config"`
 	CommentConfigs      CommentConfigSlice   `boil:"CommentConfigs" json:"CommentConfigs" toml:"CommentConfigs" yaml:"CommentConfigs"`
+	CommentPlates       CommentPlateSlice    `boil:"CommentPlates" json:"CommentPlates" toml:"CommentPlates" yaml:"CommentPlates"`
 	Comments            CommentSlice         `boil:"Comments" json:"Comments" toml:"Comments" yaml:"Comments"`
 	ImgCategories       ImgCategorySlice     `boil:"ImgCategories" json:"ImgCategories" toml:"ImgCategories" yaml:"ImgCategories"`
 	Imgs                ImgSlice             `boil:"Imgs" json:"Imgs" toml:"Imgs" yaml:"Imgs"`
@@ -177,6 +180,22 @@ func (r *tenantR) GetCommentConfigs() CommentConfigSlice {
 	}
 
 	return r.CommentConfigs
+}
+
+func (o *Tenant) GetCommentPlates() CommentPlateSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetCommentPlates()
+}
+
+func (r *tenantR) GetCommentPlates() CommentPlateSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.CommentPlates
 }
 
 func (o *Tenant) GetComments() CommentSlice {
@@ -588,6 +607,20 @@ func (o *Tenant) CommentConfigs(mods ...qm.QueryMod) commentConfigQuery {
 	)
 
 	return CommentConfigs(queryMods...)
+}
+
+// CommentPlates retrieves all the comment_plate's CommentPlates with an executor.
+func (o *Tenant) CommentPlates(mods ...qm.QueryMod) commentPlateQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"comment_plates\".\"tenant_id\"=?", o.ID),
+	)
+
+	return CommentPlates(queryMods...)
 }
 
 // Comments retrieves all the comment's Comments with an executor.
@@ -1100,6 +1133,119 @@ func (tenantL) LoadCommentConfigs(e boil.Executor, singular bool, maybeTenant in
 				local.R.CommentConfigs = append(local.R.CommentConfigs, foreign)
 				if foreign.R == nil {
 					foreign.R = &commentConfigR{}
+				}
+				foreign.R.Tenant = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadCommentPlates allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (tenantL) LoadCommentPlates(e boil.Executor, singular bool, maybeTenant interface{}, mods queries.Applicator) error {
+	var slice []*Tenant
+	var object *Tenant
+
+	if singular {
+		var ok bool
+		object, ok = maybeTenant.(*Tenant)
+		if !ok {
+			object = new(Tenant)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeTenant)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeTenant))
+			}
+		}
+	} else {
+		s, ok := maybeTenant.(*[]*Tenant)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeTenant)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeTenant))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &tenantR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &tenantR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`comment_plates`),
+		qm.WhereIn(`comment_plates.tenant_id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.Query(e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load comment_plates")
+	}
+
+	var resultSlice []*CommentPlate
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice comment_plates")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on comment_plates")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for comment_plates")
+	}
+
+	if len(commentPlateAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.CommentPlates = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &commentPlateR{}
+			}
+			foreign.R.Tenant = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.TenantID {
+				local.R.CommentPlates = append(local.R.CommentPlates, foreign)
+				if foreign.R == nil {
+					foreign.R = &commentPlateR{}
 				}
 				foreign.R.Tenant = local
 				break
@@ -1761,7 +1907,7 @@ func (o *Tenant) AddCommentConfigs(exec boil.Executor, insert bool, related ...*
 				strmangle.SetParamNames("\"", "\"", 1, []string{"tenant_id"}),
 				strmangle.WhereClause("\"", "\"", 2, commentConfigPrimaryKeyColumns),
 			)
-			values := []interface{}{o.ID, rel.TenantID, rel.BelongKey}
+			values := []interface{}{o.ID, rel.TenantID, rel.Plate}
 
 			if boil.DebugMode {
 				fmt.Fprintln(boil.DebugWriter, updateQuery)
@@ -1786,6 +1932,67 @@ func (o *Tenant) AddCommentConfigs(exec boil.Executor, insert bool, related ...*
 	for _, rel := range related {
 		if rel.R == nil {
 			rel.R = &commentConfigR{
+				Tenant: o,
+			}
+		} else {
+			rel.R.Tenant = o
+		}
+	}
+	return nil
+}
+
+// AddCommentPlatesG adds the given related objects to the existing relationships
+// of the tenant, optionally inserting them as new records.
+// Appends related to o.R.CommentPlates.
+// Sets related.R.Tenant appropriately.
+// Uses the global database handle.
+func (o *Tenant) AddCommentPlatesG(insert bool, related ...*CommentPlate) error {
+	return o.AddCommentPlates(boil.GetDB(), insert, related...)
+}
+
+// AddCommentPlates adds the given related objects to the existing relationships
+// of the tenant, optionally inserting them as new records.
+// Appends related to o.R.CommentPlates.
+// Sets related.R.Tenant appropriately.
+func (o *Tenant) AddCommentPlates(exec boil.Executor, insert bool, related ...*CommentPlate) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.TenantID = o.ID
+			if err = rel.Insert(exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"comment_plates\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"tenant_id"}),
+				strmangle.WhereClause("\"", "\"", 2, commentPlatePrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.DebugMode {
+				fmt.Fprintln(boil.DebugWriter, updateQuery)
+				fmt.Fprintln(boil.DebugWriter, values)
+			}
+			if _, err = exec.Exec(updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.TenantID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &tenantR{
+			CommentPlates: related,
+		}
+	} else {
+		o.R.CommentPlates = append(o.R.CommentPlates, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &commentPlateR{
 				Tenant: o,
 			}
 		} else {

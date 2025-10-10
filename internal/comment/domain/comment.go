@@ -6,8 +6,6 @@ import (
 
 type TenantID int64
 
-type BelongKey string
-
 type UserInfo struct {
 	ID       int64  `json:"id"`
 	NikeName string `json:"nickname"`
@@ -20,7 +18,7 @@ const CommentStatusApprove CommentStatus = ""
 
 type Comment struct {
 	ID        int64
-	BelongKey BelongKey
+	Plate     string
 	User      *UserInfo
 	TenantID  TenantID
 	ParentID  int64
@@ -47,8 +45,27 @@ type CommentList struct {
 	List  []*Comment
 }
 
-// CommentTenantConfig 租户全局配置
-type CommentTenantConfig struct {
+type Plate struct {
+	ID          int64
+	TenantID    TenantID
+	Plate       string
+	Description string
+}
+
+type PlateQuery struct {
+	TenantID TenantID
+	Page     int
+	PageSize int
+	Keyword  string
+}
+
+type PlateList struct {
+	Total int64
+	List  []*Plate
+}
+
+// TenantConfig 基于租户的全局配置
+type TenantConfig struct {
 	TenantID    TenantID
 	ClientToken string
 	IfAudit     bool
@@ -56,11 +73,11 @@ type CommentTenantConfig struct {
 	UpdatedAt   time.Time
 }
 
-// CommentConfig belong_key颗粒度的配置 优先级更高
-type CommentConfig struct {
-	TenantID    TenantID
-	BelongKey   BelongKey
-	IfAudit     bool
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+// PlateConfig  板块级别的配置 优先级更高
+type PlateConfig struct {
+	TenantID  TenantID
+	Plate     string
+	IfAudit   bool
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }

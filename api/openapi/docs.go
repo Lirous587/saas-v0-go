@@ -154,7 +154,7 @@ const docTemplate = `{
                 "tags": [
                     "comment"
                 ],
-                "summary": "获取评论列表",
+                "summary": "获取列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -223,7 +223,7 @@ const docTemplate = `{
                 "tags": [
                     "comment"
                 ],
-                "summary": "创建评论",
+                "summary": "创建",
                 "parameters": [
                     {
                         "description": "请求参数",
@@ -276,7 +276,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 Comment",
                 "consumes": [
                     "application/json"
                 ],
@@ -286,7 +285,7 @@ const docTemplate = `{
                 "tags": [
                     "comment"
                 ],
-                "summary": "删除 Comment",
+                "summary": "删除",
                 "parameters": [
                     {
                         "type": "integer",
@@ -325,7 +324,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "获取租户级别的评论系统配置",
                 "consumes": [
                     "application/json"
                 ],
@@ -357,7 +355,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/handler.CommentTenantConfigResponse"
+                                            "$ref": "#/definitions/handler.TenantConfigResponse"
                                         }
                                     }
                                 }
@@ -384,7 +382,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "设置租户级别的评论系统配置",
                 "consumes": [
                     "application/json"
                 ],
@@ -409,7 +406,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.SetCommentTenantConfigRequest"
+                            "$ref": "#/definitions/handler.SetTenantConfigRequest"
                         }
                     }
                 ],
@@ -435,7 +432,183 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/comment/{tenant_id}/{belong_key}/config": {
+        "/v1/comment/{tenant_id}/plate": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "评论板块列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "关键词",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "新增评论板块",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.CreatePlateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/comment/{tenant_id}/plate/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "删除评论板块",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "板块id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/comment/{tenant_id}/{plate}/config": {
             "get": {
                 "security": [
                     {
@@ -473,7 +646,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/handler.CommentConfigResponse"
+                                            "$ref": "#/definitions/handler.PlateConfigResponse"
                                         }
                                     }
                                 }
@@ -520,8 +693,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "板块唯一键",
-                        "name": "belong_key",
+                        "description": "板块",
+                        "name": "plate",
                         "in": "path",
                         "required": true
                     },
@@ -531,7 +704,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.SetCommentConfigRequest"
+                            "$ref": "#/definitions/handler.SetPlateConfigRequest"
                         }
                     }
                 ],
@@ -2643,20 +2816,6 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.CommentConfigResponse": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "integer"
-                },
-                "if_audit": {
-                    "type": "boolean"
-                },
-                "updated_at": {
-                    "type": "integer"
-                }
-            }
-        },
         "handler.CommentListResponse": {
             "type": "object",
             "properties": {
@@ -2703,23 +2862,6 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.CommentTenantConfigResponse": {
-            "type": "object",
-            "properties": {
-                "client_token": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "integer"
-                },
-                "if_audit": {
-                    "type": "boolean"
-                },
-                "updated_at": {
-                    "type": "integer"
-                }
-            }
-        },
         "handler.CreateCategoryRequest": {
             "type": "object",
             "required": [
@@ -2734,6 +2876,22 @@ const docTemplate = `{
                 "title": {
                     "type": "string",
                     "maxLength": 10
+                }
+            }
+        },
+        "handler.CreatePlateRequest": {
+            "type": "object",
+            "required": [
+                "plate"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 60
+                },
+                "plate": {
+                    "type": "string",
+                    "maxLength": 50
                 }
             }
         },
@@ -2892,6 +3050,20 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.PlateConfigResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
+                "if_audit": {
+                    "type": "boolean"
+                },
+                "updated_at": {
+                    "type": "integer"
+                }
+            }
+        },
         "handler.R2Configure": {
             "type": "object",
             "properties": {
@@ -2934,18 +3106,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.SetCommentConfigRequest": {
-            "type": "object",
-            "required": [
-                "if_audit"
-            ],
-            "properties": {
-                "if_audit": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "handler.SetCommentTenantConfigRequest": {
+        "handler.SetPlateConfigRequest": {
             "type": "object",
             "required": [
                 "if_audit"
@@ -2987,6 +3148,34 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.SetTenantConfigRequest": {
+            "type": "object",
+            "required": [
+                "if_audit"
+            ],
+            "properties": {
+                "if_audit": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "handler.TenantConfigResponse": {
+            "type": "object",
+            "properties": {
+                "client_token": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "if_audit": {
+                    "type": "boolean"
+                },
+                "updated_at": {
+                    "type": "integer"
+                }
+            }
+        },
         "handler.TenantListResponse": {
             "type": "object",
             "properties": {
@@ -3023,6 +3212,10 @@ const docTemplate = `{
         },
         "handler.UpdateCategoryRequest": {
             "type": "object",
+            "required": [
+                "prefix",
+                "title"
+            ],
             "properties": {
                 "prefix": {
                     "type": "string",
@@ -3108,19 +3301,19 @@ const docTemplate = `{
         "saas_internal_comment_handler.CreateRequest": {
             "type": "object",
             "required": [
-                "belong_key",
                 "content",
+                "plate",
                 "tenantID"
             ],
             "properties": {
-                "belong_key": {
-                    "type": "string"
-                },
                 "content": {
                     "type": "string"
                 },
                 "parent_id": {
                     "type": "integer"
+                },
+                "plate": {
+                    "type": "string"
                 },
                 "tenantID": {
                     "type": "integer"

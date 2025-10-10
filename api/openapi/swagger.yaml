@@ -74,15 +74,6 @@ definitions:
       title:
         type: string
     type: object
-  handler.CommentConfigResponse:
-    properties:
-      created_at:
-        type: integer
-      if_audit:
-        type: boolean
-      updated_at:
-        type: integer
-    type: object
   handler.CommentListResponse:
     properties:
       list:
@@ -113,17 +104,6 @@ definitions:
       user:
         $ref: '#/definitions/handler.UserInfo'
     type: object
-  handler.CommentTenantConfigResponse:
-    properties:
-      client_token:
-        type: string
-      created_at:
-        type: integer
-      if_audit:
-        type: boolean
-      updated_at:
-        type: integer
-    type: object
   handler.CreateCategoryRequest:
     properties:
       prefix:
@@ -135,6 +115,17 @@ definitions:
     required:
     - prefix
     - title
+    type: object
+  handler.CreatePlateRequest:
+    properties:
+      description:
+        maxLength: 60
+        type: string
+      plate:
+        maxLength: 50
+        type: string
+    required:
+    - plate
     type: object
   handler.EntryRequest:
     properties:
@@ -237,6 +228,15 @@ definitions:
       updated_at:
         type: integer
     type: object
+  handler.PlateConfigResponse:
+    properties:
+      created_at:
+        type: integer
+      if_audit:
+        type: boolean
+      updated_at:
+        type: integer
+    type: object
   handler.R2Configure:
     properties:
       access_key_id:
@@ -264,14 +264,7 @@ definitions:
           $ref: '#/definitions/saas_internal_role_handler.RoleResponse'
         type: array
     type: object
-  handler.SetCommentConfigRequest:
-    properties:
-      if_audit:
-        type: boolean
-    required:
-    - if_audit
-    type: object
-  handler.SetCommentTenantConfigRequest:
+  handler.SetPlateConfigRequest:
     properties:
       if_audit:
         type: boolean
@@ -299,6 +292,24 @@ definitions:
     - public_bucket
     - public_url_prefix
     - secret_access_key
+    type: object
+  handler.SetTenantConfigRequest:
+    properties:
+      if_audit:
+        type: boolean
+    required:
+    - if_audit
+    type: object
+  handler.TenantConfigResponse:
+    properties:
+      client_token:
+        type: string
+      created_at:
+        type: integer
+      if_audit:
+        type: boolean
+      updated_at:
+        type: integer
     type: object
   handler.TenantListResponse:
     properties:
@@ -330,6 +341,9 @@ definitions:
       title:
         maxLength: 10
         type: string
+    required:
+    - prefix
+    - title
     type: object
   handler.UpgradeRequest:
     properties:
@@ -381,17 +395,17 @@ definitions:
     type: object
   saas_internal_comment_handler.CreateRequest:
     properties:
-      belong_key:
-        type: string
       content:
         type: string
       parent_id:
         type: integer
+      plate:
+        type: string
       tenantID:
         type: integer
     required:
-    - belong_key
     - content
+    - plate
     - tenantID
     type: object
   saas_internal_plan_handler.CreateRequest:
@@ -617,7 +631,7 @@ paths:
           description: 服务器错误
           schema:
             $ref: '#/definitions/response.errorResponse'
-      summary: 获取评论列表
+      summary: 获取列表
       tags:
       - comment
     post:
@@ -652,14 +666,13 @@ paths:
             $ref: '#/definitions/response.errorResponse'
       security:
       - BearerAuth: []
-      summary: 创建评论
+      summary: 创建
       tags:
       - comment
   /v1/comment/{id}:
     delete:
       consumes:
       - application/json
-      description: 根据ID删除 Comment
       parameters:
       - description: 评论id
         in: path
@@ -683,10 +696,10 @@ paths:
             $ref: '#/definitions/response.errorResponse'
       security:
       - BearerAuth: []
-      summary: 删除 Comment
+      summary: 删除
       tags:
       - comment
-  /v1/comment/{tenant_id}/{belong_key}/config:
+  /v1/comment/{tenant_id}/{plate}/config:
     get:
       consumes:
       - application/json
@@ -706,7 +719,7 @@ paths:
             - $ref: '#/definitions/response.successResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/handler.CommentConfigResponse'
+                  $ref: '#/definitions/handler.PlateConfigResponse'
               type: object
         "400":
           description: 参数错误
@@ -730,9 +743,9 @@ paths:
         name: tenant_id
         required: true
         type: integer
-      - description: 板块唯一键
+      - description: 板块
         in: path
-        name: belong_key
+        name: plate
         required: true
         type: string
       - description: 请求参数
@@ -740,7 +753,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.SetCommentConfigRequest'
+          $ref: '#/definitions/handler.SetPlateConfigRequest'
       produces:
       - application/json
       responses:
@@ -765,7 +778,6 @@ paths:
     get:
       consumes:
       - application/json
-      description: 获取租户级别的评论系统配置
       parameters:
       - description: 租户id
         in: path
@@ -782,7 +794,7 @@ paths:
             - $ref: '#/definitions/response.successResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/handler.CommentTenantConfigResponse'
+                  $ref: '#/definitions/handler.TenantConfigResponse'
               type: object
         "400":
           description: 参数错误
@@ -800,7 +812,6 @@ paths:
     put:
       consumes:
       - application/json
-      description: 设置租户级别的评论系统配置
       parameters:
       - description: 租户id
         in: path
@@ -812,7 +823,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.SetCommentTenantConfigRequest'
+          $ref: '#/definitions/handler.SetTenantConfigRequest'
       produces:
       - application/json
       responses:
@@ -831,6 +842,118 @@ paths:
       security:
       - BearerAuth: []
       summary: 设置租户级别的评论系统配置
+      tags:
+      - comment
+  /v1/comment/{tenant_id}/plate:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: integer
+      - description: 关键词
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 评论板块列表
+      tags:
+      - comment
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreatePlateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 新增评论板块
+      tags:
+      - comment
+  /v1/comment/{tenant_id}/plate/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: integer
+      - description: 板块id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 删除评论板块
       tags:
       - comment
   /v1/img/{tenant_id}:

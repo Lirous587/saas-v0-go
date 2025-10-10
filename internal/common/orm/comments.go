@@ -24,7 +24,7 @@ import (
 // Comment is an object representing the database table.
 type Comment struct {
 	ID        int64      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	BelongKey string     `boil:"belong_key" json:"belong_key" toml:"belong_key" yaml:"belong_key"`
+	Plate     string     `boil:"plate" json:"plate" toml:"plate" yaml:"plate"`
 	TenantID  int64      `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
 	UserID    int64      `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
 	ParentID  null.Int64 `boil:"parent_id" json:"parent_id,omitempty" toml:"parent_id" yaml:"parent_id,omitempty"`
@@ -40,7 +40,7 @@ type Comment struct {
 
 var CommentColumns = struct {
 	ID        string
-	BelongKey string
+	Plate     string
 	TenantID  string
 	UserID    string
 	ParentID  string
@@ -51,7 +51,7 @@ var CommentColumns = struct {
 	CreatedAt string
 }{
 	ID:        "id",
-	BelongKey: "belong_key",
+	Plate:     "plate",
 	TenantID:  "tenant_id",
 	UserID:    "user_id",
 	ParentID:  "parent_id",
@@ -64,7 +64,7 @@ var CommentColumns = struct {
 
 var CommentTableColumns = struct {
 	ID        string
-	BelongKey string
+	Plate     string
 	TenantID  string
 	UserID    string
 	ParentID  string
@@ -75,7 +75,7 @@ var CommentTableColumns = struct {
 	CreatedAt string
 }{
 	ID:        "comments.id",
-	BelongKey: "comments.belong_key",
+	Plate:     "comments.plate",
 	TenantID:  "comments.tenant_id",
 	UserID:    "comments.user_id",
 	ParentID:  "comments.parent_id",
@@ -128,7 +128,7 @@ func (w whereHelpernull_Int64) IsNotNull() qm.QueryMod { return qmhelper.WhereIs
 
 var CommentWhere = struct {
 	ID        whereHelperint64
-	BelongKey whereHelperstring
+	Plate     whereHelperstring
 	TenantID  whereHelperint64
 	UserID    whereHelperint64
 	ParentID  whereHelpernull_Int64
@@ -139,7 +139,7 @@ var CommentWhere = struct {
 	CreatedAt whereHelpertime_Time
 }{
 	ID:        whereHelperint64{field: "\"comments\".\"id\""},
-	BelongKey: whereHelperstring{field: "\"comments\".\"belong_key\""},
+	Plate:     whereHelperstring{field: "\"comments\".\"plate\""},
 	TenantID:  whereHelperint64{field: "\"comments\".\"tenant_id\""},
 	UserID:    whereHelperint64{field: "\"comments\".\"user_id\""},
 	ParentID:  whereHelpernull_Int64{field: "\"comments\".\"parent_id\""},
@@ -301,8 +301,8 @@ func (r *commentR) GetRootComments() CommentSlice {
 type commentL struct{}
 
 var (
-	commentAllColumns            = []string{"id", "belong_key", "tenant_id", "user_id", "parent_id", "root_id", "content", "status", "like_count", "created_at"}
-	commentColumnsWithoutDefault = []string{"belong_key", "tenant_id", "user_id", "content"}
+	commentAllColumns            = []string{"id", "plate", "tenant_id", "user_id", "parent_id", "root_id", "content", "status", "like_count", "created_at"}
+	commentColumnsWithoutDefault = []string{"plate", "tenant_id", "user_id", "content"}
 	commentColumnsWithDefault    = []string{"id", "parent_id", "root_id", "status", "like_count", "created_at"}
 	commentPrimaryKeyColumns     = []string{"id"}
 	commentGeneratedColumns      = []string{}

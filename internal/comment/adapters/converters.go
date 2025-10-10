@@ -15,7 +15,7 @@ func domainCommentToORM(comment *domain.Comment) *orm.Comment {
 	// 非null项
 	ormComment := &orm.Comment{
 		ID:        comment.ID,
-		BelongKey: string(comment.BelongKey),
+		Plate:     string(comment.Plate),
 		UserID:    comment.User.ID,
 		TenantID:  int64(comment.TenantID),
 		LikeCount: comment.LikeCount,
@@ -42,8 +42,8 @@ func ormCommentToDomain(ormComment *orm.Comment) *domain.Comment {
 
 	// 非null项
 	comment := &domain.Comment{
-		ID:        ormComment.ID,
-		BelongKey: domain.BelongKey(ormComment.BelongKey),
+		ID:    ormComment.ID,
+		Plate: ormComment.Plate,
 		User: &domain.UserInfo{
 			ID: ormComment.UserID,
 			// Avatar: "",
@@ -78,7 +78,63 @@ func ormCommentsToDomain(ormComments []*orm.Comment) []*domain.Comment {
 	return comments
 }
 
-func domainCommentTenantConfigToORM(config *domain.CommentTenantConfig) *orm.CommentTenantConfig {
+func domainPlateToORM(plate *domain.Plate) *orm.CommentPlate {
+	if plate == nil {
+		return nil
+	}
+
+	// 非null项
+	ormPlate := &orm.CommentPlate{
+		ID:       plate.ID,
+		TenantID: int64(plate.TenantID),
+		Plate:    string(plate.Plate),
+	}
+
+	// 处理null项
+
+	if plate.Description != "" {
+		ormPlate.Description = null.StringFrom(plate.Description)
+		ormPlate.Description.Valid = true
+	}
+
+	return ormPlate
+}
+
+func ormPlateToDomain(ormPlate *orm.CommentPlate) *domain.Plate {
+	if ormPlate == nil {
+		return nil
+	}
+
+	// 非null项
+	plate := &domain.Plate{
+		ID:       ormPlate.ID,
+		TenantID: domain.TenantID(ormPlate.TenantID),
+		Plate:    ormPlate.Plate,
+	}
+
+	// 处理null项
+	if ormPlate.Description.Valid {
+		plate.Description = ormPlate.Description.String
+	}
+
+	return plate
+}
+
+func ormPlatesToDomain(ormPlates []*orm.CommentPlate) []*domain.Plate {
+	if len(ormPlates) == 0 {
+		return nil
+	}
+
+	comments := make([]*domain.Plate, 0, len(ormPlates))
+	for i := range ormPlates {
+		if ormPlates[i] != nil {
+			comments = append(comments, ormPlateToDomain(ormPlates[i]))
+		}
+	}
+	return comments
+}
+
+func domainTenantConfigToORM(config *domain.TenantConfig) *orm.CommentTenantConfig {
 	if config == nil {
 		return nil
 	}
@@ -95,13 +151,13 @@ func domainCommentTenantConfigToORM(config *domain.CommentTenantConfig) *orm.Com
 	return ormConfig
 }
 
-func ormCommentTenantConfigToDomain(ormConfig *orm.CommentTenantConfig) *domain.CommentTenantConfig {
+func ormTenantConfigToDomain(ormConfig *orm.CommentTenantConfig) *domain.TenantConfig {
 	if ormConfig == nil {
 		return nil
 	}
 
 	// 非null项
-	config := &domain.CommentTenantConfig{
+	config := &domain.TenantConfig{
 		TenantID:    domain.TenantID(ormConfig.TenantID),
 		ClientToken: ormConfig.ClientToken,
 		IfAudit:     ormConfig.IfAudit,
@@ -114,16 +170,16 @@ func ormCommentTenantConfigToDomain(ormConfig *orm.CommentTenantConfig) *domain.
 	return config
 }
 
-func domainCommentConfigToORM(config *domain.CommentConfig) *orm.CommentConfig {
+func domainPlateConfigToORM(config *domain.PlateConfig) *orm.CommentConfig {
 	if config == nil {
 		return nil
 	}
 
 	// 非null项
 	ormConfig := &orm.CommentConfig{
-		BelongKey:   string(config.BelongKey),
-		TenantID:    int64(config.TenantID),
-		IfAudit:     config.IfAudit,
+		Plate:    string(config.Plate),
+		TenantID: int64(config.TenantID),
+		IfAudit:  config.IfAudit,
 	}
 
 	// 处理null项
@@ -131,18 +187,18 @@ func domainCommentConfigToORM(config *domain.CommentConfig) *orm.CommentConfig {
 	return ormConfig
 }
 
-func ormCommentConfigToDomain(ormConfig *orm.CommentConfig) *domain.CommentConfig {
+func ormPlateConfigToDomain(ormConfig *orm.CommentConfig) *domain.PlateConfig {
 	if ormConfig == nil {
 		return nil
 	}
 
 	// 非null项
-	config := &domain.CommentConfig{
-		BelongKey:   domain.BelongKey(ormConfig.BelongKey),
-		TenantID:    domain.TenantID(ormConfig.TenantID),
-		IfAudit:     ormConfig.IfAudit,
-		CreatedAt:   ormConfig.CreatedAt,
-		UpdatedAt:   ormConfig.UpdatedAt,
+	config := &domain.PlateConfig{
+		Plate:     ormConfig.Plate,
+		TenantID:  domain.TenantID(ormConfig.TenantID),
+		IfAudit:   ormConfig.IfAudit,
+		CreatedAt: ormConfig.CreatedAt,
+		UpdatedAt: ormConfig.UpdatedAt,
 	}
 
 	// 处理null项

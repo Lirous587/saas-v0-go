@@ -7,8 +7,12 @@ type CommentService interface {
 	Delete(id int64) error
 	List(query *CommentQuery) (*CommentList, error)
 
-	SetCommentTenantConfig(config *CommentTenantConfig) error
-	GetCommentTenantConfig(tenantID TenantID) (*CommentTenantConfig, error)
-	SetCommentConfig(config *CommentConfig) error
-	GetCommentConfig(tenantID TenantID, benlongKey BelongKey) (*CommentConfig, error)
+	CreatePlate(plate *Plate) error
+	DeletePlate(tenantID TenantID, id int64) error
+	ListPlate(query *PlateQuery) (*PlateList, error)
+
+	SetTenantConfig(config *TenantConfig) error
+	GetTenantConfig(tenantID TenantID) (*TenantConfig, error)
+	SetPlateConfig(config *PlateConfig) error
+	GetPlateConfig(tenantID TenantID, plate string) (*PlateConfig, error)
 }
