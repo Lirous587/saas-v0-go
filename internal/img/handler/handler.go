@@ -80,10 +80,10 @@ func getExtByContentType(realType string) (ext string) {
 // @Accept       multipart/form-data
 // @Produce      json
 // @Param        object      formData  file  true  "图片文件"
-// @Param        path        formData  string false "自定义图片路径（可选）"
-// @Param        description formData  string false "图片描述（可选，最长60字）"
-// @Param        category_id formData  int64  false "分类ID（可选）"
-// @Success      200 {object} response.successResponse{data=handler.ImgResponse} "上传成功"
+// @Param        path        formData  string false "自定义图片路径"
+// @Param        description formData  string false "图片描述"
+// @Param        category_id formData  int64  false "分类id"
+// @Success      200 {object} response.successResponse{data=handler.ImgResponse} "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
@@ -149,12 +149,11 @@ func (h *HttpHandler) Upload(ctx *gin.Context) {
 
 // Delete godoc
 // @Summary      删除图片
-// @Description  删除图片（软删除或硬删除）
 // @Tags         img
 // @Accept       json
 // @Produce      json
-// @Param        hard  query  bool   false "是否硬删除（默认false）"
-// @Success      200 {object} response.successResponse "删除成功"
+// @Param        hard  query  bool   false "是否硬删除"
+// @Success      200 {object} response.successResponse "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
@@ -183,16 +182,15 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 
 // List godoc
 // @Summary      图片列表
-// @Description  分页获取图片列表
 // @Tags         img
 // @Accept       json
 // @Produce      json
-// @Param        page        query int    false "页码（默认1）"
-// @Param        page_size   query int    false "每页数量（默认5，最大50）"
-// @Param        keyword     query string false "关键词（可选，最长20字）"
-// @Param        deleted     query bool   false "是否查询回收站图片（默认false）"
-// @Param        category_id query int64  false "分类ID（可选）"
-// @Success      200 {object} response.successResponse{data=handler.ImgListResponse} "查询成功"
+// @Param        page        query int    false "页码"
+// @Param        page_size   query int    false "每页数量"
+// @Param        keyword     query string false "关键词"
+// @Param        deleted     query bool   false "是否查询回收站图片"
+// @Param        category_id query int64  false "分类id"
+// @Success      200 {object} response.successResponse{data=handler.ImgListResponse} "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
@@ -224,12 +222,11 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 
 // ClearRecycleBin godoc
 // @Summary      移除回收站图片
-// @Description  移除删除回收站中的图片
 // @Tags         img
 // @Accept       json
 // @Produce      json
-// @Param        id path int64 true "图片ID"
-// @Success      200 {object} response.successResponse "清空成功"
+// @Param        id path int64 true "图片id"
+// @Success      200 {object} response.successResponse "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
@@ -251,13 +248,12 @@ func (h *HttpHandler) ClearRecycleBin(ctx *gin.Context) {
 
 // RestoreFromRecycleBin godoc
 // @Summary      恢复回收站图片
-// @Description  从回收站恢复图片
 // @Tags         img
 // @Accept       json
 // @Produce      json
-// @Param        id path int64 true "图片ID"
-// @Param        id path int64 true "图片ID"
-// @Success      200 {object} response.successResponse{data=handler.ImgResponse} "恢复成功"
+// @Param        id path int64 true "图片id"
+// @Param        id path int64 true "图片id"
+// @Success      200 {object} response.successResponse{data=handler.ImgResponse} "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
@@ -286,13 +282,12 @@ func (h *HttpHandler) ListenDeleteQueue() {
 
 // CreateCategory godoc
 // @Summary      创建图片分类
-// @Description  新建图片分类
 // @Tags         img-category
 // @Accept       json
 // @Produce      json
 // @Param        tenant_id    path   int64  true  "租户id"
-// @Param        request body handler.CreateCategoryRequest true "创建分类请求"
-// @Success      200 {object} response.successResponse{data=handler.CategoryResponse} "创建成功"
+// @Param        request body handler.CreateCategoryRequest true "请求参数"
+// @Success      200 {object} response.successResponse{data=handler.CategoryResponse} "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
@@ -319,14 +314,13 @@ func (h *HttpHandler) CreateCategory(ctx *gin.Context) {
 
 // UpdateCategory godoc
 // @Summary      更新图片分类
-// @Description  修改图片分类信息
 // @Tags         img-category
 // @Accept       json
 // @Produce      json
 // @Param        id      		path   int64  true  "分类id"
 // @Param        tenant_id  path   int64  true  "租户id"
-// @Param        request body   handler.UpdateCategoryRequest true "更新分类请求"
-// @Success      200 {object} response.successResponse{data=handler.CategoryResponse} "更新成功"
+// @Param        request body   handler.UpdateCategoryRequest true "请求参数"
+// @Success      200 {object} response.successResponse{data=handler.CategoryResponse} "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
@@ -354,7 +348,6 @@ func (h *HttpHandler) UpdateCategory(ctx *gin.Context) {
 
 // DeleteCategory godoc
 // @Summary      删除图片分类
-// @Description  删除指定图片分类
 // @Tags         img-category
 // @Accept       json
 // @Produce      json
@@ -381,11 +374,10 @@ func (h *HttpHandler) DeleteCategory(ctx *gin.Context) {
 
 // ListCategories godoc
 // @Summary      分类列表
-// @Description  获取所有图片分类
 // @Tags         img-category
 // @Accept       json
 // @Produce      json
-// @Success      200 {object} response.successResponse{data=[]handler.CategoryResponse} "查询成功"
+// @Success      200 {object} response.successResponse{data=[]handler.CategoryResponse} "请求成功"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
 // @Router       /v1/img/{tenant_id}/categories [get]
@@ -406,13 +398,12 @@ func (h *HttpHandler) ListCategories(ctx *gin.Context) {
 
 // SetConfigureR2 godoc
 // @Summary      配置图库R2配置
-// @Description  配置图库R2配置
 // @Tags         img
 // @Accept       json
 // @Produce      json
 // @Param        tenant_id      path   int64  true  "租户id"
 // @Param        request body   handler.SetR2ConfigureRequest true "请求参数"
-// @Success      200 {object} response.successResponse "查询成功"
+// @Success      200 {object} response.successResponse "请求成功"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
 // @Router       /v1/img/{tenant_id}/configure_r2 [put]
@@ -443,11 +434,10 @@ func (h *HttpHandler) SetConfigureR2(ctx *gin.Context) {
 
 // GetConfigureR2 godoc
 // @Summary      获取配置图库R2配置
-// @Description  获取配置图库R2配置
 // @Tags         img
 // @Accept       json
 // @Produce      json
-// @Success      200 {object} response.successResponse{data=handler.R2Configure} "查询成功"
+// @Success      200 {object} response.successResponse{data=handler.R2Configure} "请求成功"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
 // @Router       /v1/img/{tenant_id}/configure_r2 [get]

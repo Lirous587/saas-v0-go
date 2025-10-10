@@ -40,10 +40,14 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 		// protect.DELETE("/:id/like", handler.Unlike)
 
 		// 管理员
+		// 高级查询
+		// protect.GET("/advanced", handler.AdvancedList)
+		// 审计
+		// protect.PUT("/:id")
 		// 全局配置
 		protect.PUT("/config", handler.SetCommentTenantConfig)
 		protect.GET("/config", handler.GetCommentTenantConfig)
-		// belong_key颗粒度
+		// 板块配置
 		protect.PUT("/:belong_key/config", handler.SetCommentConfig)
 		protect.GET("/:belong_key/config", handler.GetCommentConfig)
 	}

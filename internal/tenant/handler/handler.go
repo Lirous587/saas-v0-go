@@ -36,14 +36,13 @@ func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
 }
 
 // Create godoc
-// @Summary      新建租户
-// @Description  创建新的 Tenant
+// @Summary      创建
 // @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        request body handler.CreateRequest true "创建 Tenant 请求"
-// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "成功创建 Tenant"
+// @Param        request body handler.CreateRequest true "请求参数"
+// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant [post]
@@ -77,14 +76,13 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 }
 
 // Read godoc
-// @Summary      查询租户基础信息
-// @Description  查询租户基础信息
+// @Summary      读取单条数据
 // @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "Tenant ID"
-// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "成功查询 Tenant"
+// @Param        id   path int true "id"
+// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant/{id} [get]
@@ -106,15 +104,14 @@ func (h *HttpHandler) Read(ctx *gin.Context) {
 }
 
 // Update godoc
-// @Summary      更新 Tenant
-// @Description  根据ID更新 Tenant 信息
+// @Summary      更新
 // @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "Tenant ID"
-// @Param        request body handler.UpdateRequest true "更新 Tenant 请求"
-// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "成功更新 Tenant"
+// @Param        id   path int true "id"
+// @Param        request body handler.UpdateRequest true "请求参数"
+// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant/{id} [put]
@@ -146,14 +143,13 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 }
 
 // Delete godoc
-// @Summary      删除 Tenant
-// @Description  根据ID删除 Tenant
+// @Summary      删除
 // @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "Tenant ID"
-// @Success      200  {object}  response.successResponse "成功删除 Tenant"
+// @Param        id   path int true "id"
+// @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant/{id} [delete]
@@ -173,15 +169,14 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 }
 
 // List godoc
-// @Summary      获取 Tenant 列表
-// @Description  根据查询参数获取Tenant列表，返回当前页数据和total数量
+// @Summary      获取列表
 // @Tags         tenant
 // @Accept       json
 // @Produce      json
-// @Param        keyword    query     string  false  "关键词搜索"
-// @Param        page       query     int     false  "页码" default(1)
-// @Param        page_size  query     int     false  "每页数量" default(10)
-// @Success      200  {object}  response.successResponse{data=handler.TenantListResponse} "Tenant列表"
+// @Param        keyword    query     string  false  "关键词"
+// @Param        page       query     int     false  "页码"
+// @Param        page_size  query     int     false  "每页数量"
+// @Success      200  {object}  response.successResponse{data=handler.TenantListResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant [get]
@@ -208,14 +203,13 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 
 // Upgrade godoc
 // @Summary      升级租户
-// @Description  升级租户计划
 // @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "Tenant ID"
-// @Param        request body handler.UpgradeRequest true "升级 Tenant 请求"
-// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "成功升级 Tenant"
+// @Param        id   path int true "id"
+// @Param        request body handler.UpgradeRequest true "请求参数"
+// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant/upgrade/{id} [put]
@@ -225,13 +219,12 @@ func (h *HttpHandler) Upgrade(ctx *gin.Context) {
 
 // GenInviteToken godoc
 // @Summary      生成邀请令牌
-// @Description  生成邀请令牌
 // @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "Tenant ID"
-// @Param        request body handler.GenInviteTokenRequest true "生成邀请令牌 Tenant 请求"
+// @Param        id   path int true "id"
+// @Param        request body handler.GenInviteTokenRequest true "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -258,13 +251,12 @@ func (h *HttpHandler) GenInviteToken(ctx *gin.Context) {
 
 // Invite godoc
 // @Summary      邀请指定人员,通过邮箱通知
-// @Description  邀请指定人员,通过邮箱通知
 // @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "Tenant ID"
-// @Param        request body handler.InviteRequest true  "邀请参数"
+// @Param        id   path int true "id"
+// @Param        request body handler.InviteRequest true  "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -292,13 +284,12 @@ func (h *HttpHandler) Invite(ctx *gin.Context) {
 
 // Enter godoc
 // @Summary      加入租户
-// @Description  加入指定租户 并分配指定角色
 // @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "Tenant ID"
-// @Param        request body handler.EntryRequest true "加入租户请求参数"
+// @Param        id   path int true "id"
+// @Param        request body handler.EntryRequest true "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -327,12 +318,11 @@ func (h *HttpHandler) Enter(ctx *gin.Context) {
 
 // GetUserWithRole godoc
 // @Summary      获取租户下的用户
-// @Description  获取租户下的用户的非敏感信息以及角色信息
 // @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "Tenant ID"
+// @Param        id   path int true "id"
 // @Param        request body handler.ListUserWithRoleQueryRequestBody true "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"

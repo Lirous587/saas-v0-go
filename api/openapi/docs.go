@@ -146,7 +146,6 @@ const docTemplate = `{
         },
         "/v1/comment": {
             "get": {
-                "description": "根据查询参数获取Comment列表，返回当前页数据和total数量",
                 "consumes": [
                     "application/json"
                 ],
@@ -156,24 +155,22 @@ const docTemplate = `{
                 "tags": [
                     "comment"
                 ],
-                "summary": "获取 Comment 列表",
+                "summary": "获取评论列表",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "关键词搜索",
+                        "description": "关键词",
                         "name": "keyword",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "default": 1,
                         "description": "页码",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "default": 10,
                         "description": "每页数量",
                         "name": "page_size",
                         "in": "query"
@@ -181,7 +178,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Comment列表",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -218,7 +215,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "创建新的 Comment",
                 "consumes": [
                     "application/json"
                 ],
@@ -228,10 +224,10 @@ const docTemplate = `{
                 "tags": [
                     "comment"
                 ],
-                "summary": "创建 Comment",
+                "summary": "创建评论",
                 "parameters": [
                     {
-                        "description": "创建 Comment 请求",
+                        "description": "请求参数",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -242,7 +238,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功创建 Comment",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -295,7 +291,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Comment ID",
+                        "description": "评论id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -303,7 +299,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功删除 Comment",
+                        "description": "请求成功",
                         "schema": {
                             "$ref": "#/definitions/response.successResponse"
                         }
@@ -409,7 +405,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "租户评论系统配置",
+                        "description": "请求参数",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -447,7 +443,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "获取板块级别的评论系统配置",
                 "consumes": [
                     "application/json"
                 ],
@@ -506,7 +501,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "设置板块级别的评论系统配置",
                 "consumes": [
                     "application/json"
                 ],
@@ -533,7 +527,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "租户评论系统配置",
+                        "description": "请求参数",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -571,7 +565,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "分页获取图片列表",
                 "consumes": [
                     "application/json"
                 ],
@@ -585,38 +578,38 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "页码（默认1）",
+                        "description": "页码",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "每页数量（默认5，最大50）",
+                        "description": "每页数量",
                         "name": "page_size",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "关键词（可选，最长20字）",
+                        "description": "关键词",
                         "name": "keyword",
                         "in": "query"
                     },
                     {
                         "type": "boolean",
-                        "description": "是否查询回收站图片（默认false）",
+                        "description": "是否查询回收站图片",
                         "name": "deleted",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "分类ID（可选）",
+                        "description": "分类id",
                         "name": "category_id",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "查询成功",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -655,7 +648,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "获取所有图片分类",
                 "consumes": [
                     "application/json"
                 ],
@@ -668,7 +660,7 @@ const docTemplate = `{
                 "summary": "分类列表",
                 "responses": {
                     "200": {
-                        "description": "查询成功",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -704,7 +696,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新建图片分类",
                 "consumes": [
                     "application/json"
                 ],
@@ -724,7 +715,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "创建分类请求",
+                        "description": "请求参数",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -735,7 +726,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "创建成功",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -774,7 +765,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "修改图片分类信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -801,7 +791,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "更新分类请求",
+                        "description": "请求参数",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -812,7 +802,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "更新成功",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -849,7 +839,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "删除指定图片分类",
                 "consumes": [
                     "application/json"
                 ],
@@ -905,7 +894,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "获取配置图库R2配置",
                 "consumes": [
                     "application/json"
                 ],
@@ -918,7 +906,7 @@ const docTemplate = `{
                 "summary": "获取配置图库R2配置",
                 "responses": {
                     "200": {
-                        "description": "查询成功",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -949,7 +937,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "配置图库R2配置",
                 "consumes": [
                     "application/json"
                 ],
@@ -980,7 +967,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "查询成功",
+                        "description": "请求成功",
                         "schema": {
                             "$ref": "#/definitions/response.successResponse"
                         }
@@ -1001,7 +988,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "从回收站恢复图片",
                 "consumes": [
                     "application/json"
                 ],
@@ -1015,14 +1001,14 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "图片ID",
+                        "description": "图片id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "integer",
-                        "description": "图片ID",
+                        "description": "图片id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1030,7 +1016,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "恢复成功",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -1067,7 +1053,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "移除删除回收站中的图片",
                 "consumes": [
                     "application/json"
                 ],
@@ -1081,7 +1066,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "图片ID",
+                        "description": "图片id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1089,7 +1074,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "清空成功",
+                        "description": "请求成功",
                         "schema": {
                             "$ref": "#/definitions/response.successResponse"
                         }
@@ -1137,26 +1122,26 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "自定义图片路径（可选）",
+                        "description": "自定义图片路径",
                         "name": "path",
                         "in": "formData"
                     },
                     {
                         "type": "string",
-                        "description": "图片描述（可选，最长60字）",
+                        "description": "图片描述",
                         "name": "description",
                         "in": "formData"
                     },
                     {
                         "type": "integer",
-                        "description": "分类ID（可选）",
+                        "description": "分类id",
                         "name": "category_id",
                         "in": "formData"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "上传成功",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -1195,7 +1180,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "删除图片（软删除或硬删除）",
                 "consumes": [
                     "application/json"
                 ],
@@ -1209,14 +1193,14 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "boolean",
-                        "description": "是否硬删除（默认false）",
+                        "description": "是否硬删除",
                         "name": "hard",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "删除成功",
+                        "description": "请求成功",
                         "schema": {
                             "$ref": "#/definitions/response.successResponse"
                         }
@@ -1238,7 +1222,6 @@ const docTemplate = `{
         },
         "/v1/plan": {
             "get": {
-                "description": "获取Plan列表",
                 "consumes": [
                     "application/json"
                 ],
@@ -1248,10 +1231,10 @@ const docTemplate = `{
                 "tags": [
                     "plan"
                 ],
-                "summary": "获取 Plan 列表",
+                "summary": "获取列表",
                 "responses": {
                     "200": {
-                        "description": "Plan列表",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -1288,7 +1271,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "创建新的 Plan",
                 "consumes": [
                     "application/json"
                 ],
@@ -1298,10 +1280,10 @@ const docTemplate = `{
                 "tags": [
                     "plan"
                 ],
-                "summary": "创建 Plan",
+                "summary": "创建",
                 "parameters": [
                     {
-                        "description": "创建 Plan 请求",
+                        "description": "请求参数",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -1312,7 +1294,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功创建 Plan",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -1351,7 +1333,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "读取单条 Plan",
                 "consumes": [
                     "application/json"
                 ],
@@ -1361,11 +1342,11 @@ const docTemplate = `{
                 "tags": [
                     "plan"
                 ],
-                "summary": "读取单条 Plan",
+                "summary": "读取单条数据",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Plan ID",
+                        "description": "id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1373,7 +1354,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功创建 Plan",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -1410,7 +1391,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID更新 Plan 信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -1420,17 +1400,17 @@ const docTemplate = `{
                 "tags": [
                     "plan"
                 ],
-                "summary": "更新 Plan",
+                "summary": "更新",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Plan ID",
+                        "description": "id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "更新 Plan 请求",
+                        "description": "请求参数",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -1441,7 +1421,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功更新 Plan",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -1478,7 +1458,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 Plan",
                 "consumes": [
                     "application/json"
                 ],
@@ -1488,11 +1467,11 @@ const docTemplate = `{
                 "tags": [
                     "plan"
                 ],
-                "summary": "删除 Plan",
+                "summary": "删除",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Plan ID",
+                        "description": "id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1500,7 +1479,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功删除 Plan",
+                        "description": "请求成功",
                         "schema": {
                             "$ref": "#/definitions/response.successResponse"
                         }
@@ -1520,14 +1499,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/role/:tenant_id": {
+        "/v1/role": {
             "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "获取Role列表",
                 "consumes": [
                     "application/json"
                 ],
@@ -1537,19 +1515,10 @@ const docTemplate = `{
                 "tags": [
                     "role"
                 ],
-                "summary": "获取 Role 列表",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "租户id",
-                        "name": "tenant_id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
+                "summary": "获取列表",
                 "responses": {
                     "200": {
-                        "description": "Role列表",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -1586,7 +1555,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "创建新的 Role",
                 "consumes": [
                     "application/json"
                 ],
@@ -1596,17 +1564,17 @@ const docTemplate = `{
                 "tags": [
                     "role"
                 ],
-                "summary": "创建 Role",
+                "summary": "创建",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Role ID",
+                        "description": "id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "创建 Role 请求",
+                        "description": "请求参数",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -1617,7 +1585,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功创建 Role",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -1649,14 +1617,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/role/:tenant_id/{id}": {
+        "/v1/role/{id}": {
             "put": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID更新 Role 信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -1666,17 +1633,17 @@ const docTemplate = `{
                 "tags": [
                     "role"
                 ],
-                "summary": "更新 Role",
+                "summary": "更新",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Role ID",
+                        "description": "id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "更新 Role 请求",
+                        "description": "请求参数",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -1687,7 +1654,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功更新 Role",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -1724,7 +1691,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 Role",
                 "consumes": [
                     "application/json"
                 ],
@@ -1734,11 +1700,11 @@ const docTemplate = `{
                 "tags": [
                     "role"
                 ],
-                "summary": "删除 Role",
+                "summary": "删除",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Role ID",
+                        "description": "id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1746,7 +1712,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功删除 Role",
+                        "description": "请求成功",
                         "schema": {
                             "$ref": "#/definitions/response.successResponse"
                         }
@@ -1768,7 +1734,6 @@ const docTemplate = `{
         },
         "/v1/tenant": {
             "get": {
-                "description": "根据查询参数获取Tenant列表，返回当前页数据和total数量",
                 "consumes": [
                     "application/json"
                 ],
@@ -1778,24 +1743,22 @@ const docTemplate = `{
                 "tags": [
                     "tenant"
                 ],
-                "summary": "获取 Tenant 列表",
+                "summary": "获取列表",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "关键词搜索",
+                        "description": "关键词",
                         "name": "keyword",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "default": 1,
                         "description": "页码",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "default": 10,
                         "description": "每页数量",
                         "name": "page_size",
                         "in": "query"
@@ -1803,7 +1766,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Tenant列表",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -1840,7 +1803,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "创建新的 Tenant",
                 "consumes": [
                     "application/json"
                 ],
@@ -1850,10 +1812,10 @@ const docTemplate = `{
                 "tags": [
                     "tenant"
                 ],
-                "summary": "新建租户",
+                "summary": "创建",
                 "parameters": [
                     {
-                        "description": "创建 Tenant 请求",
+                        "description": "请求参数",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -1864,7 +1826,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功创建 Tenant",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -1903,7 +1865,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "获取租户下的用户的非敏感信息以及角色信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -1917,7 +1878,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Tenant ID",
+                        "description": "id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1961,7 +1922,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "加入指定租户 并分配指定角色",
                 "consumes": [
                     "application/json"
                 ],
@@ -1975,13 +1935,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Tenant ID",
+                        "description": "id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "加入租户请求参数",
+                        "description": "请求参数",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -2019,7 +1979,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "升级租户计划",
                 "consumes": [
                     "application/json"
                 ],
@@ -2033,13 +1992,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Tenant ID",
+                        "description": "id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "升级 Tenant 请求",
+                        "description": "请求参数",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -2050,7 +2009,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功升级 Tenant",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -2089,7 +2048,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "查询租户基础信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -2099,11 +2057,11 @@ const docTemplate = `{
                 "tags": [
                     "tenant"
                 ],
-                "summary": "查询租户基础信息",
+                "summary": "读取单条数据",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Tenant ID",
+                        "description": "id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -2111,7 +2069,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功查询 Tenant",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -2148,7 +2106,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID更新 Tenant 信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -2158,17 +2115,17 @@ const docTemplate = `{
                 "tags": [
                     "tenant"
                 ],
-                "summary": "更新 Tenant",
+                "summary": "更新",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Tenant ID",
+                        "description": "id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "更新 Tenant 请求",
+                        "description": "请求参数",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -2179,7 +2136,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功更新 Tenant",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -2216,7 +2173,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 Tenant",
                 "consumes": [
                     "application/json"
                 ],
@@ -2226,11 +2182,11 @@ const docTemplate = `{
                 "tags": [
                     "tenant"
                 ],
-                "summary": "删除 Tenant",
+                "summary": "删除",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Tenant ID",
+                        "description": "id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -2238,7 +2194,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功删除 Tenant",
+                        "description": "请求成功",
                         "schema": {
                             "$ref": "#/definitions/response.successResponse"
                         }
@@ -2265,7 +2221,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "生成邀请令牌",
                 "consumes": [
                     "application/json"
                 ],
@@ -2279,13 +2234,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Tenant ID",
+                        "description": "id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "生成邀请令牌 Tenant 请求",
+                        "description": "请求参数",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -2323,7 +2278,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "邀请指定人员,通过邮箱通知",
                 "consumes": [
                     "application/json"
                 ],
@@ -2337,13 +2291,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Tenant ID",
+                        "description": "id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "邀请参数",
+                        "description": "请求参数",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -2394,13 +2348,13 @@ const docTemplate = `{
                 "summary": "校验令牌",
                 "responses": {
                     "200": {
-                        "description": "令牌有效",
+                        "description": "请求成功",
                         "schema": {
                             "$ref": "#/definitions/response.successResponse"
                         }
                     },
                     "401": {
-                        "description": "令牌无效或过期",
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/response.errorResponse"
                         }
@@ -2434,7 +2388,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "登录成功",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -2486,7 +2440,7 @@ const docTemplate = `{
                 "summary": "获取用户信息",
                 "responses": {
                     "200": {
-                        "description": "获取成功",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -2504,7 +2458,7 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "未授权",
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/response.errorResponse"
                         }
@@ -2542,7 +2496,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "刷新成功",
+                        "description": "请求成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -2566,7 +2520,7 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "令牌无效或过期",
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/response.errorResponse"
                         }

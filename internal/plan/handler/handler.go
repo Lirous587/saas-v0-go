@@ -35,14 +35,13 @@ func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
 }
 
 // Create godoc
-// @Summary      创建 Plan
-// @Description  创建新的 Plan
+// @Summary      创建
 // @Tags         plan
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        request body handler.CreateRequest true "创建 Plan 请求"
-// @Success      200  {object}  response.successResponse{data=handler.PlanResponse} "成功创建 Plan"
+// @Param        request body handler.CreateRequest true "请求参数"
+// @Success      200  {object}  response.successResponse{data=handler.PlanResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/plan [post]
@@ -68,14 +67,13 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 }
 
 // Read godoc
-// @Summary      读取单条 Plan
-// @Description  读取单条 Plan
+// @Summary      读取单条数据
 // @Tags         plan
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "Plan ID"
-// @Success      200  {object}  response.successResponse{data=handler.PlanResponse} "成功创建 Plan"
+// @Param        id   path int true "id"
+// @Success      200  {object}  response.successResponse{data=handler.PlanResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/plan/{id} [get]
@@ -97,15 +95,14 @@ func (h *HttpHandler) Read(ctx *gin.Context) {
 }
 
 // Update godoc
-// @Summary      更新 Plan
-// @Description  根据ID更新 Plan 信息
+// @Summary      更新
 // @Tags         plan
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "Plan ID"
-// @Param        request body handler.UpdateRequest true "更新 Plan 请求"
-// @Success      200  {object}  response.successResponse{data=handler.PlanResponse} "成功更新 Plan"
+// @Param        id   path int true "id"
+// @Param        request body handler.UpdateRequest true "请求参数"
+// @Success      200  {object}  response.successResponse{data=handler.PlanResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/plan/{id} [put]
@@ -132,14 +129,13 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 }
 
 // Delete godoc
-// @Summary      删除 Plan
-// @Description  根据ID删除 Plan
+// @Summary      删除
 // @Tags         plan
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "Plan ID"
-// @Success      200  {object}  response.successResponse "成功删除 Plan"
+// @Param        id   path int true "id"
+// @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/plan/{id} [delete]
@@ -159,12 +155,11 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 }
 
 // List godoc
-// @Summary      获取 Plan 列表
-// @Description  获取Plan列表
+// @Summary      获取列表
 // @Tags         plan
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}  response.successResponse{data=handler.PlanListResponse} "Plan列表"
+// @Success      200  {object}  response.successResponse{data=handler.PlanListResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/plan [get]

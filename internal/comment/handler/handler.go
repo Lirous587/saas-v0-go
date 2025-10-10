@@ -36,14 +36,13 @@ func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
 }
 
 // Create godoc
-// @Summary      创建 Comment
-// @Description  创建新的 Comment
+// @Summary      创建评论
 // @Tags         comment
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        request body handler.CreateRequest true "创建 Comment 请求"
-// @Success      200  {object}  response.successResponse{data=handler.CommentResponse} "成功创建 Comment"
+// @Param        request body handler.CreateRequest true "请求参数"
+// @Success      200  {object}  response.successResponse{data=handler.CommentResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/comment [post]
@@ -74,8 +73,8 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "Comment ID"
-// @Success      200  {object}  response.successResponse "成功删除 Comment"
+// @Param        id   path int true "评论id"
+// @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/comment/{id} [delete]
@@ -95,15 +94,14 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 }
 
 // List godoc
-// @Summary      获取 Comment 列表
-// @Description  根据查询参数获取Comment列表，返回当前页数据和total数量
+// @Summary      获取评论列表
 // @Tags         comment
 // @Accept       json
 // @Produce      json
-// @Param        keyword    query     string  false  "关键词搜索"
-// @Param        page       query     int     false  "页码" default(1)
-// @Param        page_size  query     int     false  "每页数量" default(10)
-// @Success      200  {object}  response.successResponse{data=handler.CommentListResponse} "Comment列表"
+// @Param        keyword    query     string  false  "关键词"
+// @Param        page       query     int     false  "页码"
+// @Param        page_size  query     int     false  "每页数量"
+// @Success      200  {object}  response.successResponse{data=handler.CommentListResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/comment [get]
@@ -136,7 +134,7 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        tenant_id   path int true "租户id"
-// @Param        request body handler.SetCommentTenantConfigRequest true "租户评论系统配置"
+// @Param        request body handler.SetCommentTenantConfigRequest true "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -189,14 +187,13 @@ func (h *HttpHandler) GetCommentTenantConfig(ctx *gin.Context) {
 
 // SetCommentConfig godoc
 // @Summary      设置板块级别的评论系统配置
-// @Description  设置板块级别的评论系统配置
 // @Tags         comment
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
 // @Param        tenant_id   	path int true "租户id"
 // @Param        belong_key   path string true "板块唯一键"
-// @Param        request body handler.SetCommentConfigRequest true "租户评论系统配置"
+// @Param        request body handler.SetCommentConfigRequest true "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -222,7 +219,6 @@ func (h *HttpHandler) SetCommentConfig(ctx *gin.Context) {
 
 // GetCommentConfig godoc
 // @Summary      获取板块级别的评论系统配置
-// @Description  获取板块级别的评论系统配置
 // @Tags         comment
 // @Accept       json
 // @Produce      json

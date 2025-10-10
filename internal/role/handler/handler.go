@@ -35,18 +35,17 @@ func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
 }
 
 // Create godoc
-// @Summary      创建 Role
-// @Description  创建新的 Role
+// @Summary      创建
 // @Tags         role
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "Role ID"
-// @Param        request body handler.CreateRequest true "创建 Role 请求"
-// @Success      200  {object}  response.successResponse{data=handler.RoleResponse} "成功创建 Role"
+// @Param        id   path int true "id"
+// @Param        request body handler.CreateRequest true "请求参数"
+// @Success      200  {object}  response.successResponse{data=handler.RoleResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/role/:tenant_id [post]
+// @Router       /v1/role [post]
 func (h *HttpHandler) Create(ctx *gin.Context) {
 	req := new(CreateRequest)
 
@@ -69,18 +68,17 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 }
 
 // Update godoc
-// @Summary      更新 Role
-// @Description  根据ID更新 Role 信息
+// @Summary      更新
 // @Tags         role
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "Role ID"
-// @Param        request body handler.UpdateRequest true "更新 Role 请求"
-// @Success      200  {object}  response.successResponse{data=handler.RoleResponse} "成功更新 Role"
+// @Param        id   path int true "id"
+// @Param        request body handler.UpdateRequest true "请求参数"
+// @Success      200  {object}  response.successResponse{data=handler.RoleResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/role/:tenant_id/{id} [put]
+// @Router       /v1/role/{id} [put]
 func (h *HttpHandler) Update(ctx *gin.Context) {
 	req := new(UpdateRequest)
 
@@ -103,17 +101,16 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 }
 
 // Delete godoc
-// @Summary      删除 Role
-// @Description  根据ID删除 Role
+// @Summary      删除
 // @Tags         role
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "Role ID"
-// @Success      200  {object}  response.successResponse "成功删除 Role"
+// @Param        id   path int true "id"
+// @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/role/:tenant_id/{id} [delete]
+// @Router       /v1/role/{id} [delete]
 func (h *HttpHandler) Delete(ctx *gin.Context) {
 	id, err := h.getID(ctx)
 	if err != nil {
@@ -130,17 +127,15 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 }
 
 // List godoc
-// @Summary      获取 Role 列表
-// @Description  获取Role列表
+// @Summary      获取列表
 // @Tags         role
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id  query     int64     true  "租户id"
-// @Success      200  {object}  response.successResponse{data=handler.RoleListResponse} "Role列表"
+// @Success      200  {object}  response.successResponse{data=handler.RoleListResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/role/:tenant_id [get]
+// @Router       /v1/role [get]
 func (h *HttpHandler) List(ctx *gin.Context) {
 	data, err := h.service.List()
 
