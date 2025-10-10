@@ -116,12 +116,6 @@ func (h *HttpHandler) Read(ctx *gin.Context) {
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant/{id} [put]
 func (h *HttpHandler) Update(ctx *gin.Context) {
-	id, err := h.getID(ctx)
-	if err != nil {
-		response.InvalidParams(ctx, err)
-		return
-	}
-
 	req := new(UpdateRequest)
 
 	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
@@ -129,7 +123,7 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 	}
 
 	data, err := h.service.Update(&domain.Tenant{
-		ID:          id,
+		ID:          req.ID,
 		Name:        req.Name,
 		Description: req.Description,
 	})
@@ -214,7 +208,7 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant/upgrade/{id} [put]
 func (h *HttpHandler) Upgrade(ctx *gin.Context) {
-
+	panic("暂未实现")
 }
 
 // GenInviteToken godoc
