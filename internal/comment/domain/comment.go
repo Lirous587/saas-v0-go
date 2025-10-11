@@ -30,6 +30,14 @@ type Comment struct {
 	IsLiked   bool
 }
 
+func (c *Comment) HasPartent() bool {
+	return c.ParentID >= 0
+}
+
+func (c *Comment) HasRoot() bool {
+	return c.RootID >= 0
+}
+
 type CommentQuery struct {
 	Page     int
 	PageSize int
@@ -46,10 +54,10 @@ type CommentList struct {
 }
 
 type Plate struct {
-	ID          int64
-	TenantID    TenantID
-	BelongKey   string
-	Description string
+	ID        int64
+	TenantID  TenantID
+	BelongKey string
+	Summary   string
 }
 
 type PlateBelong struct {

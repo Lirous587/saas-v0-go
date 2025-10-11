@@ -90,14 +90,10 @@ func domainPlateToORM(plate *domain.Plate) *orm.CommentPlate {
 		ID:        plate.ID,
 		TenantID:  int64(plate.TenantID),
 		BelongKey: plate.BelongKey,
+		Summary:   plate.Summary,
 	}
 
 	// 处理null项
-
-	if plate.Description != "" {
-		ormPlate.Description = null.StringFrom(plate.Description)
-		ormPlate.Description.Valid = true
-	}
 
 	return ormPlate
 }
@@ -112,12 +108,10 @@ func ormPlateToDomain(ormPlate *orm.CommentPlate) *domain.Plate {
 		ID:        ormPlate.ID,
 		TenantID:  domain.TenantID(ormPlate.TenantID),
 		BelongKey: ormPlate.BelongKey,
+		Summary:   ormPlate.Summary,
 	}
 
 	// 处理null项
-	if ormPlate.Description.Valid {
-		plate.Description = ormPlate.Description.String
-	}
 
 	return plate
 }

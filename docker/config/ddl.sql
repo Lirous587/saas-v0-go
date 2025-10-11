@@ -221,10 +221,10 @@ CREATE TABLE public.tenant_r2_configs (
 -- 评论板块表
 CREATE TABLE public.comment_plates
 (
-    id          bigserial PRIMARY KEY,
+    id          bigserial      PRIMARY KEY,
+    summary     varchar(60)    NOT NULL,
     belong_key  varchar(50)    NOT NULL,  -- 资源标识，如 "article:123"
     tenant_id   bigint         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
-    description varchar(60),
     UNIQUE (tenant_id, belong_key)
 );
 -- 索引优化

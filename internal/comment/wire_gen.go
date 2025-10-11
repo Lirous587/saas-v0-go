@@ -11,6 +11,8 @@ import (
 	"saas/internal/comment/adapters"
 	"saas/internal/comment/handler"
 	"saas/internal/comment/service"
+	"saas/internal/comment/templates"
+	"saas/internal/common/email"
 )
 
 // Injectors from wire.go:
@@ -18,8 +20,10 @@ import (
 func InitV1(r *gin.RouterGroup) func() {
 	commentRepository := adapters.NewCommentPSQLRepository()
 	commentCache := adapters.NewCommentRedisCache()
-	commentService := service.NewCommentService(commentRepository, commentCache)
+	v := templates.LoadCommentTemplates()
+	mailer := email.NewMailer(v)
+	commentService := service.NewCommentService(commentRepository, commentCache, mailer)
 	httpHandler := handler.NewHttpHandler(commentService)
-	v := RegisterV1(r, httpHandler)
-	return v
+	v2 := RegisterV1(r, httpHandler)
+	return v2
 }

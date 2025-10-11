@@ -159,9 +159,9 @@ func (h *HttpHandler) CreatePlate(ctx *gin.Context) {
 	}
 
 	if err := h.service.CreatePlate(&domain.Plate{
-		TenantID:    req.TenantID,
-		BelongKey:   req.BelongKey,
-		Description: req.Description,
+		TenantID:  req.TenantID,
+		BelongKey: req.BelongKey,
+		Summary:   req.Summary,
 	}); err != nil {
 		response.Error(ctx, err)
 		return

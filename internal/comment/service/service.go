@@ -2,6 +2,7 @@ package service
 
 import (
 	"saas/internal/comment/domain"
+	"saas/internal/common/email"
 	"saas/internal/common/reskit/codes"
 	"saas/internal/common/utils"
 
@@ -9,21 +10,35 @@ import (
 )
 
 type service struct {
-	repo  domain.CommentRepository
-	cache domain.CommentCache
+	repo   domain.CommentRepository
+	cache  domain.CommentCache
+	mailer email.Mailer
 }
 
-func NewCommentService(repo domain.CommentRepository, cache domain.CommentCache) domain.CommentService {
+func NewCommentService(repo domain.CommentRepository, cache domain.CommentCache, mailer email.Mailer) domain.CommentService {
 	return &service{
-		repo:  repo,
-		cache: cache,
+		repo:   repo,
+		cache:  cache,
+		mailer: mailer,
 	}
 }
 
 func (s *service) Create(comment *domain.Comment) (*domain.Comment, error) {
 	// 1.plate 是否存在
+	exist, err := s.repo.ExistPlateBykey(comment.TenantID, comment.Plate.BelongKey)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
 
-	// parent_id
+	if !exist {
+		return nil, errors.WithStack(codes.ErrCommentPlateNotFound)
+	}
+
+	// 2.检查parent_id和root_id 根据其来发送邮件
+	if comment.HasPartent() {
+
+	}
+
 	// user_id
 	s.repo.Create(comment)
 

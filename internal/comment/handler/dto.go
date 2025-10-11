@@ -44,9 +44,9 @@ type CommentListResponse struct {
 // --- 评论板块
 
 type PlateResponse struct {
-	ID          int64  `json:"id"`
-	BelongKey   string `json:"belong_key"`
-	Description string `json:"description,omitempty"`
+	ID        int64  `json:"id"`
+	BelongKey string `json:"belong_key"`
+	Summary   string `json:"summary"`
 }
 
 type PlateListResponse struct {
@@ -55,9 +55,9 @@ type PlateListResponse struct {
 }
 
 type CreatePlateRequest struct {
-	TenantID    domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
-	BelongKey   string          `json:"belong_key" binding:"required,max=50"`
-	Description string          `json:"description" binding:"max=60"`
+	TenantID  domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	BelongKey string          `json:"belong_key" binding:"required,max=50"`
+	Summary   string          `json:"summary" binding:"required,max=60"`
 }
 
 type DeletePlateRequest struct {
