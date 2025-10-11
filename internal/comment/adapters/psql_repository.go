@@ -120,7 +120,7 @@ func (repo *CommentPSQLRepository) DeletePlate(tenantID domain.TenantID, id int6
 	}
 
 	if rows == 0 {
-		return codes.ErrCommentPlateConfigNotFound
+		return codes.ErrCommentPlateNotFound
 	}
 
 	return nil
@@ -173,10 +173,13 @@ func (repo *CommentPSQLRepository) ExistPlateBykey(tenantID domain.TenantID, bel
 func (repo *CommentPSQLRepository) GetPlateBelongByID(id int64) (*domain.PlateBelong, error) {
 	plate, err := orm.CommentPlates(
 		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.ID), id),
-		qm.Select(orm.CommentPlateColumns.TenantID, orm.CommentPlateColumns.BelongKey),
+		qm.Select(orm.CommentPlateColumns.ID, orm.CommentPlateColumns.BelongKey),
 	).OneG()
 
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, codes.ErrCommentPlateNotFound
+		}
 		return nil, err
 	}
 
@@ -190,10 +193,13 @@ func (repo *CommentPSQLRepository) GetPlateBelongByKey(tenantID domain.TenantID,
 	plate, err := orm.CommentPlates(
 		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.TenantID), tenantID),
 		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.BelongKey), belongKey),
-		qm.Select(orm.CommentPlateColumns.TenantID, orm.CommentPlateColumns.BelongKey),
+		qm.Select(orm.CommentPlateColumns.ID, orm.CommentPlateColumns.BelongKey),
 	).OneG()
 
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, codes.ErrCommentPlateNotFound
+		}
 		return nil, err
 	}
 

@@ -56,7 +56,7 @@ func (s *service) CreatePlate(plate *domain.Plate) error {
 	}
 
 	if exist {
-		return codes.ErrCommentPlateNotFound
+		return codes.ErrCommentPlateExist
 	}
 
 	if err := s.repo.CreatePlate(plate); err != nil {
@@ -90,16 +90,12 @@ func (s *service) GetTenantConfig(tenantID domain.TenantID) (*domain.TenantConfi
 }
 
 func (s *service) SetPlateConfig(config *domain.PlateConfig) error {
-	// 查询该板块是否存在
-	exist, err := s.repo.ExistPlateBykey(config.TenantID, config.Plate.BelongKey)
+	plate, err := s.repo.GetPlateBelongByKey(config.TenantID, config.Plate.BelongKey)
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	if !exist {
-		return codes.ErrCommentPlateNotFound
-	}
-
+	config.Plate.ID = plate.ID
 	if err := s.repo.SetPlateConfig(config); err != nil {
 		return errors.WithStack(err)
 	}
