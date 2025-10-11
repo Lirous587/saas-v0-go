@@ -15,7 +15,7 @@ func domainCommentToORM(comment *domain.Comment) *orm.Comment {
 	// 非null项
 	ormComment := &orm.Comment{
 		ID:        comment.ID,
-		Plate:     string(comment.Plate),
+		PlateID:   comment.Plate.ID,
 		UserID:    comment.User.ID,
 		TenantID:  int64(comment.TenantID),
 		LikeCount: comment.LikeCount,
@@ -42,8 +42,10 @@ func ormCommentToDomain(ormComment *orm.Comment) *domain.Comment {
 
 	// 非null项
 	comment := &domain.Comment{
-		ID:    ormComment.ID,
-		Plate: ormComment.Plate,
+		ID: ormComment.ID,
+		Plate: &domain.PlateBelong{
+			ID: ormComment.PlateID,
+		},
 		User: &domain.UserInfo{
 			ID: ormComment.UserID,
 			// Avatar: "",
@@ -85,9 +87,9 @@ func domainPlateToORM(plate *domain.Plate) *orm.CommentPlate {
 
 	// 非null项
 	ormPlate := &orm.CommentPlate{
-		ID:       plate.ID,
-		TenantID: int64(plate.TenantID),
-		Plate:    string(plate.Plate),
+		ID:        plate.ID,
+		TenantID:  int64(plate.TenantID),
+		BelongKey: plate.BelongKey,
 	}
 
 	// 处理null项
@@ -107,9 +109,9 @@ func ormPlateToDomain(ormPlate *orm.CommentPlate) *domain.Plate {
 
 	// 非null项
 	plate := &domain.Plate{
-		ID:       ormPlate.ID,
-		TenantID: domain.TenantID(ormPlate.TenantID),
-		Plate:    ormPlate.Plate,
+		ID:        ormPlate.ID,
+		TenantID:  domain.TenantID(ormPlate.TenantID),
+		BelongKey: ormPlate.BelongKey,
 	}
 
 	// 处理null项
@@ -170,14 +172,14 @@ func ormTenantConfigToDomain(ormConfig *orm.CommentTenantConfig) *domain.TenantC
 	return config
 }
 
-func domainPlateConfigToORM(config *domain.PlateConfig) *orm.CommentConfig {
+func domainPlateConfigToORM(config *domain.PlateConfig) *orm.CommentPlateConfig {
 	if config == nil {
 		return nil
 	}
 
 	// 非null项
-	ormConfig := &orm.CommentConfig{
-		Plate:    string(config.Plate),
+	ormConfig := &orm.CommentPlateConfig{
+		PlateID:  config.Plate.ID,
 		TenantID: int64(config.TenantID),
 		IfAudit:  config.IfAudit,
 	}
@@ -187,14 +189,16 @@ func domainPlateConfigToORM(config *domain.PlateConfig) *orm.CommentConfig {
 	return ormConfig
 }
 
-func ormPlateConfigToDomain(ormConfig *orm.CommentConfig) *domain.PlateConfig {
+func ormPlateConfigToDomain(ormConfig *orm.CommentPlateConfig) *domain.PlateConfig {
 	if ormConfig == nil {
 		return nil
 	}
 
 	// 非null项
 	config := &domain.PlateConfig{
-		Plate:     ormConfig.Plate,
+		Plate: &domain.PlateBelong{
+			ID: ormConfig.PlateID,
+		},
 		TenantID:  domain.TenantID(ormConfig.TenantID),
 		IfAudit:   ormConfig.IfAudit,
 		CreatedAt: ormConfig.CreatedAt,

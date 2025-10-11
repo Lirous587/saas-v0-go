@@ -24,8 +24,8 @@ import (
 // Comment is an object representing the database table.
 type Comment struct {
 	ID        int64      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Plate     string     `boil:"plate" json:"plate" toml:"plate" yaml:"plate"`
 	TenantID  int64      `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
+	PlateID   int64      `boil:"plate_id" json:"plate_id" toml:"plate_id" yaml:"plate_id"`
 	UserID    int64      `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
 	ParentID  null.Int64 `boil:"parent_id" json:"parent_id,omitempty" toml:"parent_id" yaml:"parent_id,omitempty"`
 	RootID    null.Int64 `boil:"root_id" json:"root_id,omitempty" toml:"root_id" yaml:"root_id,omitempty"`
@@ -40,8 +40,8 @@ type Comment struct {
 
 var CommentColumns = struct {
 	ID        string
-	Plate     string
 	TenantID  string
+	PlateID   string
 	UserID    string
 	ParentID  string
 	RootID    string
@@ -51,8 +51,8 @@ var CommentColumns = struct {
 	CreatedAt string
 }{
 	ID:        "id",
-	Plate:     "plate",
 	TenantID:  "tenant_id",
+	PlateID:   "plate_id",
 	UserID:    "user_id",
 	ParentID:  "parent_id",
 	RootID:    "root_id",
@@ -64,8 +64,8 @@ var CommentColumns = struct {
 
 var CommentTableColumns = struct {
 	ID        string
-	Plate     string
 	TenantID  string
+	PlateID   string
 	UserID    string
 	ParentID  string
 	RootID    string
@@ -75,8 +75,8 @@ var CommentTableColumns = struct {
 	CreatedAt string
 }{
 	ID:        "comments.id",
-	Plate:     "comments.plate",
 	TenantID:  "comments.tenant_id",
+	PlateID:   "comments.plate_id",
 	UserID:    "comments.user_id",
 	ParentID:  "comments.parent_id",
 	RootID:    "comments.root_id",
@@ -128,8 +128,8 @@ func (w whereHelpernull_Int64) IsNotNull() qm.QueryMod { return qmhelper.WhereIs
 
 var CommentWhere = struct {
 	ID        whereHelperint64
-	Plate     whereHelperstring
 	TenantID  whereHelperint64
+	PlateID   whereHelperint64
 	UserID    whereHelperint64
 	ParentID  whereHelpernull_Int64
 	RootID    whereHelpernull_Int64
@@ -139,8 +139,8 @@ var CommentWhere = struct {
 	CreatedAt whereHelpertime_Time
 }{
 	ID:        whereHelperint64{field: "\"comments\".\"id\""},
-	Plate:     whereHelperstring{field: "\"comments\".\"plate\""},
 	TenantID:  whereHelperint64{field: "\"comments\".\"tenant_id\""},
+	PlateID:   whereHelperint64{field: "\"comments\".\"plate_id\""},
 	UserID:    whereHelperint64{field: "\"comments\".\"user_id\""},
 	ParentID:  whereHelpernull_Int64{field: "\"comments\".\"parent_id\""},
 	RootID:    whereHelpernull_Int64{field: "\"comments\".\"root_id\""},
@@ -153,6 +153,7 @@ var CommentWhere = struct {
 // CommentRels is where relationship names are stored.
 var CommentRels = struct {
 	Parent         string
+	Plate          string
 	Root           string
 	Tenant         string
 	User           string
@@ -161,6 +162,7 @@ var CommentRels = struct {
 	RootComments   string
 }{
 	Parent:         "Parent",
+	Plate:          "Plate",
 	Root:           "Root",
 	Tenant:         "Tenant",
 	User:           "User",
@@ -172,6 +174,7 @@ var CommentRels = struct {
 // commentR is where relationships are stored.
 type commentR struct {
 	Parent         *Comment         `boil:"Parent" json:"Parent" toml:"Parent" yaml:"Parent"`
+	Plate          *CommentPlate    `boil:"Plate" json:"Plate" toml:"Plate" yaml:"Plate"`
 	Root           *Comment         `boil:"Root" json:"Root" toml:"Root" yaml:"Root"`
 	Tenant         *Tenant          `boil:"Tenant" json:"Tenant" toml:"Tenant" yaml:"Tenant"`
 	User           *User            `boil:"User" json:"User" toml:"User" yaml:"User"`
@@ -199,6 +202,22 @@ func (r *commentR) GetParent() *Comment {
 	}
 
 	return r.Parent
+}
+
+func (o *Comment) GetPlate() *CommentPlate {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetPlate()
+}
+
+func (r *commentR) GetPlate() *CommentPlate {
+	if r == nil {
+		return nil
+	}
+
+	return r.Plate
 }
 
 func (o *Comment) GetRoot() *Comment {
@@ -301,8 +320,8 @@ func (r *commentR) GetRootComments() CommentSlice {
 type commentL struct{}
 
 var (
-	commentAllColumns            = []string{"id", "plate", "tenant_id", "user_id", "parent_id", "root_id", "content", "status", "like_count", "created_at"}
-	commentColumnsWithoutDefault = []string{"plate", "tenant_id", "user_id", "content"}
+	commentAllColumns            = []string{"id", "tenant_id", "plate_id", "user_id", "parent_id", "root_id", "content", "status", "like_count", "created_at"}
+	commentColumnsWithoutDefault = []string{"tenant_id", "plate_id", "user_id", "content"}
 	commentColumnsWithDefault    = []string{"id", "parent_id", "root_id", "status", "like_count", "created_at"}
 	commentPrimaryKeyColumns     = []string{"id"}
 	commentGeneratedColumns      = []string{}
@@ -608,6 +627,17 @@ func (o *Comment) Parent(mods ...qm.QueryMod) commentQuery {
 	return Comments(queryMods...)
 }
 
+// Plate pointed to by the foreign key.
+func (o *Comment) Plate(mods ...qm.QueryMod) commentPlateQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.PlateID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return CommentPlates(queryMods...)
+}
+
 // Root pointed to by the foreign key.
 func (o *Comment) Root(mods ...qm.QueryMod) commentQuery {
 	queryMods := []qm.QueryMod{
@@ -799,6 +829,126 @@ func (commentL) LoadParent(e boil.Executor, singular bool, maybeComment interfac
 					foreign.R = &commentR{}
 				}
 				foreign.R.ParentComments = append(foreign.R.ParentComments, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadPlate allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (commentL) LoadPlate(e boil.Executor, singular bool, maybeComment interface{}, mods queries.Applicator) error {
+	var slice []*Comment
+	var object *Comment
+
+	if singular {
+		var ok bool
+		object, ok = maybeComment.(*Comment)
+		if !ok {
+			object = new(Comment)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeComment)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeComment))
+			}
+		}
+	} else {
+		s, ok := maybeComment.(*[]*Comment)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeComment)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeComment))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &commentR{}
+		}
+		args[object.PlateID] = struct{}{}
+
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &commentR{}
+			}
+
+			args[obj.PlateID] = struct{}{}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`comment_plates`),
+		qm.WhereIn(`comment_plates.id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.Query(e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load CommentPlate")
+	}
+
+	var resultSlice []*CommentPlate
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice CommentPlate")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for comment_plates")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for comment_plates")
+	}
+
+	if len(commentPlateAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.Plate = foreign
+		if foreign.R == nil {
+			foreign.R = &commentPlateR{}
+		}
+		foreign.R.PlateComments = append(foreign.R.PlateComments, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.PlateID == foreign.ID {
+				local.R.Plate = foreign
+				if foreign.R == nil {
+					foreign.R = &commentPlateR{}
+				}
+				foreign.R.PlateComments = append(foreign.R.PlateComments, local)
 				break
 			}
 		}
@@ -1602,6 +1752,60 @@ func (o *Comment) RemoveParent(exec boil.Executor, related *Comment) error {
 		related.R.ParentComments = related.R.ParentComments[:ln-1]
 		break
 	}
+	return nil
+}
+
+// SetPlateG of the comment to the related item.
+// Sets o.R.Plate to related.
+// Adds o to related.R.PlateComments.
+// Uses the global database handle.
+func (o *Comment) SetPlateG(insert bool, related *CommentPlate) error {
+	return o.SetPlate(boil.GetDB(), insert, related)
+}
+
+// SetPlate of the comment to the related item.
+// Sets o.R.Plate to related.
+// Adds o to related.R.PlateComments.
+func (o *Comment) SetPlate(exec boil.Executor, insert bool, related *CommentPlate) error {
+	var err error
+	if insert {
+		if err = related.Insert(exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"comments\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"plate_id"}),
+		strmangle.WhereClause("\"", "\"", 2, commentPrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, updateQuery)
+		fmt.Fprintln(boil.DebugWriter, values)
+	}
+	if _, err = exec.Exec(updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	o.PlateID = related.ID
+	if o.R == nil {
+		o.R = &commentR{
+			Plate: related,
+		}
+	} else {
+		o.R.Plate = related
+	}
+
+	if related.R == nil {
+		related.R = &commentPlateR{
+			PlateComments: CommentSlice{o},
+		}
+	} else {
+		related.R.PlateComments = append(related.R.PlateComments, o)
+	}
+
 	return nil
 }
 

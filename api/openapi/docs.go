@@ -608,7 +608,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/comment/{tenant_id}/{plate}/config": {
+        "/v1/comment/{tenant_id}/{belong_key}/config": {
             "get": {
                 "security": [
                     {
@@ -630,6 +630,13 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "租户id",
                         "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "板块key",
+                        "name": "belong_key",
                         "in": "path",
                         "required": true
                     }
@@ -693,8 +700,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "板块",
-                        "name": "plate",
+                        "description": "板块key",
+                        "name": "belong_key",
                         "in": "path",
                         "required": true
                     },
@@ -2882,16 +2889,16 @@ const docTemplate = `{
         "handler.CreatePlateRequest": {
             "type": "object",
             "required": [
-                "plate"
+                "belong_key"
             ],
             "properties": {
+                "belong_key": {
+                    "type": "string",
+                    "maxLength": 50
+                },
                 "description": {
                     "type": "string",
                     "maxLength": 60
-                },
-                "plate": {
-                    "type": "string",
-                    "maxLength": 50
                 }
             }
         },
@@ -3301,19 +3308,20 @@ const docTemplate = `{
         "saas_internal_comment_handler.CreateRequest": {
             "type": "object",
             "required": [
+                "belong_key",
                 "content",
-                "plate",
                 "tenantID"
             ],
             "properties": {
+                "belong_key": {
+                    "type": "string",
+                    "maxLength": 50
+                },
                 "content": {
                     "type": "string"
                 },
                 "parent_id": {
                     "type": "integer"
-                },
-                "plate": {
-                    "type": "string"
                 },
                 "tenantID": {
                     "type": "integer"

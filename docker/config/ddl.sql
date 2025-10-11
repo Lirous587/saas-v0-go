@@ -222,23 +222,23 @@ CREATE TABLE public.tenant_r2_configs (
 CREATE TABLE public.comment_plates
 (
     id          bigserial PRIMARY KEY,
-    plate       varchar(50)    NOT NULL,  -- 资源标识，如 "article:123"
+    belong_key  varchar(50)    NOT NULL,  -- 资源标识，如 "article:123"
     tenant_id   bigint         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
     description varchar(60),
-    UNIQUE (tenant_id, plate)
+    UNIQUE (tenant_id, belong_key)
 );
 -- 索引优化
 CREATE INDEX IF NOT EXISTS idx_comment_plates_tenant_id ON public.comment_plates (tenant_id);
-CREATE INDEX IF NOT EXISTS idx_comment_plates_plate_key ON public.comment_plates (plate);
+CREATE INDEX IF NOT EXISTS idx_comment_plates_belong_key ON public.comment_plates (belong_key);
 CREATE INDEX idx_comment_plates_description_trgm ON public.comment_plates USING gin (description gin_trgm_ops);
 
 
 -- 评论表
 CREATE TABLE public.comments
 (
-    id         bigserial PRIMARY KEY,
-    plate      varchar(50)    NOT NULL,  -- 资源标识，如 "article:123"
+    id         bigserial      PRIMARY KEY,
     tenant_id  bigint         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
+    plate_id   bigint         NOT NULL REFERENCES public.comment_plates (id) ON DELETE CASCADE,
     user_id    bigint         NOT NULL REFERENCES public.users (id) ON DELETE CASCADE,
     parent_id  bigint         NULL REFERENCES public.comments (id) ON DELETE CASCADE,
     root_id    bigint         NULL REFERENCES public.comments (id) ON DELETE CASCADE,
@@ -252,8 +252,8 @@ CREATE TABLE public.comments
 );
 -- 按租户查询
 CREATE INDEX IF NOT EXISTS idx_comments_tenant_id ON public.comments (tenant_id);
--- 查询资源的所有评论
-CREATE INDEX IF NOT EXISTS idx_comments_tenant_plate ON public.comments (tenant_id, plate);  
+-- 查询板块的所有评论
+CREATE INDEX IF NOT EXISTS idx_comments_tenant_plate_id ON public.comments (tenant_id, plate_id);  
 -- 查询子评论
 CREATE INDEX IF NOT EXISTS idx_comments_parent_id ON public.comments (parent_id);
 -- 查询整个评论树
@@ -286,21 +286,21 @@ CREATE TABLE public.comment_tenant_configs
 (
     tenant_id    bigint      NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE PRIMARY KEY,
     client_token text        NOT NULL,  -- 客户端令牌，用于 API 访问控制，防止接口被刷
-    if_audit     boolean     NOT NULL DEFAULT true,   -- 默认是否开启审核
+    if_audit     boolean     NOT NULL DEFAULT true,   -- 是否开启审核
     created_at   timestamptz(6) NOT NULL DEFAULT now(),
     updated_at   timestamptz(6) NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_comment_tenant_configs_if_audit ON public.comment_tenant_configs (if_audit);
 
 -- 评论板块配置（资源级别，高精细度）
-CREATE TABLE public.comment_configs
+CREATE TABLE public.comment_plate_configs
 (
     tenant_id     bigint      NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
-    plate         varchar(50) NOT NULL,  -- 与 public.comments.plate 对应
+    plate_id      bigint         NOT NULL REFERENCES public.comment_plates (id) ON DELETE CASCADE,
     if_audit      boolean     NOT NULL DEFAULT true,  -- 是否开启审核
     created_at    timestamptz(6) NOT NULL DEFAULT now(),
     updated_at    timestamptz(6) NOT NULL DEFAULT now(),
-    PRIMARY KEY (tenant_id, plate)
+    PRIMARY KEY (tenant_id, plate_id)
 );
-CREATE INDEX IF NOT EXISTS idx_comment_configs_tenant_id ON public.comment_configs (tenant_id);
-CREATE INDEX IF NOT EXISTS idx_comment_configs_if_audit ON public.comment_configs (if_audit);  
+CREATE INDEX IF NOT EXISTS idx_comment_plate_configs_tenant_id ON public.comment_plate_configs (tenant_id);
+CREATE INDEX IF NOT EXISTS idx_comment_plate_configs_if_audit ON public.comment_plate_configs (if_audit);  

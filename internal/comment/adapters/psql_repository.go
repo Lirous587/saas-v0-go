@@ -130,7 +130,7 @@ func (repo *CommentPSQLRepository) ListPlate(query *domain.PlateQuery) (*domain.
 	var whereMods []qm.QueryMod
 	if query.Keyword != "" {
 		like := "%" + query.Keyword + "%"
-		whereMods = append(whereMods, qm.Where(fmt.Sprintf("(%s LIKE ? OR %s LIKE ?)", orm.CommentPlateColumns.Plate, orm.CommentPlateColumns.Description), like, like))
+		whereMods = append(whereMods, qm.Where(fmt.Sprintf("(%s LIKE ? OR %s LIKE ?)", orm.CommentPlateColumns.BelongKey, orm.CommentPlateColumns.Description), like, like))
 	}
 	// 1.计算total
 	total, err := orm.CommentPlates(whereMods...).CountG()
@@ -158,10 +158,10 @@ func (repo *CommentPSQLRepository) ListPlate(query *domain.PlateQuery) (*domain.
 	}, nil
 }
 
-func (repo *CommentPSQLRepository) ExistPlate(tenantID domain.TenantID, plate string) (bool, error) {
+func (repo *CommentPSQLRepository) ExistPlateBykey(tenantID domain.TenantID, belongKey string) (bool, error) {
 	exist, err := orm.CommentPlates(
 		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.TenantID), tenantID),
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.Plate), plate),
+		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.BelongKey), belongKey),
 	).ExistsG()
 
 	if err != nil {
@@ -169,6 +169,38 @@ func (repo *CommentPSQLRepository) ExistPlate(tenantID domain.TenantID, plate st
 	}
 
 	return exist, nil
+}
+func (repo *CommentPSQLRepository) GetPlateBelongByID(id int64) (*domain.PlateBelong, error) {
+	plate, err := orm.CommentPlates(
+		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.ID), id),
+		qm.Select(orm.CommentPlateColumns.TenantID, orm.CommentPlateColumns.BelongKey),
+	).OneG()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.PlateBelong{
+		ID:        plate.ID,
+		BelongKey: plate.BelongKey,
+	}, nil
+}
+
+func (repo *CommentPSQLRepository) GetPlateBelongByKey(tenantID domain.TenantID, belongKey string) (*domain.PlateBelong, error) {
+	plate, err := orm.CommentPlates(
+		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.TenantID), tenantID),
+		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.BelongKey), belongKey),
+		qm.Select(orm.CommentPlateColumns.TenantID, orm.CommentPlateColumns.BelongKey),
+	).OneG()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.PlateBelong{
+		ID:        plate.ID,
+		BelongKey: plate.BelongKey,
+	}, nil
 }
 
 func (repo *CommentPSQLRepository) SetTenantConfig(config *domain.TenantConfig) error {
@@ -208,12 +240,12 @@ func (repo *CommentPSQLRepository) SetPlateConfig(config *domain.PlateConfig) er
 	ormConfig := domainPlateConfigToORM(config)
 	if err := ormConfig.UpsertG(
 		true,
-		[]string{orm.CommentConfigColumns.TenantID, orm.CommentConfigColumns.Plate}, // 冲突列：复合主键的两个字段
+		[]string{orm.CommentPlateConfigColumns.TenantID, orm.CommentPlateConfigColumns.PlateID}, // 冲突列：复合主键的两个字段
 		boil.Greylist(
-			orm.CommentConfigColumns.IfAudit,
+			orm.CommentPlateConfigColumns.IfAudit,
 		),
 		boil.Greylist(
-			orm.CommentConfigColumns.IfAudit,
+			orm.CommentPlateConfigColumns.IfAudit,
 		),
 	); err != nil {
 		return errors.WithStack(err)
@@ -222,10 +254,10 @@ func (repo *CommentPSQLRepository) SetPlateConfig(config *domain.PlateConfig) er
 	return nil
 }
 
-func (repo *CommentPSQLRepository) GetPlateConfig(tenantID domain.TenantID, plate string) (*domain.PlateConfig, error) {
-	ormConfig, err := orm.CommentConfigs(
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentConfigColumns.TenantID), tenantID),
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentConfigColumns.Plate), plate),
+func (repo *CommentPSQLRepository) GetPlateConfig(tenantID domain.TenantID, plateID int64) (*domain.PlateConfig, error) {
+	ormConfig, err := orm.CommentPlateConfigs(
+		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateConfigColumns.TenantID), tenantID),
+		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateConfigColumns.PlateID), plateID),
 	).OneG()
 
 	if err != nil {

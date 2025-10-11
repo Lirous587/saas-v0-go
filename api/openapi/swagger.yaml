@@ -118,14 +118,14 @@ definitions:
     type: object
   handler.CreatePlateRequest:
     properties:
+      belong_key:
+        maxLength: 50
+        type: string
       description:
         maxLength: 60
         type: string
-      plate:
-        maxLength: 50
-        type: string
     required:
-    - plate
+    - belong_key
     type: object
   handler.EntryRequest:
     properties:
@@ -395,17 +395,18 @@ definitions:
     type: object
   saas_internal_comment_handler.CreateRequest:
     properties:
+      belong_key:
+        maxLength: 50
+        type: string
       content:
         type: string
       parent_id:
         type: integer
-      plate:
-        type: string
       tenantID:
         type: integer
     required:
+    - belong_key
     - content
-    - plate
     - tenantID
     type: object
   saas_internal_plan_handler.CreateRequest:
@@ -699,7 +700,7 @@ paths:
       summary: 删除
       tags:
       - comment
-  /v1/comment/{tenant_id}/{plate}/config:
+  /v1/comment/{tenant_id}/{belong_key}/config:
     get:
       consumes:
       - application/json
@@ -709,6 +710,11 @@ paths:
         name: tenant_id
         required: true
         type: integer
+      - description: 板块key
+        in: path
+        name: belong_key
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -743,9 +749,9 @@ paths:
         name: tenant_id
         required: true
         type: integer
-      - description: 板块
+      - description: 板块key
         in: path
-        name: plate
+        name: belong_key
         required: true
         type: string
       - description: 请求参数

@@ -18,7 +18,7 @@ const CommentStatusApprove CommentStatus = ""
 
 type Comment struct {
 	ID        int64
-	Plate     string
+	Plate     *PlateBelong
 	User      *UserInfo
 	TenantID  TenantID
 	ParentID  int64
@@ -48,8 +48,13 @@ type CommentList struct {
 type Plate struct {
 	ID          int64
 	TenantID    TenantID
-	Plate       string
+	BelongKey   string
 	Description string
+}
+
+type PlateBelong struct {
+	ID        int64
+	BelongKey string
 }
 
 type PlateQuery struct {
@@ -76,7 +81,7 @@ type TenantConfig struct {
 // PlateConfig  板块级别的配置 优先级更高
 type PlateConfig struct {
 	TenantID  TenantID
-	Plate     string
+	Plate     *PlateBelong
 	IfAudit   bool
 	CreatedAt time.Time
 	UpdatedAt time.Time

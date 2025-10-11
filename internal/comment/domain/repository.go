@@ -9,13 +9,15 @@ type CommentRepository interface {
 
 	CreatePlate(plate *Plate) error
 	DeletePlate(tenantID TenantID, id int64) error
-	ExistPlate(tenantID TenantID, palte string) (bool, error)
 	ListPlate(query *PlateQuery) (*PlateList, error)
+	ExistPlateBykey(tenantID TenantID, belongKey string) (bool, error)
+	GetPlateBelongByID(id int64) (*PlateBelong, error)
+	GetPlateBelongByKey(tenantID TenantID, belongKey string) (*PlateBelong, error)
 
 	SetTenantConfig(config *TenantConfig) error
 	GetTenantConfig(tenantID TenantID) (*TenantConfig, error)
 	SetPlateConfig(config *PlateConfig) error
-	GetPlateConfig(tenantID TenantID, palte string) (*PlateConfig, error)
+	GetPlateConfig(tenantID TenantID, palteID int64) (*PlateConfig, error)
 }
 
 type CommentCache interface {

@@ -84,7 +84,7 @@ func domainPlateToResponse(plate *domain.Plate) *PlateResponse {
 
 	return &PlateResponse{
 		ID:          plate.ID,
-		Plate:       plate.Plate,
+		BelongKey:   plate.BelongKey,
 		Description: plate.Description,
 	}
 }

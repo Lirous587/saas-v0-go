@@ -21,10 +21,10 @@ type CommentResponse struct {
 }
 
 type CreateRequest struct {
-	Plate    string          `json:"plate" binding:"required"`
-	TenantID domain.TenantID `uri:"tenant_id" binding:"required"`
-	ParentID int64           `json:"parent_id"`
-	Content  string          `json:"content" binding:"required"`
+	BelongKey string          `json:"belong_key" binding:"required,max=50"`
+	TenantID  domain.TenantID `uri:"tenant_id" binding:"required"`
+	ParentID  int64           `json:"parent_id"`
+	Content   string          `json:"content" binding:"required"`
 }
 
 type ListRequest struct {
@@ -45,7 +45,7 @@ type CommentListResponse struct {
 
 type PlateResponse struct {
 	ID          int64  `json:"id"`
-	Plate       string `json:"plate"`
+	BelongKey   string `json:"belong_key"`
 	Description string `json:"description,omitempty"`
 }
 
@@ -56,7 +56,7 @@ type PlateListResponse struct {
 
 type CreatePlateRequest struct {
 	TenantID    domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
-	Plate       string          `json:"plate" binding:"required,max=50"`
+	BelongKey   string          `json:"belong_key" binding:"required,max=50"`
 	Description string          `json:"description" binding:"max=60"`
 }
 
@@ -93,14 +93,14 @@ type TenantConfigResponse struct {
 // --- 板块级别配置
 
 type SetPlateConfigRequest struct {
-	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
-	Plate    string          `json:"-" uri:"plate" binding:"required"`
-	IfAudit  *bool           `json:"if_audit" binding:"required"`
+	TenantID  domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	BelongKey string          `json:"-" uri:"belong_key" binding:"required,max=50"`
+	IfAudit   *bool           `json:"if_audit" binding:"required"`
 }
 
 type GetPlateConfigRequest struct {
-	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
-	Plate    string          `json:"-" uri:"plate" binding:"required"`
+	TenantID  domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	BelongKey string          `json:"-" uri:"belong_key" binding:"required"`
 }
 
 type PlateConfigResponse struct {

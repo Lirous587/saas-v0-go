@@ -50,7 +50,7 @@ func (s *service) List(query *domain.CommentQuery) (*domain.CommentList, error) 
 }
 
 func (s *service) CreatePlate(plate *domain.Plate) error {
-	exist, err := s.repo.ExistPlate(plate.TenantID, plate.Plate)
+	exist, err := s.repo.ExistPlateBykey(plate.TenantID, plate.BelongKey)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -91,7 +91,7 @@ func (s *service) GetTenantConfig(tenantID domain.TenantID) (*domain.TenantConfi
 
 func (s *service) SetPlateConfig(config *domain.PlateConfig) error {
 	// 查询该板块是否存在
-	exist, err := s.repo.ExistPlate(config.TenantID, config.Plate)
+	exist, err := s.repo.ExistPlateBykey(config.TenantID, config.Plate.BelongKey)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -107,6 +107,16 @@ func (s *service) SetPlateConfig(config *domain.PlateConfig) error {
 	return nil
 }
 
-func (s *service) GetPlateConfig(tenantID domain.TenantID, plate string) (*domain.PlateConfig, error) {
-	return s.repo.GetPlateConfig(tenantID, plate)
+func (s *service) GetPlateConfig(tenantID domain.TenantID, belongKey string) (*domain.PlateConfig, error) {
+	plate, err := s.repo.GetPlateBelongByKey(tenantID, belongKey)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	config, err := s.repo.GetPlateConfig(tenantID, plate.ID)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return config, nil
 }

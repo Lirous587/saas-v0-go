@@ -61,7 +61,9 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 	}
 
 	data, err := h.service.Create(&domain.Comment{
-		Plate:    req.Plate,
+		Plate: &domain.PlateBelong{
+			BelongKey: req.BelongKey,
+		},
 		TenantID: req.TenantID,
 		ParentID: req.ParentID,
 		Content:  req.Content,
@@ -158,7 +160,7 @@ func (h *HttpHandler) CreatePlate(ctx *gin.Context) {
 
 	if err := h.service.CreatePlate(&domain.Plate{
 		TenantID:    req.TenantID,
-		Plate:       req.Plate,
+		BelongKey:   req.BelongKey,
 		Description: req.Description,
 	}); err != nil {
 		response.Error(ctx, err)
@@ -294,12 +296,12 @@ func (h *HttpHandler) GetTenantConfig(ctx *gin.Context) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        tenant_id   	path int true "租户id"
-// @Param        plate   			path string true "板块"
+// @Param        belong_key   path string true "板块key"
 // @Param        request body handler.SetPlateConfigRequest true "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/comment/{tenant_id}/{plate}/config [put]
+// @Router       /v1/comment/{tenant_id}/{belong_key}/config [put]
 func (h *HttpHandler) SetPlateConfig(ctx *gin.Context) {
 	req := new(SetPlateConfigRequest)
 
@@ -309,8 +311,10 @@ func (h *HttpHandler) SetPlateConfig(ctx *gin.Context) {
 
 	if err := h.service.SetPlateConfig(&domain.PlateConfig{
 		TenantID: req.TenantID,
-		Plate:    req.Plate,
-		IfAudit:  *req.IfAudit,
+		Plate: &domain.PlateBelong{
+			BelongKey: req.BelongKey,
+		},
+		IfAudit: *req.IfAudit,
 	}); err != nil {
 		response.Error(ctx, err)
 		return
@@ -325,11 +329,12 @@ func (h *HttpHandler) SetPlateConfig(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id   path int true "租户id"
+// @Param        tenant_id   path int true 		"租户id"
+// @Param        belong_key  path string true "板块key"
 // @Success      200  {object}  response.successResponse{data=handler.PlateConfigResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/comment/{tenant_id}/{plate}/config [get]
+// @Router       /v1/comment/{tenant_id}/{belong_key}/config [get]
 func (h *HttpHandler) GetPlateConfig(ctx *gin.Context) {
 	req := new(GetPlateConfigRequest)
 
@@ -337,7 +342,7 @@ func (h *HttpHandler) GetPlateConfig(ctx *gin.Context) {
 		return
 	}
 
-	res, err := h.service.GetPlateConfig(req.TenantID, req.Plate)
+	res, err := h.service.GetPlateConfig(req.TenantID, req.BelongKey)
 	if err != nil {
 		response.Error(ctx, err)
 		return
