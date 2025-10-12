@@ -404,6 +404,8 @@ definitions:
         type: string
       parent_id:
         type: integer
+      root_id:
+        type: integer
     required:
     - content
     type: object
@@ -676,7 +678,7 @@ paths:
             $ref: '#/definitions/response.errorResponse'
       security:
       - BearerAuth: []
-      summary: 创建
+      summary: 创建/回复评论
       tags:
       - comment
   /v1/comment/{tenant_id}/{belong_key}/config:
@@ -791,7 +793,7 @@ paths:
             $ref: '#/definitions/response.errorResponse'
       security:
       - BearerAuth: []
-      summary: 删除
+      summary: 删除评论
       tags:
       - comment
   /v1/comment/{tenant_id}/config:

@@ -6,6 +6,7 @@ type CommentRepository interface {
 	Delete(tenantID TenantID, id int64) error
 	List(query *CommentQuery) (*CommentList, error)
 	IsCommentInPlate(tenantID TenantID, plateID int64, commentID int64) (bool, error)
+	GetCommentUser(tenantID TenantID, commentID int64) (int64, error)
 
 	GetUserIdsByRootORParent(tenantID TenantID, plateID int64, rootID int64, parentID int64) ([]int64, error)
 	GetDomainAdminByTenant(tenantID TenantID) (int64, error)

@@ -2,7 +2,7 @@
 
 type CommentService interface {
 	Create(comment *Comment, belongKey string) (*Comment, error)
-	Delete(tenantID TenantID, id int64) error
+	Delete(tenantID TenantID, userID int64, id int64) error
 	List(query *CommentQuery) (*CommentList, error)
 
 	CreatePlate(plate *Plate) error

@@ -96,6 +96,19 @@ func (repo *CommentPSQLRepository) IsCommentInPlate(tenantID domain.TenantID, pl
 	return exist, nil
 }
 
+func (repo *CommentPSQLRepository) GetCommentUser(tenantID domain.TenantID, commentID int64) (int64, error) {
+	ormComment, err := orm.Comments(
+		qm.Where(fmt.Sprintf("%s = ?", orm.CommentColumns.TenantID), tenantID),
+		qm.And(fmt.Sprintf("%s = ?", orm.CommentColumns.ID), commentID),
+	).OneG()
+
+	if err != nil {
+		return 0, err
+	}
+
+	return ormComment.UserID, nil
+}
+
 func (repo *CommentPSQLRepository) GetUserIdsByRootORParent(tenantID domain.TenantID, plateID int64, rootID int64, parentID int64) ([]int64, error) {
 	comments, err := orm.Comments(
 		qm.Where(fmt.Sprintf("%s = ? AND %s = ? AND (%s = ? OR %s = ?)",

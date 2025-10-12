@@ -20,7 +20,7 @@ func NewHttpHandler(service domain.CommentService) *HttpHandler {
 }
 
 // Create godoc
-// @Summary      创建
+// @Summary      创建/回复评论
 // @Tags         comment
 // @Accept       json
 // @Produce      json
@@ -62,7 +62,7 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 }
 
 // Delete godoc
-// @Summary      删除
+// @Summary      删除评论
 // @Tags         comment
 // @Accept       json
 // @Produce      json
@@ -74,13 +74,19 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/comment/{tenant_id}/{id} [delete]
 func (h *HttpHandler) Delete(ctx *gin.Context) {
+	userID, err := server.GetUserID(ctx)
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
 	req := new(DeleteRequest)
 
 	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
-	if err := h.service.Delete(req.TenantID, req.ID); err != nil {
+	if err := h.service.Delete(req.TenantID, userID, req.ID); err != nil {
 		response.Error(ctx, err)
 		return
 	}

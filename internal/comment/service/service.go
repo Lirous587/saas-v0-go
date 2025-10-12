@@ -182,9 +182,27 @@ func (s *service) Create(comment *domain.Comment, belongKey string) (*domain.Com
 	return comment, nil
 }
 
-func (s *service) Delete(tenantID domain.TenantID, id int64) error {
-	// s.repo.Delete(tenantID, id)
-	return nil
+func (s *service) Delete(tenantID domain.TenantID, userID int64, id int64) error {
+	// 查询当前评论用户
+	uid, err := s.repo.GetCommentUser(tenantID, id)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	// 如果请求用户和评论用户不一致
+	if uid != userID {
+		// 去获取当前租户的uid
+		adminID, err := s.repo.GetDomainAdminByTenant(tenantID)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+
+		if userID != adminID {
+			return codes.ErrCommentNoPermissionToDelete
+		}
+	}
+
+	return s.repo.Delete(tenantID, id)
 }
 
 func (s *service) List(query *domain.CommentQuery) (*domain.CommentList, error) {

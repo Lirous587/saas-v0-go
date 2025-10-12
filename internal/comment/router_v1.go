@@ -33,7 +33,7 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 		protect.POST("/:belong_key", handler.Create)
 
 		// 用户：删除评论（只能删自己的，或管理员删任意）
-		protect.DELETE("/:belong_key/:id", handler.Delete)
+		protect.DELETE("/:id", handler.Delete)
 
 		// 低优先级：点赞/取消点赞
 		// protect.POST("/:id/like", handler.Like)

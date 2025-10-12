@@ -516,7 +516,7 @@ const docTemplate = `{
                 "tags": [
                     "comment"
                 ],
-                "summary": "创建",
+                "summary": "创建/回复评论",
                 "parameters": [
                     {
                         "type": "integer",
@@ -721,7 +721,7 @@ const docTemplate = `{
                 "tags": [
                     "comment"
                 ],
-                "summary": "删除",
+                "summary": "删除评论",
                 "parameters": [
                     {
                         "type": "integer",
@@ -3344,6 +3344,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "parent_id": {
+                    "type": "integer"
+                },
+                "root_id": {
                     "type": "integer"
                 }
             }
