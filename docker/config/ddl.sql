@@ -173,7 +173,9 @@ CREATE INDEX IF NOT EXISTS idx_tenant_user_role_user_id ON public.tenant_user_ro
 CREATE INDEX IF NOT EXISTS idx_tenant_user_role_tenant_id ON public.tenant_user_role (tenant_id);
 CREATE INDEX IF NOT EXISTS idx_tenant_user_role_role_id ON public.tenant_user_role (role_id);
 CREATE UNIQUE INDEX IF NOT EXISTS ux_tenant_user_role_user_tenant ON public.tenant_user_role (user_id, tenant_id);
-
+CREATE UNIQUE INDEX IF NOT EXISTS ux_tenant_user_role_role_1_per_tenant 
+ON public.tenant_user_role (tenant_id) 
+WHERE role_id = 1;
 
 -- img_categories
 CREATE TABLE public.img_categories
