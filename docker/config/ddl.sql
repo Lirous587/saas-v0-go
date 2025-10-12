@@ -255,15 +255,13 @@ CREATE INDEX IF NOT EXISTS idx_comments_tenant_id ON public.comments (tenant_id)
 -- 查询板块的所有评论
 CREATE INDEX IF NOT EXISTS idx_comments_tenant_plate_id ON public.comments (tenant_id, plate_id);  
 -- 查询子评论
-CREATE INDEX IF NOT EXISTS idx_comments_parent_id ON public.comments (parent_id);
+CREATE INDEX IF NOT EXISTS idx_comments_tenant_parent_id ON public.comments (tenant_id,parent_id);
 -- 查询整个评论树
-CREATE INDEX IF NOT EXISTS idx_comments_root_id ON public.comments (root_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_comments_tenant_root_created_at ON public.comments (tenant_id, root_id, created_at);
 -- 按状态查询
 CREATE INDEX IF NOT EXISTS idx_comments_status ON public.comments (status);
 -- 全文搜索内容
 CREATE INDEX IF NOT EXISTS idx_comments_content_trgm ON public.comments USING gin (content gin_trgm_ops);
--- 按时间排序查询
-CREATE INDEX IF NOT EXISTS idx_comments_created_at ON public.comments (created_at DESC);
 -- 热门评论查询（按点赞数）
 CREATE INDEX IF NOT EXISTS idx_comments_like_count ON public.comments (like_count DESC);
 

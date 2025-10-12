@@ -3,7 +3,8 @@ package codes
 // Comment相关错误 (2200-2399)
 var (
 	//  评论错误
-	ErrCommentNotFound = ErrCode{Msg: "当前评论不存在", Type: ErrorTypeNotFound, Code: 2200}
+	ErrCommentNotFound           = ErrCode{Msg: "当前评论不存在", Type: ErrorTypeNotFound, Code: 2200}
+	ErrCommentNotFoundInNowPlate = ErrCode{Msg: "当前板块不存在该评论", Type: ErrorTypeNotFound, Code: 2201}
 
 	//  评论板块错误 2320-2339
 	ErrCommentPlateNotFound = ErrCode{Msg: "评论板块不存在", Type: ErrorTypeNotFound, Code: 2320}

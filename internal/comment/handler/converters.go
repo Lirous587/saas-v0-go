@@ -12,9 +12,9 @@ func domainCommentToResponse(comment *domain.Comment) *CommentResponse {
 	return &CommentResponse{
 		ID: comment.ID,
 		User: &UserInfo{
-			ID:       comment.User.ID,
-			NikeName: comment.User.NikeName,
-			Avatar:   comment.User.Avatar,
+			ID: comment.UserID,
+			// NickName: comment.User.NickName,
+			// Avatar:   comment.User.Avatar,
 		},
 		ParentID:  comment.ParentID,
 		RootID:    comment.RootID,
@@ -83,9 +83,10 @@ func domainPlateToResponse(plate *domain.Plate) *PlateResponse {
 	}
 
 	return &PlateResponse{
-		ID:        plate.ID,
-		BelongKey: plate.BelongKey,
-		Summary:   plate.Summary,
+		ID:         plate.ID,
+		BelongKey:  plate.BelongKey,
+		Summary:    plate.Summary,
+		RelatedURL: plate.RelatedURL,
 	}
 }
 

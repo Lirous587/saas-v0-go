@@ -4,7 +4,7 @@ import "saas/internal/comment/domain"
 
 type UserInfo struct {
 	ID       int64  `json:"id"`
-	NikeName string `json:"nickname"`
+	NickName string `json:"nickname"`
 	Avatar   string `json:"avatar,omitempty"`
 }
 
@@ -21,10 +21,16 @@ type CommentResponse struct {
 }
 
 type CreateRequest struct {
-	BelongKey string          `json:"belong_key" binding:"required,max=50"`
-	TenantID  domain.TenantID `uri:"tenant_id" binding:"required"`
+	TenantID  domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	BelongKey string          `json:"-" uri:"belong_key" binding:"required,max=50"`
+	RootID    int64           `json:"root_id"`
 	ParentID  int64           `json:"parent_id"`
 	Content   string          `json:"content" binding:"required"`
+}
+
+type DeleteRequest struct {
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	ID       int64           `json:"-" uri:"id" binding:"required"`
 }
 
 type ListRequest struct {
@@ -44,9 +50,10 @@ type CommentListResponse struct {
 // --- 评论板块
 
 type PlateResponse struct {
-	ID        int64  `json:"id"`
-	BelongKey string `json:"belong_key"`
-	Summary   string `json:"summary"`
+	ID         int64  `json:"id"`
+	BelongKey  string `json:"belong_key"`
+	RelatedURL string `json:"related_url"`
+	Summary    string `json:"summary"`
 }
 
 type PlateListResponse struct {
@@ -55,9 +62,10 @@ type PlateListResponse struct {
 }
 
 type CreatePlateRequest struct {
-	TenantID  domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
-	BelongKey string          `json:"belong_key" binding:"required,max=50"`
-	Summary   string          `json:"summary" binding:"required,max=60"`
+	TenantID   domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	BelongKey  string          `json:"belong_key" binding:"required,max=50"`
+	RelatedURL string          `json:"related_url" binding:"required,url,max=255"`
+	Summary    string          `json:"summary" binding:"required,max=60"`
 }
 
 type DeletePlateRequest struct {

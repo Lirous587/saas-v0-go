@@ -28,7 +28,6 @@ type mailer struct {
 }
 
 var (
-	AdminEmail   string
 	globalDialer *gomail.Dialer
 	config       mailerConfig
 )
@@ -63,8 +62,6 @@ func UpdateConfig() error {
 		CC:       os.Getenv("EMAIL_CC"),
 	}
 
-	AdminEmail = os.Getenv("EMAIL_ADMIN")
-
 	globalDialer = gomail.NewDialer(config.Host, config.Port, config.Username, config.Password)
 
 	return nil
@@ -77,7 +74,7 @@ func validateEnv() error {
 		config.Username == "" ||
 		config.Password == "" ||
 		config.From == "" ||
-		AdminEmail == "" {
+		config.CC == "" {
 		return errors.New("email config: 环境变量缺失，必填项不能为空")
 	}
 	return nil

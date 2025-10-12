@@ -5,10 +5,8 @@ import (
 	"saas/internal/common/reqkit/bind"
 	"saas/internal/common/reskit/response"
 	"saas/internal/common/server"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 )
 
 type HttpHandler struct {
@@ -21,32 +19,19 @@ func NewHttpHandler(service domain.CommentService) *HttpHandler {
 	}
 }
 
-func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
-	idStr := ctx.Param("id")
-	if idStr == "" {
-		return 0, errors.New("请传递id参数")
-	}
-	idInt, err := strconv.Atoi(idStr)
-	if err != nil {
-		return 0, errors.WithStack(err)
-	}
-	if idInt == 0 {
-		return 0, errors.WithStack(errors.New("无效的id"))
-	}
-	return int64(idInt), nil
-}
-
 // Create godoc
 // @Summary      创建
 // @Tags         comment
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
+// @Param        tenant_id   	path int true "租户id"
+// @Param        belong_key   path string true "板块key"
 // @Param        request body handler.CreateRequest true "请求参数"
 // @Success      200  {object}  response.successResponse{data=handler.CommentResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/comment [post]
+// @Router       /v1/comment/{tenant_id}/{belong_key} [post]
 func (h *HttpHandler) Create(ctx *gin.Context) {
 	userID, err := server.GetUserID(ctx)
 	if err != nil {
@@ -61,16 +46,12 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 	}
 
 	data, err := h.service.Create(&domain.Comment{
-		Plate: &domain.PlateBelong{
-			BelongKey: req.BelongKey,
-		},
 		TenantID: req.TenantID,
+		RootID:   req.RootID,
 		ParentID: req.ParentID,
 		Content:  req.Content,
-		User: &domain.UserInfo{
-			ID: userID,
-		},
-	})
+		UserID:   userID,
+	}, req.BelongKey)
 
 	if err != nil {
 		response.Error(ctx, err)
@@ -86,19 +67,20 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "评论id"
+// @Param        tenant_id   	path int true "租户id"
+// @Param        id   				path int true "评论id"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/comment/{id} [delete]
+// @Router       /v1/comment/{tenant_id}/{id} [delete]
 func (h *HttpHandler) Delete(ctx *gin.Context) {
-	id, err := h.getID(ctx)
-	if err != nil {
-		response.InvalidParams(ctx, err)
+	req := new(DeleteRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
-	if err := h.service.Delete(id); err != nil {
+	if err := h.service.Delete(req.TenantID, req.ID); err != nil {
 		response.Error(ctx, err)
 		return
 	}
@@ -159,9 +141,10 @@ func (h *HttpHandler) CreatePlate(ctx *gin.Context) {
 	}
 
 	if err := h.service.CreatePlate(&domain.Plate{
-		TenantID:  req.TenantID,
-		BelongKey: req.BelongKey,
-		Summary:   req.Summary,
+		TenantID:   req.TenantID,
+		BelongKey:  req.BelongKey,
+		RelatedURL: req.RelatedURL,
+		Summary:    req.Summary,
 	}); err != nil {
 		response.Error(ctx, err)
 		return

@@ -7,9 +7,18 @@ import (
 type TenantID int64
 
 type UserInfo struct {
-	ID       int64  `json:"id"`
-	NikeName string `json:"nickname"`
-	Avatar   string `json:"avatar,omitempty"`
+	ID       int64
+	NickName string
+	Avatar   string
+	email    string
+}
+
+func (u *UserInfo) SetEmail(email string) {
+	u.email = email
+}
+
+func (u *UserInfo) GetEmail() string {
+	return u.email
 }
 
 type CommentStatus string
@@ -17,9 +26,11 @@ type CommentStatus string
 const CommentStatusApprove CommentStatus = ""
 
 type Comment struct {
-	ID        int64
-	Plate     *PlateBelong
-	User      *UserInfo
+	ID      int64
+	PlateID int64
+	UserID  int64
+	// Plate     *PlateBelong
+	// User      *UserInfo
 	TenantID  TenantID
 	ParentID  int64
 	RootID    int64
@@ -30,12 +41,24 @@ type Comment struct {
 	IsLiked   bool
 }
 
-func (c *Comment) HasPartent() bool {
-	return c.ParentID >= 0
+func (c *Comment) IsCommentByAdmin(userID int64) bool {
+	return c.UserID == userID
 }
 
-func (c *Comment) HasRoot() bool {
-	return c.RootID >= 0
+// IsReply 存在root或parent
+func (c *Comment) IsReply() bool {
+	return c.ParentID != 0 || c.RootID != 0
+}
+
+func (c *Comment) FilterSelf(userIds []int64) []int64 {
+	filteredIds := make([]int64, 0, 3)
+	for i := range userIds {
+		if userIds[i] != c.UserID {
+			filteredIds = append(filteredIds, userIds[i])
+		}
+	}
+
+	return filteredIds
 }
 
 type CommentQuery struct {
@@ -54,10 +77,11 @@ type CommentList struct {
 }
 
 type Plate struct {
-	ID        int64
-	TenantID  TenantID
-	BelongKey string
-	Summary   string
+	ID         int64
+	TenantID   TenantID
+	BelongKey  string
+	RelatedURL string
+	Summary    string
 }
 
 type PlateBelong struct {

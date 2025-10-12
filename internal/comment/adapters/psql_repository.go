@@ -7,6 +7,7 @@ import (
 	"saas/internal/common/orm"
 	"saas/internal/common/reskit/codes"
 	"saas/internal/common/utils"
+	roleDomain "saas/internal/role/domain"
 
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
@@ -14,21 +15,11 @@ import (
 )
 
 type CommentPSQLRepository struct {
+	role roleDomain.Role
 }
 
 func NewCommentPSQLRepository() domain.CommentRepository {
 	return &CommentPSQLRepository{}
-}
-
-func (repo *CommentPSQLRepository) FindByID(id int64) (*domain.Comment, error) {
-	ormComment, err := orm.FindCommentG(id)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, codes.ErrCommentNotFound
-		}
-		return nil, err
-	}
-	return ormCommentToDomain(ormComment), nil
 }
 
 func (repo *CommentPSQLRepository) Create(comment *domain.Comment) (*domain.Comment, error) {
@@ -41,33 +32,20 @@ func (repo *CommentPSQLRepository) Create(comment *domain.Comment) (*domain.Comm
 	return ormCommentToDomain(ormComment), nil
 }
 
-func (repo *CommentPSQLRepository) Update(comment *domain.Comment) (*domain.Comment, error) {
-	ormComment := domainCommentToORM(comment)
-
-	rows, err := ormComment.UpdateG(boil.Infer())
-
-	if err != nil {
-		return nil, err
-	}
-	if rows == 0 {
-		return nil, codes.ErrCommentNotFound
-	}
-
-	return ormCommentToDomain(ormComment), nil
-}
-
-func (repo *CommentPSQLRepository) Delete(id int64) error {
-	ormComment := orm.Comment{
-		ID: id,
-	}
-	rows, err := ormComment.DeleteG()
+func (repo *CommentPSQLRepository) Delete(tenantID domain.TenantID, id int64) error {
+	rows, err := orm.Comments(
+		qm.Where(fmt.Sprintf("%s = ?", orm.CommentColumns.TenantID), tenantID),
+		qm.And(fmt.Sprintf("%s = ?", orm.CommentColumns.ID), id),
+	).DeleteAllG()
 
 	if err != nil {
 		return err
 	}
+
 	if rows == 0 {
 		return codes.ErrCommentNotFound
 	}
+
 	return nil
 }
 
@@ -101,6 +79,90 @@ func (repo *CommentPSQLRepository) List(query *domain.CommentQuery) (*domain.Com
 		Total: total,
 		List:  ormCommentsToDomain(comment),
 	}, nil
+}
+
+// IsCommentInPlate 当前评论id是否在某板块下 用于检测合法性
+func (repo *CommentPSQLRepository) IsCommentInPlate(tenantID domain.TenantID, plateID int64, commentID int64) (bool, error) {
+	exist, err := orm.Comments(
+		qm.Where(fmt.Sprintf("%s = ?", orm.CommentColumns.TenantID), tenantID),
+		qm.And(fmt.Sprintf("%s = ?", orm.CommentColumns.PlateID), plateID),
+		qm.And(fmt.Sprintf("%s = ?", orm.CommentColumns.ID), commentID),
+	).ExistsG()
+
+	if err != nil {
+		return false, err
+	}
+
+	return exist, nil
+}
+
+func (repo *CommentPSQLRepository) GetUserIdsByRootORParent(tenantID domain.TenantID, plateID int64, rootID int64, parentID int64) ([]int64, error) {
+	comments, err := orm.Comments(
+		qm.Where(fmt.Sprintf("%s = ? AND %s = ? AND (%s = ? OR %s = ?)",
+			orm.CommentColumns.TenantID,
+			orm.CommentColumns.PlateID,
+			orm.CommentColumns.ID,
+			orm.CommentColumns.ID),
+			tenantID, plateID, rootID, parentID),
+		qm.Select(orm.CommentColumns.UserID),
+	).AllG()
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, codes.ErrCommentNotFound
+		}
+		return nil, err
+	}
+
+	userIds := make([]int64, 0, 2)
+	for i := range comments {
+		userIds = append(userIds, comments[i].UserID)
+	}
+
+	return userIds, nil
+}
+
+func (repo *CommentPSQLRepository) GetDomainAdminByTenant(tenantID domain.TenantID) (int64, error) {
+	tenant, err := orm.TenantUserRoles(
+		qm.Where(fmt.Sprintf("%s = ?", orm.TenantUserRoleColumns.TenantID), tenantID),
+		qm.Where(fmt.Sprintf("%s = ?", orm.TenantUserRoleColumns.RoleID), repo.role.GetTenantadmin().ID),
+		qm.Select(orm.CommentColumns.UserID),
+	).OneG()
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, codes.ErrTenantNotFound
+		}
+		return 0, err
+	}
+
+	return tenant.UserID, nil
+}
+
+func (repo *CommentPSQLRepository) GetUserInfosByIds(ids []int64) ([]*domain.UserInfo, error) {
+	ormUsers, err := orm.Users(
+		qm.WhereIn(fmt.Sprintf("%s in ?", orm.UserColumns.ID), utils.Int64SliceToInterface(ids)...),
+		qm.Select(orm.UserColumns.ID, orm.UserColumns.Nickname, orm.UserColumns.Avatar, orm.UserColumns.Email),
+	).AllG()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return ormUsersToDomain(ormUsers), nil
+}
+
+func (repo *CommentPSQLRepository) GetUserInfoByID(id int64) (*domain.UserInfo, error) {
+	ormUser, err := orm.Users(
+		qm.Where(fmt.Sprintf("%s = ?", orm.UserColumns.ID), id),
+		qm.Select(orm.UserColumns.ID, orm.UserColumns.Nickname, orm.UserColumns.Avatar, orm.UserColumns.Email),
+	).OneG()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return ormUserToDomain(ormUser), nil
 }
 
 func (repo *CommentPSQLRepository) CreatePlate(plate *domain.Plate) error {
@@ -161,7 +223,7 @@ func (repo *CommentPSQLRepository) ListPlate(query *domain.PlateQuery) (*domain.
 func (repo *CommentPSQLRepository) ExistPlateBykey(tenantID domain.TenantID, belongKey string) (bool, error) {
 	exist, err := orm.CommentPlates(
 		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.TenantID), tenantID),
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.BelongKey), belongKey),
+		qm.And(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.BelongKey), belongKey),
 	).ExistsG()
 
 	if err != nil {
@@ -170,6 +232,7 @@ func (repo *CommentPSQLRepository) ExistPlateBykey(tenantID domain.TenantID, bel
 
 	return exist, nil
 }
+
 func (repo *CommentPSQLRepository) GetPlateBelongByID(id int64) (*domain.PlateBelong, error) {
 	plate, err := orm.CommentPlates(
 		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.ID), id),
@@ -207,6 +270,23 @@ func (repo *CommentPSQLRepository) GetPlateBelongByKey(tenantID domain.TenantID,
 		ID:        plate.ID,
 		BelongKey: plate.BelongKey,
 	}, nil
+}
+
+func (repo *CommentPSQLRepository) GetPlateRelatedURlByID(tenantID domain.TenantID, id int64) (string, error) {
+	plate, err := orm.CommentPlates(
+		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.TenantID), tenantID),
+		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.ID), id),
+		qm.Select(orm.CommentPlateColumns.RelatedURL),
+	).OneG()
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", codes.ErrCommentPlateNotFound
+		}
+		return "", err
+	}
+
+	return plate.RelatedURL, nil
 }
 
 func (repo *CommentPSQLRepository) SetTenantConfig(config *domain.TenantConfig) error {

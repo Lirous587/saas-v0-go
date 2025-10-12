@@ -15,9 +15,10 @@ func domainCommentToORM(comment *domain.Comment) *orm.Comment {
 	// 非null项
 	ormComment := &orm.Comment{
 		ID:        comment.ID,
-		PlateID:   comment.Plate.ID,
-		UserID:    comment.User.ID,
+		PlateID:   comment.PlateID,
+		UserID:    comment.UserID,
 		TenantID:  int64(comment.TenantID),
+		Content:   comment.Content,
 		LikeCount: comment.LikeCount,
 		CreatedAt: comment.CreatedAt,
 	}
@@ -42,15 +43,11 @@ func ormCommentToDomain(ormComment *orm.Comment) *domain.Comment {
 
 	// 非null项
 	comment := &domain.Comment{
-		ID: ormComment.ID,
-		Plate: &domain.PlateBelong{
-			ID: ormComment.PlateID,
-		},
-		User: &domain.UserInfo{
-			ID: ormComment.UserID,
-			// Avatar: "",
-		},
+		ID:        ormComment.ID,
+		PlateID:   ormComment.PlateID,
+		UserID:    ormComment.UserID,
 		TenantID:  domain.TenantID(ormComment.TenantID),
+		Content:   ormComment.Content,
 		LikeCount: ormComment.LikeCount,
 		CreatedAt: ormComment.CreatedAt,
 	}
@@ -72,12 +69,43 @@ func ormCommentsToDomain(ormComments []*orm.Comment) []*domain.Comment {
 	}
 
 	comments := make([]*domain.Comment, 0, len(ormComments))
-	for _, ormComment := range ormComments {
-		if ormComment != nil {
-			comments = append(comments, ormCommentToDomain(ormComment))
+	for i := range ormComments {
+		if ormComments[i] != nil {
+			comments = append(comments, ormCommentToDomain(ormComments[i]))
 		}
 	}
 	return comments
+}
+
+func ormUserToDomain(ormUser *orm.User) *domain.UserInfo {
+	if ormUser == nil {
+		return nil
+	}
+
+	// 非null项
+	user := &domain.UserInfo{
+		ID:       ormUser.ID,
+		NickName: ormUser.Nickname,
+		// Avatar:   ormUser.AvatarURL.String,
+	}
+
+	user.SetEmail(ormUser.Email)
+
+	return user
+}
+
+func ormUsersToDomain(ormUsers []*orm.User) []*domain.UserInfo {
+	if len(ormUsers) == 0 {
+		return nil
+	}
+
+	users := make([]*domain.UserInfo, 0, len(ormUsers))
+	for i := range ormUsers {
+		if ormUsers[i] != nil {
+			users = append(users, ormUserToDomain(ormUsers[i]))
+		}
+	}
+	return users
 }
 
 func domainPlateToORM(plate *domain.Plate) *orm.CommentPlate {
@@ -87,10 +115,11 @@ func domainPlateToORM(plate *domain.Plate) *orm.CommentPlate {
 
 	// 非null项
 	ormPlate := &orm.CommentPlate{
-		ID:        plate.ID,
-		TenantID:  int64(plate.TenantID),
-		BelongKey: plate.BelongKey,
-		Summary:   plate.Summary,
+		ID:         plate.ID,
+		TenantID:   int64(plate.TenantID),
+		BelongKey:  plate.BelongKey,
+		RelatedURL: plate.RelatedURL,
+		Summary:    plate.Summary,
 	}
 
 	// 处理null项
@@ -105,10 +134,11 @@ func ormPlateToDomain(ormPlate *orm.CommentPlate) *domain.Plate {
 
 	// 非null项
 	plate := &domain.Plate{
-		ID:        ormPlate.ID,
-		TenantID:  domain.TenantID(ormPlate.TenantID),
-		BelongKey: ormPlate.BelongKey,
-		Summary:   ormPlate.Summary,
+		ID:         ormPlate.ID,
+		TenantID:   domain.TenantID(ormPlate.TenantID),
+		BelongKey:  ormPlate.BelongKey,
+		RelatedURL: ormPlate.RelatedURL,
+		Summary:    ormPlate.Summary,
 	}
 
 	// 处理null项

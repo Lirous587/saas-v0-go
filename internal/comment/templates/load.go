@@ -8,13 +8,13 @@ import (
 
 const (
 	// 模板名称常量 - 供service层使用
-	TemplateReply   = "reply"
+	// TemplateReply   = "reply"
 	TemplateComment = "comment"
 )
 
 const (
 	// 模板文件名常量 - 供加载函数使用
-	FileReply   = "reply.html"
+	// FileReply   = "reply.html"
 	FileComment = "comment.html"
 )
 
@@ -26,7 +26,7 @@ func LoadCommentTemplates() map[string]*template.Template {
 
 	templateFiles := map[string]string{
 		TemplateComment: FileComment,
-		TemplateReply:   FileReply,
+		// TemplateReply:   FileReply,
 	}
 
 	for name, filename := range templateFiles {
