@@ -45,6 +45,12 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 		return
 	}
 
+	// 验证root_id和parent_id的组合是否合法
+	if err := req.Validate(); err != nil {
+		response.InvalidParams(ctx, err)
+		return
+	}
+
 	data, err := h.service.Create(&domain.Comment{
 		TenantID: req.TenantID,
 		RootID:   req.RootID,

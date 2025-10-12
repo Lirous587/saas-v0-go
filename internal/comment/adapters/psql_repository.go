@@ -81,6 +81,26 @@ func (repo *CommentPSQLRepository) List(query *domain.CommentQuery) (*domain.Com
 	}, nil
 }
 
+func (repo *CommentPSQLRepository) GetCommentRootID(tenantID domain.TenantID, commentID int64) (int64, error) {
+	comment, err := orm.Comments(
+		qm.Where(fmt.Sprintf("%s = ?", orm.CommentColumns.TenantID), tenantID),
+		qm.And(fmt.Sprintf("%s = ?", orm.CommentColumns.ID), commentID),
+	).OneG()
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, codes.ErrCommentRootCommentNotFound
+		}
+		return 0, err
+	}
+
+	if comment.RootID.Valid {
+		return comment.RootID.Int64, nil
+	}
+
+	return 0, codes.ErrCommentRootCommentNotFound
+}
+
 // IsCommentInPlate 当前评论id是否在某板块下 用于检测合法性
 func (repo *CommentPSQLRepository) IsCommentInPlate(tenantID domain.TenantID, plateID int64, commentID int64) (bool, error) {
 	exist, err := orm.Comments(

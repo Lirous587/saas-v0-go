@@ -1,6 +1,9 @@
 package handler
 
-import "saas/internal/comment/domain"
+import (
+	"saas/internal/comment/domain"
+	"saas/internal/common/reskit/codes"
+)
 
 type UserInfo struct {
 	ID       int64  `json:"id"`
@@ -26,6 +29,17 @@ type CreateRequest struct {
 	RootID    int64           `json:"root_id"`
 	ParentID  int64           `json:"parent_id"`
 	Content   string          `json:"content" binding:"required"`
+}
+
+// Validate 用于验证root_id和parent_id的组合关系是否正确
+func (cq *CreateRequest) Validate() error {
+	// 当有parent_id时 必须要有root_id
+	if cq.ParentID != 0 {
+		if cq.RootID == 0 {
+			return codes.ErrCommentIllegalReply
+		}
+	}
+	return nil
 }
 
 type DeleteRequest struct {

@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"saas/internal/comment/domain"
 	"saas/internal/common/email"
 	"saas/internal/common/reskit/codes"
@@ -35,23 +34,36 @@ func (s *service) Create(comment *domain.Comment, belongKey string) (*domain.Com
 	comment.PlateID = plate.ID
 
 	// 2.验证root_id和parent_id合理性
-	// 当前板块下是否存在root_id和parent_id
-	if comment.RootID != 0 {
+	// 请求参数验证确保了root_id和parent_id只有两种组合
+	// 1.仅有root_id（顶级评论）
+	// 2.root_id和parent_id同时存在（回复） 要去验证parent_id的合理性 即parent_id的root_id是否与此时的comment.RootID一致
+	if comment.IsTopLevelComment() {
 		exist, err := s.repo.IsCommentInPlate(comment.TenantID, comment.PlateID, comment.RootID)
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
 		if !exist {
-			return nil, codes.ErrCommentNotFoundInNowPlate
+			return nil, codes.ErrCommentNotFoundInNowPlate.WithSlug("root_id 不存在于当前板块")
 		}
-	}
-	if comment.ParentID != 0 {
+	} else if comment.IsReplyParentComment() {
+		// 验证 parent_id 是否在板块下
 		exist, err := s.repo.IsCommentInPlate(comment.TenantID, comment.PlateID, comment.ParentID)
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
 		if !exist {
-			return nil, codes.ErrCommentNotFoundInNowPlate
+			return nil, codes.ErrCommentNotFoundInNowPlate.WithSlug("parent_id 不存在于当前板块")
+		}
+
+		// 验证 parent_id 的 root_id 是否与 comment.RootID 一致
+		parentRootID, err := s.repo.GetCommentRootID(comment.TenantID, comment.ParentID)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+		if parentRootID != comment.RootID {
+			return nil, codes.ErrCommentHierarchyInvalid.WithDetail(map[string]any{
+				"warning": "再敢瞎评论找人弄你",
+			})
 		}
 	}
 
@@ -96,12 +108,8 @@ func (s *service) Create(comment *domain.Comment, belongKey string) (*domain.Com
 				return
 			}
 
-			fmt.Println("userIds", userIds)
-
 			// 从userIds中排除自己
 			filteredIds := comment.FilterSelf(userIds)
-
-			fmt.Println("filteredIds", filteredIds)
 
 			if comment.IsCommentByAdmin(adminId) {
 				toUserIds = utils.UniqueInt64s(filteredIds)

@@ -41,6 +41,16 @@ type Comment struct {
 	IsLiked   bool
 }
 
+// IsTopLevelComment 判断是否为顶级评论（root 评论，无父评论）
+func (c *Comment) IsTopLevelComment() bool {
+	return c.RootID != 0 && c.ParentID == 0 // 确保是 root 且无 parent
+}
+
+// IsReplyComment 判断是否为回复评论（有父评论）
+func (c *Comment) IsReplyParentComment() bool {
+	return c.ParentID != 0
+}
+
 func (c *Comment) IsCommentByAdmin(userID int64) bool {
 	return c.UserID == userID
 }
