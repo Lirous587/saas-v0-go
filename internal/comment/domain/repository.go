@@ -14,6 +14,10 @@ type CommentRepository interface {
 	GetUserInfosByIds(ids []int64) ([]*UserInfo, error)
 	GetUserInfoByID(id int64) (*UserInfo, error)
 
+	SetTenantConfig(config *TenantConfig) error
+	GetTenantConfig(tenantID TenantID) (*TenantConfig, error)
+	ExistTenantConfigByID(tenantID TenantID) (bool, error)
+
 	CreatePlate(plate *Plate) error
 	DeletePlate(tenantID TenantID, id int64) error
 	ListPlate(query *PlateQuery) (*PlateList, error)
@@ -21,9 +25,6 @@ type CommentRepository interface {
 	GetPlateBelongByID(id int64) (*PlateBelong, error)
 	GetPlateBelongByKey(tenantID TenantID, belongKey string) (*PlateBelong, error)
 	GetPlateRelatedURlByID(tenantID TenantID, id int64) (string, error)
-
-	SetTenantConfig(config *TenantConfig) error
-	GetTenantConfig(tenantID TenantID) (*TenantConfig, error)
 	SetPlateConfig(config *PlateConfig) error
 	GetPlateConfig(tenantID TenantID, palteID int64) (*PlateConfig, error)
 }

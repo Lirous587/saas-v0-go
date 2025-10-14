@@ -141,10 +141,18 @@ type CommentConfig struct {
 // TenantConfig 基于租户的全局配置
 type TenantConfig struct {
 	TenantID    TenantID
-	ClientToken string
+	clientToken string
 	IfAudit     bool
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+}
+
+func (tc *TenantConfig) SetClientToken(token string) {
+	tc.clientToken = token
+}
+
+func (tc *TenantConfig) GetClientToken() string {
+	return tc.clientToken
 }
 
 // PlateConfig  板块级别的配置 优先级更高

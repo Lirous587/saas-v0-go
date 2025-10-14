@@ -217,6 +217,51 @@ func (repo *CommentPSQLRepository) GetUserInfoByID(id int64) (*domain.UserInfo, 
 	return ormUserToDomain(ormUser), nil
 }
 
+func (repo *CommentPSQLRepository) SetTenantConfig(config *domain.TenantConfig) error {
+	ormConfig := domainTenantConfigToORM(config)
+	if err := ormConfig.UpsertG(
+		true,
+		[]string{orm.CommentTenantConfigColumns.TenantID},
+		boil.Blacklist(
+			orm.CommentTenantConfigColumns.ClientToken,
+		),
+		boil.Greylist( //使用GreyList 因为用Infer的话IfAudit设置为false时不会生效 此时就会导致使用默认值true 与请求冲突
+			orm.CommentTenantConfigColumns.IfAudit,
+		),
+	); err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
+}
+
+func (repo *CommentPSQLRepository) GetTenantConfig(tenantID domain.TenantID) (*domain.TenantConfig, error) {
+	ormConfig, err := orm.CommentTenantConfigs(
+		qm.Where(fmt.Sprintf("%s = ?", orm.CommentTenantConfigColumns.TenantID), tenantID),
+	).OneG()
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, codes.ErrCommentTenantConfigNotFound
+		}
+		return nil, err
+	}
+
+	return ormTenantConfigToDomain(ormConfig), nil
+}
+
+func (repo *CommentPSQLRepository) ExistTenantConfigByID(tenantID domain.TenantID) (bool, error) {
+	exist, err := orm.CommentTenantConfigs(
+		qm.Where(fmt.Sprintf("%s = ?", orm.CommentTenantConfigColumns.TenantID), tenantID),
+	).ExistsG()
+
+	if err != nil {
+		return false, err
+	}
+
+	return exist, nil
+}
+
 func (repo *CommentPSQLRepository) CreatePlate(plate *domain.Plate) error {
 	ormPlate := domainPlateToORM(plate)
 
@@ -339,39 +384,6 @@ func (repo *CommentPSQLRepository) GetPlateRelatedURlByID(tenantID domain.Tenant
 	}
 
 	return plate.RelatedURL, nil
-}
-
-func (repo *CommentPSQLRepository) SetTenantConfig(config *domain.TenantConfig) error {
-	ormConfig := domainTenantConfigToORM(config)
-	if err := ormConfig.UpsertG(
-		true,
-		[]string{orm.CommentTenantConfigColumns.TenantID},
-		boil.Greylist( // 手动指定 insertColumns，确保包含 if_audit
-			orm.CommentTenantConfigColumns.IfAudit,
-		),
-		boil.Greylist( // 手动指定 insertColumns，确保包含 if_audit
-			orm.CommentTenantConfigColumns.IfAudit,
-		),
-	); err != nil {
-		return errors.WithStack(err)
-	}
-
-	return nil
-}
-
-func (repo *CommentPSQLRepository) GetTenantConfig(tenantID domain.TenantID) (*domain.TenantConfig, error) {
-	ormConfig, err := orm.CommentTenantConfigs(
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentTenantConfigColumns.TenantID), tenantID),
-	).OneG()
-
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, codes.ErrCommentTenantConfigNotFound
-		}
-		return nil, err
-	}
-
-	return ormTenantConfigToDomain(ormConfig), nil
 }
 
 func (repo *CommentPSQLRepository) SetPlateConfig(config *domain.PlateConfig) error {

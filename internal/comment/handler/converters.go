@@ -54,7 +54,7 @@ func domainTenantConfigToResponse(config *domain.TenantConfig) *TenantConfigResp
 	}
 
 	return &TenantConfigResponse{
-		ClientToken: config.ClientToken,
+		ClientToken: config.GetClientToken(),
 		IfAudit:     config.IfAudit,
 		CreatedAt:   config.CreatedAt.Unix(),
 		UpdatedAt:   config.UpdatedAt.Unix(),

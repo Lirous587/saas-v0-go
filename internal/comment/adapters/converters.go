@@ -175,7 +175,7 @@ func domainTenantConfigToORM(config *domain.TenantConfig) *orm.CommentTenantConf
 	// 非null项
 	ormConfig := &orm.CommentTenantConfig{
 		TenantID:    int64(config.TenantID),
-		ClientToken: config.ClientToken,
+		ClientToken: config.GetClientToken(),
 		IfAudit:     config.IfAudit,
 	}
 
@@ -191,12 +191,12 @@ func ormTenantConfigToDomain(ormConfig *orm.CommentTenantConfig) *domain.TenantC
 
 	// 非null项
 	config := &domain.TenantConfig{
-		TenantID:    domain.TenantID(ormConfig.TenantID),
-		ClientToken: ormConfig.ClientToken,
-		IfAudit:     ormConfig.IfAudit,
-		CreatedAt:   ormConfig.CreatedAt,
-		UpdatedAt:   ormConfig.UpdatedAt,
+		TenantID:  domain.TenantID(ormConfig.TenantID),
+		IfAudit:   ormConfig.IfAudit,
+		CreatedAt: ormConfig.CreatedAt,
+		UpdatedAt: ormConfig.UpdatedAt,
 	}
+	config.SetClientToken(ormConfig.ClientToken)
 
 	// 处理null项
 

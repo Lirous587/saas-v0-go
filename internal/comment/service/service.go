@@ -102,6 +102,12 @@ func (s *service) ListPlate(query *domain.PlateQuery) (*domain.PlateList, error)
 }
 
 func (s *service) SetTenantConfig(config *domain.TenantConfig) error {
+	// 判断是否已有配置
+	exist, err := s.repo.ExistTenantConfigByID(config.TenantID)
+	if err != nil {
+		return err
+	}
+
 	// 删除缓存
 	if err := s.cache.DeleteTenantConfig(config.TenantID); err != nil {
 		zap.L().Error(
@@ -111,13 +117,15 @@ func (s *service) SetTenantConfig(config *domain.TenantConfig) error {
 		)
 	}
 
-	// 生成client_token
-	clientToken, err := utils.GenRandomHexToken()
-	if err != nil {
-		return err
+	// 没配置过就生成client_token
+	if !exist {
+		// 生成client_token
+		clientToken, err := utils.GenRandomHexToken()
+		if err != nil {
+			return err
+		}
+		config.SetClientToken(clientToken)
 	}
-
-	config.ClientToken = clientToken
 
 	return s.repo.SetTenantConfig(config)
 }
