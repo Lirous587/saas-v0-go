@@ -159,6 +159,63 @@ func (h *HttpHandler) Audit(ctx *gin.Context) {
 	response.Success(ctx)
 }
 
+// SetTenantConfig godoc
+// @Summary      设置租户级别的评论系统配置
+// @Tags         comment
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        tenant_id   path int true "租户id"
+// @Param        request body handler.SetTenantConfigRequest true "请求参数"
+// @Success      200  {object}  response.successResponse "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/comment/{tenant_id}/config [put]
+func (h *HttpHandler) SetTenantConfig(ctx *gin.Context) {
+	req := new(SetTenantConfigRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	if err := h.service.SetTenantConfig(&domain.TenantConfig{
+		TenantID: req.TenantID,
+		IfAudit:  *req.IfAudit,
+	}); err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx)
+}
+
+// GetTenantConfig godoc
+// @Summary      获取租户级别的评论系统配置
+// @Tags         comment
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        tenant_id   path int true "租户id"
+// @Success      200  {object}  response.successResponse{data=handler.TenantConfigResponse} "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/comment/{tenant_id}/config [get]
+func (h *HttpHandler) GetTenantConfig(ctx *gin.Context) {
+	req := new(GetTenantConfigRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	res, err := h.service.GetTenantConfig(req.TenantID)
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx, domainTenantConfigToResponse(res))
+}
+
 // CreatePlate godoc
 // @Summary      新增评论板块
 // @Tags         comment
@@ -253,63 +310,6 @@ func (h *HttpHandler) ListPlate(ctx *gin.Context) {
 	response.Success(ctx, domainPlateListToResponse(data))
 }
 
-// SetTenantConfig godoc
-// @Summary      设置租户级别的评论系统配置
-// @Tags         comment
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        tenant_id   path int true "租户id"
-// @Param        request body handler.SetTenantConfigRequest true "请求参数"
-// @Success      200  {object}  response.successResponse "请求成功"
-// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
-// @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/comment/{tenant_id}/config [put]
-func (h *HttpHandler) SetTenantConfig(ctx *gin.Context) {
-	req := new(SetTenantConfigRequest)
-
-	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
-		return
-	}
-
-	if err := h.service.SetTenantConfig(&domain.TenantConfig{
-		TenantID: req.TenantID,
-		IfAudit:  *req.IfAudit,
-	}); err != nil {
-		response.Error(ctx, err)
-		return
-	}
-
-	response.Success(ctx)
-}
-
-// GetTenantConfig godoc
-// @Summary      获取租户级别的评论系统配置
-// @Tags         comment
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        tenant_id   path int true "租户id"
-// @Success      200  {object}  response.successResponse{data=handler.TenantConfigResponse} "请求成功"
-// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
-// @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/comment/{tenant_id}/config [get]
-func (h *HttpHandler) GetTenantConfig(ctx *gin.Context) {
-	req := new(GetTenantConfigRequest)
-
-	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
-		return
-	}
-
-	res, err := h.service.GetTenantConfig(req.TenantID)
-	if err != nil {
-		response.Error(ctx, err)
-		return
-	}
-
-	response.Success(ctx, domainTenantConfigToResponse(res))
-}
-
 // SetPlateConfig godoc
 // @Summary      设置板块级别的评论系统配置
 // @Tags         comment
@@ -322,7 +322,7 @@ func (h *HttpHandler) GetTenantConfig(ctx *gin.Context) {
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/comment/{tenant_id}/{belong_key}/config [put]
+// @Router       /v1/comment/{tenant_id}/plate/{belong_key}/config [put]
 func (h *HttpHandler) SetPlateConfig(ctx *gin.Context) {
 	req := new(SetPlateConfigRequest)
 
@@ -355,7 +355,7 @@ func (h *HttpHandler) SetPlateConfig(ctx *gin.Context) {
 // @Success      200  {object}  response.successResponse{data=handler.PlateConfigResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/comment/{tenant_id}/{plate_id}/config [get]
+// @Router       /v1/comment/{tenant_id}/plate/{plate_id}/config [get]
 func (h *HttpHandler) GetPlateConfig(ctx *gin.Context) {
 	req := new(GetPlateConfigRequest)
 

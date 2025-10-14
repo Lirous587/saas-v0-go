@@ -17,6 +17,8 @@ var (
 	ErrCommentPlateExist    = ErrCode{Msg: "该评论板块已存在", Type: ErrorTypeAlreadyExists, Code: 2321}
 
 	//  评论配置错误 2340-2359
-	ErrCommentTenantConfigNotFound = ErrCode{Msg: "该租户下的评论配置不存在", Type: ErrorTypeNotFound, Code: 2340}
-	ErrCommentPlateConfigNotFound  = ErrCode{Msg: "该板块的评论配置不存在", Type: ErrorTypeNotFound, Code: 2359}
+	ErrCommentTenantConfigNotFound     = ErrCode{Msg: "该租户下的评论配置不存在", Type: ErrorTypeNotFound, Code: 2340}
+	ErrCommentTenantConfigCacheMissing = ErrCode{Msg: "该租户下的评论配置缓存未命中", Type: ErrorTypeCacheMiss, Code: 2341}
+	ErrCommentPlateConfigNotFound      = ErrCode{Msg: "该板块的评论配置不存在", Type: ErrorTypeNotFound, Code: 2342}
+	ErrCommentPlateConfigCacheMissing  = ErrCode{Msg: "该板块的评论配置缓存未命中", Type: ErrorTypeCacheMiss, Code: 2342}
 )

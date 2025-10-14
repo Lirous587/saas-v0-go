@@ -29,6 +29,11 @@ type CommentRepository interface {
 }
 
 type CommentCache interface {
-	SetTenantCommentClientToken(tenantID TenantID, clientToken string) error
-	GetTenantCommentClientToken(tenantID TenantID) (string, error)
+	SetTenantConfig(config *TenantConfig) error
+	GetTenantConfig(tenantID TenantID) (*TenantConfig, error)
+	DeleteTenantConfig(tenantID TenantID) error
+
+	SetPlateConfig(config *PlateConfig) error
+	GetPlateConfig(tenantID TenantID, plateID int64) (*PlateConfig, error)
+	DeletePlateConfig(tenantID TenantID, plateID int64) error
 }

@@ -7,6 +7,7 @@ import (
 	"saas/internal/common/utils"
 
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 type service struct {
@@ -101,6 +102,15 @@ func (s *service) ListPlate(query *domain.PlateQuery) (*domain.PlateList, error)
 }
 
 func (s *service) SetTenantConfig(config *domain.TenantConfig) error {
+	// 删除缓存
+	if err := s.cache.DeleteTenantConfig(config.TenantID); err != nil {
+		zap.L().Error(
+			"删除租户级别评论配置缓存失败",
+			zap.Error(err),
+			zap.Int64("tenant_id", int64(config.TenantID)),
+		)
+	}
+
 	// 生成client_token
 	clientToken, err := utils.GenRandomHexToken()
 	if err != nil {
@@ -113,7 +123,32 @@ func (s *service) SetTenantConfig(config *domain.TenantConfig) error {
 }
 
 func (s *service) GetTenantConfig(tenantID domain.TenantID) (*domain.TenantConfig, error) {
-	return s.repo.GetTenantConfig(tenantID)
+	// 尝试从缓存获取
+	config, cacheErr := s.cache.GetTenantConfig(tenantID)
+	if cacheErr == nil {
+		return config, nil
+	}
+
+	// 缓存未命中或出错，从数据库获取
+	config, err := s.repo.GetTenantConfig(tenantID)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	// 如果是缓存缺失，异步写入缓存
+	if errors.Is(cacheErr, codes.ErrCommentTenantConfigCacheMissing) {
+		go func() {
+			if setErr := s.cache.SetTenantConfig(config); setErr != nil {
+				zap.L().Error(
+					"设置租户级别评论配置缓存失败",
+					zap.Error(setErr),
+					zap.Int64("tenant_id", int64(tenantID)),
+				)
+			}
+		}()
+	}
+
+	return config, nil
 }
 
 func (s *service) SetPlateConfig(config *domain.PlateConfig) error {
@@ -121,8 +156,18 @@ func (s *service) SetPlateConfig(config *domain.PlateConfig) error {
 	if err != nil {
 		return errors.WithStack(err)
 	}
-
 	config.Plate.ID = plate.ID
+
+	// 删除缓存
+	if err := s.cache.DeletePlateConfig(config.TenantID, config.Plate.ID); err != nil {
+		zap.L().Error(
+			"删除板块级别评论配置缓存失败",
+			zap.Error(err),
+			zap.Int64("tenant_id", int64(config.TenantID)),
+			zap.Int64("plate_id", config.Plate.ID),
+		)
+	}
+
 	if err := s.repo.SetPlateConfig(config); err != nil {
 		return errors.WithStack(err)
 	}
@@ -131,9 +176,30 @@ func (s *service) SetPlateConfig(config *domain.PlateConfig) error {
 }
 
 func (s *service) GetPlateConfig(tenantID domain.TenantID, plateID int64) (*domain.PlateConfig, error) {
+	// 尝试从缓存获取
+	config, cacheErr := s.cache.GetPlateConfig(tenantID, plateID)
+	if cacheErr == nil {
+		return config, nil
+	}
+
+	// 缓存未命中或出错，从数据库获取
 	config, err := s.repo.GetPlateConfig(tenantID, plateID)
 	if err != nil {
 		return nil, errors.WithStack(err)
+	}
+
+	// 如果是缓存缺失，异步写入缓存
+	if errors.Is(cacheErr, codes.ErrCommentPlateConfigCacheMissing) {
+		go func() {
+			if setErr := s.cache.SetPlateConfig(config); setErr != nil {
+				zap.L().Error(
+					"设置板块级别评论配置缓存失败",
+					zap.Error(setErr),
+					zap.Int64("tenant_id", int64(tenantID)),
+					zap.Int64("plate_id", plateID),
+				)
+			}
+		}()
 	}
 
 	return config, nil
