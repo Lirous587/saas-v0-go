@@ -13,7 +13,7 @@ type UserInfo struct {
 
 type CommentResponse struct {
 	ID        int64                `json:"id"`
-	User      *UserInfo            `json:"user"`
+	UserID    int64                `json:"user_id"`
 	ParentID  int64                `json:"parent_id"`
 	RootID    int64                `json:"root_id"`
 	Content   string               `json:"content"`
@@ -51,6 +51,12 @@ type ListRequest struct {
 	Page     int    `form:"page,default=1" binding:"min=1"`
 	PageSize int    `form:"page_size,default=5" binding:"min=5,max=20"`
 	KeyWord  string `form:"keyword" binding:"max=20"`
+}
+
+type AuditRequest struct {
+	TenantID domain.TenantID      `json:"-" uri:"tenant_id" binding:"required"`
+	ID       int64                `json:"id"`
+	Status   domain.CommentStatus `json:"status" binding:"required"`
 }
 
 type AdvancedListRequest struct {
@@ -121,8 +127,8 @@ type SetPlateConfigRequest struct {
 }
 
 type GetPlateConfigRequest struct {
-	TenantID  domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
-	BelongKey string          `json:"-" uri:"belong_key" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	PlateID  int64           `json:"-" uri:"plate_id" binding:"required"`
 }
 
 type PlateConfigResponse struct {

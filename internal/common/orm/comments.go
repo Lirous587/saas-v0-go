@@ -23,16 +23,16 @@ import (
 
 // Comment is an object representing the database table.
 type Comment struct {
-	ID        int64      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	TenantID  int64      `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
-	PlateID   int64      `boil:"plate_id" json:"plate_id" toml:"plate_id" yaml:"plate_id"`
-	UserID    int64      `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
-	ParentID  null.Int64 `boil:"parent_id" json:"parent_id,omitempty" toml:"parent_id" yaml:"parent_id,omitempty"`
-	RootID    null.Int64 `boil:"root_id" json:"root_id,omitempty" toml:"root_id" yaml:"root_id,omitempty"`
-	Content   string     `boil:"content" json:"content" toml:"content" yaml:"content"`
-	Status    string     `boil:"status" json:"status" toml:"status" yaml:"status"`
-	LikeCount int64      `boil:"like_count" json:"like_count" toml:"like_count" yaml:"like_count"`
-	CreatedAt time.Time  `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	ID        int64         `boil:"id" json:"id" toml:"id" yaml:"id"`
+	TenantID  int64         `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
+	PlateID   int64         `boil:"plate_id" json:"plate_id" toml:"plate_id" yaml:"plate_id"`
+	UserID    int64         `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	ParentID  null.Int64    `boil:"parent_id" json:"parent_id,omitempty" toml:"parent_id" yaml:"parent_id,omitempty"`
+	RootID    null.Int64    `boil:"root_id" json:"root_id,omitempty" toml:"root_id" yaml:"root_id,omitempty"`
+	Content   string        `boil:"content" json:"content" toml:"content" yaml:"content"`
+	Status    CommentStatus `boil:"status" json:"status" toml:"status" yaml:"status"`
+	LikeCount int64         `boil:"like_count" json:"like_count" toml:"like_count" yaml:"like_count"`
+	CreatedAt time.Time     `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 
 	R *commentR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L commentL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -126,6 +126,41 @@ func (w whereHelpernull_Int64) NIN(slice []int64) qm.QueryMod {
 func (w whereHelpernull_Int64) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
 func (w whereHelpernull_Int64) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
+type whereHelperCommentStatus struct{ field string }
+
+func (w whereHelperCommentStatus) EQ(x CommentStatus) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelperCommentStatus) NEQ(x CommentStatus) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperCommentStatus) LT(x CommentStatus) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelperCommentStatus) LTE(x CommentStatus) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperCommentStatus) GT(x CommentStatus) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelperCommentStatus) GTE(x CommentStatus) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+func (w whereHelperCommentStatus) IN(slice []CommentStatus) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperCommentStatus) NIN(slice []CommentStatus) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
 var CommentWhere = struct {
 	ID        whereHelperint64
 	TenantID  whereHelperint64
@@ -134,7 +169,7 @@ var CommentWhere = struct {
 	ParentID  whereHelpernull_Int64
 	RootID    whereHelpernull_Int64
 	Content   whereHelperstring
-	Status    whereHelperstring
+	Status    whereHelperCommentStatus
 	LikeCount whereHelperint64
 	CreatedAt whereHelpertime_Time
 }{
@@ -145,7 +180,7 @@ var CommentWhere = struct {
 	ParentID:  whereHelpernull_Int64{field: "\"comments\".\"parent_id\""},
 	RootID:    whereHelpernull_Int64{field: "\"comments\".\"root_id\""},
 	Content:   whereHelperstring{field: "\"comments\".\"content\""},
-	Status:    whereHelperstring{field: "\"comments\".\"status\""},
+	Status:    whereHelperCommentStatus{field: "\"comments\".\"status\""},
 	LikeCount: whereHelperint64{field: "\"comments\".\"like_count\""},
 	CreatedAt: whereHelpertime_Time{field: "\"comments\".\"created_at\""},
 }
@@ -157,7 +192,6 @@ var CommentRels = struct {
 	Root           string
 	Tenant         string
 	User           string
-	CommentLikes   string
 	ParentComments string
 	RootComments   string
 }{
@@ -166,21 +200,19 @@ var CommentRels = struct {
 	Root:           "Root",
 	Tenant:         "Tenant",
 	User:           "User",
-	CommentLikes:   "CommentLikes",
 	ParentComments: "ParentComments",
 	RootComments:   "RootComments",
 }
 
 // commentR is where relationships are stored.
 type commentR struct {
-	Parent         *Comment         `boil:"Parent" json:"Parent" toml:"Parent" yaml:"Parent"`
-	Plate          *CommentPlate    `boil:"Plate" json:"Plate" toml:"Plate" yaml:"Plate"`
-	Root           *Comment         `boil:"Root" json:"Root" toml:"Root" yaml:"Root"`
-	Tenant         *Tenant          `boil:"Tenant" json:"Tenant" toml:"Tenant" yaml:"Tenant"`
-	User           *User            `boil:"User" json:"User" toml:"User" yaml:"User"`
-	CommentLikes   CommentLikeSlice `boil:"CommentLikes" json:"CommentLikes" toml:"CommentLikes" yaml:"CommentLikes"`
-	ParentComments CommentSlice     `boil:"ParentComments" json:"ParentComments" toml:"ParentComments" yaml:"ParentComments"`
-	RootComments   CommentSlice     `boil:"RootComments" json:"RootComments" toml:"RootComments" yaml:"RootComments"`
+	Parent         *Comment      `boil:"Parent" json:"Parent" toml:"Parent" yaml:"Parent"`
+	Plate          *CommentPlate `boil:"Plate" json:"Plate" toml:"Plate" yaml:"Plate"`
+	Root           *Comment      `boil:"Root" json:"Root" toml:"Root" yaml:"Root"`
+	Tenant         *Tenant       `boil:"Tenant" json:"Tenant" toml:"Tenant" yaml:"Tenant"`
+	User           *User         `boil:"User" json:"User" toml:"User" yaml:"User"`
+	ParentComments CommentSlice  `boil:"ParentComments" json:"ParentComments" toml:"ParentComments" yaml:"ParentComments"`
+	RootComments   CommentSlice  `boil:"RootComments" json:"RootComments" toml:"RootComments" yaml:"RootComments"`
 }
 
 // NewStruct creates a new relationship struct
@@ -266,22 +298,6 @@ func (r *commentR) GetUser() *User {
 	}
 
 	return r.User
-}
-
-func (o *Comment) GetCommentLikes() CommentLikeSlice {
-	if o == nil {
-		return nil
-	}
-
-	return o.R.GetCommentLikes()
-}
-
-func (r *commentR) GetCommentLikes() CommentLikeSlice {
-	if r == nil {
-		return nil
-	}
-
-	return r.CommentLikes
 }
 
 func (o *Comment) GetParentComments() CommentSlice {
@@ -669,20 +685,6 @@ func (o *Comment) User(mods ...qm.QueryMod) userQuery {
 	queryMods = append(queryMods, mods...)
 
 	return Users(queryMods...)
-}
-
-// CommentLikes retrieves all the comment_like's CommentLikes with an executor.
-func (o *Comment) CommentLikes(mods ...qm.QueryMod) commentLikeQuery {
-	var queryMods []qm.QueryMod
-	if len(mods) != 0 {
-		queryMods = append(queryMods, mods...)
-	}
-
-	queryMods = append(queryMods,
-		qm.Where("\"comment_likes\".\"comment_id\"=?", o.ID),
-	)
-
-	return CommentLikes(queryMods...)
 }
 
 // ParentComments retrieves all the comment's Comments with an executor via parent_id column.
@@ -1321,119 +1323,6 @@ func (commentL) LoadUser(e boil.Executor, singular bool, maybeComment interface{
 	return nil
 }
 
-// LoadCommentLikes allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (commentL) LoadCommentLikes(e boil.Executor, singular bool, maybeComment interface{}, mods queries.Applicator) error {
-	var slice []*Comment
-	var object *Comment
-
-	if singular {
-		var ok bool
-		object, ok = maybeComment.(*Comment)
-		if !ok {
-			object = new(Comment)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeComment)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeComment))
-			}
-		}
-	} else {
-		s, ok := maybeComment.(*[]*Comment)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeComment)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeComment))
-			}
-		}
-	}
-
-	args := make(map[interface{}]struct{})
-	if singular {
-		if object.R == nil {
-			object.R = &commentR{}
-		}
-		args[object.ID] = struct{}{}
-	} else {
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &commentR{}
-			}
-			args[obj.ID] = struct{}{}
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	argsSlice := make([]interface{}, len(args))
-	i := 0
-	for arg := range args {
-		argsSlice[i] = arg
-		i++
-	}
-
-	query := NewQuery(
-		qm.From(`comment_likes`),
-		qm.WhereIn(`comment_likes.comment_id in ?`, argsSlice...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.Query(e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load comment_likes")
-	}
-
-	var resultSlice []*CommentLike
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice comment_likes")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on comment_likes")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for comment_likes")
-	}
-
-	if len(commentLikeAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(e); err != nil {
-				return err
-			}
-		}
-	}
-	if singular {
-		object.R.CommentLikes = resultSlice
-		for _, foreign := range resultSlice {
-			if foreign.R == nil {
-				foreign.R = &commentLikeR{}
-			}
-			foreign.R.Comment = object
-		}
-		return nil
-	}
-
-	for _, foreign := range resultSlice {
-		for _, local := range slice {
-			if local.ID == foreign.CommentID {
-				local.R.CommentLikes = append(local.R.CommentLikes, foreign)
-				if foreign.R == nil {
-					foreign.R = &commentLikeR{}
-				}
-				foreign.R.Comment = local
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
 // LoadParentComments allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
 func (commentL) LoadParentComments(e boil.Executor, singular bool, maybeComment interface{}, mods queries.Applicator) error {
@@ -2009,67 +1898,6 @@ func (o *Comment) SetUser(exec boil.Executor, insert bool, related *User) error 
 		related.R.Comments = append(related.R.Comments, o)
 	}
 
-	return nil
-}
-
-// AddCommentLikesG adds the given related objects to the existing relationships
-// of the comment, optionally inserting them as new records.
-// Appends related to o.R.CommentLikes.
-// Sets related.R.Comment appropriately.
-// Uses the global database handle.
-func (o *Comment) AddCommentLikesG(insert bool, related ...*CommentLike) error {
-	return o.AddCommentLikes(boil.GetDB(), insert, related...)
-}
-
-// AddCommentLikes adds the given related objects to the existing relationships
-// of the comment, optionally inserting them as new records.
-// Appends related to o.R.CommentLikes.
-// Sets related.R.Comment appropriately.
-func (o *Comment) AddCommentLikes(exec boil.Executor, insert bool, related ...*CommentLike) error {
-	var err error
-	for _, rel := range related {
-		if insert {
-			rel.CommentID = o.ID
-			if err = rel.Insert(exec, boil.Infer()); err != nil {
-				return errors.Wrap(err, "failed to insert into foreign table")
-			}
-		} else {
-			updateQuery := fmt.Sprintf(
-				"UPDATE \"comment_likes\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"comment_id"}),
-				strmangle.WhereClause("\"", "\"", 2, commentLikePrimaryKeyColumns),
-			)
-			values := []interface{}{o.ID, rel.CommentID, rel.UserID}
-
-			if boil.DebugMode {
-				fmt.Fprintln(boil.DebugWriter, updateQuery)
-				fmt.Fprintln(boil.DebugWriter, values)
-			}
-			if _, err = exec.Exec(updateQuery, values...); err != nil {
-				return errors.Wrap(err, "failed to update foreign table")
-			}
-
-			rel.CommentID = o.ID
-		}
-	}
-
-	if o.R == nil {
-		o.R = &commentR{
-			CommentLikes: related,
-		}
-	} else {
-		o.R.CommentLikes = append(o.R.CommentLikes, related...)
-	}
-
-	for _, rel := range related {
-		if rel.R == nil {
-			rel.R = &commentLikeR{
-				Comment: o,
-			}
-		} else {
-			rel.R.Comment = o
-		}
-	}
 	return nil
 }
 

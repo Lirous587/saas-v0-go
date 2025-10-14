@@ -9,7 +9,6 @@ type TenantID int64
 type UserInfo struct {
 	ID       int64
 	NickName string
-	Avatar   string
 	email    string
 }
 
@@ -23,41 +22,61 @@ func (u *UserInfo) GetEmail() string {
 
 type CommentStatus string
 
-const CommentStatusApprove CommentStatus = ""
+const CommentStatusApproved CommentStatus = "approved"
+const CommentStatusPending CommentStatus = "pending"
 
 type Comment struct {
-	ID      int64
-	PlateID int64
-	UserID  int64
-	// Plate     *PlateBelong
-	// User      *UserInfo
+	ID        int64
+	PlateID   int64
+	UserID    int64
 	TenantID  TenantID
 	ParentID  int64
 	RootID    int64
 	Content   string
-	Status    CommentStatus
+	status    CommentStatus
 	LikeCount int64
 	CreatedAt time.Time
 	IsLiked   bool
 }
 
-// IsTopLevelComment 判断是否为顶级评论（root 评论，无父评论）
-func (c *Comment) IsTopLevelComment() bool {
-	return c.RootID != 0 && c.ParentID == 0 // 确保是 root 且无 parent
+func (c *Comment) GetStatus() CommentStatus {
+	return c.status
 }
 
-// IsReplyComment 判断是否为回复评论（有父评论）
+func (c *Comment) SetApproved() {
+	c.status = CommentStatusApproved
+}
+
+func (c *Comment) SetPending() {
+	c.status = CommentStatusPending
+}
+
+func (c *Comment) IsApproved() bool {
+	return c.status == CommentStatusApproved
+}
+
+func (c *Comment) IsRootComment() bool {
+	return c.RootID == 0 && c.ParentID == 0
+}
+
+func (c *Comment) IsReply() bool {
+	return !c.IsRootComment()
+}
+
+func (c *Comment) IsReplyRootComment() bool {
+	return c.RootID != 0 && c.ParentID == 0
+}
+
 func (c *Comment) IsReplyParentComment() bool {
-	return c.ParentID != 0
+	return c.RootID != 0 && c.ParentID != 0
+}
+
+func (c *Comment) CanReply() bool {
+	return c.status == CommentStatusApproved
 }
 
 func (c *Comment) IsCommentByAdmin(userID int64) bool {
 	return c.UserID == userID
-}
-
-// IsReply 存在root或parent
-func (c *Comment) IsReply() bool {
-	return c.ParentID != 0 || c.RootID != 0
 }
 
 func (c *Comment) FilterSelf(userIds []int64) []int64 {
@@ -69,6 +88,10 @@ func (c *Comment) FilterSelf(userIds []int64) []int64 {
 	}
 
 	return filteredIds
+}
+
+func (c *Comment) CanAudit() bool {
+	return c.status == CommentStatusPending
 }
 
 type CommentQuery struct {
@@ -109,6 +132,10 @@ type PlateQuery struct {
 type PlateList struct {
 	Total int64
 	List  []*Plate
+}
+
+type CommentConfig struct {
+	IfAudit bool
 }
 
 // TenantConfig 基于租户的全局配置

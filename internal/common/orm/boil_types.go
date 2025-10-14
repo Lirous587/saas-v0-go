@@ -50,3 +50,43 @@ func makeCacheKey(cols boil.Columns, nzDefaults []string) string {
 	strmangle.PutBuffer(buf)
 	return str
 }
+
+type CommentStatus string
+
+// Enum values for CommentStatus
+const (
+	CommentStatusPending  CommentStatus = "pending"
+	CommentStatusApproved CommentStatus = "approved"
+)
+
+func AllCommentStatus() []CommentStatus {
+	return []CommentStatus{
+		CommentStatusPending,
+		CommentStatusApproved,
+	}
+}
+
+func (e CommentStatus) IsValid() error {
+	switch e {
+	case CommentStatusPending, CommentStatusApproved:
+		return nil
+	default:
+		return errors.New("enum is not valid")
+	}
+}
+
+func (e CommentStatus) String() string {
+	return string(e)
+}
+
+func (e CommentStatus) Ordinal() int {
+	switch e {
+	case CommentStatusPending:
+		return 0
+	case CommentStatusApproved:
+		return 1
+
+	default:
+		panic(errors.New("enum is not valid"))
+	}
+}

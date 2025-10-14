@@ -22,6 +22,22 @@ func NewCommentPSQLRepository() domain.CommentRepository {
 	return &CommentPSQLRepository{}
 }
 
+func (repo *CommentPSQLRepository) GetByID(tenantID domain.TenantID, id int64) (*domain.Comment, error) {
+	ormComment, err := orm.Comments(
+		qm.Where(fmt.Sprintf("%s = ?", orm.CommentColumns.TenantID), tenantID),
+		qm.And(fmt.Sprintf("%s = ?", orm.CommentColumns.ID), id),
+	).OneG()
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, codes.ErrCommentNotFound
+		}
+		return nil, err
+	}
+
+	return ormCommentToDomain(ormComment), nil
+}
+
 func (repo *CommentPSQLRepository) Create(comment *domain.Comment) (*domain.Comment, error) {
 	ormComment := domainCommentToORM(comment)
 
@@ -42,6 +58,24 @@ func (repo *CommentPSQLRepository) Delete(tenantID domain.TenantID, id int64) er
 		return err
 	}
 
+	if rows == 0 {
+		return codes.ErrCommentNotFound
+	}
+
+	return nil
+}
+
+func (repo *CommentPSQLRepository) Approve(tenantID domain.TenantID, id int64) error {
+	ormComment := &orm.Comment{
+		TenantID: int64(tenantID),
+		ID:       id,
+		Status:   orm.CommentStatusApproved,
+	}
+
+	rows, err := ormComment.UpdateG(boil.Whitelist(orm.CommentColumns.Status))
+	if err != nil {
+		return err
+	}
 	if rows == 0 {
 		return codes.ErrCommentNotFound
 	}
@@ -81,48 +115,18 @@ func (repo *CommentPSQLRepository) List(query *domain.CommentQuery) (*domain.Com
 	}, nil
 }
 
-func (repo *CommentPSQLRepository) GetCommentRootID(tenantID domain.TenantID, commentID int64) (int64, error) {
-	comment, err := orm.Comments(
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentColumns.TenantID), tenantID),
-		qm.And(fmt.Sprintf("%s = ?", orm.CommentColumns.ID), commentID),
-	).OneG()
-
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return 0, codes.ErrCommentRootCommentNotFound
-		}
-		return 0, err
-	}
-
-	if comment.RootID.Valid {
-		return comment.RootID.Int64, nil
-	}
-
-	return 0, codes.ErrCommentRootCommentNotFound
-}
-
-// IsCommentInPlate 当前评论id是否在某板块下 用于检测合法性
-func (repo *CommentPSQLRepository) IsCommentInPlate(tenantID domain.TenantID, plateID int64, commentID int64) (bool, error) {
-	exist, err := orm.Comments(
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentColumns.TenantID), tenantID),
-		qm.And(fmt.Sprintf("%s = ?", orm.CommentColumns.PlateID), plateID),
-		qm.And(fmt.Sprintf("%s = ?", orm.CommentColumns.ID), commentID),
-	).ExistsG()
-
-	if err != nil {
-		return false, err
-	}
-
-	return exist, nil
-}
-
 func (repo *CommentPSQLRepository) GetCommentUser(tenantID domain.TenantID, commentID int64) (int64, error) {
 	ormComment, err := orm.Comments(
 		qm.Where(fmt.Sprintf("%s = ?", orm.CommentColumns.TenantID), tenantID),
 		qm.And(fmt.Sprintf("%s = ?", orm.CommentColumns.ID), commentID),
+		qm.Select(orm.CommentColumns.UserID),
 	).OneG()
 
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, codes.ErrCommentNotFound
+		}
+
 		return 0, err
 	}
 
@@ -155,27 +159,42 @@ func (repo *CommentPSQLRepository) GetUserIdsByRootORParent(tenantID domain.Tena
 	return userIds, nil
 }
 
-func (repo *CommentPSQLRepository) GetDomainAdminByTenant(tenantID domain.TenantID) (int64, error) {
-	tenant, err := orm.TenantUserRoles(
+func (repo *CommentPSQLRepository) GetDomainAdminByTenant(tenantID domain.TenantID) (*domain.UserInfo, error) {
+	tenantUserRole, err := orm.TenantUserRoles(
 		qm.Where(fmt.Sprintf("%s = ?", orm.TenantUserRoleColumns.TenantID), tenantID),
 		qm.Where(fmt.Sprintf("%s = ?", orm.TenantUserRoleColumns.RoleID), repo.role.GetTenantadmin().ID),
-		qm.Select(orm.CommentColumns.UserID),
+		qm.Select(orm.TenantUserRoleColumns.UserID),
+		qm.Load(orm.TenantUserRoleRels.User),
 	).OneG()
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return 0, codes.ErrTenantNotFound
+			return nil, codes.ErrTenantNotFound
 		}
-		return 0, err
+		return nil, err
 	}
 
-	return tenant.UserID, nil
+	// 获取关联的用户
+	user := tenantUserRole.R.User
+	if user == nil {
+		return nil, errors.WithStack(codes.ErrUserNotFound.WithSlug("关联用户不存在"))
+	}
+
+	// 填充 UserInfo
+	userInfo := &domain.UserInfo{
+		ID:       user.ID,
+		NickName: user.Nickname,
+	}
+
+	userInfo.SetEmail(user.Email)
+
+	return userInfo, nil
 }
 
 func (repo *CommentPSQLRepository) GetUserInfosByIds(ids []int64) ([]*domain.UserInfo, error) {
 	ormUsers, err := orm.Users(
 		qm.WhereIn(fmt.Sprintf("%s in ?", orm.UserColumns.ID), utils.Int64SliceToInterface(ids)...),
-		qm.Select(orm.UserColumns.ID, orm.UserColumns.Nickname, orm.UserColumns.Avatar, orm.UserColumns.Email),
+		qm.Select(orm.UserColumns.ID, orm.UserColumns.Nickname, orm.UserColumns.Email),
 	).AllG()
 
 	if err != nil {

@@ -21,6 +21,7 @@ func domainCommentToORM(comment *domain.Comment) *orm.Comment {
 		Content:   comment.Content,
 		LikeCount: comment.LikeCount,
 		CreatedAt: comment.CreatedAt,
+		Status:    orm.CommentStatus(comment.GetStatus()),
 	}
 
 	// 处理null项
@@ -50,6 +51,12 @@ func ormCommentToDomain(ormComment *orm.Comment) *domain.Comment {
 		Content:   ormComment.Content,
 		LikeCount: ormComment.LikeCount,
 		CreatedAt: ormComment.CreatedAt,
+	}
+
+	comment.SetPending()
+
+	if ormComment.Status == orm.CommentStatusApproved {
+		comment.SetApproved()
 	}
 
 	// 处理null项

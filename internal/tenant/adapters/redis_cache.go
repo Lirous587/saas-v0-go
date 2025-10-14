@@ -77,7 +77,6 @@ func (cache *TenantRedisCache) ValidatePublicInviteToken(tenantID int64, value s
 
 	result, err := cache.client.HGet(context.Background(), key, value).Result()
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 

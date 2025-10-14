@@ -82,22 +82,22 @@ var TenantRels = struct {
 	CommentTenantConfig string
 	TenantPlan          string
 	TenantR2Config      string
+	TenantUserRole      string
 	CommentPlateConfigs string
 	CommentPlates       string
 	Comments            string
 	ImgCategories       string
 	Imgs                string
-	TenantUserRoles     string
 }{
 	CommentTenantConfig: "CommentTenantConfig",
 	TenantPlan:          "TenantPlan",
 	TenantR2Config:      "TenantR2Config",
+	TenantUserRole:      "TenantUserRole",
 	CommentPlateConfigs: "CommentPlateConfigs",
 	CommentPlates:       "CommentPlates",
 	Comments:            "Comments",
 	ImgCategories:       "ImgCategories",
 	Imgs:                "Imgs",
-	TenantUserRoles:     "TenantUserRoles",
 }
 
 // tenantR is where relationships are stored.
@@ -105,12 +105,12 @@ type tenantR struct {
 	CommentTenantConfig *CommentTenantConfig    `boil:"CommentTenantConfig" json:"CommentTenantConfig" toml:"CommentTenantConfig" yaml:"CommentTenantConfig"`
 	TenantPlan          *TenantPlan             `boil:"TenantPlan" json:"TenantPlan" toml:"TenantPlan" yaml:"TenantPlan"`
 	TenantR2Config      *TenantR2Config         `boil:"TenantR2Config" json:"TenantR2Config" toml:"TenantR2Config" yaml:"TenantR2Config"`
+	TenantUserRole      *TenantUserRole         `boil:"TenantUserRole" json:"TenantUserRole" toml:"TenantUserRole" yaml:"TenantUserRole"`
 	CommentPlateConfigs CommentPlateConfigSlice `boil:"CommentPlateConfigs" json:"CommentPlateConfigs" toml:"CommentPlateConfigs" yaml:"CommentPlateConfigs"`
 	CommentPlates       CommentPlateSlice       `boil:"CommentPlates" json:"CommentPlates" toml:"CommentPlates" yaml:"CommentPlates"`
 	Comments            CommentSlice            `boil:"Comments" json:"Comments" toml:"Comments" yaml:"Comments"`
 	ImgCategories       ImgCategorySlice        `boil:"ImgCategories" json:"ImgCategories" toml:"ImgCategories" yaml:"ImgCategories"`
 	Imgs                ImgSlice                `boil:"Imgs" json:"Imgs" toml:"Imgs" yaml:"Imgs"`
-	TenantUserRoles     TenantUserRoleSlice     `boil:"TenantUserRoles" json:"TenantUserRoles" toml:"TenantUserRoles" yaml:"TenantUserRoles"`
 }
 
 // NewStruct creates a new relationship struct
@@ -164,6 +164,22 @@ func (r *tenantR) GetTenantR2Config() *TenantR2Config {
 	}
 
 	return r.TenantR2Config
+}
+
+func (o *Tenant) GetTenantUserRole() *TenantUserRole {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetTenantUserRole()
+}
+
+func (r *tenantR) GetTenantUserRole() *TenantUserRole {
+	if r == nil {
+		return nil
+	}
+
+	return r.TenantUserRole
 }
 
 func (o *Tenant) GetCommentPlateConfigs() CommentPlateConfigSlice {
@@ -244,22 +260,6 @@ func (r *tenantR) GetImgs() ImgSlice {
 	}
 
 	return r.Imgs
-}
-
-func (o *Tenant) GetTenantUserRoles() TenantUserRoleSlice {
-	if o == nil {
-		return nil
-	}
-
-	return o.R.GetTenantUserRoles()
-}
-
-func (r *tenantR) GetTenantUserRoles() TenantUserRoleSlice {
-	if r == nil {
-		return nil
-	}
-
-	return r.TenantUserRoles
 }
 
 // tenantL is where Load methods for each relationship are stored.
@@ -595,6 +595,17 @@ func (o *Tenant) TenantR2Config(mods ...qm.QueryMod) tenantR2ConfigQuery {
 	return TenantR2Configs(queryMods...)
 }
 
+// TenantUserRole pointed to by the foreign key.
+func (o *Tenant) TenantUserRole(mods ...qm.QueryMod) tenantUserRoleQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"tenant_id\" = ?", o.ID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return TenantUserRoles(queryMods...)
+}
+
 // CommentPlateConfigs retrieves all the comment_plate_config's CommentPlateConfigs with an executor.
 func (o *Tenant) CommentPlateConfigs(mods ...qm.QueryMod) commentPlateConfigQuery {
 	var queryMods []qm.QueryMod
@@ -663,20 +674,6 @@ func (o *Tenant) Imgs(mods ...qm.QueryMod) imgQuery {
 	)
 
 	return Imgs(queryMods...)
-}
-
-// TenantUserRoles retrieves all the tenant_user_role's TenantUserRoles with an executor.
-func (o *Tenant) TenantUserRoles(mods ...qm.QueryMod) tenantUserRoleQuery {
-	var queryMods []qm.QueryMod
-	if len(mods) != 0 {
-		queryMods = append(queryMods, mods...)
-	}
-
-	queryMods = append(queryMods,
-		qm.Where("\"tenant_user_role\".\"tenant_id\"=?", o.ID),
-	)
-
-	return TenantUserRoles(queryMods...)
 }
 
 // LoadCommentTenantConfig allows an eager lookup of values, cached into the
@@ -1020,6 +1017,123 @@ func (tenantL) LoadTenantR2Config(e boil.Executor, singular bool, maybeTenant in
 				local.R.TenantR2Config = foreign
 				if foreign.R == nil {
 					foreign.R = &tenantR2ConfigR{}
+				}
+				foreign.R.Tenant = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadTenantUserRole allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-1 relationship.
+func (tenantL) LoadTenantUserRole(e boil.Executor, singular bool, maybeTenant interface{}, mods queries.Applicator) error {
+	var slice []*Tenant
+	var object *Tenant
+
+	if singular {
+		var ok bool
+		object, ok = maybeTenant.(*Tenant)
+		if !ok {
+			object = new(Tenant)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeTenant)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeTenant))
+			}
+		}
+	} else {
+		s, ok := maybeTenant.(*[]*Tenant)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeTenant)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeTenant))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &tenantR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &tenantR{}
+			}
+
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`tenant_user_role`),
+		qm.WhereIn(`tenant_user_role.tenant_id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.Query(e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load TenantUserRole")
+	}
+
+	var resultSlice []*TenantUserRole
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice TenantUserRole")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for tenant_user_role")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for tenant_user_role")
+	}
+
+	if len(tenantUserRoleAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.TenantUserRole = foreign
+		if foreign.R == nil {
+			foreign.R = &tenantUserRoleR{}
+		}
+		foreign.R.Tenant = object
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.ID == foreign.TenantID {
+				local.R.TenantUserRole = foreign
+				if foreign.R == nil {
+					foreign.R = &tenantUserRoleR{}
 				}
 				foreign.R.Tenant = local
 				break
@@ -1596,119 +1710,6 @@ func (tenantL) LoadImgs(e boil.Executor, singular bool, maybeTenant interface{},
 	return nil
 }
 
-// LoadTenantUserRoles allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (tenantL) LoadTenantUserRoles(e boil.Executor, singular bool, maybeTenant interface{}, mods queries.Applicator) error {
-	var slice []*Tenant
-	var object *Tenant
-
-	if singular {
-		var ok bool
-		object, ok = maybeTenant.(*Tenant)
-		if !ok {
-			object = new(Tenant)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeTenant)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeTenant))
-			}
-		}
-	} else {
-		s, ok := maybeTenant.(*[]*Tenant)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeTenant)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeTenant))
-			}
-		}
-	}
-
-	args := make(map[interface{}]struct{})
-	if singular {
-		if object.R == nil {
-			object.R = &tenantR{}
-		}
-		args[object.ID] = struct{}{}
-	} else {
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &tenantR{}
-			}
-			args[obj.ID] = struct{}{}
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	argsSlice := make([]interface{}, len(args))
-	i := 0
-	for arg := range args {
-		argsSlice[i] = arg
-		i++
-	}
-
-	query := NewQuery(
-		qm.From(`tenant_user_role`),
-		qm.WhereIn(`tenant_user_role.tenant_id in ?`, argsSlice...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.Query(e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load tenant_user_role")
-	}
-
-	var resultSlice []*TenantUserRole
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice tenant_user_role")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on tenant_user_role")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for tenant_user_role")
-	}
-
-	if len(tenantUserRoleAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(e); err != nil {
-				return err
-			}
-		}
-	}
-	if singular {
-		object.R.TenantUserRoles = resultSlice
-		for _, foreign := range resultSlice {
-			if foreign.R == nil {
-				foreign.R = &tenantUserRoleR{}
-			}
-			foreign.R.Tenant = object
-		}
-		return nil
-	}
-
-	for _, foreign := range resultSlice {
-		for _, local := range slice {
-			if local.ID == foreign.TenantID {
-				local.R.TenantUserRoles = append(local.R.TenantUserRoles, foreign)
-				if foreign.R == nil {
-					foreign.R = &tenantUserRoleR{}
-				}
-				foreign.R.Tenant = local
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
 // SetCommentTenantConfigG of the tenant to the related item.
 // Sets o.R.CommentTenantConfig to related.
 // Adds o to related.R.Tenant.
@@ -1872,6 +1873,63 @@ func (o *Tenant) SetTenantR2Config(exec boil.Executor, insert bool, related *Ten
 
 	if related.R == nil {
 		related.R = &tenantR2ConfigR{
+			Tenant: o,
+		}
+	} else {
+		related.R.Tenant = o
+	}
+	return nil
+}
+
+// SetTenantUserRoleG of the tenant to the related item.
+// Sets o.R.TenantUserRole to related.
+// Adds o to related.R.Tenant.
+// Uses the global database handle.
+func (o *Tenant) SetTenantUserRoleG(insert bool, related *TenantUserRole) error {
+	return o.SetTenantUserRole(boil.GetDB(), insert, related)
+}
+
+// SetTenantUserRole of the tenant to the related item.
+// Sets o.R.TenantUserRole to related.
+// Adds o to related.R.Tenant.
+func (o *Tenant) SetTenantUserRole(exec boil.Executor, insert bool, related *TenantUserRole) error {
+	var err error
+
+	if insert {
+		related.TenantID = o.ID
+
+		if err = related.Insert(exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	} else {
+		updateQuery := fmt.Sprintf(
+			"UPDATE \"tenant_user_role\" SET %s WHERE %s",
+			strmangle.SetParamNames("\"", "\"", 1, []string{"tenant_id"}),
+			strmangle.WhereClause("\"", "\"", 2, tenantUserRolePrimaryKeyColumns),
+		)
+		values := []interface{}{o.ID, related.UserID, related.TenantID}
+
+		if boil.DebugMode {
+			fmt.Fprintln(boil.DebugWriter, updateQuery)
+			fmt.Fprintln(boil.DebugWriter, values)
+		}
+		if _, err = exec.Exec(updateQuery, values...); err != nil {
+			return errors.Wrap(err, "failed to update foreign table")
+		}
+
+		related.TenantID = o.ID
+	}
+
+	if o.R == nil {
+		o.R = &tenantR{
+			TenantUserRole: related,
+		}
+	} else {
+		o.R.TenantUserRole = related
+	}
+
+	if related.R == nil {
+		related.R = &tenantUserRoleR{
 			Tenant: o,
 		}
 	} else {
@@ -2176,67 +2234,6 @@ func (o *Tenant) AddImgs(exec boil.Executor, insert bool, related ...*Img) error
 	for _, rel := range related {
 		if rel.R == nil {
 			rel.R = &imgR{
-				Tenant: o,
-			}
-		} else {
-			rel.R.Tenant = o
-		}
-	}
-	return nil
-}
-
-// AddTenantUserRolesG adds the given related objects to the existing relationships
-// of the tenant, optionally inserting them as new records.
-// Appends related to o.R.TenantUserRoles.
-// Sets related.R.Tenant appropriately.
-// Uses the global database handle.
-func (o *Tenant) AddTenantUserRolesG(insert bool, related ...*TenantUserRole) error {
-	return o.AddTenantUserRoles(boil.GetDB(), insert, related...)
-}
-
-// AddTenantUserRoles adds the given related objects to the existing relationships
-// of the tenant, optionally inserting them as new records.
-// Appends related to o.R.TenantUserRoles.
-// Sets related.R.Tenant appropriately.
-func (o *Tenant) AddTenantUserRoles(exec boil.Executor, insert bool, related ...*TenantUserRole) error {
-	var err error
-	for _, rel := range related {
-		if insert {
-			rel.TenantID = o.ID
-			if err = rel.Insert(exec, boil.Infer()); err != nil {
-				return errors.Wrap(err, "failed to insert into foreign table")
-			}
-		} else {
-			updateQuery := fmt.Sprintf(
-				"UPDATE \"tenant_user_role\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"tenant_id"}),
-				strmangle.WhereClause("\"", "\"", 2, tenantUserRolePrimaryKeyColumns),
-			)
-			values := []interface{}{o.ID, rel.UserID, rel.TenantID}
-
-			if boil.DebugMode {
-				fmt.Fprintln(boil.DebugWriter, updateQuery)
-				fmt.Fprintln(boil.DebugWriter, values)
-			}
-			if _, err = exec.Exec(updateQuery, values...); err != nil {
-				return errors.Wrap(err, "failed to update foreign table")
-			}
-
-			rel.TenantID = o.ID
-		}
-	}
-
-	if o.R == nil {
-		o.R = &tenantR{
-			TenantUserRoles: related,
-		}
-	} else {
-		o.R.TenantUserRoles = append(o.R.TenantUserRoles, related...)
-	}
-
-	for _, rel := range related {
-		if rel.R == nil {
-			rel.R = &tenantUserRoleR{
 				Tenant: o,
 			}
 		} else {

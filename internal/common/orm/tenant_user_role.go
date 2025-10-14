@@ -686,7 +686,7 @@ func (tenantUserRoleL) LoadTenant(e boil.Executor, singular bool, maybeTenantUse
 		if foreign.R == nil {
 			foreign.R = &tenantR{}
 		}
-		foreign.R.TenantUserRoles = append(foreign.R.TenantUserRoles, object)
+		foreign.R.TenantUserRole = object
 		return nil
 	}
 
@@ -697,7 +697,7 @@ func (tenantUserRoleL) LoadTenant(e boil.Executor, singular bool, maybeTenantUse
 				if foreign.R == nil {
 					foreign.R = &tenantR{}
 				}
-				foreign.R.TenantUserRoles = append(foreign.R.TenantUserRoles, local)
+				foreign.R.TenantUserRole = local
 				break
 			}
 		}
@@ -882,7 +882,7 @@ func (o *TenantUserRole) SetRole(exec boil.Executor, insert bool, related *Role)
 
 // SetTenantG of the tenantUserRole to the related item.
 // Sets o.R.Tenant to related.
-// Adds o to related.R.TenantUserRoles.
+// Adds o to related.R.TenantUserRole.
 // Uses the global database handle.
 func (o *TenantUserRole) SetTenantG(insert bool, related *Tenant) error {
 	return o.SetTenant(boil.GetDB(), insert, related)
@@ -890,7 +890,7 @@ func (o *TenantUserRole) SetTenantG(insert bool, related *Tenant) error {
 
 // SetTenant of the tenantUserRole to the related item.
 // Sets o.R.Tenant to related.
-// Adds o to related.R.TenantUserRoles.
+// Adds o to related.R.TenantUserRole.
 func (o *TenantUserRole) SetTenant(exec boil.Executor, insert bool, related *Tenant) error {
 	var err error
 	if insert {
@@ -925,10 +925,10 @@ func (o *TenantUserRole) SetTenant(exec boil.Executor, insert bool, related *Ten
 
 	if related.R == nil {
 		related.R = &tenantR{
-			TenantUserRoles: TenantUserRoleSlice{o},
+			TenantUserRole: o,
 		}
 	} else {
-		related.R.TenantUserRoles = append(related.R.TenantUserRoles, o)
+		related.R.TenantUserRole = o
 	}
 
 	return nil

@@ -10,16 +10,12 @@ func domainCommentToResponse(comment *domain.Comment) *CommentResponse {
 	}
 
 	return &CommentResponse{
-		ID: comment.ID,
-		User: &UserInfo{
-			ID: comment.UserID,
-			// NickName: comment.User.NickName,
-			// Avatar:   comment.User.Avatar,
-		},
+		ID:        comment.ID,
+		UserID:    comment.UserID,
 		ParentID:  comment.ParentID,
 		RootID:    comment.RootID,
 		Content:   comment.Content,
-		Status:    comment.Status,
+		Status:    comment.GetStatus(),
 		LikeCount: comment.LikeCount,
 		CreatedAt: comment.CreatedAt.Unix(),
 		IsLiked:   comment.IsLiked,

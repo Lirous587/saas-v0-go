@@ -236,6 +236,10 @@ CREATE INDEX idx_comment_plates_description_trgm ON public.comment_plates USING 
 
 
 -- 评论表
+CREATE TYPE comment_status AS ENUM (
+    'pending', -- 待审核
+    'approved' -- 已通过
+);
 CREATE TABLE public.comments
 (
     id         bigserial      PRIMARY KEY,
@@ -245,12 +249,9 @@ CREATE TABLE public.comments
     parent_id  bigint         NULL REFERENCES public.comments (id) ON DELETE CASCADE,
     root_id    bigint         NULL REFERENCES public.comments (id) ON DELETE CASCADE,
     content    text           NOT NULL,
-    status     varchar(10)    NOT NULL DEFAULT 'pending',
+    status     comment_status NOT NULL DEFAULT 'pending',
     like_count int8           NOT NULL DEFAULT 0,
-    created_at timestamptz(6) NOT NULL DEFAULT now(),
-    CONSTRAINT comments_status_check CHECK (
-        status IN ('pending', 'approved', 'rejected')
-    )
+    created_at timestamptz(6) NOT NULL DEFAULT now()
 );
 -- 按租户查询
 CREATE INDEX IF NOT EXISTS idx_comments_tenant_id ON public.comments (tenant_id);
@@ -266,19 +267,6 @@ CREATE INDEX IF NOT EXISTS idx_comments_status ON public.comments (status);
 CREATE INDEX IF NOT EXISTS idx_comments_content_trgm ON public.comments USING gin (content gin_trgm_ops);
 -- 热门评论查询（按点赞数）
 CREATE INDEX IF NOT EXISTS idx_comments_like_count ON public.comments (like_count DESC);
-
-
--- 评论点赞表
-CREATE TABLE public.comment_likes
-(
-    comment_id bigint         NOT NULL REFERENCES public.comments (id) ON DELETE CASCADE,
-    user_id    bigint         NOT NULL REFERENCES public.users (id) ON DELETE CASCADE,
-    created_at timestamptz(6) NOT NULL DEFAULT now(),
-    PRIMARY KEY (comment_id, user_id)  -- 确保一个用户对一个评论只能点赞一次
-);
--- 索引优化
-CREATE INDEX IF NOT EXISTS idx_comment_likes_user_id ON public.comment_likes (user_id);  -- 用户的点赞列表
-CREATE INDEX IF NOT EXISTS idx_comment_likes_comment_id ON public.comment_likes (comment_id);  -- 评论的点赞列表
 
 
 -- 评论租户全局配置（默认配置）

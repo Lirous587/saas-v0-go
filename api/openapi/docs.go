@@ -154,7 +154,7 @@ const docTemplate = `{
                 "tags": [
                     "comment"
                 ],
-                "summary": "获取列表",
+                "summary": "评论审计",
                 "parameters": [
                     {
                         "type": "string",
@@ -546,19 +546,7 @@ const docTemplate = `{
                     "200": {
                         "description": "请求成功",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.successResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/handler.CommentResponse"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.successResponse"
                         }
                     },
                     "400": {
@@ -577,71 +565,6 @@ const docTemplate = `{
             }
         },
         "/v1/comment/{tenant_id}/{belong_key}/config": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "comment"
-                ],
-                "summary": "获取板块级别的评论系统配置",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "租户id",
-                        "name": "tenant_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "板块key",
-                        "name": "belong_key",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "请求成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.successResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/handler.PlateConfigResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "参数错误",
-                        "schema": {
-                            "$ref": "#/definitions/response.invalidParamsResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器错误",
-                        "schema": {
-                            "$ref": "#/definitions/response.errorResponse"
-                        }
-                    }
-                }
-            },
             "put": {
                 "security": [
                     {
@@ -743,6 +666,73 @@ const docTemplate = `{
                         "description": "请求成功",
                         "schema": {
                             "$ref": "#/definitions/response.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/comment/{tenant_id}/{plate_id}/config": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "获取板块级别的评论系统配置",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "板块id",
+                        "name": "plate_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.PlateConfigResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -2741,10 +2731,12 @@ const docTemplate = `{
         "domain.CommentStatus": {
             "type": "string",
             "enum": [
-                ""
+                "approved",
+                "pending"
             ],
             "x-enum-varnames": [
-                "CommentStatusApprove"
+                "CommentStatusApprove",
+                "CommentStatusPending"
             ]
         },
         "domain.InviteTokenKind": {
@@ -2887,8 +2879,8 @@ const docTemplate = `{
                 "status": {
                     "$ref": "#/definitions/domain.CommentStatus"
                 },
-                "user": {
-                    "$ref": "#/definitions/handler.UserInfo"
+                "user_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -3271,20 +3263,6 @@ const docTemplate = `{
             "properties": {
                 "plan_id": {
                     "type": "integer"
-                }
-            }
-        },
-        "handler.UserInfo": {
-            "type": "object",
-            "properties": {
-                "avatar": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "nickname": {
-                    "type": "string"
                 }
             }
         },

@@ -28,7 +28,7 @@ func NewHttpHandler(service domain.CommentService) *HttpHandler {
 // @Param        tenant_id   	path int true "租户id"
 // @Param        belong_key   path string true "板块key"
 // @Param        request body handler.CreateRequest true "请求参数"
-// @Success      200  {object}  response.successResponse{data=handler.CommentResponse} "请求成功"
+// @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/comment/{tenant_id}/{belong_key} [post]
@@ -51,20 +51,18 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.service.Create(&domain.Comment{
+	if err = h.service.Create(&domain.Comment{
 		TenantID: req.TenantID,
 		RootID:   req.RootID,
 		ParentID: req.ParentID,
 		Content:  req.Content,
 		UserID:   userID,
-	}, req.BelongKey)
-
-	if err != nil {
+	}, req.BelongKey); err != nil {
 		response.Error(ctx, err)
 		return
 	}
 
-	response.Success(ctx, domainCommentToResponse(data))
+	response.Success(ctx)
 }
 
 // Delete godoc
@@ -120,7 +118,6 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 	}
 
 	data, err := h.service.List(&domain.CommentQuery{
-		// Keyword:  req.KeyWord,
 		Page:     req.Page,
 		PageSize: req.PageSize,
 	})
@@ -131,6 +128,35 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 	}
 
 	response.Success(ctx, domainCommentListToResponse(data))
+}
+
+// Audit godoc
+// @Summary      评论审计
+// @Tags         comment
+// @Accept       json
+// @Produce      json
+// @Param        keyword    query     string  false  "关键词"
+// @Param        page       query     int     false  "页码"
+// @Param        page_size  query     int     false  "每页数量"
+// @Success      200  {object}  response.successResponse{data=handler.CommentListResponse} "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/comment [get]
+func (h *HttpHandler) Audit(ctx *gin.Context) {
+	req := new(AuditRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	err := h.service.Audit(req.TenantID, req.ID, req.Status)
+
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx)
 }
 
 // CreatePlate godoc
@@ -324,12 +350,12 @@ func (h *HttpHandler) SetPlateConfig(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id   path int true 		"租户id"
-// @Param        belong_key  path string true "板块key"
+// @Param        tenant_id path int true 	"租户id"
+// @Param        plate_id  path int true 	"板块id"
 // @Success      200  {object}  response.successResponse{data=handler.PlateConfigResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/comment/{tenant_id}/{belong_key}/config [get]
+// @Router       /v1/comment/{tenant_id}/{plate_id}/config [get]
 func (h *HttpHandler) GetPlateConfig(ctx *gin.Context) {
 	req := new(GetPlateConfigRequest)
 
@@ -337,7 +363,7 @@ func (h *HttpHandler) GetPlateConfig(ctx *gin.Context) {
 		return
 	}
 
-	res, err := h.service.GetPlateConfig(req.TenantID, req.BelongKey)
+	res, err := h.service.GetPlateConfig(req.TenantID, req.PlateID)
 	if err != nil {
 		response.Error(ctx, err)
 		return

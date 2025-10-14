@@ -7,7 +7,6 @@ import (
 	"saas/internal/common/utils"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 type service struct {
@@ -24,170 +23,30 @@ func NewCommentService(repo domain.CommentRepository, cache domain.CommentCache,
 	}
 }
 
-func (s *service) Create(comment *domain.Comment, belongKey string) (*domain.Comment, error) {
-	// 1.plate 是否存在
-	plate, err := s.repo.GetPlateBelongByKey(comment.TenantID, belongKey)
+func (s *service) Audit(tenantID domain.TenantID, id int64, status domain.CommentStatus) error {
+	comment, err := s.repo.GetByID(tenantID, id)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 
-	comment.PlateID = plate.ID
+	if !comment.CanAudit() {
+		return codes.ErrCommentIllegalAudit
+	}
 
-	// 2.验证root_id和parent_id合理性
-	// 请求参数验证确保了root_id和parent_id只有两种组合
-	// 1.仅有root_id（顶级评论）
-	// 2.root_id和parent_id同时存在（回复） 要去验证parent_id的合理性 即parent_id的root_id是否与此时的comment.RootID一致
-	if comment.IsTopLevelComment() {
-		exist, err := s.repo.IsCommentInPlate(comment.TenantID, comment.PlateID, comment.RootID)
-		if err != nil {
-			return nil, errors.WithStack(err)
+	// 同意
+	if comment.IsApproved() {
+		if err := s.repo.Approve(tenantID, id); err != nil {
+			return errors.WithMessage(err, "同意评论时候更新status失败")
 		}
-		if !exist {
-			return nil, codes.ErrCommentNotFoundInNowPlate.WithSlug("root_id 不存在于当前板块")
-		}
-	} else if comment.IsReplyParentComment() {
-		// 验证 parent_id 是否在板块下
-		exist, err := s.repo.IsCommentInPlate(comment.TenantID, comment.PlateID, comment.ParentID)
-		if err != nil {
-			return nil, errors.WithStack(err)
-		}
-		if !exist {
-			return nil, codes.ErrCommentNotFoundInNowPlate.WithSlug("parent_id 不存在于当前板块")
-		}
-
-		// 验证 parent_id 的 root_id 是否与 comment.RootID 一致
-		parentRootID, err := s.repo.GetCommentRootID(comment.TenantID, comment.ParentID)
-		if err != nil {
-			return nil, errors.WithStack(err)
-		}
-		if parentRootID != comment.RootID {
-			return nil, codes.ErrCommentHierarchyInvalid.WithDetail(map[string]any{
-				"warning": "再敢瞎评论找人弄你",
-			})
+	} else {
+		if err := s.repo.Delete(tenantID, id); err != nil {
+			return errors.WithMessage(err, "拒绝评论时候删除评论记录失败")
 		}
 	}
 
-	// 3.创建评论
-	comment, err = s.repo.Create(comment)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
+	// 通知评论者
 
-	// 4.异步发送邮件通知
-	// 判断评论者角色 domain_admin viewer
-	// domain_admin 评论 如果root parent存在且不为自己 才需发送任何邮件
-	// viewer 评论 如果root parent为自己 也无需发送邮件
-	go func() {
-		// 查询租户管理员id
-		adminId, err := s.repo.GetDomainAdminByTenant(comment.TenantID)
-		if err != nil {
-			zap.L().Error("获取租户管理用户失败",
-				zap.Int64("tenant_id", int64(comment.TenantID)),
-				zap.Int64("comment_id", comment.ID),
-				zap.Error(err))
-			return
-		}
-
-		var toUserIds []int64
-
-		// 获取toUserIds
-		if comment.IsReply() {
-			// 回复
-			// 首先根据root_id parent_id拿到对应的userIds
-			// domain_admin回复 过滤自己之后 给filteredUserIds发邮件
-			// viewer回复 过滤自己之后 给filteredUserIds以及domain_admin邮件
-			// 都需要去重处理 避免多次收到邮件
-			userIds, err := s.repo.GetUserIdsByRootORParent(comment.TenantID, comment.PlateID, comment.RootID, comment.ParentID)
-			if err != nil {
-				zap.L().Error("获取根/父评论用户失败",
-					zap.Int64("tenant_id", int64(comment.TenantID)),
-					zap.Int64("comment_id", comment.ID),
-					zap.Int64("root_id", comment.RootID),
-					zap.Int64("parent_id", comment.ParentID),
-					zap.Error(err))
-				return
-			}
-
-			// 从userIds中排除自己
-			filteredIds := comment.FilterSelf(userIds)
-
-			if comment.IsCommentByAdmin(adminId) {
-				toUserIds = utils.UniqueInt64s(filteredIds)
-			} else {
-				// 要加上admin_id
-				toUserIds = utils.UniqueInt64s(append(filteredIds, adminId))
-			}
-
-		} else {
-			// 创建根评论
-			// domain_admin创建无需发送邮件
-			// viewer创建需要给domain_admin发送邮件
-			if comment.IsCommentByAdmin(adminId) {
-				zap.L().Info("创建根评论，评论用户为租户管理员，无需发送邮件")
-			} else {
-				toUserIds = []int64{adminId}
-			}
-		}
-
-		if len(toUserIds) == 0 {
-			zap.L().Info("无用户需要发送邮件",
-				zap.Int64("tenant_id", int64(comment.TenantID)),
-				zap.Int64("comment_id", comment.ID))
-			return
-		}
-
-		// 获取当前评论用户
-		commentUser, err := s.repo.GetUserInfoByID(comment.UserID)
-		if err != nil {
-			zap.L().Error("获取当前评论用户失败",
-				zap.Int64("comment_id", comment.ID),
-				zap.Int64("user_id", comment.UserID),
-				zap.Error(err))
-			return
-		}
-
-		// 查询所要发送邮件的用户
-		toUsers, err := s.repo.GetUserInfosByIds(toUserIds)
-		if err != nil {
-			zap.L().Error("获取用户信息失败",
-				zap.Int64("tenant_id", int64(comment.TenantID)),
-				zap.Int64("comment_id", comment.ID),
-				zap.Int64s("user_ids", toUserIds),
-				zap.Error(err))
-			return
-		}
-
-		// 获取 板块的related_url
-		relatedURL, err := s.repo.GetPlateRelatedURlByID(comment.TenantID, plate.ID)
-		if err != nil {
-			zap.L().Error("获取板块RelatedURl失败",
-				zap.Int64("tenant_id", int64(comment.TenantID)),
-				zap.Int64("comment_id", comment.ID),
-				zap.Int64("plate_key", comment.PlateID),
-				zap.Error(err))
-			return
-		}
-
-		// 限制 goroutine 数量
-		sem := make(chan struct{}, 10) // 最多 10 个并发
-		for _, toUser := range toUsers {
-			go func(u *domain.UserInfo) {
-				sem <- struct{}{}        // 获取信号
-				defer func() { <-sem }() // 释放
-				if err := s.sentCommentEmail(commentUser, u.GetEmail(), relatedURL, comment.Content); err != nil {
-					zap.L().Error("发送邮件失败",
-						zap.Int64("tenant_id", int64(comment.TenantID)),
-						zap.Int64("comment_id", comment.ID),
-						zap.Int64("to_user_id", u.ID),
-						zap.String("to_email", u.GetEmail()),
-						zap.Error(err))
-					return
-				}
-			}(toUser)
-		}
-	}()
-
-	return comment, nil
+	return nil
 }
 
 func (s *service) Delete(tenantID domain.TenantID, userID int64, id int64) error {
@@ -200,12 +59,12 @@ func (s *service) Delete(tenantID domain.TenantID, userID int64, id int64) error
 	// 如果请求用户和评论用户不一致
 	if uid != userID {
 		// 去获取当前租户的uid
-		adminID, err := s.repo.GetDomainAdminByTenant(tenantID)
+		admin, err := s.repo.GetDomainAdminByTenant(tenantID)
 		if err != nil {
 			return errors.WithStack(err)
 		}
 
-		if userID != adminID {
+		if userID != admin.ID {
 			return codes.ErrCommentNoPermissionToDelete
 		}
 	}
@@ -271,13 +130,8 @@ func (s *service) SetPlateConfig(config *domain.PlateConfig) error {
 	return nil
 }
 
-func (s *service) GetPlateConfig(tenantID domain.TenantID, belongKey string) (*domain.PlateConfig, error) {
-	plate, err := s.repo.GetPlateBelongByKey(tenantID, belongKey)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	config, err := s.repo.GetPlateConfig(tenantID, plate.ID)
+func (s *service) GetPlateConfig(tenantID domain.TenantID, plateID int64) (*domain.PlateConfig, error) {
+	config, err := s.repo.GetPlateConfig(tenantID, plateID)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

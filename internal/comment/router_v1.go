@@ -27,11 +27,11 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 		g.GET("", handler.List)
 	}
 
-	protect := g.Use(auth.JWTValidate(), auth.CasbinValited())
+	protect := g.Group("", auth.JWTValidate(), auth.CasbinValited())
 	{
 		// 创建评论
 		protect.POST("/:belong_key", handler.Create)
-		// 删除评论（只能删自己的，或管理员删任意）
+		// 删除评论
 		protect.DELETE("/:id", handler.Delete)
 
 		// 低优先级：点赞/取消点赞
@@ -39,22 +39,25 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 		// protect.DELETE("/:id/like", handler.Unlike)
 
 		// 管理员
+		// 审计
+		protect.PUT("/:id", handler.Audit)
 		// 高级查询
 		// protect.GET("/advanced", handler.AdvancedList)
-		// 审计
-		// protect.PUT("/:id")
-
-		// 板块管理
-		protect.POST("/plate", handler.CreatePlate)
-		protect.DELETE("/plate/:id", handler.DeletePlate)
-		protect.GET("/plate", handler.ListPlate)
 
 		// 全局配置
 		protect.PUT("/config", handler.SetTenantConfig)
 		protect.GET("/config", handler.GetTenantConfig)
-		// 板块配置
-		protect.PUT("/:belong_key/config", handler.SetPlateConfig)
-		protect.GET("/:belong_key/config", handler.GetPlateConfig)
+
+		// 板块管理子组
+		plateGroup := protect.Group("/plate")
+		{
+			plateGroup.POST("", handler.CreatePlate)
+			plateGroup.DELETE("/:id", handler.DeletePlate)
+			plateGroup.GET("", handler.ListPlate)
+			// 板块配置
+			plateGroup.PUT("/:belong_key/config", handler.SetPlateConfig)
+			plateGroup.GET("/:plate_id/config", handler.GetPlateConfig)
+		}
 	}
 
 	return nil
