@@ -164,12 +164,14 @@ func (s *service) adminCommnet(comment *domain.Comment) error {
 		if comment.IsReply() {
 			commnetSource, err := s.getCommentSource(comment)
 			if err != nil {
+				zap.L().Error("获取评论来源失败", zap.Error(err))
 				return
 			}
 
 			// 获取root和parent用户id
 			uids, err := s.repo.GetUserIdsByRootORParent(comment.TenantID, comment.PlateID, comment.RootID, comment.ParentID)
 			if err != nil {
+				zap.L().Error("获取root和parent用户id失败", zap.Error(err))
 				return
 			}
 
@@ -180,12 +182,14 @@ func (s *service) adminCommnet(comment *domain.Comment) error {
 
 			// 无toUserIds 无需发送邮件
 			if len(toUserIds) == 0 {
+				zap.L().Debug("无需发送邮件")
 				return
 			}
 
 			// 查询所要发送邮件的用户
 			toUsers, err := s.repo.GetUserInfosByIds(toUserIds)
 			if err != nil {
+				zap.L().Error("查询所要发送邮件的用户失败", zap.Error(err))
 				return
 			}
 
@@ -193,6 +197,7 @@ func (s *service) adminCommnet(comment *domain.Comment) error {
 			for _, toUser := range toUsers {
 				go func(u *domain.UserInfo) {
 					if err := s.sentCommentEmail(commnetSource.commentUser, u.GetEmail(), commnetSource.relatedURL, comment.Content); err != nil {
+						zap.L().Error("发送邮件失败", zap.Error(err))
 						return
 					}
 				}(toUser)
@@ -226,21 +231,20 @@ func (s *service) viewerComment(comment *domain.Comment, admin *domain.UserInfo)
 	go func() {
 		commnetSource, err := s.getCommentSource(comment)
 		if err != nil {
-			zap.L().Error("getCommentSource失败")
+			zap.L().Error("获取评论来源失败", zap.Error(err))
 			return
 		}
 
+		// 评论为根评论时 发邮件给租户
 		if comment.IsRootComment() {
 			if config.IfAudit {
-				// 发邮件给租户
 				if err := s.sentNeedAuditEmail(commnetSource.commentUser, admin.GetEmail(), commnetSource.relatedURL, comment.Content); err != nil {
-					zap.L().Error("sentNeedAuditEmail失败")
+					zap.L().Error("发送邮件AuditEmail给租户管理员失败", zap.Error(err))
 					return
 				}
 			} else {
-				// sentCommentEmail
 				if err := s.sentCommentEmail(commnetSource.commentUser, admin.GetEmail(), commnetSource.relatedURL, comment.Content); err != nil {
-					zap.L().Error("sentCommentEmail失败")
+					zap.L().Error("发送邮件CommentEmail给租户管理员失败", zap.Error(err))
 					return
 				}
 			}
@@ -248,16 +252,15 @@ func (s *service) viewerComment(comment *domain.Comment, admin *domain.UserInfo)
 			if config.IfAudit {
 				// 发邮件给租户
 				if err := s.sentNeedAuditEmail(commnetSource.commentUser, admin.GetEmail(), commnetSource.relatedURL, comment.Content); err != nil {
-					zap.L().Error("sentNeedAuditEmail失败", zap.Error(err))
+					zap.L().Error("发邮件给租户失败", zap.Error(err))
 					return
 				}
 			} else {
 				// 发邮件给租户以及root和parent
-
 				// 获取root和parent用户id
 				uids, err := s.repo.GetUserIdsByRootORParent(comment.TenantID, comment.PlateID, comment.RootID, comment.ParentID)
 				if err != nil {
-					zap.L().Error("GetUserIdsByRootORParent失败")
+					zap.L().Error("获取root和parent用户id失败", zap.Error(err))
 					return
 				}
 
@@ -275,7 +278,7 @@ func (s *service) viewerComment(comment *domain.Comment, admin *domain.UserInfo)
 				// 查询所要发送邮件的用户
 				toUsers, err := s.repo.GetUserInfosByIds(toUserIds)
 				if err != nil {
-					zap.L().Error("GetUserInfosByIds失败")
+					zap.L().Error("查询所要发送邮件的用户失败", zap.Error(err))
 					return
 				}
 
@@ -283,7 +286,7 @@ func (s *service) viewerComment(comment *domain.Comment, admin *domain.UserInfo)
 				for _, toUser := range toUsers {
 					go func(u *domain.UserInfo) {
 						if err := s.sentCommentEmail(commnetSource.commentUser, u.GetEmail(), commnetSource.relatedURL, comment.Content); err != nil {
-							zap.L().Error("sentCommentEmail失败")
+							zap.L().Error("发送邮件失败", zap.Error(err))
 							return
 						}
 					}(toUser)

@@ -98,36 +98,50 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 	response.Success(ctx)
 }
 
-// List godoc
-// @Summary      获取列表
+// ListRoots godoc
+// @Summary      获取根级评论列表
 // @Tags         comment
 // @Accept       json
 // @Produce      json
-// @Param        keyword    query     string  false  "关键词"
 // @Param        page       query     int     false  "页码"
 // @Param        page_size  query     int     false  "每页数量"
 // @Success      200  {object}  response.successResponse{data=handler.CommentListResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/comment [get]
-func (h *HttpHandler) List(ctx *gin.Context) {
-	req := new(ListRequest)
+func (h *HttpHandler) ListRoots(ctx *gin.Context) {
+	// req := new(ListRequest)
 
-	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
-		return
-	}
+	// if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+	// 	return
+	// }
 
-	data, err := h.service.List(&domain.CommentQuery{
-		Page:     req.Page,
-		PageSize: req.PageSize,
-	})
+	// data, err := h.service.List(&domain.CommentQuery{
+	// 	Page:     req.Page,
+	// 	PageSize: req.PageSize,
+	// })
 
-	if err != nil {
-		response.Error(ctx, err)
-		return
-	}
+	// if err != nil {
+	// 	response.Error(ctx, err)
+	// 	return
+	// }
 
-	response.Success(ctx, domainCommentListToResponse(data))
+	// response.Success(ctx, domainCommentListToResponse(data))
+}
+
+// ListRoots godoc
+// @Summary      获取回复评论列表
+// @Tags         comment
+// @Accept       json
+// @Produce      json
+// @Param        page       query     int     false  "页码"
+// @Param        page_size  query     int     false  "每页数量"
+// @Success      200  {object}  response.successResponse{data=handler.CommentListResponse} "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/comment [get]
+func (h *HttpHandler) ListReplies(ctx *gin.Context) {
+
 }
 
 // Audit godoc
