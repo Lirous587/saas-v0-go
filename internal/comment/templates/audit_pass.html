@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>评论审核通过</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333333;
+      }
+      p {
+        color: #666666;
+        line-height: 1.6;
+      }
+      .comment {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-left: 4px solid #28a745;
+        margin: 10px 0;
+      }
+      .footer {
+        font-size: 12px;
+        color: #999999;
+        text-align: center;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>评论审核通过</h1>
+      <p>亲爱的用户，您好！</p>
+      <p>您的评论已通过审核：</p>
+
+      <div class="comment">
+        <p><strong>评论内容：</strong> {{.CommentContent}}</p>
+        <p><strong>相关链接：</strong> {{.RelatedURL}}</p>
+      </div>
+
+      <div class="footer">
+        <p>此邮件由系统自动发送，请勿回复。</p>
+      </div>
+    </div>
+  </body>
+</html>

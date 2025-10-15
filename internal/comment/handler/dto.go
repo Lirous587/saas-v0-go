@@ -55,7 +55,7 @@ type ListRequest struct {
 
 type AuditRequest struct {
 	TenantID domain.TenantID      `json:"-" uri:"tenant_id" binding:"required"`
-	ID       int64                `json:"id"`
+	ID       int64                `json:"-" uri:"id" binding:"required"`
 	Status   domain.CommentStatus `json:"status" binding:"required"`
 }
 
@@ -136,7 +136,7 @@ type SetPlateConfigRequest struct {
 
 type GetPlateConfigRequest struct {
 	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
-	ID  int64           `json:"-" uri:"id" binding:"required"`
+	ID       int64           `json:"-" uri:"id" binding:"required"`
 }
 
 type PlateConfigResponse struct {

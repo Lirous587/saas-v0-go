@@ -154,14 +154,8 @@ const docTemplate = `{
                 "tags": [
                     "comment"
                 ],
-                "summary": "评论审计",
+                "summary": "获取回复评论列表",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "关键词",
-                        "name": "keyword",
-                        "in": "query"
-                    },
                     {
                         "type": "integer",
                         "description": "页码",
@@ -760,6 +754,80 @@ const docTemplate = `{
             }
         },
         "/v1/comment/{tenant_id}/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "评论审计",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "评论id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.AuditRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.CommentListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -2822,6 +2890,17 @@ const docTemplate = `{
             "x-enum-varnames": [
                 "WayImageClick"
             ]
+        },
+        "handler.AuditRequest": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "$ref": "#/definitions/domain.CommentStatus"
+                }
+            }
         },
         "handler.AuthResponse": {
             "type": "object",

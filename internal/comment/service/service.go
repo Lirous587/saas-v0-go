@@ -34,6 +34,10 @@ func (s *service) Audit(tenantID domain.TenantID, id int64, status domain.Commen
 		return codes.ErrCommentIllegalAudit
 	}
 
+	if status == domain.CommentStatusApproved {
+		comment.SetApproved()
+	}
+
 	// 同意
 	if comment.IsApproved() {
 		if err := s.repo.Approve(tenantID, id); err != nil {
@@ -45,7 +49,76 @@ func (s *service) Audit(tenantID domain.TenantID, id int64, status domain.Commen
 		}
 	}
 
-	// 通知评论者
+	go func() {
+		// 获取评论来源
+		commentSource, err := s.getCommentSource(comment)
+		if err != nil {
+			zap.L().Error("获取评论来源失败", zap.Error(err))
+			return
+		}
+
+		// 后续异步处理
+		// 此处与上方拆开 避免逻辑混乱
+		if comment.IsApproved() {
+			go func() {
+				// - 通知评论者
+				// 通知评论用户(必定不为租户管理员 放心处理)
+				if err := s.sentAuditPassEmail(commentSource.commentUser.GetEmail(), commentSource.relatedURL, comment.Content); err != nil {
+					zap.L().Error("发送邮件AuditPass失败", zap.Error(err))
+					return
+				}
+
+				// - 通知回复者
+				// 1.根据当前评论的root和parent去查询uids
+				uids, err := s.repo.GetUserIdsByRootORParent(tenantID, comment.PlateID, comment.RootID, comment.ParentID)
+				if err != nil {
+					zap.L().Error("根据当前评论的root和parent去查询uids失败", zap.Error(err))
+					return
+				}
+
+				// 2.查询租户
+				admin, err := s.repo.GetDomainAdminByTenant(tenantID)
+				if err != nil {
+					zap.L().Error("获取租户管理员失败", zap.Error(err))
+					return
+				}
+
+				// 通知其回复人员 从uids中除去自己和租户管理员(因为此时租户审核了就无需通知)
+				filterSelfIds := comment.FilterSelf(uids)
+				filterIds := make([]int64, 0, 3)
+				for _, id := range filterSelfIds {
+					if id == admin.ID {
+						continue
+					}
+					filterIds = append(filterIds, id)
+				}
+
+				toUids := utils.UniqueInt64s(filterIds)
+				// 获取待通知的用户信息
+				toUsers, err := s.repo.GetUserInfosByIds(toUids)
+				if err != nil {
+					zap.L().Error("获取待通知的用户信息失败", zap.Error(err))
+					return
+				}
+				// 整合数据 发送邮件
+				for _, toUser := range toUsers {
+					go func(u *domain.UserInfo) {
+						if err := s.sentCommentEmail(commentSource.commentUser, u.GetEmail(), commentSource.relatedURL, comment.Content); err != nil {
+							zap.L().Error("发送邮件commentEmail失败", zap.Error(err))
+							return
+						}
+					}(toUser)
+				}
+
+			}()
+		} else {
+			go func() {
+				if err := s.sentAuditRejectEmail(commentSource.commentUser.GetEmail(), commentSource.relatedURL, comment.Content); err != nil {
+					zap.L().Error("发送邮件auditRejectEmail失败", zap.Error(err))
+				}
+			}()
+		}
+	}()
 
 	return nil
 }
@@ -59,7 +132,7 @@ func (s *service) Delete(tenantID domain.TenantID, userID int64, id int64) error
 
 	// 如果请求用户和评论用户不一致
 	if uid != userID {
-		// 去获取当前租户的uid
+		// 获取当前租户管理员
 		admin, err := s.repo.GetDomainAdminByTenant(tenantID)
 		if err != nil {
 			return errors.WithStack(err)

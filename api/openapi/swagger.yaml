@@ -22,6 +22,13 @@ definitions:
     type: string
     x-enum-varnames:
     - WayImageClick
+  handler.AuditRequest:
+    properties:
+      status:
+        $ref: '#/definitions/domain.CommentStatus'
+    required:
+    - status
+    type: object
   handler.AuthResponse:
     properties:
       access_token:
@@ -593,10 +600,6 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: 关键词
-        in: query
-        name: keyword
-        type: string
       - description: 页码
         in: query
         name: page
@@ -625,7 +628,7 @@ paths:
           description: 服务器错误
           schema:
             $ref: '#/definitions/response.errorResponse'
-      summary: 评论审计
+      summary: 获取回复评论列表
       tags:
       - comment
   /v1/comment/{tenant_id}/{belong_key}:
@@ -702,6 +705,51 @@ paths:
       security:
       - BearerAuth: []
       summary: 删除评论
+      tags:
+      - comment
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: integer
+      - description: 评论id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.AuditRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.CommentListResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 评论审计
       tags:
       - comment
   /v1/comment/{tenant_id}/config:

@@ -149,13 +149,14 @@ func (h *HttpHandler) ListReplies(ctx *gin.Context) {
 // @Tags         comment
 // @Accept       json
 // @Produce      json
-// @Param        keyword    query     string  false  "关键词"
-// @Param        page       query     int     false  "页码"
-// @Param        page_size  query     int     false  "每页数量"
+// @Security     BearerAuth
+// @Param        tenant_id   path int true "租户id"
+// @Param        id   			 path int true "评论id"
+// @Param        request body handler.AuditRequest true "请求参数"
 // @Success      200  {object}  response.successResponse{data=handler.CommentListResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/comment [get]
+// @Router       /v1/comment/{tenant_id}/{id} [put]
 func (h *HttpHandler) Audit(ctx *gin.Context) {
 	req := new(AuditRequest)
 

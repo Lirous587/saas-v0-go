@@ -9,14 +9,18 @@ import (
 const (
 	// 模板名称常量 - 供service层使用
 	// TemplateReply   = "reply"
-	TemplateComment   = "comment"
-	TemplateNeedAudit = "needAudit"
+	TemplateComment     = "comment"
+	TemplateNeedAudit   = "needAudit"
+	TemplateAuditPass   = "auditPass"
+	TemplateAuditReject = "auditReject"
 )
 
 const (
 	// 模板文件名常量 - 供加载函数使用
-	FileComment   = "comment.html"
-	FileNeedAudit = "need_audit.html"
+	FileComment     = "comment.html"
+	FileNeedAudit   = "need_audit.html"
+	FileAuditPass   = "audit_pass.html"
+	FileAuditReject = "audit_reject.html"
 )
 
 //go:embed *.html
@@ -26,8 +30,10 @@ func LoadCommentTemplates() map[string]*template.Template {
 	templates := make(map[string]*template.Template)
 
 	templateFiles := map[string]string{
-		TemplateComment:   FileComment,
-		TemplateNeedAudit: FileNeedAudit,
+		TemplateComment:     FileComment,
+		TemplateNeedAudit:   FileNeedAudit,
+		TemplateAuditPass:   FileAuditPass,
+		TemplateAuditReject: FileAuditReject,
 	}
 
 	for name, filename := range templateFiles {

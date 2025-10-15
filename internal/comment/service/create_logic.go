@@ -107,28 +107,28 @@ func (s *service) validateCommentLegitimacy(comment *domain.Comment) error {
 }
 
 // 获取评论配置
-func (s *service) getCommentConfig(comment *domain.Comment) (*domain.CommentConfig, error) {
-	if comment.TenantID == 0 || comment.PlateID == 0 {
+func (s *service) getCommentConfig(tenantID domain.TenantID, plateID int64) (*domain.CommentConfig, error) {
+	if tenantID == 0 || plateID == 0 {
 		return nil, codes.ErrCommentIllegalReply
 	}
 
 	// 1.先去获取板块配置
 	// 2.不存在板块配置则使用租户配置
-	plateConfig, err := s.GetPlateConfig(comment.TenantID, comment.PlateID)
+	plateConfig, err := s.GetPlateConfig(tenantID, plateID)
 	if err == nil {
 		zap.L().Debug("使用板块配置")
 		return &domain.CommentConfig{
 			IfAudit: plateConfig.IfAudit,
 		}, nil
 	} else if errors.Is(err, codes.ErrCommentPlateConfigNotFound) {
-		tenantConfig, err := s.GetTenantConfig(comment.TenantID)
+		tenantConfig, err := s.GetTenantConfig(tenantID)
 		if err == nil {
 			zap.L().Debug("使用租户配置")
 			return &domain.CommentConfig{
 				IfAudit: tenantConfig.IfAudit,
 			}, nil
 		} else if errors.Is(err, codes.ErrCommentTenantConfigNotFound) {
-			zap.L().Warn("租户配置不存在，使用默认审核")
+			zap.L().Debug("租户配置不存在，使用默认审核")
 			return &domain.CommentConfig{
 				IfAudit: true,
 			}, nil
@@ -137,9 +137,8 @@ func (s *service) getCommentConfig(comment *domain.Comment) (*domain.CommentConf
 
 	// 出现意外错误 记录日志 并且返回默认配置
 	zap.L().Error("获取配置失败",
-		zap.Int64("tenant_id", int64(comment.TenantID)),
-		zap.Int64("comment_id", int64(comment.ID)),
-		zap.Int64("plate_id", comment.PlateID),
+		zap.Int64("tenant_id", int64(tenantID)),
+		zap.Int64("plate_id", plateID),
 		zap.Error(err))
 
 	return &domain.CommentConfig{
@@ -162,7 +161,7 @@ func (s *service) adminCommnet(comment *domain.Comment) error {
 
 		// 如果是回复评论
 		if comment.IsReply() {
-			commnetSource, err := s.getCommentSource(comment)
+			commentSource, err := s.getCommentSource(comment)
 			if err != nil {
 				zap.L().Error("获取评论来源失败", zap.Error(err))
 				return
@@ -196,7 +195,7 @@ func (s *service) adminCommnet(comment *domain.Comment) error {
 			// 整合数据 发送邮件
 			for _, toUser := range toUsers {
 				go func(u *domain.UserInfo) {
-					if err := s.sentCommentEmail(commnetSource.commentUser, u.GetEmail(), commnetSource.relatedURL, comment.Content); err != nil {
+					if err := s.sentCommentEmail(commentSource.commentUser, u.GetEmail(), commentSource.relatedURL, comment.Content); err != nil {
 						zap.L().Error("发送邮件失败", zap.Error(err))
 						return
 					}
@@ -210,7 +209,7 @@ func (s *service) adminCommnet(comment *domain.Comment) error {
 
 func (s *service) viewerComment(comment *domain.Comment, admin *domain.UserInfo) error {
 	// 查询评论配置
-	config, err := s.getCommentConfig(comment)
+	config, err := s.getCommentConfig(comment.TenantID, comment.PlateID)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -229,7 +228,7 @@ func (s *service) viewerComment(comment *domain.Comment, admin *domain.UserInfo)
 
 	// 异步邮箱通知
 	go func() {
-		commnetSource, err := s.getCommentSource(comment)
+		commentSource, err := s.getCommentSource(comment)
 		if err != nil {
 			zap.L().Error("获取评论来源失败", zap.Error(err))
 			return
@@ -238,12 +237,12 @@ func (s *service) viewerComment(comment *domain.Comment, admin *domain.UserInfo)
 		// 评论为根评论时 发邮件给租户
 		if comment.IsRootComment() {
 			if config.IfAudit {
-				if err := s.sentNeedAuditEmail(commnetSource.commentUser, admin.GetEmail(), commnetSource.relatedURL, comment.Content); err != nil {
+				if err := s.sentNeedAuditEmail(commentSource.commentUser, admin.GetEmail(), commentSource.relatedURL, comment.Content); err != nil {
 					zap.L().Error("发送邮件AuditEmail给租户管理员失败", zap.Error(err))
 					return
 				}
 			} else {
-				if err := s.sentCommentEmail(commnetSource.commentUser, admin.GetEmail(), commnetSource.relatedURL, comment.Content); err != nil {
+				if err := s.sentCommentEmail(commentSource.commentUser, admin.GetEmail(), commentSource.relatedURL, comment.Content); err != nil {
 					zap.L().Error("发送邮件CommentEmail给租户管理员失败", zap.Error(err))
 					return
 				}
@@ -251,7 +250,7 @@ func (s *service) viewerComment(comment *domain.Comment, admin *domain.UserInfo)
 		} else if comment.IsReply() {
 			if config.IfAudit {
 				// 发邮件给租户
-				if err := s.sentNeedAuditEmail(commnetSource.commentUser, admin.GetEmail(), commnetSource.relatedURL, comment.Content); err != nil {
+				if err := s.sentNeedAuditEmail(commentSource.commentUser, admin.GetEmail(), commentSource.relatedURL, comment.Content); err != nil {
 					zap.L().Error("发邮件给租户失败", zap.Error(err))
 					return
 				}
@@ -285,7 +284,7 @@ func (s *service) viewerComment(comment *domain.Comment, admin *domain.UserInfo)
 				// 整合数据 发送邮件
 				for _, toUser := range toUsers {
 					go func(u *domain.UserInfo) {
-						if err := s.sentCommentEmail(commnetSource.commentUser, u.GetEmail(), commnetSource.relatedURL, comment.Content); err != nil {
+						if err := s.sentCommentEmail(commentSource.commentUser, u.GetEmail(), commentSource.relatedURL, comment.Content); err != nil {
 							zap.L().Error("发送邮件失败", zap.Error(err))
 							return
 						}
@@ -298,13 +297,13 @@ func (s *service) viewerComment(comment *domain.Comment, admin *domain.UserInfo)
 	return nil
 }
 
-type commnetSource struct {
+type commentSource struct {
 	commentUser *domain.UserInfo
 	relatedURL  string
 }
 
 // 获取评论来源 --> 评论者 板块信息
-func (s *service) getCommentSource(comment *domain.Comment) (*commnetSource, error) {
+func (s *service) getCommentSource(comment *domain.Comment) (*commentSource, error) {
 	// 获取当前评论用户
 	commentUser, err := s.repo.GetUserInfoByID(comment.UserID)
 	if err != nil {
@@ -316,7 +315,7 @@ func (s *service) getCommentSource(comment *domain.Comment) (*commnetSource, err
 		return nil, err
 	}
 
-	return &commnetSource{
+	return &commentSource{
 		commentUser: commentUser,
 		relatedURL:  relatedURL,
 	}, nil
