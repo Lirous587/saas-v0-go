@@ -851,7 +851,83 @@ paths:
       summary: 新增评论板块
       tags:
       - comment
-  /v1/comment/{tenant_id}/plate/{belong_key}/config:
+  /v1/comment/{tenant_id}/plate/:id:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: integer
+      - description: 板块id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreatePlateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 修改评论板块
+      tags:
+      - comment
+  /v1/comment/{tenant_id}/plate/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: integer
+      - description: 板块id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 删除评论板块
+      tags:
+      - comment
+  /v1/comment/{tenant_id}/plate/config/{belong_key}:
     put:
       consumes:
       - application/json
@@ -892,42 +968,7 @@ paths:
       summary: 设置板块级别的评论系统配置
       tags:
       - comment
-  /v1/comment/{tenant_id}/plate/{id}:
-    delete:
-      consumes:
-      - application/json
-      parameters:
-      - description: 租户id
-        in: path
-        name: tenant_id
-        required: true
-        type: integer
-      - description: 板块id
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 请求成功
-          schema:
-            $ref: '#/definitions/response.successResponse'
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 删除评论板块
-      tags:
-      - comment
-  /v1/comment/{tenant_id}/plate/{plate_id}/config:
+  /v1/comment/{tenant_id}/plate/config/{id}:
     get:
       consumes:
       - application/json
@@ -939,7 +980,7 @@ paths:
         type: integer
       - description: 板块id
         in: path
-        name: plate_id
+        name: id
         required: true
         type: integer
       produces:

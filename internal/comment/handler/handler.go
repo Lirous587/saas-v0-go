@@ -248,6 +248,40 @@ func (h *HttpHandler) CreatePlate(ctx *gin.Context) {
 	response.Success(ctx)
 }
 
+// UpdatePlate godoc
+// @Summary      修改评论板块
+// @Tags         comment
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        tenant_id   path int true "租户id"
+// @Param        id   			 path int true "板块id"
+// @Param        request body handler.CreatePlateRequest true "请求参数"
+// @Success      200  {object}  response.successResponse "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/comment/{tenant_id}/plate/:id [put]
+func (h *HttpHandler) UpdatePlate(ctx *gin.Context) {
+	req := new(UpdatePlateRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	if err := h.service.UpdatePlate(&domain.Plate{
+		ID:         req.ID,
+		TenantID:   req.TenantID,
+		BelongKey:  req.BelongKey,
+		RelatedURL: req.RelatedURL,
+		Summary:    req.Summary,
+	}); err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx)
+}
+
 // DeletePlate godoc
 // @Summary      删除评论板块
 // @Tags         comment
@@ -322,7 +356,7 @@ func (h *HttpHandler) ListPlate(ctx *gin.Context) {
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/comment/{tenant_id}/plate/{belong_key}/config [put]
+// @Router       /v1/comment/{tenant_id}/plate/config/{belong_key} [put]
 func (h *HttpHandler) SetPlateConfig(ctx *gin.Context) {
 	req := new(SetPlateConfigRequest)
 
@@ -351,11 +385,11 @@ func (h *HttpHandler) SetPlateConfig(ctx *gin.Context) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        tenant_id path int true 	"租户id"
-// @Param        plate_id  path int true 	"板块id"
+// @Param        id  		   path int true 	"板块id"
 // @Success      200  {object}  response.successResponse{data=handler.PlateConfigResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/comment/{tenant_id}/plate/{plate_id}/config [get]
+// @Router       /v1/comment/{tenant_id}/plate/config/{id} [get]
 func (h *HttpHandler) GetPlateConfig(ctx *gin.Context) {
 	req := new(GetPlateConfigRequest)
 
@@ -363,7 +397,7 @@ func (h *HttpHandler) GetPlateConfig(ctx *gin.Context) {
 		return
 	}
 
-	res, err := h.service.GetPlateConfig(req.TenantID, req.PlateID)
+	res, err := h.service.GetPlateConfig(req.TenantID, req.ID)
 	if err != nil {
 		response.Error(ctx, err)
 		return

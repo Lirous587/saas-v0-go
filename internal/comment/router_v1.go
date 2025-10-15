@@ -52,11 +52,12 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 		plateGroup := protect.Group("/plate")
 		{
 			plateGroup.POST("", handler.CreatePlate)
+			plateGroup.PUT("/:id", handler.UpdatePlate)
 			plateGroup.DELETE("/:id", handler.DeletePlate)
 			plateGroup.GET("", handler.ListPlate)
 			// 板块配置
-			plateGroup.PUT("/:belong_key/config", handler.SetPlateConfig)
-			plateGroup.GET("/:plate_id/config", handler.GetPlateConfig)
+			plateGroup.PUT("/config/:belong_key", handler.SetPlateConfig)
+			plateGroup.GET("/config/:id", handler.GetPlateConfig)
 		}
 	}
 

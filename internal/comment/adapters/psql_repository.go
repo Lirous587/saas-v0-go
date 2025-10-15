@@ -1,4 +1,4 @@
-﻿package adapters
+package adapters
 
 import (
 	"database/sql"
@@ -266,6 +266,21 @@ func (repo *CommentPSQLRepository) CreatePlate(plate *domain.Plate) error {
 	ormPlate := domainPlateToORM(plate)
 
 	return ormPlate.InsertG(boil.Infer())
+}
+
+func (repo *CommentPSQLRepository) UpdatePlate(plate *domain.Plate) error {
+	ormPlate := domainPlateToORM(plate)
+
+	rows, err := ormPlate.UpdateG(boil.Infer())
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return codes.ErrCommentPlateNotFound
+	}
+
+	return nil
 }
 
 func (repo *CommentPSQLRepository) DeletePlate(tenantID domain.TenantID, id int64) error {

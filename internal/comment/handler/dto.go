@@ -88,6 +88,14 @@ type CreatePlateRequest struct {
 	Summary    string          `json:"summary" binding:"required,max=60"`
 }
 
+type UpdatePlateRequest struct {
+	TenantID   domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	ID         int64           `json:"-" uri:"id" binding:"required"`
+	BelongKey  string          `json:"belong_key" binding:"required,max=50"`
+	RelatedURL string          `json:"related_url" binding:"required,url,max=255"`
+	Summary    string          `json:"summary" binding:"required,max=60"`
+}
+
 type DeletePlateRequest struct {
 	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 	ID       int64           `json:"-" uri:"id" binding:"required"`
@@ -128,7 +136,7 @@ type SetPlateConfigRequest struct {
 
 type GetPlateConfigRequest struct {
 	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
-	PlateID  int64           `json:"-" uri:"plate_id" binding:"required"`
+	ID  int64           `json:"-" uri:"id" binding:"required"`
 }
 
 type PlateConfigResponse struct {

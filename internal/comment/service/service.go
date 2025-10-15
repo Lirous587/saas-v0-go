@@ -93,6 +93,14 @@ func (s *service) CreatePlate(plate *domain.Plate) error {
 	return nil
 }
 
+func (s *service) UpdatePlate(plate *domain.Plate) error {
+
+	if err := s.repo.UpdatePlate(plate); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
 func (s *service) DeletePlate(tenantID domain.TenantID, id int64) error {
 	return s.repo.DeletePlate(tenantID, id)
 }

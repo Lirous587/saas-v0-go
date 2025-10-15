@@ -19,6 +19,7 @@ type CommentRepository interface {
 	ExistTenantConfigByID(tenantID TenantID) (bool, error)
 
 	CreatePlate(plate *Plate) error
+	UpdatePlate(plate *Plate) error
 	DeletePlate(tenantID TenantID, id int64) error
 	ListPlate(query *PlateQuery) (*PlateList, error)
 	ExistPlateBykey(tenantID TenantID, belongKey string) (bool, error)

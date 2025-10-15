@@ -7,6 +7,7 @@ type CommentService interface {
 	List(query *CommentQuery) (*CommentList, error)
 
 	CreatePlate(plate *Plate) error
+	UpdatePlate(plate *Plate) error
 	DeletePlate(tenantID TenantID, id int64) error
 	ListPlate(query *PlateQuery) (*PlateList, error)
 
