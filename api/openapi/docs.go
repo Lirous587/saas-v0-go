@@ -750,6 +750,11 @@ const docTemplate = `{
         },
         "/v1/comment/{tenant_id}/{belong_key}/roots": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -827,6 +832,11 @@ const docTemplate = `{
         },
         "/v1/comment/{tenant_id}/{belong_key}/{root_id}/replies": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],

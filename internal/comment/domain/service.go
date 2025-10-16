@@ -4,9 +4,9 @@ type CommentService interface {
 	Create(comment *Comment, belongKey string) error
 	Delete(tenantID TenantID, userID int64, id int64) error
 	Audit(tenantID TenantID, id int64, status CommentStatus) error
-	ListRoots(belongKey string, query *CommentRootsQuery) ([]*CommentRoot, error)
-	ListReplies(belongKey string, query *CommentRepliesQuery) ([]*CommentReply, error)
-	
+	ListRoots(belongKey string, userID int64, query *CommentRootsQuery) ([]*CommentRoot, error)
+	ListReplies(belongKey string, userID int64, query *CommentRepliesQuery) ([]*CommentReply, error)
+
 	ToggleLike(tenantID TenantID, userID int64, id int64) error
 	CreatePlate(plate *Plate) error
 	UpdatePlate(plate *Plate) error

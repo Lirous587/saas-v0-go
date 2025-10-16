@@ -25,9 +25,9 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 	{
 		// 访客 获取评论
 		// 获取根评论
-		g.GET("/:belong_key/roots", handler.ListRoots)
+		g.GET("/:belong_key/roots", auth.OptionalJWTValidate(), handler.ListRoots)
 		// 根据根评论去获取其树下评论
-		g.GET("/:belong_key/:root_id/replies", handler.ListReplies)
+		g.GET("/:belong_key/:root_id/replies", auth.OptionalJWTValidate(), handler.ListReplies)
 	}
 
 	protect := g.Group("", auth.JWTValidate(), auth.CasbinValited())

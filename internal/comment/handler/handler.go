@@ -103,6 +103,7 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Tags         comment
 // @Accept       json
 // @Produce      json
+// @Security     BearerAuth
 // @Param        tenant_id   path 	 int 	  true 	 "租户id"
 // @Param        belong_key  path 	 string true   "评论板块"
 // @Param        last_id     query   int    false  "上页最小id"
@@ -112,13 +113,15 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/comment/{tenant_id}/{belong_key}/roots [get]
 func (h *HttpHandler) ListRoots(ctx *gin.Context) {
+	userID, _ := server.GetUserID(ctx)
+
 	req := new(ListRootsRequest)
 
 	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
-	data, err := h.service.ListRoots(req.BelongKey, &domain.CommentRootsQuery{
+	data, err := h.service.ListRoots(req.BelongKey, userID, &domain.CommentRootsQuery{
 		TenantID: req.TenantID,
 		PageSize: req.PageSize,
 		LastID:   req.LastID,
@@ -137,6 +140,7 @@ func (h *HttpHandler) ListRoots(ctx *gin.Context) {
 // @Tags         comment
 // @Accept       json
 // @Produce      json
+// @Security     BearerAuth
 // @Param        tenant_id   path 	 int 	  true 	 "租户id"
 // @Param        belong_key  path 	 string true   "评论板块"
 // @Param        root_id   	 path 	 int 	  true   "根评论id"
@@ -147,13 +151,15 @@ func (h *HttpHandler) ListRoots(ctx *gin.Context) {
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/comment/{tenant_id}/{belong_key}/{root_id}/replies [get]
 func (h *HttpHandler) ListReplies(ctx *gin.Context) {
+	userID, _ := server.GetUserID(ctx)
+
 	req := new(ListRepliesRequest)
 
 	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
-	data, err := h.service.ListReplies(req.BelongKey, &domain.CommentRepliesQuery{
+	data, err := h.service.ListReplies(req.BelongKey, userID, &domain.CommentRepliesQuery{
 		TenantID: req.TenantID,
 		RootID:   req.RootID,
 		LastID:   req.LastID,

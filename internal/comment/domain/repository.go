@@ -47,4 +47,5 @@ type CommentCache interface {
 	GetLikeStatus(tenantID TenantID, userID int64, commentID int64) (LikeStatus, error)
 	AddLike(tenantID TenantID, userID int64, commentID int64) error
 	RemoveLike(tenantID TenantID, userID int64, commentID int64) error
+	GetLikeMap(tenantID TenantID, userID int64, commentIds []int64) (map[int64]struct{}, error)
 }

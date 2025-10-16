@@ -202,12 +202,12 @@ func (cache *CommentRedisCache) DeletePlateConfig(tenantID domain.TenantID, plat
 	return nil
 }
 
-const commentLikeKey = "comment:plate:config"
+const commentLikeKey = "comment:like"
 const commentLikeExpired = 30 * time.Hour * 24 // 30缓存 场景足够
 
 func (cache *CommentRedisCache) GetLikeStatus(tenantID domain.TenantID, userID int64, commentID int64) (domain.LikeStatus, error) {
 	preKey := utils.GetRedisKey(commentLikeKey)
-	key := fmt.Sprintf("%s-%d-%d", preKey, tenantID, userID)
+	key := fmt.Sprintf("%s:%d-%d", preKey, tenantID, userID)
 	exists, err := cache.client.SIsMember(context.Background(), key, commentID).Result()
 	if err != nil {
 		return false, errors.WithStack(err)
@@ -239,4 +239,25 @@ func (cache *CommentRedisCache) RemoveLike(tenantID domain.TenantID, userID int6
 		return errors.WithStack(err)
 	}
 	return nil
+}
+
+func (cache *CommentRedisCache) GetLikeMap(tenantID domain.TenantID, userID int64, commentIds []int64) (map[int64]struct{}, error) {
+	preKey := utils.GetRedisKey(commentLikeKey)
+	key := fmt.Sprintf("%s-%d-%d", preKey, tenantID, userID)
+
+	members := utils.Int64SliceToInterface(commentIds)
+
+	results, err := cache.client.SMIsMember(context.Background(), key, members...).Result()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	likeMap := make(map[int64]struct{})
+	for i, exists := range results {
+		if exists {
+			likeMap[commentIds[i]] = struct{}{}
+		}
+	}
+
+	return likeMap, nil
 }

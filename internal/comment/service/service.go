@@ -146,7 +146,7 @@ func (s *service) Delete(tenantID domain.TenantID, userID int64, id int64) error
 	return s.repo.Delete(tenantID, id)
 }
 
-func (s *service) ListRoots(belongKey string, query *domain.CommentRootsQuery) ([]*domain.CommentRoot, error) {
+func (s *service) ListRoots(belongKey string, userID int64, query *domain.CommentRootsQuery) ([]*domain.CommentRoot, error) {
 	plateID, err := s.getPlateID(query.TenantID, belongKey)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -154,10 +154,37 @@ func (s *service) ListRoots(belongKey string, query *domain.CommentRootsQuery) (
 
 	query.PlateID = plateID
 
-	return s.repo.ListRoots(query)
+	// 获取到roots
+	roots, err := s.repo.ListRoots(query)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	// 登录用户则处理点赞
+	if userID != 0 {
+		rootIds := make([]int64, 0, len(roots))
+		for i := range roots {
+			rootIds = append(rootIds, roots[i].CommentWithUser.ID)
+		}
+
+		// 整合点赞记录
+		likeMap, err := s.cache.GetLikeMap(query.TenantID, userID, rootIds)
+		if err != nil {
+			zap.L().Error("获取点赞状态失败", zap.Error(err))
+		}
+
+		// 设置 IsLiked 字段
+		for i := range roots {
+			if _, liked := likeMap[roots[i].CommentWithUser.ID]; liked {
+				roots[i].CommentWithUser.IsLiked = true
+			}
+		}
+	}
+
+	return roots, nil
 }
 
-func (s *service) ListReplies(belongKey string, query *domain.CommentRepliesQuery) ([]*domain.CommentReply, error) {
+func (s *service) ListReplies(belongKey string, userID int64, query *domain.CommentRepliesQuery) ([]*domain.CommentReply, error) {
 	plateID, err := s.getPlateID(query.TenantID, belongKey)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -165,7 +192,34 @@ func (s *service) ListReplies(belongKey string, query *domain.CommentRepliesQuer
 
 	query.PlateID = plateID
 
-	return s.repo.ListReplies(query)
+	// 获取到replies
+	replies, err := s.repo.ListReplies(query)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	// 登录用户则处理点赞
+	if userID != 0 {
+		replyIds := make([]int64, 0, len(replies))
+		for i := range replies {
+			replyIds = append(replyIds, replies[i].CommentWithUser.ID)
+		}
+
+		// 整合点赞记录
+		likeMap, err := s.cache.GetLikeMap(query.TenantID, userID, replyIds)
+		if err != nil {
+			zap.L().Error("获取点赞状态失败", zap.Error(err))
+		}
+
+		// 设置 IsLiked 字段
+		for i := range replies {
+			if _, liked := likeMap[replies[i].CommentWithUser.ID]; liked {
+				replies[i].CommentWithUser.IsLiked = true
+			}
+		}
+	}
+
+	return replies, nil
 }
 
 func (s *service) ToggleLike(tenantID domain.TenantID, userID int64, id int64) error {

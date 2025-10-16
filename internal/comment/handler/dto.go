@@ -50,7 +50,7 @@ type CommentRootResponse struct {
 	Content      string    `json:"content"`
 	LikeCount    int64     `json:"like_count,omitempty"`
 	CreatedAt    int64     `json:"created_at"`
-	IsLiked      bool      `json:"is_liked"`
+	IsLiked      bool      `json:"is_liked,omitempty"`
 	RepliesCount int64     `json:"replies_count,omitempty"`
 }
 
@@ -70,7 +70,7 @@ type CommentReplyResponse struct {
 	Content   string    `json:"content"`
 	LikeCount int64     `json:"like_count,omitempty"`
 	CreatedAt int64     `json:"created_at"`
-	IsLiked   bool      `json:"is_liked"`
+	IsLiked   bool      `json:"is_liked,omitempty"`
 }
 
 type ToggleLikeRequest struct {

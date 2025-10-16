@@ -103,6 +103,36 @@ func JWTValidate() gin.HandlerFunc {
 	}
 }
 
+func OptionalJWTValidate() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// 1. 从请求头解析 Token
+		tokenStr, err := parseTokenFromHeader(c)
+		if err != nil {
+			c.Next()
+			return
+		}
+
+		// 2. 验证token
+		_, err = tokenServer.ValidateAccessToken(tokenStr)
+		if err != nil {
+			c.Next()
+			return
+		}
+
+		// 3. 解析 Token
+		payload, err := tokenServer.ParseAccessToken(tokenStr)
+		if err != nil {
+			c.Next()
+			return
+		}
+
+		// 3. 将用户 相关信息存入上下文
+		c.Set(server.UserIDKey, payload.UserID)
+
+		c.Next()
+	}
+}
+
 func CasbinValited() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// 1.获取useID

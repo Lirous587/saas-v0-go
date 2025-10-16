@@ -705,6 +705,8 @@ paths:
           description: 服务器错误
           schema:
             $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
       summary: 获取根树下的回复评论列表
       tags:
       - comment
@@ -753,6 +755,8 @@ paths:
           description: 服务器错误
           schema:
             $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
       summary: 获取根级评论列表
       tags:
       - comment
