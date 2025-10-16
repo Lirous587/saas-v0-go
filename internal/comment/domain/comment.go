@@ -95,6 +95,27 @@ func (c *Comment) CanAudit() bool {
 	return c.status == CommentStatusPending
 }
 
+type LikeStatus bool
+
+const like LikeStatus = true
+const unLike LikeStatus = false
+
+func (l *LikeStatus) Like() {
+	*l = like
+}
+
+func (l *LikeStatus) UnLike() {
+	*l = unLike
+}
+
+func (l *LikeStatus) IsLike() bool {
+	return *l == like
+}
+
+func (l *LikeStatus) Toogle() {
+	*l = !*l
+}
+
 // -- 评论响应
 
 type CommentWithUser struct {

@@ -12,6 +12,7 @@ import (
 
 	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
+	"github.com/aarondl/sqlboiler/v4/queries"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/pkg/errors"
 )
@@ -90,6 +91,10 @@ type replyCount struct {
 	Count  int64 `boil:"reply_count"`
 }
 
+const (
+	replyCountSelect = "COUNT(*) AS reply_count"
+)
+
 func (repo *CommentPSQLRepository) ListRoots(query *domain.CommentRootsQuery) ([]*domain.CommentRoot, error) {
 	mods := make([]qm.QueryMod, 0, 9)
 	mods = append(mods, orm.CommentWhere.TenantID.EQ(int64(query.TenantID)))
@@ -130,7 +135,7 @@ func (repo *CommentPSQLRepository) ListRoots(query *domain.CommentRootsQuery) ([
 	if len(rootIDs) > 0 {
 		var replyCounts []replyCount
 		err := orm.NewQuery(
-			qm.Select(orm.CommentTableColumns.RootID, "COUNT(*) as reply_count"),
+			qm.Select(orm.CommentTableColumns.RootID, replyCountSelect),
 			qm.From(orm.TableNames.Comments),
 			orm.CommentWhere.TenantID.EQ(int64(query.TenantID)),
 			orm.CommentWhere.PlateID.EQ(query.PlateID),
@@ -222,6 +227,43 @@ func (repo *CommentPSQLRepository) ListReplies(query *domain.CommentRepliesQuery
 	}
 
 	return replies, nil
+}
+
+func (repo *CommentPSQLRepository) UpdateLikeCount(tenantID domain.TenantID, commentID int64, isLike bool) error {
+	tx, err := boil.BeginTx(context.Background(), nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	deltaStr := "+ 1"
+	if !isLike {
+		deltaStr = "- 1"
+	}
+
+	likeResStr := orm.CommentColumns.LikeCount + deltaStr
+
+	sql := fmt.Sprintf(
+		"UPDATE %s SET %s = %s WHERE id = $1 AND tenant_id = $2",
+		orm.TableNames.Comments,
+		orm.CommentColumns.LikeCount,
+		likeResStr)
+
+	result, err := queries.Raw(sql, commentID, tenantID).Exec(tx)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return codes.ErrCommentNotFound
+	}
+
+	return tx.Commit()
 }
 
 func (repo *CommentPSQLRepository) GetCommentUser(tenantID domain.TenantID, commentID int64) (int64, error) {

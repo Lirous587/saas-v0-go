@@ -37,9 +37,8 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 		// 删除评论
 		protect.DELETE("/:id", handler.Delete)
 
-		// 低优先级：点赞/取消点赞
-		// protect.POST("/:id/like", handler.Like)
-		// protect.DELETE("/:id/like", handler.Unlike)
+		// 低优先级 点赞/取消点赞
+		protect.PUT("/like/:id", handler.ToggleLike)
 
 		// 管理员
 		// 审计

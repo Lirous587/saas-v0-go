@@ -168,6 +168,39 @@ func (h *HttpHandler) ListReplies(ctx *gin.Context) {
 	response.Success(ctx, domainCommentRepliesToResponse(data))
 }
 
+// ToggleLike godoc
+// @Summary      点赞/取消点赞评论
+// @Tags         comment
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        tenant_id   	path int true "租户id"
+// @Param        id   				path int true "评论id"
+// @Success      200  {object}  response.successResponse "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/comment/{tenant_id}/like/{id} [put]
+func (h *HttpHandler) ToggleLike(ctx *gin.Context) {
+	userID, err := server.GetUserID(ctx)
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	req := new(ToggleLikeRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	if err := h.service.ToggleLike(req.TenantID, userID, req.ID); err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx)
+}
+
 // Audit godoc
 // @Summary      评论审计
 // @Tags         comment

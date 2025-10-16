@@ -6,7 +6,8 @@ type CommentService interface {
 	Audit(tenantID TenantID, id int64, status CommentStatus) error
 	ListRoots(belongKey string, query *CommentRootsQuery) ([]*CommentRoot, error)
 	ListReplies(belongKey string, query *CommentRepliesQuery) ([]*CommentReply, error)
-
+	
+	ToggleLike(tenantID TenantID, userID int64, id int64) error
 	CreatePlate(plate *Plate) error
 	UpdatePlate(plate *Plate) error
 	DeletePlate(tenantID TenantID, id int64) error

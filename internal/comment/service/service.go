@@ -168,6 +168,38 @@ func (s *service) ListReplies(belongKey string, query *domain.CommentRepliesQuer
 	return s.repo.ListReplies(query)
 }
 
+func (s *service) ToggleLike(tenantID domain.TenantID, userID int64, id int64) error {
+	// 去查询当前status
+	likeStatus, err := s.cache.GetLikeStatus(tenantID, userID, id)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	// toogle状态
+	likeStatus.Toogle()
+
+	// 判断当前操作
+	if likeStatus.IsLike() {
+		// 当前操作为点赞点赞
+		if err := s.cache.AddLike(tenantID, userID, id); err != nil {
+			return errors.WithStack(err)
+		}
+		if err := s.repo.UpdateLikeCount(tenantID, id, likeStatus.IsLike()); err != nil {
+			return errors.WithStack(err)
+		}
+	} else {
+		// 当前操作为取消点赞
+		if err := s.cache.RemoveLike(tenantID, userID, id); err != nil {
+			return errors.WithStack(err)
+		}
+		if err := s.repo.UpdateLikeCount(tenantID, id, likeStatus.IsLike()); err != nil {
+			return errors.WithStack(err)
+		}
+	}
+
+	return nil
+}
+
 func (s *service) CreatePlate(plate *domain.Plate) error {
 	exist, err := s.repo.ExistPlateBykey(plate.TenantID, plate.BelongKey)
 	if err != nil {

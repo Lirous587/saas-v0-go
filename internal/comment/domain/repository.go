@@ -7,6 +7,7 @@ type CommentRepository interface {
 	Approve(tenantID TenantID, id int64) error
 	ListRoots(query *CommentRootsQuery) ([]*CommentRoot, error)
 	ListReplies(query *CommentRepliesQuery) ([]*CommentReply, error)
+	UpdateLikeCount(tenantID TenantID, commentID int64, isLike bool) error
 
 	GetCommentUser(tenantID TenantID, commentID int64) (int64, error)
 
@@ -42,4 +43,8 @@ type CommentCache interface {
 	SetPlateConfig(config *PlateConfig) error
 	GetPlateConfig(tenantID TenantID, plateID int64) (*PlateConfig, error)
 	DeletePlateConfig(tenantID TenantID, plateID int64) error
+
+	GetLikeStatus(tenantID TenantID, userID int64, commentID int64) (LikeStatus, error)
+	AddLike(tenantID TenantID, userID int64, commentID int64) error
+	RemoveLike(tenantID TenantID, userID int64, commentID int64) error
 }

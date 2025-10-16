@@ -73,6 +73,11 @@ type CommentReplyResponse struct {
 	IsLiked   bool      `json:"is_liked"`
 }
 
+type ToggleLikeRequest struct {
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	ID       int64           `json:"-" uri:"id" binding:"required"`
+}
+
 type AuditRequest struct {
 	TenantID domain.TenantID      `json:"-" uri:"tenant_id" binding:"required"`
 	ID       int64                `json:"-" uri:"id" binding:"required"`
