@@ -70,7 +70,7 @@ func (s *service) validateCommentLegitimacy(comment *domain.Comment) error {
 		}
 
 		// 是否为真正root检测
-		if rcommnet.RootID != 0 {
+		if !rcommnet.IsRootComment() {
 			return codes.ErrCommentBuildIllegalTree.WithDetail(map[string]any{
 				"reason": "评论的当前评论非根评论",
 			})

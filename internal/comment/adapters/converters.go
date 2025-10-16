@@ -70,19 +70,19 @@ func ormCommentToDomain(ormComment *orm.Comment) *domain.Comment {
 	return comment
 }
 
-func ormCommentsToDomain(ormComments []*orm.Comment) []*domain.Comment {
-	if len(ormComments) == 0 {
-		return nil
-	}
+// func ormCommentsToDomain(ormComments []*orm.Comment) []*domain.Comment {
+// 	if len(ormComments) == 0 {
+// 		return nil
+// 	}
 
-	comments := make([]*domain.Comment, 0, len(ormComments))
-	for i := range ormComments {
-		if ormComments[i] != nil {
-			comments = append(comments, ormCommentToDomain(ormComments[i]))
-		}
-	}
-	return comments
-}
+// 	comments := make([]*domain.Comment, 0, len(ormComments))
+// 	for i := range ormComments {
+// 		if ormComments[i] != nil {
+// 			comments = append(comments, ormCommentToDomain(ormComments[i]))
+// 		}
+// 	}
+// 	return comments
+// }
 
 func ormUserToDomain(ormUser *orm.User) *domain.UserInfo {
 	if ormUser == nil {
@@ -93,7 +93,7 @@ func ormUserToDomain(ormUser *orm.User) *domain.UserInfo {
 	user := &domain.UserInfo{
 		ID:       ormUser.ID,
 		NickName: ormUser.Nickname,
-		// Avatar:   ormUser.AvatarURL.String,
+		Avatar:   ormUser.Avatar,
 	}
 
 	user.SetEmail(ormUser.Email)

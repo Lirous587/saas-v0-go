@@ -32,7 +32,7 @@ type User struct {
 	LastLoginAt  time.Time   `boil:"last_login_at" json:"last_login_at" toml:"last_login_at" yaml:"last_login_at"`
 	CreatedAt    time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt    time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
-	Avatar       null.String `boil:"avatar" json:"avatar,omitempty" toml:"avatar" yaml:"avatar,omitempty"`
+	Avatar       string      `boil:"avatar" json:"avatar" toml:"avatar" yaml:"avatar"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -98,7 +98,7 @@ var UserWhere = struct {
 	LastLoginAt  whereHelpertime_Time
 	CreatedAt    whereHelpertime_Time
 	UpdatedAt    whereHelpertime_Time
-	Avatar       whereHelpernull_String
+	Avatar       whereHelperstring
 }{
 	ID:           whereHelperint64{field: "\"users\".\"id\""},
 	Nickname:     whereHelperstring{field: "\"users\".\"nickname\""},
@@ -109,7 +109,7 @@ var UserWhere = struct {
 	LastLoginAt:  whereHelpertime_Time{field: "\"users\".\"last_login_at\""},
 	CreatedAt:    whereHelpertime_Time{field: "\"users\".\"created_at\""},
 	UpdatedAt:    whereHelpertime_Time{field: "\"users\".\"updated_at\""},
-	Avatar:       whereHelpernull_String{field: "\"users\".\"avatar\""},
+	Avatar:       whereHelperstring{field: "\"users\".\"avatar\""},
 }
 
 // UserRels is where relationship names are stored.
@@ -169,8 +169,8 @@ type userL struct{}
 
 var (
 	userAllColumns            = []string{"id", "nickname", "email", "github_id", "google_id", "password_hash", "last_login_at", "created_at", "updated_at", "avatar"}
-	userColumnsWithoutDefault = []string{"nickname", "email", "last_login_at"}
-	userColumnsWithDefault    = []string{"id", "github_id", "google_id", "password_hash", "created_at", "updated_at", "avatar"}
+	userColumnsWithoutDefault = []string{"nickname", "email", "last_login_at", "avatar"}
+	userColumnsWithDefault    = []string{"id", "github_id", "google_id", "password_hash", "created_at", "updated_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 	userGeneratedColumns      = []string{}
 )

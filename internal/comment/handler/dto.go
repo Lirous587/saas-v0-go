@@ -11,18 +11,6 @@ type UserInfo struct {
 	Avatar   string `json:"avatar,omitempty"`
 }
 
-type CommentResponse struct {
-	ID        int64                `json:"id"`
-	UserID    int64                `json:"user_id"`
-	ParentID  int64                `json:"parent_id"`
-	RootID    int64                `json:"root_id"`
-	Content   string               `json:"content"`
-	Status    domain.CommentStatus `json:"status,omitempty"`
-	LikeCount int64                `json:"like_count"`
-	CreatedAt int64                `json:"created_at"`
-	IsLiked   bool                 `json:"is_liked"`
-}
-
 type CreateRequest struct {
 	TenantID  domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 	BelongKey string          `json:"-" uri:"belong_key" binding:"required,max=50"`
@@ -50,30 +38,45 @@ type DeleteRequest struct {
 type ListRootsRequest struct {
 	TenantID  domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 	BelongKey string          `json:"-" uri:"belong_key" binding:"required"`
-	Page      int             `form:"page,default=1" binding:"min=1"`
-	PageSize  int             `form:"page_size,default=5" binding:"min=5,max=15"`
+	LastID    int64           `json:"-" form:"last_id" binding:"min=0"`
+	PageSize  int             `json:"-" form:"page_size,default=5" binding:"min=5,max=15"`
+}
+
+type CommentRootResponse struct {
+	ID           int64     `json:"id"`
+	User         *UserInfo `json:"user"`
+	ParentID     int64     `json:"parent_id,omitempty"`
+	RootID       int64     `json:"root_id,omitempty"`
+	Content      string    `json:"content"`
+	LikeCount    int64     `json:"like_count,omitempty"`
+	CreatedAt    int64     `json:"created_at"`
+	IsLiked      bool      `json:"is_liked"`
+	RepliesCount int64     `json:"replies_count,omitempty"`
 }
 
 type ListRepliesRequest struct {
 	TenantID  domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 	BelongKey string          `json:"-" uri:"belong_key" binding:"required"`
 	RootID    int64           `json:"-" uri:"root_id" binding:"required"`
-	Page      int             `form:"page,default=1" binding:"min=1"`
-	PageSize  int             `form:"page_size,default=5" binding:"min=5,max=15"`
+	LastID    int64           `json:"-" form:"last_id" binding:"min=0"`
+	PageSize  int             `json:"-" form:"page_size,default=5" binding:"min=5,max=15"`
+}
+
+type CommentReplyResponse struct {
+	ID        int64     `json:"id"`
+	User      *UserInfo `json:"user"`
+	ParentID  int64     `json:"parent_id,omitempty"`
+	RootID    int64     `json:"root_id,omitempty"`
+	Content   string    `json:"content"`
+	LikeCount int64     `json:"like_count,omitempty"`
+	CreatedAt int64     `json:"created_at"`
+	IsLiked   bool      `json:"is_liked"`
 }
 
 type AuditRequest struct {
 	TenantID domain.TenantID      `json:"-" uri:"tenant_id" binding:"required"`
 	ID       int64                `json:"-" uri:"id" binding:"required"`
 	Status   domain.CommentStatus `json:"status" binding:"required"`
-}
-
-type AdvancedListRequest struct {
-}
-
-type CommentListResponse struct {
-	Total int64              `json:"total"`
-	List  []*CommentResponse `json:"list"`
 }
 
 // --- 评论板块

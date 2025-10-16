@@ -83,16 +83,7 @@ definitions:
       title:
         type: string
     type: object
-  handler.CommentListResponse:
-    properties:
-      list:
-        items:
-          $ref: '#/definitions/handler.CommentResponse'
-        type: array
-      total:
-        type: integer
-    type: object
-  handler.CommentResponse:
+  handler.CommentReplyResponse:
     properties:
       content:
         type: string
@@ -108,10 +99,29 @@ definitions:
         type: integer
       root_id:
         type: integer
-      status:
-        $ref: '#/definitions/domain.CommentStatus'
-      user_id:
+      user:
+        $ref: '#/definitions/handler.UserInfo'
+    type: object
+  handler.CommentRootResponse:
+    properties:
+      content:
+        type: string
+      created_at:
         type: integer
+      id:
+        type: integer
+      is_liked:
+        type: boolean
+      like_count:
+        type: integer
+      parent_id:
+        type: integer
+      replies_count:
+        type: integer
+      root_id:
+        type: integer
+      user:
+        $ref: '#/definitions/handler.UserInfo'
     type: object
   handler.CreateCategoryRequest:
     properties:
@@ -366,6 +376,15 @@ definitions:
     required:
     - plan_id
     type: object
+  handler.UserInfo:
+    properties:
+      avatar:
+        type: string
+      id:
+        type: integer
+      nickname:
+        type: string
+    type: object
   response.errorResponse:
     properties:
       code:
@@ -595,42 +614,6 @@ paths:
       summary: 生成带答案的验证码
       tags:
       - captcha
-  /v1/comment:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: 页码
-        in: query
-        name: page
-        type: integer
-      - description: 每页数量
-        in: query
-        name: page_size
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 请求成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.CommentListResponse'
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      summary: 获取回复评论列表
-      tags:
-      - comment
   /v1/comment/{tenant_id}/{belong_key}:
     post:
       consumes:
@@ -670,6 +653,107 @@ paths:
       security:
       - BearerAuth: []
       summary: 创建/回复评论
+      tags:
+      - comment
+  /v1/comment/{tenant_id}/{belong_key}/{root_id}/replies:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: integer
+      - description: 评论板块
+        in: path
+        name: belong_key
+        required: true
+        type: string
+      - description: 根评论id
+        in: path
+        name: root_id
+        required: true
+        type: integer
+      - description: 上页最小id
+        in: query
+        name: last_id
+        type: integer
+      - description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/handler.CommentReplyResponse'
+                  type: array
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      summary: 获取根树下的回复评论列表
+      tags:
+      - comment
+  /v1/comment/{tenant_id}/{belong_key}/roots:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: integer
+      - description: 评论板块
+        in: path
+        name: belong_key
+        required: true
+        type: string
+      - description: 上页最小id
+        in: query
+        name: last_id
+        type: integer
+      - description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/handler.CommentRootResponse'
+                  type: array
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      summary: 获取根级评论列表
       tags:
       - comment
   /v1/comment/{tenant_id}/{id}:
@@ -733,12 +817,7 @@ paths:
         "200":
           description: 请求成功
           schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.CommentListResponse'
-              type: object
+            $ref: '#/definitions/response.successResponse'
         "400":
           description: 参数错误
           schema:

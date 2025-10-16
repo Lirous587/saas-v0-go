@@ -4,48 +4,67 @@ import (
 	"saas/internal/comment/domain"
 )
 
-func domainCommentToResponse(comment *domain.Comment) *CommentResponse {
-	if comment == nil {
+func domainCommentRootsToResponse(roots []*domain.CommentRoot) []*CommentRootResponse {
+	if len(roots) == 0 {
 		return nil
 	}
 
-	return &CommentResponse{
-		ID:        comment.ID,
-		UserID:    comment.UserID,
-		ParentID:  comment.ParentID,
-		RootID:    comment.RootID,
-		Content:   comment.Content,
-		Status:    comment.GetStatus(),
-		LikeCount: comment.LikeCount,
-		CreatedAt: comment.CreatedAt.Unix(),
-		IsLiked:   comment.IsLiked,
-	}
-}
-
-func domainCommentsToResponse(comments []*domain.Comment) []*CommentResponse {
-	if len(comments) == 0 {
-		return nil
-	}
-
-	ret := make([]*CommentResponse, 0, len(comments))
-
-	for _, comment := range comments {
-		if comment != nil {
-			ret = append(ret, domainCommentToResponse(comment))
+	responses := make([]*CommentRootResponse, 0, len(roots))
+	for i := range roots {
+		if roots[i] == nil || roots[i].CommentWithUser == nil {
+			continue
 		}
+		CommentWithUser := roots[i].CommentWithUser
+		userInfo := &UserInfo{
+			ID:       CommentWithUser.User.ID,
+			NickName: CommentWithUser.User.NickName,
+			Avatar:   CommentWithUser.User.Avatar,
+		}
+		responses = append(responses, &CommentRootResponse{
+			ID:           CommentWithUser.ID,
+			User:         userInfo,
+			ParentID:     CommentWithUser.ParentID,
+			RootID:       CommentWithUser.RootID,
+			Content:      CommentWithUser.Content,
+			LikeCount:    CommentWithUser.LikeCount,
+			CreatedAt:    CommentWithUser.CreatedAt.Unix(),
+			IsLiked:      CommentWithUser.IsLiked,
+			RepliesCount: roots[i].RepliesCount,
+		})
 	}
-	return ret
+
+	return responses
 }
 
-func domainCommentListToResponse(data *domain.CommentList) *CommentListResponse {
-	if data == nil {
+func domainCommentRepliesToResponse(replies []*domain.CommentReply) []*CommentReplyResponse {
+	if len(replies) == 0 {
 		return nil
 	}
 
-	return &CommentListResponse{
-		Total: data.Total,
-		List:  domainCommentsToResponse(data.List),
+	responses := make([]*CommentReplyResponse, 0, len(replies))
+	for i := range replies {
+		if replies[i] == nil || replies[i].CommentWithUser == nil {
+			continue
+		}
+		CommentWithUser := replies[i].CommentWithUser
+		userInfo := &UserInfo{
+			ID:       CommentWithUser.User.ID,
+			NickName: CommentWithUser.User.NickName,
+			Avatar:   CommentWithUser.User.Avatar,
+		}
+		responses = append(responses, &CommentReplyResponse{
+			ID:        CommentWithUser.ID,
+			User:      userInfo,
+			ParentID:  CommentWithUser.ParentID,
+			RootID:    CommentWithUser.RootID,
+			Content:   CommentWithUser.Content,
+			LikeCount: CommentWithUser.LikeCount,
+			CreatedAt: CommentWithUser.CreatedAt.Unix(),
+			IsLiked:   CommentWithUser.IsLiked,
+		})
 	}
+
+	return responses
 }
 
 func domainTenantConfigToResponse(config *domain.TenantConfig) *TenantConfigResponse {

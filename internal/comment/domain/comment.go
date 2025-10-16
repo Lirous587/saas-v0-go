@@ -9,6 +9,7 @@ type TenantID int64
 type UserInfo struct {
 	ID       int64
 	NickName string
+	Avatar   string
 	email    string
 }
 
@@ -94,46 +95,44 @@ func (c *Comment) CanAudit() bool {
 	return c.status == CommentStatusPending
 }
 
+// -- 评论响应
+
+type CommentWithUser struct {
+	ID        int64
+	User      *UserInfo
+	ParentID  int64
+	RootID    int64
+	Content   string
+	LikeCount int64
+	CreatedAt time.Time
+	IsLiked   bool
+}
+
 type CommentRootsQuery struct {
 	TenantID TenantID
-	plateID  int64
-	Page     int
+	PlateID  int64
+	LastID   int64
 	PageSize int
 }
 
-func (rq *CommentRootsQuery) SetPlateID(id int64) {
-	rq.plateID = id
-}
-
-func (rq *CommentRootsQuery) GetPlateID() int64 {
-	return rq.plateID
+type CommentRoot struct {
+	CommentWithUser *CommentWithUser
+	RepliesCount    int64
 }
 
 type CommentRepliesQuery struct {
 	TenantID TenantID
-	plateID  int64
+	PlateID  int64
 	RootID   int64
-	Page     int
+	LastID   int64
 	PageSize int
 }
 
-func (rq *CommentRepliesQuery) SetPlateID(id int64) {
-	rq.plateID = id
+type CommentReply struct {
+	CommentWithUser *CommentWithUser
 }
 
-func (rq *CommentRepliesQuery) GetPlateID() int64 {
-	return rq.plateID
-}
-
-type CommentAdvancedQuery struct {
-	// Page     int
-	// PageSize int
-}
-
-type CommentList struct {
-	Total int64
-	List  []*Comment
-}
+// -- 板块
 
 type Plate struct {
 	ID         int64

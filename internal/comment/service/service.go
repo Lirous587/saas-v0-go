@@ -146,24 +146,24 @@ func (s *service) Delete(tenantID domain.TenantID, userID int64, id int64) error
 	return s.repo.Delete(tenantID, id)
 }
 
-func (s *service) ListRoots(belongKey string, query *domain.CommentRootsQuery) (*domain.CommentList, error) {
+func (s *service) ListRoots(belongKey string, query *domain.CommentRootsQuery) ([]*domain.CommentRoot, error) {
 	plateID, err := s.getPlateID(query.TenantID, belongKey)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	query.SetPlateID(plateID)
+	query.PlateID = plateID
 
 	return s.repo.ListRoots(query)
 }
 
-func (s *service) ListReplies(belongKey string, query *domain.CommentRepliesQuery) (*domain.CommentList, error) {
+func (s *service) ListReplies(belongKey string, query *domain.CommentRepliesQuery) ([]*domain.CommentReply, error) {
 	plateID, err := s.getPlateID(query.TenantID, belongKey)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	query.SetPlateID(plateID)
+	query.PlateID = plateID
 
 	return s.repo.ListReplies(query)
 }

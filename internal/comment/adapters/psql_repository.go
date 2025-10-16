@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"saas/internal/comment/domain"
@@ -9,6 +10,7 @@ import (
 	"saas/internal/common/utils"
 	roleDomain "saas/internal/role/domain"
 
+	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/pkg/errors"
@@ -83,14 +85,143 @@ func (repo *CommentPSQLRepository) Approve(tenantID domain.TenantID, id int64) e
 	return nil
 }
 
-func (repo *CommentPSQLRepository) ListRoots(query *domain.CommentRootsQuery) (*domain.CommentList, error) {
-
-	return nil, nil
+type replyCount struct {
+	RootID int64 `boil:"root_id"`
+	Count  int64 `boil:"reply_count"`
 }
 
-func (repo *CommentPSQLRepository) ListReplies(query *domain.CommentRepliesQuery) (*domain.CommentList, error) {
+func (repo *CommentPSQLRepository) ListRoots(query *domain.CommentRootsQuery) ([]*domain.CommentRoot, error) {
+	mods := make([]qm.QueryMod, 0, 9)
+	mods = append(mods, orm.CommentWhere.TenantID.EQ(int64(query.TenantID)))
+	mods = append(mods, orm.CommentWhere.PlateID.EQ(query.PlateID))
+	// 评论状态为approved
+	mods = append(mods, orm.CommentWhere.Status.EQ(orm.CommentStatusApproved))
+	// 根评论过滤：root_id is null parent_id is null
+	mods = append(mods, orm.CommentWhere.RootID.IsNull())
+	mods = append(mods, orm.CommentWhere.ParentID.IsNull())
 
-	return nil, nil
+	// 使用游标代替offest
+	if query.LastID > 0 {
+		mods = append(mods, orm.CommentWhere.ID.GT(query.LastID))
+	}
+
+	// order 按ID升序排序
+	mods = append(mods, qm.OrderBy(orm.CommentColumns.ID+" ASC"))
+
+	// limit
+	mods = append(mods, qm.Limit(query.PageSize))
+
+	// 连表加载用户
+	mods = append(mods, qm.Load(orm.CommentRels.User))
+
+	// 执行查询
+	ormComments, err := orm.Comments(mods...).AllG()
+	if err != nil {
+		return nil, err
+	}
+
+	// 为所有根评论计算回复数
+	rootIDs := make([]int64, 0, len(ormComments))
+	for _, c := range ormComments {
+		rootIDs = append(rootIDs, c.ID)
+	}
+
+	repliesCountMap := make(map[int64]int64)
+	if len(rootIDs) > 0 {
+		var replyCounts []replyCount
+		err := orm.NewQuery(
+			qm.Select(orm.CommentTableColumns.RootID, "COUNT(*) as reply_count"),
+			qm.From(orm.TableNames.Comments),
+			orm.CommentWhere.TenantID.EQ(int64(query.TenantID)),
+			orm.CommentWhere.PlateID.EQ(query.PlateID),
+			orm.CommentWhere.Status.EQ(orm.CommentStatusApproved),
+			orm.CommentWhere.RootID.IN(rootIDs),
+			qm.GroupBy(orm.CommentTableColumns.RootID),
+		).BindG(context.Background(), &replyCounts)
+
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		for _, r := range replyCounts {
+			repliesCountMap[r.RootID] = r.Count
+		}
+	}
+
+	// 转换结果
+	roots := make([]*domain.CommentRoot, 0, len(ormComments))
+	for _, ormComment := range ormComments {
+		userInfo := ormUserToDomain(ormComment.R.User)
+		commentWithUser := &domain.CommentWithUser{
+			ID:        ormComment.ID,
+			User:      userInfo,
+			ParentID:  ormComment.ParentID.Int64,
+			RootID:    ormComment.RootID.Int64,
+			Content:   ormComment.Content,
+			LikeCount: ormComment.LikeCount,
+			CreatedAt: ormComment.CreatedAt,
+			// IsLiked:   false, // 待补充
+		}
+		roots = append(roots, &domain.CommentRoot{
+			CommentWithUser: commentWithUser,
+			RepliesCount:    repliesCountMap[ormComment.ID],
+		})
+	}
+
+	return roots, nil
+}
+
+func (repo *CommentPSQLRepository) ListReplies(query *domain.CommentRepliesQuery) ([]*domain.CommentReply, error) {
+	mods := make([]qm.QueryMod, 0, 8)
+	mods = append(mods, orm.CommentWhere.TenantID.EQ(int64(query.TenantID)))
+	mods = append(mods, orm.CommentWhere.PlateID.EQ(query.PlateID))
+	// 评论状态为approved
+	mods = append(mods, orm.CommentWhere.Status.EQ(orm.CommentStatusApproved))
+	// 根root条件
+	mods = append(mods, orm.CommentWhere.RootID.EQ(null.Int64From(query.RootID)))
+
+	// 使用游标代替offest
+	if query.LastID > 0 {
+		mods = append(mods, orm.CommentWhere.ID.GT(query.LastID))
+	}
+
+	// order 按ID升序排序（确保游标有效）
+	mods = append(mods, qm.OrderBy(orm.CommentColumns.ID+" ASC"))
+
+	// limit
+	mods = append(mods, qm.Limit(query.PageSize))
+
+	// 连表加载用户
+	mods = append(mods, qm.Load(orm.CommentRels.User))
+
+	// 执行查询
+	ormComments, err := orm.Comments(mods...).AllG()
+	if err != nil {
+		return nil, err
+	}
+
+	// 转换结果
+	replies := make([]*domain.CommentReply, 0, len(ormComments))
+	for i := range ormComments {
+		userInfo := ormUserToDomain(ormComments[i].R.User)
+
+		commentWithUser := &domain.CommentWithUser{
+			ID:        ormComments[i].ID,
+			User:      userInfo,
+			ParentID:  ormComments[i].ParentID.Int64,
+			RootID:    ormComments[i].RootID.Int64,
+			Content:   ormComments[i].Content,
+			LikeCount: ormComments[i].LikeCount,
+			CreatedAt: ormComments[i].CreatedAt,
+			// IsLiked:   false, // 待补充
+		}
+
+		replies = append(replies, &domain.CommentReply{
+			CommentWithUser: commentWithUser,
+		})
+	}
+
+	return replies, nil
 }
 
 func (repo *CommentPSQLRepository) GetCommentUser(tenantID domain.TenantID, commentID int64) (int64, error) {

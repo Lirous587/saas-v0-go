@@ -5,8 +5,8 @@ type CommentRepository interface {
 	Create(comment *Comment) (*Comment, error)
 	Delete(tenantID TenantID, id int64) error
 	Approve(tenantID TenantID, id int64) error
-	ListRoots(query *CommentRootsQuery) (*CommentList, error)
-	ListReplies(query *CommentRepliesQuery) (*CommentList, error)
+	ListRoots(query *CommentRootsQuery) ([]*CommentRoot, error)
+	ListReplies(query *CommentRepliesQuery) ([]*CommentReply, error)
 
 	GetCommentUser(tenantID TenantID, commentID int64) (int64, error)
 
