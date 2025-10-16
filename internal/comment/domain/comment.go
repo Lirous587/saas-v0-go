@@ -94,9 +94,35 @@ func (c *Comment) CanAudit() bool {
 	return c.status == CommentStatusPending
 }
 
-type CommentQuery struct {
+type CommentRootsQuery struct {
+	TenantID TenantID
+	plateID  int64
 	Page     int
 	PageSize int
+}
+
+func (rq *CommentRootsQuery) SetPlateID(id int64) {
+	rq.plateID = id
+}
+
+func (rq *CommentRootsQuery) GetPlateID() int64 {
+	return rq.plateID
+}
+
+type CommentRepliesQuery struct {
+	TenantID TenantID
+	plateID  int64
+	RootID   int64
+	Page     int
+	PageSize int
+}
+
+func (rq *CommentRepliesQuery) SetPlateID(id int64) {
+	rq.plateID = id
+}
+
+func (rq *CommentRepliesQuery) GetPlateID() int64 {
+	return rq.plateID
 }
 
 type CommentAdvancedQuery struct {
@@ -141,18 +167,10 @@ type CommentConfig struct {
 // TenantConfig 基于租户的全局配置
 type TenantConfig struct {
 	TenantID    TenantID
-	clientToken string
+	ClientToken string
 	IfAudit     bool
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-}
-
-func (tc *TenantConfig) SetClientToken(token string) {
-	tc.clientToken = token
-}
-
-func (tc *TenantConfig) GetClientToken() string {
-	return tc.clientToken
 }
 
 // PlateConfig  板块级别的配置 优先级更高

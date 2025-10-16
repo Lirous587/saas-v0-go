@@ -47,8 +47,9 @@ func NewRoleRedisCache() domain.RoleCache {
 
 const userRoleInTenantPreKey = "user_role_in_tenant"
 
-// const userRoleInTenantExpire = time.Hour * 2
-const userRoleInTenantExpire = time.Second * 1
+const userRoleInTenantExpire = time.Hour * 2
+
+// const userRoleInTenantExpire = time.Second * 1
 
 func (cache *RoleRedisCache) buildRoleKey(userID, tenantID int64) string {
 	key := utils.GetRedisKey(userRoleInTenantPreKey)

@@ -10,13 +10,14 @@ import (
 )
 
 func (s *service) Create(comment *domain.Comment, belongKey string) error {
-	// 获取plateBelong 1次sql
-	plateBelong, err := s.repo.GetPlateBelongByKey(comment.TenantID, belongKey)
+	// 获取plateID
+	plateID, err := s.getPlateID(comment.TenantID, belongKey)
+
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	comment.PlateID = plateBelong.ID
+	comment.PlateID = plateID
 
 	// 验证评论合法性 1次sql
 	if err := s.validateCommentLegitimacy(comment); err != nil {
@@ -68,6 +69,12 @@ func (s *service) validateCommentLegitimacy(comment *domain.Comment) error {
 			return errors.WithMessage(err, "获取rcomment失败")
 		}
 
+		// 是否为真正root检测
+		if rcommnet.RootID != 0 {
+			return codes.ErrCommentBuildIllegalTree.WithDetail(map[string]any{
+				"reason": "评论的当前评论非根评论",
+			})
+		}
 		// 板块一致性检测
 		if rcommnet.PlateID != comment.PlateID {
 			return codes.ErrCommentRootNotInPlate

@@ -103,30 +103,33 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Tags         comment
 // @Accept       json
 // @Produce      json
-// @Param        page       query     int     false  "页码"
-// @Param        page_size  query     int     false  "每页数量"
+// @Param        tenant_id   path 	 int 	  true 	 "租户id"
+// @Param        belong_key  path 	 string true   "评论板块"
+// @Param        page        query   int    false  "页码"
+// @Param        page_size   query   int    false  "每页数量"
 // @Success      200  {object}  response.successResponse{data=handler.CommentListResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/comment [get]
+// @Router       /v1/comment/{tenant_id}/{belong_key}/roots [get]
 func (h *HttpHandler) ListRoots(ctx *gin.Context) {
-	// req := new(ListRequest)
+	req := new(ListRootsRequest)
 
-	// if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
-	// 	return
-	// }
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
 
-	// data, err := h.service.List(&domain.CommentQuery{
-	// 	Page:     req.Page,
-	// 	PageSize: req.PageSize,
-	// })
+	data, err := h.service.ListRoots(req.BelongKey, &domain.CommentRootsQuery{
+		TenantID: req.TenantID,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+	})
 
-	// if err != nil {
-	// 	response.Error(ctx, err)
-	// 	return
-	// }
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
 
-	// response.Success(ctx, domainCommentListToResponse(data))
+	response.Success(ctx, domainCommentListToResponse(data))
 }
 
 // ListRoots godoc
@@ -134,14 +137,35 @@ func (h *HttpHandler) ListRoots(ctx *gin.Context) {
 // @Tags         comment
 // @Accept       json
 // @Produce      json
-// @Param        page       query     int     false  "页码"
-// @Param        page_size  query     int     false  "每页数量"
+// @Param        tenant_id   path 	 int 	  true 	 "租户id"
+// @Param        belong_key  path 	 string true   "评论板块"
+// @Param        root_id   	 path 	 int 	  true   "根评论id"
+// @Param        page        query   int    false  "页码"
+// @Param        page_size   query   int    false  "每页数量"
 // @Success      200  {object}  response.successResponse{data=handler.CommentListResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/comment [get]
+// @Router       /v1/comment/{tenant_id}/{belong_key}/{root_id}/replies [get]
 func (h *HttpHandler) ListReplies(ctx *gin.Context) {
+	req := new(ListRepliesRequest)
 
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	data, err := h.service.ListReplies(req.BelongKey, &domain.CommentRepliesQuery{
+		TenantID: req.TenantID,
+		RootID:   req.RootID,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+	})
+
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx, domainCommentListToResponse(data))
 }
 
 // Audit godoc

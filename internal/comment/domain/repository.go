@@ -5,7 +5,8 @@ type CommentRepository interface {
 	Create(comment *Comment) (*Comment, error)
 	Delete(tenantID TenantID, id int64) error
 	Approve(tenantID TenantID, id int64) error
-	List(query *CommentQuery) (*CommentList, error)
+	ListRoots(query *CommentRootsQuery) (*CommentList, error)
+	ListReplies(query *CommentRepliesQuery) (*CommentList, error)
 
 	GetCommentUser(tenantID TenantID, commentID int64) (int64, error)
 
@@ -35,6 +36,9 @@ type CommentCache interface {
 	GetTenantConfig(tenantID TenantID) (*TenantConfig, error)
 	DeleteTenantConfig(tenantID TenantID) error
 
+	GetPlateID(tenantID TenantID, belongKey string) (int64, error)
+	SetPlateID(tenantID TenantID, belongKey string, id int64) error
+	DeletePlateID(tenantID TenantID, belongKey string) error
 	SetPlateConfig(config *PlateConfig) error
 	GetPlateConfig(tenantID TenantID, plateID int64) (*PlateConfig, error)
 	DeletePlateConfig(tenantID TenantID, plateID int64) error

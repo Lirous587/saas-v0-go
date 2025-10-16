@@ -83,36 +83,14 @@ func (repo *CommentPSQLRepository) Approve(tenantID domain.TenantID, id int64) e
 	return nil
 }
 
-func (repo *CommentPSQLRepository) List(query *domain.CommentQuery) (*domain.CommentList, error) {
-	var whereMods []qm.QueryMod
-	// if query.Keyword != "" {
-	// 	// like := "%" + query.Keyword + "%"
-	// 	// whereMods = append(whereMods, qm.Where(fmt.Sprintf("(%s LIKE ? OR %s LIKE ?)", orm.CommentColumns.Title, orm.CommentColumns.Description), like, like))
-	// }
-	// 1.计算total
-	total, err := orm.Comments(whereMods...).CountG()
-	if err != nil {
-		return nil, err
-	}
+func (repo *CommentPSQLRepository) ListRoots(query *domain.CommentRootsQuery) (*domain.CommentList, error) {
 
-	// 2.计算offset
-	offset, err := utils.ComputeOffset(query.Page, query.PageSize)
-	if err != nil {
-		return nil, err
-	}
+	return nil, nil
+}
 
-	listMods := append(whereMods, qm.Offset(offset), qm.Limit(query.PageSize))
+func (repo *CommentPSQLRepository) ListReplies(query *domain.CommentRepliesQuery) (*domain.CommentList, error) {
 
-	// 3.查询数据
-	comment, err := orm.Comments(listMods...).AllG()
-	if err != nil {
-		return nil, err
-	}
-
-	return &domain.CommentList{
-		Total: total,
-		List:  ormCommentsToDomain(comment),
-	}, nil
+	return nil, nil
 }
 
 func (repo *CommentPSQLRepository) GetCommentUser(tenantID domain.TenantID, commentID int64) (int64, error) {

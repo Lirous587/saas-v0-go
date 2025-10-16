@@ -19,7 +19,6 @@ type mailerConfig struct {
 	Password string
 	From     string
 	FromName string
-	CC       string
 }
 
 type mailer struct {
@@ -59,7 +58,6 @@ func UpdateConfig() error {
 		Password: os.Getenv("EMAIL_PASSWORD"),
 		From:     os.Getenv("EMAIL_FROM"),
 		FromName: os.Getenv("EMAIL_FROM_NAME"),
-		CC:       os.Getenv("EMAIL_CC"),
 	}
 
 	globalDialer = gomail.NewDialer(config.Host, config.Port, config.Username, config.Password)
@@ -73,8 +71,7 @@ func validateEnv() error {
 		config.Port == 0 ||
 		config.Username == "" ||
 		config.Password == "" ||
-		config.From == "" ||
-		config.CC == "" {
+		config.From == "" {
 		return errors.New("email config: 环境变量缺失，必填项不能为空")
 	}
 	return nil
@@ -101,11 +98,6 @@ func (m *mailer) SendPlain(to, subject, body string) error {
 	msg.SetHeader("Subject", subject)
 	msg.SetBody("text/plain", body)
 
-	// 如果设置了抄送邮箱，则添加CC头
-	if config.CC != "" {
-		msg.SetHeader("Cc", config.CC)
-	}
-
 	return errors.WithStack(m.dialer.DialAndSend(msg))
 }
 
@@ -115,11 +107,6 @@ func (m *mailer) SendHTML(to, subject, htmlBody string) error {
 	msg.SetHeader("To", to)
 	msg.SetHeader("Subject", subject)
 	msg.SetBody("text/html", htmlBody)
-
-	// 如果设置了抄送邮箱，则添加CC头
-	if config.CC != "" {
-		msg.SetHeader("Cc", config.CC)
-	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

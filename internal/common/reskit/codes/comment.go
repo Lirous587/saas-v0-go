@@ -20,5 +20,6 @@ var (
 	ErrCommentTenantConfigNotFound     = ErrCode{Msg: "该租户下的评论配置不存在", Type: ErrorTypeNotFound, Code: 2340}
 	ErrCommentTenantConfigCacheMissing = ErrCode{Msg: "该租户下的评论配置缓存未命中", Type: ErrorTypeCacheMiss, Code: 2341}
 	ErrCommentPlateConfigNotFound      = ErrCode{Msg: "该板块的评论配置不存在", Type: ErrorTypeNotFound, Code: 2342}
-	ErrCommentPlateConfigCacheMissing  = ErrCode{Msg: "该板块的评论配置缓存未命中", Type: ErrorTypeCacheMiss, Code: 2342}
+	ErrCommentPlateConfigCacheMissing  = ErrCode{Msg: "该板块的评论配置缓存未命中", Type: ErrorTypeCacheMiss, Code: 2343}
+	ErrCommentPlateIDCacheMissing      = ErrCode{Msg: "该板块ID缓存未命中", Type: ErrorTypeCacheMiss, Code: 2344}
 )

@@ -47,10 +47,19 @@ type DeleteRequest struct {
 	ID       int64           `json:"-" uri:"id" binding:"required"`
 }
 
-type ListRequest struct {
-	Page     int    `form:"page,default=1" binding:"min=1"`
-	PageSize int    `form:"page_size,default=5" binding:"min=5,max=20"`
-	KeyWord  string `form:"keyword" binding:"max=20"`
+type ListRootsRequest struct {
+	TenantID  domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	BelongKey string          `json:"-" uri:"belong_key" binding:"required"`
+	Page      int             `form:"page,default=1" binding:"min=1"`
+	PageSize  int             `form:"page_size,default=5" binding:"min=5,max=15"`
+}
+
+type ListRepliesRequest struct {
+	TenantID  domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	BelongKey string          `json:"-" uri:"belong_key" binding:"required"`
+	RootID    int64           `json:"-" uri:"root_id" binding:"required"`
+	Page      int             `form:"page,default=1" binding:"min=1"`
+	PageSize  int             `form:"page_size,default=5" binding:"min=5,max=15"`
 }
 
 type AuditRequest struct {

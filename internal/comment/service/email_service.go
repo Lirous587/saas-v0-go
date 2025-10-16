@@ -48,6 +48,7 @@ func (s *service) sentNeedAuditEmail(commentUser *domain.UserInfo, to string, re
 	)
 }
 
+// 无需cc
 func (s *service) sentAuditPassEmail(to string, relatedURL string, content string) error {
 	data := struct {
 		CommentContent string
@@ -65,6 +66,7 @@ func (s *service) sentAuditPassEmail(to string, relatedURL string, content strin
 	)
 }
 
+// 无需cc
 func (s *service) sentAuditRejectEmail(to string, relatedURL string, content string) error {
 	data := struct {
 		CommentContent string

@@ -146,8 +146,26 @@ func (s *service) Delete(tenantID domain.TenantID, userID int64, id int64) error
 	return s.repo.Delete(tenantID, id)
 }
 
-func (s *service) List(query *domain.CommentQuery) (*domain.CommentList, error) {
-	return s.repo.List(query)
+func (s *service) ListRoots(belongKey string, query *domain.CommentRootsQuery) (*domain.CommentList, error) {
+	plateID, err := s.getPlateID(query.TenantID, belongKey)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	query.SetPlateID(plateID)
+
+	return s.repo.ListRoots(query)
+}
+
+func (s *service) ListReplies(belongKey string, query *domain.CommentRepliesQuery) (*domain.CommentList, error) {
+	plateID, err := s.getPlateID(query.TenantID, belongKey)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	query.SetPlateID(plateID)
+
+	return s.repo.ListReplies(query)
 }
 
 func (s *service) CreatePlate(plate *domain.Plate) error {
@@ -167,10 +185,20 @@ func (s *service) CreatePlate(plate *domain.Plate) error {
 }
 
 func (s *service) UpdatePlate(plate *domain.Plate) error {
-
 	if err := s.repo.UpdatePlate(plate); err != nil {
 		return errors.WithStack(err)
 	}
+
+	// 删除缓存
+	if err := s.cache.DeletePlateID(plate.TenantID, plate.BelongKey); err != nil {
+		zap.L().Error(
+			"删除板块ID缓存失败",
+			zap.Error(err),
+			zap.Int64("tenant_id", int64(plate.TenantID)),
+			zap.String("belong_key", plate.BelongKey),
+		)
+	}
+
 	return nil
 }
 
@@ -180,6 +208,37 @@ func (s *service) DeletePlate(tenantID domain.TenantID, id int64) error {
 
 func (s *service) ListPlate(query *domain.PlateQuery) (*domain.PlateList, error) {
 	return s.repo.ListPlate(query)
+}
+
+func (s *service) getPlateID(tenantID domain.TenantID, belongKey string) (int64, error) {
+	// 尝试从缓存获取
+	plateID, cacheErr := s.cache.GetPlateID(tenantID, belongKey)
+	if cacheErr == nil {
+		return plateID, nil
+	}
+
+	// 缓存未命中或出错，从数据库获取
+	belong, err := s.repo.GetPlateBelongByKey(tenantID, belongKey)
+	if err != nil {
+		return 0, errors.WithStack(err)
+	}
+
+	// 如果是缓存缺失，异步写入缓存
+	if errors.Is(cacheErr, codes.ErrCommentPlateIDCacheMissing) {
+		go func() {
+			if setErr := s.cache.SetPlateID(tenantID, belong.BelongKey, belong.ID); setErr != nil {
+				zap.L().Error(
+					"设置板块ID缓存失败",
+					zap.Error(setErr),
+					zap.Int64("tenant_id", int64(tenantID)),
+					zap.String("belong_key", belong.BelongKey),
+					zap.Int64("plate_id", belong.ID),
+				)
+			}
+		}()
+	}
+
+	return belong.ID, nil
 }
 
 func (s *service) SetTenantConfig(config *domain.TenantConfig) error {
@@ -205,7 +264,7 @@ func (s *service) SetTenantConfig(config *domain.TenantConfig) error {
 		if err != nil {
 			return err
 		}
-		config.SetClientToken(clientToken)
+		config.ClientToken = clientToken
 	}
 
 	return s.repo.SetTenantConfig(config)
@@ -241,11 +300,11 @@ func (s *service) GetTenantConfig(tenantID domain.TenantID) (*domain.TenantConfi
 }
 
 func (s *service) SetPlateConfig(config *domain.PlateConfig) error {
-	plate, err := s.repo.GetPlateBelongByKey(config.TenantID, config.Plate.BelongKey)
+	plateID, err := s.getPlateID(config.TenantID, config.Plate.BelongKey)
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	config.Plate.ID = plate.ID
+	config.Plate.ID = plateID
 
 	// 删除缓存
 	if err := s.cache.DeletePlateConfig(config.TenantID, config.Plate.ID); err != nil {
