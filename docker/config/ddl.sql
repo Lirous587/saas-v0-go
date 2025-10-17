@@ -268,6 +268,8 @@ CREATE INDEX IF NOT EXISTS idx_comments_content_trgm ON public.comments USING gi
 -- 热门评论查询（按点赞数）
 CREATE INDEX IF NOT EXISTS idx_comments_like_count ON public.comments (like_count DESC);
 
+CREATE INDEX idx_comments_tenant_plate_status_root_parent ON public.comments (tenant_id, plate_id, status, root_id, parent_id);
+
 
 -- 评论租户全局配置（默认配置）
 CREATE TABLE public.comment_tenant_configs
