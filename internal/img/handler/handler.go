@@ -83,7 +83,7 @@ func getExtByContentType(realType string) (ext string) {
 // @Param        path        formData  string false "自定义图片路径"
 // @Param        description formData  string false "图片描述"
 // @Param        category_id formData  int64  false "分类id"
-// @Success      200 {object} response.successResponse{data=handler.ImgResponse} "请求成功"
+// @Success      200 {object} response.successResponse "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
@@ -129,7 +129,7 @@ func (h *HttpHandler) Upload(ctx *gin.Context) {
 		imgPath = generateImgPath(getExtByContentType(realType))
 	}
 
-	res, err := h.service.Upload(
+	if err := h.service.Upload(
 		file,
 		&domain.Img{
 			TenantID:    req.TenantID,
@@ -137,14 +137,12 @@ func (h *HttpHandler) Upload(ctx *gin.Context) {
 			Description: req.Description,
 		},
 		req.CategoryID,
-	)
-
-	if err != nil {
+	); err != nil {
 		response.Error(ctx, err)
 		return
 	}
 
-	response.Success(ctx, domainImgToResponse(res))
+	response.Success(ctx)
 }
 
 // Delete godoc
@@ -253,7 +251,7 @@ func (h *HttpHandler) ClearRecycleBin(ctx *gin.Context) {
 // @Produce      json
 // @Param        id path int64 true "图片id"
 // @Param        id path int64 true "图片id"
-// @Success      200 {object} response.successResponse{data=handler.ImgResponse} "请求成功"
+// @Success      200 {object} response.successResponse "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
@@ -265,13 +263,12 @@ func (h *HttpHandler) RestoreFromRecycleBin(ctx *gin.Context) {
 		return
 	}
 
-	res, err := h.service.RestoreFromRecycleBin(req.TenantID, req.ID)
-	if err != nil {
+	if err := h.service.RestoreFromRecycleBin(req.TenantID, req.ID); err != nil {
 		response.Error(ctx, err)
 		return
 	}
 
-	response.Success(ctx, domainImgToResponse(res))
+	response.Success(ctx)
 }
 
 func (h *HttpHandler) ListenDeleteQueue() {

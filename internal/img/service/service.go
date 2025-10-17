@@ -21,7 +21,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"golang.org/x/sync/errgroup"
 )
 
 type tenantR2Config struct {
@@ -186,12 +185,11 @@ func (s *service) Compress(src io.Reader) (io.Reader, error) {
 	return bytes.NewReader(output.Bytes()), nil
 }
 
-func (s *service) Upload(src io.Reader, img *domain.Img, categoryID int64) (*domain.Img, error) {
-
+func (s *service) Upload(src io.Reader, img *domain.Img, categoryID int64) error {
 	// 压缩图片
 	compressed, err := s.Compress(src)
 	if err != nil {
-		return nil, codes.ErrImgCompress.WithCause(err)
+		return codes.ErrImgCompress.WithCause(err)
 	}
 
 	// 1. 若有 categoryID 则需要先检查分类是否存在
@@ -200,7 +198,7 @@ func (s *service) Upload(src io.Reader, img *domain.Img, categoryID int64) (*dom
 		var err error
 		category, err = s.repo.FindCategoryByID(img.TenantID, categoryID)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
@@ -212,23 +210,23 @@ func (s *service) Upload(src io.Reader, img *domain.Img, categoryID int64) (*dom
 
 	exist, err := s.repo.ExistByPath(img.TenantID, nowPath)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if exist {
-		return nil, codes.ErrImgPathRepeat
+		return codes.ErrImgPathRepeat
 	}
 
 	// 3.入库
 	res, err := s.repo.Create(img, categoryID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// 加载配置
 	r2Config, err := s.getTenantR2Config(img.TenantID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// 后续不要再使用 img 使用res！
@@ -254,7 +252,7 @@ func (s *service) Upload(src io.Reader, img *domain.Img, categoryID int64) (*dom
 
 	res.SetPublicPreURL(r2Config.publicURLPrefix)
 
-	return res, err
+	return nil
 }
 
 // Delete 删除逻辑
@@ -287,25 +285,25 @@ func (s *service) Delete(tenantID domain.TenantID, id int64, hard ...bool) error
 	if isHardDelete {
 		// 1.删除r3
 		if err := s.DeleteFile(r2Config.s3Client, r2Config.publicBucket, img.Path); err != nil {
-			return err
+			return errors.WithStack(err)
 		}
 		// 2.删除记录
 		if err := s.repo.Delete(tenantID, img.ID, true); err != nil {
-			return err
+			return errors.WithStack(err)
 		}
 	} else {
 		// 1.从 publicBucket 移到 deleteBucket
 		if err := s.CopyFileToAnotherBucket(r2Config.s3Client, r2Config.publicBucket, r2Config.deleteBucket, img.Path); err != nil {
-			return err
+			return errors.WithStack(err)
 		}
 		//2.删除 publicBucket 中的对象
 		if err := s.DeleteFile(r2Config.s3Client, r2Config.publicBucket, img.Path); err != nil {
-			return err
+			return errors.WithStack(err)
 		}
 
 		// 3.软删除记录
 		if err := s.repo.Delete(tenantID, img.ID, false); err != nil {
-			return err
+			return errors.WithStack(err)
 		}
 
 		// 4.将id记录到消息队列
@@ -335,23 +333,13 @@ func (s *service) List(query *domain.ImgQuery) (*domain.ImgList, error) {
 		return nil, err
 	}
 	if query.Deleted {
-		g := new(errgroup.Group)
-
 		for i := range res.List {
-			g.Go(func() error {
-				presignUrl, err := s.getPresignURL(r2Config.presignClient, r2Config.deleteBucket, res.List[i].Path, deletedPresignExpired)
-				if err != nil {
-					return nil
-				}
-				res.List[i].Path = presignUrl
-				return nil
-			})
+			presignUrl, err := s.getPresignURL(r2Config.presignClient, r2Config.deleteBucket, res.List[i].Path, deletedPresignExpired)
+			if err != nil {
+				return nil, errors.WithStack(err)
+			}
+			res.List[i].Path = presignUrl
 		}
-
-		if err := g.Wait(); err != nil {
-			return nil, err
-		}
-
 	}
 
 	for i := range res.List {
@@ -457,7 +445,7 @@ func (s *service) ClearRecycleBin(tenantID domain.TenantID, id int64) error {
 	return nil
 }
 
-func (s *service) RestoreFromRecycleBin(tenantID domain.TenantID, id int64) (*domain.Img, error) {
+func (s *service) RestoreFromRecycleBin(tenantID domain.TenantID, id int64) error {
 	value, _ := s.imgMutex.LoadOrStore(id, &sync.Mutex{})
 	mu := value.(*sync.Mutex)
 	mu.Lock()
@@ -466,33 +454,33 @@ func (s *service) RestoreFromRecycleBin(tenantID domain.TenantID, id int64) (*do
 	// 1.查询已软删除的图片信息
 	img, err := s.repo.FindByID(tenantID, id, true)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if !img.IsDeleted() {
-		return nil, codes.ErrImgIllegalOperation
+		return codes.ErrImgIllegalOperation
 	}
 
 	// 加载配置
 	r2Config, err := s.getTenantR2Config(tenantID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// 2.从 deleteBucket 复制回 publicBucket
 	if err := s.CopyFileToAnotherBucket(r2Config.s3Client, r2Config.deleteBucket, r2Config.publicBucket, img.Path); err != nil {
-		return nil, err
+		return err
 	}
 
 	// 3.删除 deleteBucket 中的文件
 	if err := s.DeleteFile(r2Config.s3Client, r2Config.deleteBucket, img.Path); err != nil {
-		return nil, err
+		return err
 	}
 
 	// 4.恢复数据库记录（取消软删除）
 	res, err := s.repo.Restore(tenantID, id)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// 5.从删除队列中移除
@@ -505,7 +493,7 @@ func (s *service) RestoreFromRecycleBin(tenantID domain.TenantID, id int64) (*do
 
 	res.SetPublicPreURL(r2Config.publicURLPrefix)
 
-	return res, nil
+	return nil
 }
 
 const maxCategory = 10
@@ -513,7 +501,7 @@ const maxCategory = 10
 func (s *service) CreateCategory(category *domain.Category) error {
 	exist, err := s.repo.CategoryExistByTitle(category.TenantID, category.Title)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	if exist {
 		return codes.ErrImgCategoryTitleRepeat
@@ -521,7 +509,7 @@ func (s *service) CreateCategory(category *domain.Category) error {
 
 	count, err := s.repo.CountCategory(category.TenantID)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if count >= maxCategory {
@@ -547,7 +535,7 @@ func (s *service) UpdateCategory(category *domain.Category) error {
 	// 1.除开自己以外 是否有与修改之后title相同的数据
 	stored, err := s.repo.FindCategoryByTitle(category.TenantID, category.Title)
 	if err != nil && !errors.Is(err, codes.ErrImgCategoryNotFound) {
-		return errors.WithStack(err)
+		return err
 	}
 	if stored != nil && stored.ID != category.ID {
 		return codes.ErrImgCategoryTitleRepeat
@@ -558,15 +546,16 @@ func (s *service) UpdateCategory(category *domain.Category) error {
 	// 若不一致 则需该分类下无图片关联方可进行修改
 	old, err := s.repo.FindCategoryByID(category.TenantID, category.ID)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
+	// 若不一致
 	if old.Prefix == category.Prefix {
 		return s.repo.UpdateCategory(category)
 	}
 
 	// 若一致
 	if err := s.isCategoryExistImg(category.TenantID, category.ID); err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	return s.repo.UpdateCategory(category)
@@ -588,7 +577,7 @@ func (s *service) ListCategories(tenantID domain.TenantID) (categories []*domain
 func (s *service) SetR2Config(config *domain.R2Config) error {
 	exist, err := s.repo.ExistTenantR2Config(config.TenantID)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if !exist && config.GetSecretAccessKey() == "" {
@@ -600,7 +589,7 @@ func (s *service) SetR2Config(config *domain.R2Config) error {
 	if config.GetSecretAccessKey() != "" {
 		encryptSecret, err := s.ace256Encryptor.Encrypt(config.AccessKeyID)
 		if err != nil {
-			return errors.WithStack(err)
+			return err
 		}
 		config.SetSecretAccessKey(encryptSecret)
 	}

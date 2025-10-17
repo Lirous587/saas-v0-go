@@ -169,17 +169,14 @@ func (repo *ImgPSQLRepository) List(query *domain.ImgQuery) (*domain.ImgList, er
 
 func (repo *ImgPSQLRepository) CreateCategory(category *domain.Category) error {
 	ormCategory := domainCategoryToORM(category)
-	if err := ormCategory.InsertG(boil.Infer()); err != nil {
-		return errors.WithStack(err)
-	}
-	return nil
+	return ormCategory.InsertG(boil.Infer())
 }
 
 func (repo *ImgPSQLRepository) UpdateCategory(category *domain.Category) error {
 	ormCategory := domainCategoryToORM(category)
 	rows, err := ormCategory.UpdateG(boil.Infer())
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if rows == 0 {
