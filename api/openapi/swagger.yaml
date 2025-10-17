@@ -247,7 +247,7 @@ definitions:
       updated_at:
         type: integer
     type: object
-  handler.R2Configure:
+  handler.R2ConfigResponse:
     properties:
       access_key_id:
         type: string
@@ -292,7 +292,7 @@ definitions:
     required:
     - if_audit
     type: object
-  handler.SetR2ConfigureRequest:
+  handler.SetR2ConfigRequest:
     properties:
       access_key_id:
         type: string
@@ -1405,10 +1405,16 @@ paths:
       summary: 更新图片分类
       tags:
       - img-category
-  /v1/img/{tenant_id}/configure_r2:
+  /v1/img/{tenant_id}/r2_config:
     get:
       consumes:
       - application/json
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -1419,7 +1425,7 @@ paths:
             - $ref: '#/definitions/response.successResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/handler.R2Configure'
+                  $ref: '#/definitions/handler.R2ConfigResponse'
               type: object
         "500":
           description: 服务器错误
@@ -1444,7 +1450,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.SetR2ConfigureRequest'
+          $ref: '#/definitions/handler.SetR2ConfigRequest'
       produces:
       - application/json
       responses:

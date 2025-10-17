@@ -396,19 +396,19 @@ func (h *HttpHandler) ListCategories(ctx *gin.Context) {
 	response.Success(ctx, domainCategoriesToResponse(res))
 }
 
-// SetConfigureR2 godoc
+// SetR2Config godoc
 // @Summary      配置图库R2配置
 // @Tags         img
 // @Accept       json
 // @Produce      json
 // @Param        tenant_id      path   int64  true  "租户id"
-// @Param        request body   handler.SetR2ConfigureRequest true "请求参数"
+// @Param        request body   handler.SetR2ConfigRequest true "请求参数"
 // @Success      200 {object} response.successResponse "请求成功"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
-// @Router       /v1/img/{tenant_id}/configure_r2 [put]
-func (h *HttpHandler) SetConfigureR2(ctx *gin.Context) {
-	req := new(SetR2ConfigureRequest)
+// @Router       /v1/img/{tenant_id}/r2_config [put]
+func (h *HttpHandler) SetR2Config(ctx *gin.Context) {
+	req := new(SetR2ConfigRequest)
 	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
@@ -422,7 +422,7 @@ func (h *HttpHandler) SetConfigureR2(ctx *gin.Context) {
 		DeleteBucket:    req.DeleteBucket,
 	}
 
-	err := h.service.SetR2Configure(req.SecretAccessKey, config)
+	err := h.service.SetR2Config(req.SecretAccessKey, config)
 
 	if err != nil {
 		response.Error(ctx, err)
@@ -432,27 +432,28 @@ func (h *HttpHandler) SetConfigureR2(ctx *gin.Context) {
 	response.Success(ctx)
 }
 
-// GetConfigureR2 godoc
+// GetR2Config godoc
 // @Summary      获取配置图库R2配置
 // @Tags         img
 // @Accept       json
 // @Produce      json
-// @Success      200 {object} response.successResponse{data=handler.R2Configure} "请求成功"
+// @Param        tenant_id      path   int64  true  "租户id"
+// @Success      200 {object} response.successResponse{data=handler.R2ConfigResponse} "请求成功"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
-// @Router       /v1/img/{tenant_id}/configure_r2 [get]
-func (h *HttpHandler) GetConfigureR2(ctx *gin.Context) {
-	req := new(GetR2ConfigureRequest)
+// @Router       /v1/img/{tenant_id}/r2_config [get]
+func (h *HttpHandler) GetR2Config(ctx *gin.Context) {
+	req := new(GetR2ConfigRequest)
 	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
-	res, err := h.service.GetR2Configure(req.TenantID)
+	res, err := h.service.GetR2Config(req.TenantID)
 
 	if err != nil {
 		response.Error(ctx, err)
 		return
 	}
 
-	response.Success(ctx, domainR2ConfigureToResponse(res))
+	response.Success(ctx, domainR2ConfigToResponse(res))
 }

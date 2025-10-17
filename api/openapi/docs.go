@@ -1365,7 +1365,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/img/{tenant_id}/configure_r2": {
+        "/v1/img/{tenant_id}/r2_config": {
             "get": {
                 "security": [
                     {
@@ -1382,6 +1382,15 @@ const docTemplate = `{
                     "img"
                 ],
                 "summary": "获取配置图库R2配置",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "请求成功",
@@ -1394,7 +1403,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/handler.R2Configure"
+                                            "$ref": "#/definitions/handler.R2ConfigResponse"
                                         }
                                     }
                                 }
@@ -1439,7 +1448,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.SetR2ConfigureRequest"
+                            "$ref": "#/definitions/handler.SetR2ConfigRequest"
                         }
                     }
                 ],
@@ -3405,7 +3414,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.R2Configure": {
+        "handler.R2ConfigResponse": {
             "type": "object",
             "properties": {
                 "access_key_id": {
@@ -3475,7 +3484,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.SetR2ConfigureRequest": {
+        "handler.SetR2ConfigRequest": {
             "type": "object",
             "required": [
                 "access_key_id",

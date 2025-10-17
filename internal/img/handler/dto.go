@@ -76,15 +76,7 @@ type ListCategoryRequest struct {
 	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 }
 
-type R2Configure struct {
-	AccountID       string `json:"account_id"`
-	AccessKeyID     string `json:"access_key_id"`
-	PublicBucket    string `json:"public_bucket"`
-	PublicURLPrefix string `json:"public_url_prefix"`
-	DeleteBucket    string `json:"delete_bucket"`
-}
-
-type SetR2ConfigureRequest struct {
+type SetR2ConfigRequest struct {
 	TenantID        domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 	AccountID       string          `json:"account_id" binding:"required"`
 	AccessKeyID     string          `json:"access_key_id" binding:"required"`
@@ -94,6 +86,14 @@ type SetR2ConfigureRequest struct {
 	DeleteBucket    string          `json:"delete_bucket" binding:"required"`
 }
 
-type GetR2ConfigureRequest struct {
+type R2ConfigResponse struct {
+	AccountID       string `json:"account_id"`
+	AccessKeyID     string `json:"access_key_id"`
+	PublicBucket    string `json:"public_bucket"`
+	PublicURLPrefix string `json:"public_url_prefix"`
+	DeleteBucket    string `json:"delete_bucket"`
+}
+
+type GetR2ConfigRequest struct {
 	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 }

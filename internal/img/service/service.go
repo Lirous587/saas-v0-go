@@ -585,7 +585,7 @@ func (s *service) ListCategories(tenantID domain.TenantID) (categories []*domain
 	return s.repo.ListCategories(tenantID)
 }
 
-func (s *service) SetR2Configure(secretAccessKey string, config *domain.R2Config) error {
+func (s *service) SetR2Config(secretAccessKey string, config *domain.R2Config) error {
 	encryptSecret, err := s.ace256Encryptor.Encrypt(secretAccessKey)
 	if err != nil {
 		return errors.WithStack(err)
@@ -604,6 +604,6 @@ func (s *service) SetR2Configure(secretAccessKey string, config *domain.R2Config
 
 }
 
-func (s *service) GetR2Configure(tenantID domain.TenantID) (*domain.R2Config, error) {
+func (s *service) GetR2Config(tenantID domain.TenantID) (*domain.R2Config, error) {
 	return s.repo.GetTenantR2Config(tenantID)
 }
