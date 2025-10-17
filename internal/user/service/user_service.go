@@ -1,8 +1,8 @@
 package service
 
 import (
-	"os"
 	"saas/internal/common/reskit/codes"
+	"saas/internal/common/utils"
 
 	"go.uber.org/zap"
 
@@ -22,11 +22,9 @@ var (
 )
 
 func NewUserService(userRepo domain.UserRepository, tokenService domain.TokenService) domain.UserService {
-	githubClientID = os.Getenv("GITHUB_CLIENT_ID")
-	githubClientSecret = os.Getenv("GITHUB_CLIENT_SECRET")
-	if githubClientID == "" || githubClientSecret == "" {
-		panic("加载环境变量失败")
-	}
+	githubClientID = utils.GetEnv("GITHUB_CLIENT_ID")
+	githubClientSecret = utils.GetEnv("GITHUB_CLIENT_SECRET")
+
 	return &userService{
 		userRepo:     userRepo,
 		tokenService: tokenService,

@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"os"
 	"saas/internal/common/email"
 	"saas/internal/common/reskit/codes"
 	"saas/internal/common/utils"
@@ -29,10 +28,7 @@ type service struct {
 }
 
 func NewTenantService(repo domain.TenantRepository, cache domain.TenantCache, mailer email.Mailer, planService planDomain.PlanService, roleService roleDomain.RoleService, userRepo userDomain.UserRepository) domain.TenantService {
-	myDomain := os.Getenv("DOMAIN")
-	if myDomain == "" {
-		panic("环境变量 DOMAIN 加载失败")
-	}
+	myDomain := utils.GetEnv("DOMAIN")
 
 	return &service{
 		myDomain:    myDomain,

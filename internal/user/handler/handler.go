@@ -1,11 +1,12 @@
 package handler
 
 import (
-	"github.com/pkg/errors"
-	"os"
 	"saas/internal/common/reskit/codes"
 	"saas/internal/common/reskit/response"
+	"saas/internal/common/utils"
 	"strconv"
+
+	"github.com/pkg/errors"
 
 	"github.com/gin-gonic/gin"
 	"resty.dev/v3"
@@ -14,12 +15,19 @@ import (
 )
 
 type HttpHandler struct {
-	userService domain.UserService
+	userService  domain.UserService
+	clientID     string
+	clientSecret string
 }
 
 func NewHttpHandler(userService domain.UserService) *HttpHandler {
+	clientID := utils.GetEnv("GITHUB_CLIENT_ID")
+	clientSecret := utils.GetEnv("GITHUB_CLIENT_SECRET")
+
 	return &HttpHandler{
-		userService: userService,
+		userService:  userService,
+		clientID:     clientID,
+		clientSecret: clientSecret,
 	}
 }
 
@@ -111,24 +119,15 @@ func (h *HttpHandler) getGithubUserInfo(code string) (*domain.OAuthUserInfo, err
 }
 
 func (h *HttpHandler) getGithubAccessToken(code string) (string, error) {
-	clientID := os.Getenv("GITHUB_CLIENT_ID")
-	clientSecret := os.Getenv("GITHUB_CLIENT_SECRET")
-
-	if clientID == "" || clientSecret == "" {
-		return "", codes.ErrOAuthInvalidCode.WithDetail(map[string]any{
-			"reason": "missing_credentials",
-		})
-	}
-
 	client := resty.New()
 	var result GithubAccessTokenResponse
 
 	_, err := client.R().
 		SetHeader("Accept", "application/json").
 		SetFormData(map[string]string{
-			"client_id":		clientID,
-			"client_secret":	clientSecret,
-			"code":			code,
+			"client_id":     h.clientID,
+			"client_secret": h.clientSecret,
+			"code":          code,
 		}).
 		SetResult(&result).
 		Post("https://github.com/login/oauth/access_token")
@@ -157,16 +156,16 @@ func (h *HttpHandler) fetchGithubUserInfo(accessToken string) (*domain.OAuthUser
 		Get("https://api.github.com/user")
 
 	if err != nil {
-		return nil, err	// 这里的错误会在上层被包装
+		return nil, err // 这里的错误会在上层被包装
 	}
 
 	return &domain.OAuthUserInfo{
-		Provider:	"github",
-		ID:		strconv.FormatInt(githubUser.ID, 10),
-		Login:		githubUser.Login,
-		Nickname:	githubUser.Name,
-		Email:		githubUser.Email,
-		Avatar:		githubUser.AvatarURL,
+		Provider: "github",
+		ID:       strconv.FormatInt(githubUser.ID, 10),
+		Login:    githubUser.Login,
+		Nickname: githubUser.Name,
+		Email:    githubUser.Email,
+		Avatar:   githubUser.AvatarURL,
 	}, nil
 }
 

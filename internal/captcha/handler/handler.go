@@ -1,14 +1,15 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
-	"os"
 	"saas/internal/captcha/domain"
 	"saas/internal/captcha/service"
 	"saas/internal/common/reskit/codes"
 	"saas/internal/common/reskit/response"
+	"saas/internal/common/utils"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 )
 
 type HttpHandler struct {
@@ -60,7 +61,7 @@ func (h *HttpHandler) Gen(ctx *gin.Context) {
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/captcha/with-answer [get]
 func (h *HttpHandler) GenWithAnswer(ctx *gin.Context) {
-	mode := os.Getenv("SERVER_MODE")
+	mode := utils.GetEnv("SERVER_MODE")
 	if mode != "dev" {
 		response.Error(ctx, codes.ErrAPIForbidden)
 	}
@@ -82,9 +83,9 @@ func (h *HttpHandler) GenWithAnswer(ctx *gin.Context) {
 }
 
 const (
-	verifyWayHeaderKey	= "captcha-verify-way"
-	verifyIDHeaderKey	= "captcha-verify-id"
-	verifyValueHeaderKey	= "captcha-verify-value"
+	verifyWayHeaderKey   = "captcha-verify-way"
+	verifyIDHeaderKey    = "captcha-verify-id"
+	verifyValueHeaderKey = "captcha-verify-value"
 )
 
 // parseFromHeader 从请求头中获取验证方式

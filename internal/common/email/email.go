@@ -3,13 +3,13 @@ package email
 import (
 	"bytes"
 	"context"
+	"html/template"
+	"saas/internal/common/utils"
+	"time"
+
 	"github.com/joho/godotenv"
 	"github.com/pkg/errors"
 	"gopkg.in/gomail.v2"
-	"html/template"
-	"os"
-	"strconv"
-	"time"
 )
 
 type mailerConfig struct {
@@ -32,49 +32,21 @@ var (
 )
 
 func init() {
-	if err := UpdateConfig(); err != nil {
-		panic(err)
-	}
-	if err := validateEnv(); err != nil {
-		panic(err)
-	}
-}
-
-func UpdateConfig() error {
 	err := godotenv.Load()
 	if err != nil {
 		panic(err)
 	}
-	portStr := os.Getenv("EMAIL_PORT")
-	port, err := strconv.Atoi(portStr)
-	if err != nil {
-		return err
-	}
 
 	config = mailerConfig{
-		Host:     os.Getenv("EMAIL_HOST"),
-		Port:     port,
-		Username: os.Getenv("EMAIL_USERNAME"),
-		Password: os.Getenv("EMAIL_PASSWORD"),
-		From:     os.Getenv("EMAIL_FROM"),
-		FromName: os.Getenv("EMAIL_FROM_NAME"),
+		Host:     utils.GetEnv("EMAIL_HOST"),
+		Port:     utils.GetEnvAsInt("EMAIL_PORT"),
+		Username: utils.GetEnv("EMAIL_USERNAME"),
+		Password: utils.GetEnv("EMAIL_PASSWORD"),
+		From:     utils.GetEnv("EMAIL_FROM"),
+		FromName: utils.GetEnv("EMAIL_FROM_NAME"),
 	}
 
 	globalDialer = gomail.NewDialer(config.Host, config.Port, config.Username, config.Password)
-
-	return nil
-}
-
-func validateEnv() error {
-	// 校验必填项
-	if config.Host == "" ||
-		config.Port == 0 ||
-		config.Username == "" ||
-		config.Password == "" ||
-		config.From == "" {
-		return errors.New("email config: 环境变量缺失，必填项不能为空")
-	}
-	return nil
 }
 
 func NewMailer(templatesMap map[string]*template.Template) Mailer {

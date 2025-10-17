@@ -3,7 +3,6 @@ package adapters
 import (
 	"context"
 	"fmt"
-	"os"
 	"saas/internal/common/utils"
 	"saas/internal/img/domain"
 	"strconv"
@@ -19,14 +18,11 @@ type ImgRedisCache struct {
 }
 
 func NewImgRedisCache() domain.ImgMsgQueue {
-	host := os.Getenv("REDIS_HOST")
-	port := os.Getenv("REDIS_PORT")
-	password := os.Getenv("REDIS_PASSWORD")
-	dbStr := os.Getenv("REDIS_DB")
-	poolSizeStr := os.Getenv("REDIS_POOL_SIZE")
-
-	db, _ := strconv.Atoi(dbStr)
-	poolSize, _ := strconv.Atoi(poolSizeStr)
+	host := utils.GetEnv("REDIS_HOST")
+	port := utils.GetEnv("REDIS_PORT")
+	password := utils.GetEnv("REDIS_PASSWORD")
+	db := utils.GetEnvAsInt("REDIS_DB")
+	poolSize := utils.GetEnvAsInt("REDIS_POOL_SIZE")
 
 	addr := host + ":" + port
 

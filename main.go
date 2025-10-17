@@ -65,7 +65,7 @@ func setGDB() {
 
 	boil.DebugMode = true
 
-	logMode := os.Getenv("LOG_MODE")
+	logMode := utils.GetEnv("LOG_MODE")
 	if logMode != "dev" {
 		if err := os.MkdirAll("./logs", 0755); err != nil {
 			panic(fmt.Sprintf("创建日志目录失败:%v", err))
@@ -131,7 +131,7 @@ func main() {
 	}
 
 	// 启动 HTTP 服务器
-	server.RunHttpServer(os.Getenv("SERVER_PORT"), metricsClient, func(r *gin.RouterGroup) {
+	server.RunHttpServer(utils.GetEnv("SERVER_PORT"), metricsClient, func(r *gin.RouterGroup) {
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler,
 			ginSwagger.PersistAuthorization(true)))
 

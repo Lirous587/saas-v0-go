@@ -6,12 +6,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
-	"os"
 	"saas/internal/captcha/domain"
 	"saas/internal/common/reskit/codes"
 	"saas/internal/common/uid"
 	"saas/internal/common/utils"
-	"strconv"
 )
 
 type CaptchaRedisCache struct {
@@ -19,22 +17,19 @@ type CaptchaRedisCache struct {
 }
 
 func NewCaptchaRedisCache() domain.CaptchaCache {
-	host := os.Getenv("REDIS_HOST")
-	port := os.Getenv("REDIS_PORT")
-	password := os.Getenv("REDIS_PASSWORD")
-	dbStr := os.Getenv("REDIS_DB")
-	poolSizeStr := os.Getenv("REDIS_POOL_SIZE")
-
-	db, _ := strconv.Atoi(dbStr)
-	poolSize, _ := strconv.Atoi(poolSizeStr)
+	host := utils.GetEnv("REDIS_HOST")
+	port := utils.GetEnv("REDIS_PORT")
+	password := utils.GetEnv("REDIS_PASSWORD")
+	db := utils.GetEnvAsInt("REDIS_DB")
+	poolSize := utils.GetEnvAsInt("REDIS_POOL_SIZE")
 
 	addr := host + ":" + port
 
 	client := redis.NewClient(&redis.Options{
-		Addr:		addr,
-		DB:		db,
-		Password:	password,
-		PoolSize:	poolSize,
+		Addr:     addr,
+		DB:       db,
+		Password: password,
+		PoolSize: poolSize,
 	})
 
 	// 可选：ping 检查连接

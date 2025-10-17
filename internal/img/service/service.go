@@ -8,7 +8,6 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io"
-	"os"
 	"saas/internal/common/reskit/codes"
 	"saas/internal/common/utils"
 	"saas/internal/img/domain"
@@ -52,10 +51,8 @@ type service struct {
 const tenantR2ConfigTTL = 1 * time.Hour
 
 func NewImgService(repo domain.ImgRepository, msgQueue domain.ImgMsgQueue) domain.ImgService {
-	encryptKey := os.Getenv("R2_AES256_ENCRYPTION_KEY")
-	if encryptKey == "" {
-		panic("R2_AES256_ENCRYPTION_KEY环境变量加载失败")
-	}
+	encryptKey := utils.GetEnv("R2_AES256_ENCRYPTION_KEY")
+
 	ace256Encryptor, err := utils.NewAES256Encryptor(encryptKey)
 	if err != nil {
 		panic(err)
