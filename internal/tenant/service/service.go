@@ -45,53 +45,42 @@ func NewTenantService(repo domain.TenantRepository, cache domain.TenantCache, ma
 	}
 }
 
-func (s *service) Create(tenant *domain.Tenant, planID int64, userID int64) (*domain.Tenant, error) {
+func (s *service) Create(tenant *domain.Tenant, planID int64, userID int64) error {
 	// 1.创建事务
 	tx, err := s.repo.BeginTx()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		}
-	}()
+	defer tx.Rollback()
 
 	// 1.向tenants插入数据
 	res, err := s.repo.InsertTx(tx, tenant)
 	if err != nil {
-		return nil, errors.WithMessage(err, "向tenants插入数据失败")
+		return errors.WithMessage(err, "向tenants插入数据失败")
 	}
 
 	tenantID := res.ID
 
 	// 2.向tenant_plan插入数据
 	if err = s.planService.AttchToTenantTx(tx, planID, tenantID); err != nil {
-		return nil, errors.WithMessage(err, "向tenant_plan插入数据失败")
+		return errors.WithMessage(err, "向tenant_plan插入数据失败")
 	}
 
 	// 3.为此租户设置tenantadmin
 	superadmin := s.roleService.NewRole().GetTenantadmin()
 
 	if err = s.repo.AssignTenantUserRoleTx(tx, tenantID, userID, superadmin.ID); err != nil {
-		return nil, errors.WithMessage(err, "为此租户设置superadmin失败")
+		return errors.WithMessage(err, "为此租户设置superadmin失败")
 	}
 
-	if err = tx.Commit(); err != nil {
-		return nil, err
-	}
-
-	return res, nil
+	return tx.Commit()
 }
 
 func (s *service) Read(id int64) (*domain.Tenant, error) {
 	return s.repo.FindByID(id)
 }
 
-func (s *service) Update(tenant *domain.Tenant) (*domain.Tenant, error) {
-	if _, err := s.repo.FindByID(tenant.ID); err != nil {
-		return nil, err
-	}
+func (s *service) Update(tenant *domain.Tenant) error {
 	return s.repo.Update(tenant)
 }
 

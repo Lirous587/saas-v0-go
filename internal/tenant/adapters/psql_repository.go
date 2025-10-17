@@ -45,7 +45,7 @@ func (repo *TenantPSQLRepository) FindByID(id int64) (*domain.Tenant, error) {
 }
 
 func (repo *TenantPSQLRepository) FindTenantPlanByID(id int64) (*domain.Plan, error) {
-	// 1.从tenant_plan中查询到plan_id
+	// 从tenant_plan中查询到plan_id
 	tp, err := orm.TenantPlans(
 		qm.Where(fmt.Sprintf("%s = ?", orm.TenantPlanColumns.TenantID), id),
 		qm.Load(orm.TenantPlanRels.Plan),
@@ -75,19 +75,19 @@ func (repo *TenantPSQLRepository) InsertTx(tx *sql.Tx, tenant *domain.Tenant) (*
 	return ormTenantToDomain(ormTenant), nil
 }
 
-func (repo *TenantPSQLRepository) Update(tenant *domain.Tenant) (*domain.Tenant, error) {
+func (repo *TenantPSQLRepository) Update(tenant *domain.Tenant) error {
 	ormTenant := domainTenantToORM(tenant)
 
 	rows, err := ormTenant.UpdateG(boil.Infer())
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if rows == 0 {
-		return nil, codes.ErrTenantNotFound
+		return codes.ErrTenantNotFound
 	}
 
-	return ormTenantToDomain(ormTenant), nil
+	return nil
 }
 
 func (repo *TenantPSQLRepository) Delete(id int64) error {

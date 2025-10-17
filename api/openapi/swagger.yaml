@@ -1890,12 +1890,7 @@ paths:
         "200":
           description: 请求成功
           schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.TenantResponse'
-              type: object
+            $ref: '#/definitions/response.successResponse'
         "400":
           description: 参数错误
           schema:
@@ -2041,12 +2036,7 @@ paths:
         "200":
           description: 请求成功
           schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.TenantResponse'
-              type: object
+            $ref: '#/definitions/response.successResponse'
         "400":
           description: 参数错误
           schema:
@@ -2190,12 +2180,7 @@ paths:
         "200":
           description: 请求成功
           schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.TenantResponse'
-              type: object
+            $ref: '#/definitions/response.successResponse'
         "400":
           description: 参数错误
           schema:

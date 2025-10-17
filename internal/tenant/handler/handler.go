@@ -42,7 +42,7 @@ func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        request body handler.CreateRequest true "请求参数"
-// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "请求成功"
+// @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant [post]
@@ -59,20 +59,18 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.service.Create(&domain.Tenant{
+	if err := h.service.Create(&domain.Tenant{
 		Name:        req.Name,
 		Description: req.Description,
 	},
 		req.PlanID,
 		userID,
-	)
-
-	if err != nil {
+	); err != nil {
 		response.Error(ctx, err)
 		return
 	}
 
-	response.Success(ctx, domainTenantToResponse(data))
+	response.Success(ctx)
 }
 
 // Read godoc
@@ -111,7 +109,7 @@ func (h *HttpHandler) Read(ctx *gin.Context) {
 // @Security     BearerAuth
 // @Param        id   path int true "id"
 // @Param        request body handler.UpdateRequest true "请求参数"
-// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "请求成功"
+// @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant/{id} [put]
@@ -122,18 +120,16 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.service.Update(&domain.Tenant{
+	if err := h.service.Update(&domain.Tenant{
 		ID:          req.ID,
 		Name:        req.Name,
 		Description: req.Description,
-	})
-
-	if err != nil {
+	}); err != nil {
 		response.Error(ctx, err)
 		return
 	}
 
-	response.Success(ctx, domainTenantToResponse(data))
+	response.Success(ctx)
 }
 
 // Delete godoc
@@ -203,12 +199,13 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 // @Security     BearerAuth
 // @Param        id   path int true "id"
 // @Param        request body handler.UpgradeRequest true "请求参数"
-// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "请求成功"
+// @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant/upgrade/{id} [put]
 func (h *HttpHandler) Upgrade(ctx *gin.Context) {
-	panic("暂未实现")
+	response.Error(ctx, errors.New("暂未实现"))
+	return
 }
 
 // GenInviteToken godoc

@@ -12,8 +12,7 @@ type TenantRepository interface {
 	FindTenantPlanByID(id int64) (*Plan, error)
 
 	InsertTx(tx *sql.Tx, tenant *Tenant) (*Tenant, error)
-
-	Update(tenant *Tenant) (*Tenant, error)
+	Update(tenant *Tenant) error
 	Delete(id int64) error
 	List(query *TenantQuery) (*TenantList, error)
 
