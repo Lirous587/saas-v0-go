@@ -315,20 +315,33 @@ func (repo *ImgPSQLRepository) GetTenantR2Config(tenantID domain.TenantID) (*dom
 func (repo *ImgPSQLRepository) SetTenantR2Config(config *domain.R2Config) error {
 	ormR2Config := doaminR2ConfigToORM(config)
 
+	var updateWhiteList boil.Columns
+	// 除开SecretAccessKey列 其余列必定不为空 故此仅需处理SecretAccessKey列
+	if config.GetSecretAccessKey() == "" {
+		updateWhiteList = boil.Blacklist(
+			orm.TenantR2ConfigColumns.SecretAccessKey,
+		)
+	} else {
+		updateWhiteList = boil.Infer()
+	}
+
 	err := ormR2Config.UpsertG(
 		true,
-		[]string{orm.TenantR2ConfigColumns.TenantID}, // conflictColumns: 冲突时依据的列
-		boil.Whitelist( // updateColumns: 冲突时要更新的列
-			orm.TenantR2ConfigColumns.AccountID,
-			orm.TenantR2ConfigColumns.AccessKeyID,
-			orm.TenantR2ConfigColumns.SecretAccessKey,
-			orm.TenantR2ConfigColumns.PublicBucket,
-			orm.TenantR2ConfigColumns.PublicURLPrefix,
-			orm.TenantR2ConfigColumns.DeleteBucket,
-			orm.TenantR2ConfigColumns.UpdatedAt,
-		),
+		[]string{orm.TenantR2ConfigColumns.TenantID},
+		updateWhiteList,
 		boil.Infer(),
 	)
 
 	return err
+}
+
+func (repo *ImgPSQLRepository) ExistTenantR2Config(tenantID domain.TenantID) (bool, error) {
+	exist, err := orm.TenantR2Configs(
+		orm.TenantR2ConfigWhere.TenantID.EQ(int64(tenantID)),
+	).ExistsG()
+	if err != nil {
+		return false, errors.WithStack(err)
+	}
+
+	return exist, nil
 }

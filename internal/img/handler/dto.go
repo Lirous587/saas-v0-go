@@ -80,9 +80,9 @@ type SetR2ConfigRequest struct {
 	TenantID        domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
 	AccountID       string          `json:"account_id" binding:"required"`
 	AccessKeyID     string          `json:"access_key_id" binding:"required"`
-	SecretAccessKey string          `json:"secret_access_key" binding:"required"`
+	SecretAccessKey string          `json:"secret_access_key"`
 	PublicBucket    string          `json:"public_bucket" binding:"required"`
-	PublicURLPrefix string          `json:"public_url_prefix" binding:"required"`
+	PublicURLPrefix string          `json:"public_url_prefix" binding:"required,url"`
 	DeleteBucket    string          `json:"delete_bucket" binding:"required"`
 }
 

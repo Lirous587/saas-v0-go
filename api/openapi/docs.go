@@ -3491,8 +3491,7 @@ const docTemplate = `{
                 "account_id",
                 "delete_bucket",
                 "public_bucket",
-                "public_url_prefix",
-                "secret_access_key"
+                "public_url_prefix"
             ],
             "properties": {
                 "access_key_id": {

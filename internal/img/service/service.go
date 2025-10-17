@@ -585,13 +585,25 @@ func (s *service) ListCategories(tenantID domain.TenantID) (categories []*domain
 	return s.repo.ListCategories(tenantID)
 }
 
-func (s *service) SetR2Config(secretAccessKey string, config *domain.R2Config) error {
-	encryptSecret, err := s.ace256Encryptor.Encrypt(secretAccessKey)
+func (s *service) SetR2Config(config *domain.R2Config) error {
+	exist, err := s.repo.ExistTenantR2Config(config.TenantID)
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	config.SetSecretAccessKey(encryptSecret)
+	if !exist && config.GetSecretAccessKey() == "" {
+		return codes.ErrCommentTenantConfigSecretMissing
+	}
+
+	// 已有配置 则可不再提供secret
+	// 如果有secret 就去做加密
+	if config.GetSecretAccessKey() != "" {
+		encryptSecret, err := s.ace256Encryptor.Encrypt(config.AccessKeyID)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+		config.SetSecretAccessKey(encryptSecret)
+	}
 
 	if err := s.repo.SetTenantR2Config(config); err != nil {
 		return err

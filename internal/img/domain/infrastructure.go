@@ -22,6 +22,7 @@ type ImgRepository interface {
 
 	SetTenantR2Config(config *R2Config) error
 	GetTenantR2Config(tenantID TenantID) (*R2Config, error)
+	ExistTenantR2Config(tenantID TenantID) (bool, error)
 }
 
 type ImgMsgQueue interface {

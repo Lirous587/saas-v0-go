@@ -312,7 +312,6 @@ definitions:
     - delete_bucket
     - public_bucket
     - public_url_prefix
-    - secret_access_key
     type: object
   handler.SetTenantConfigRequest:
     properties:

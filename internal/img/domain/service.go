@@ -19,6 +19,6 @@ type ImgService interface {
 	ListCategories(tenantID TenantID) (categories []*Category, err error)
 
 	// 配置
-	SetR2Config(secretAccessKey string, config *R2Config) error
+	SetR2Config(config *R2Config) error
 	GetR2Config(tenantID TenantID) (*R2Config, error)
 }

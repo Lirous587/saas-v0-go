@@ -422,8 +422,9 @@ func (h *HttpHandler) SetR2Config(ctx *gin.Context) {
 		DeleteBucket:    req.DeleteBucket,
 	}
 
-	err := h.service.SetR2Config(req.SecretAccessKey, config)
+	config.SetSecretAccessKey(req.SecretAccessKey)
 
+	err := h.service.SetR2Config(config)
 	if err != nil {
 		response.Error(ctx, err)
 		return
