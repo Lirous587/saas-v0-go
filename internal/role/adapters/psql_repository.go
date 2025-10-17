@@ -29,14 +29,14 @@ func (repo *RolePSQLRepository) FindByID(id int64) (*domain.Role, error) {
 	return ormRoleToDomain(ormRole), nil
 }
 
-func (repo *RolePSQLRepository) Create(role *domain.Role) error {
+func (repo *RolePSQLRepository) Create(role *domain.Role) (*domain.Role, error) {
 	ormRole := domainRoleToORM(role)
 
 	if err := ormRole.InsertG(boil.Infer()); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return ormRoleToDomain(ormRole), nil
 }
 
 func (repo *RolePSQLRepository) Update(role *domain.Role) error {

@@ -16,7 +16,10 @@ func NewPlanService(repo domain.PlanRepository) domain.PlanService {
 }
 
 func (s *service) Create(plan *domain.Plan) error {
-	return s.repo.Create(plan)
+	if _, err := s.repo.Create(plan); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *service) Update(plan *domain.Plan) error {

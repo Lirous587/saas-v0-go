@@ -3,7 +3,7 @@
 import "database/sql"
 
 type PlanRepository interface {
-	Create(plan *Plan) error
+	Create(plan *Plan) (*Plan, error)
 	Update(plan *Plan) error
 	Delete(id int64) error
 	List() ([]*Plan, error)

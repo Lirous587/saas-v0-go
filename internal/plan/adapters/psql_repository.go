@@ -18,14 +18,14 @@ func NewPlanPSQLRepository() domain.PlanRepository {
 	return &PlanPSQLRepository{}
 }
 
-func (repo *PlanPSQLRepository) Create(plan *domain.Plan) error {
+func (repo *PlanPSQLRepository) Create(plan *domain.Plan) (*domain.Plan, error) {
 	ormPlan := domainPlanToORM(plan)
 
 	if err := ormPlan.InsertG(boil.Infer()); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return ormPlanToDomain(ormPlan), nil
 }
 
 func (repo *PlanPSQLRepository) Update(plan *domain.Plan) error {

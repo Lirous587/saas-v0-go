@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"saas/internal/common/reskit/codes"
 	"saas/internal/common/utils"
 	"saas/internal/role/domain"
 	"strconv"
@@ -60,6 +61,9 @@ func (cache *RoleRedisCache) GetUserRoleInTenant(userID, tenantID int64) (*domai
 	key := cache.buildRoleKey(userID, tenantID)
 	result, err := cache.client.Get(context.Background(), key).Result()
 	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return nil, codes.ErrRoleInTenantCacheMissing
+		}
 		return nil, err
 	}
 

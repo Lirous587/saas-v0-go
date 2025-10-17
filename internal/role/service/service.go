@@ -2,9 +2,9 @@ package service
 
 import (
 	"errors"
+	"saas/internal/common/reskit/codes"
 	"saas/internal/role/domain"
 
-	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 )
 
@@ -25,7 +25,10 @@ func (s *service) NewRole() *domain.Role {
 }
 
 func (s *service) Create(role *domain.Role) error {
-	return s.repo.Create(role)
+	if _, err := s.repo.Create(role); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *service) Update(role *domain.Role) error {
@@ -47,7 +50,8 @@ func (s *service) GetUserRoleInTenant(userID, tenantID int64) (*domain.Role, err
 	role, err := s.cache.GetUserRoleInTenant(userID, tenantID)
 
 	if err != nil {
-		if errors.Is(err, redis.Nil) {
+		// 缓存未命中
+		if errors.Is(err, codes.ErrRoleInTenantCacheMissing) {
 			role, err = s.repo.FindUserRoleInTenant(userID, tenantID)
 			if err != nil {
 				return nil, err
