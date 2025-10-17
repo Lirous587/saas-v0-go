@@ -510,22 +510,22 @@ func (s *service) RestoreFromRecycleBin(tenantID domain.TenantID, id int64) (*do
 
 const maxCategory = 10
 
-func (s *service) CreateCategory(category *domain.Category) (*domain.Category, error) {
+func (s *service) CreateCategory(category *domain.Category) error {
 	exist, err := s.repo.CategoryExistByTitle(category.TenantID, category.Title)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 	if exist {
-		return nil, codes.ErrImgCategoryTitleRepeat
+		return codes.ErrImgCategoryTitleRepeat
 	}
 
 	count, err := s.repo.CountCategory(category.TenantID)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 
 	if count >= maxCategory {
-		return nil, codes.ErrImgCategoryToMany
+		return codes.ErrImgCategoryToMany
 	}
 
 	return s.repo.CreateCategory(category)
@@ -543,14 +543,14 @@ func (s *service) isCategoryExistImg(tenantID domain.TenantID, id int64) error {
 	return nil
 }
 
-func (s *service) UpdateCategory(category *domain.Category) (*domain.Category, error) {
+func (s *service) UpdateCategory(category *domain.Category) error {
 	// 1.除开自己以外 是否有与修改之后title相同的数据
 	stored, err := s.repo.FindCategoryByTitle(category.TenantID, category.Title)
 	if err != nil && !errors.Is(err, codes.ErrImgCategoryNotFound) {
-		return nil, err
+		return errors.WithStack(err)
 	}
 	if stored != nil && stored.ID != category.ID {
-		return nil, codes.ErrImgCategoryTitleRepeat
+		return codes.ErrImgCategoryTitleRepeat
 	}
 
 	// 2.再去查询原先数据 比对path是否一致
@@ -558,7 +558,7 @@ func (s *service) UpdateCategory(category *domain.Category) (*domain.Category, e
 	// 若不一致 则需该分类下无图片关联方可进行修改
 	old, err := s.repo.FindCategoryByID(category.TenantID, category.ID)
 	if err != nil {
-		return nil, err
+		return errors.WithStack(err)
 	}
 	if old.Prefix == category.Prefix {
 		return s.repo.UpdateCategory(category)
@@ -566,7 +566,7 @@ func (s *service) UpdateCategory(category *domain.Category) (*domain.Category, e
 
 	// 若一致
 	if err := s.isCategoryExistImg(category.TenantID, category.ID); err != nil {
-		return nil, err
+		return errors.WithStack(err)
 	}
 
 	return s.repo.UpdateCategory(category)

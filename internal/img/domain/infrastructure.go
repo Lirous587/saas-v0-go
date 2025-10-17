@@ -9,8 +9,8 @@ type ImgRepository interface {
 	Restore(tenantID TenantID, id int64) (*Img, error)
 	List(query *ImgQuery) (*ImgList, error)
 
-	CreateCategory(category *Category) (*Category, error)
-	UpdateCategory(category *Category) (*Category, error)
+	CreateCategory(category *Category) error
+	UpdateCategory(category *Category) error
 	DeleteCategory(tenantID TenantID, id int64) error
 	ListCategories(tenantID TenantID) ([]*Category, error)
 	FindCategoryByID(tenantID TenantID, id int64) (*Category, error)

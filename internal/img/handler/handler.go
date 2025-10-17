@@ -287,7 +287,7 @@ func (h *HttpHandler) ListenDeleteQueue() {
 // @Produce      json
 // @Param        tenant_id    path   int64  true  "租户id"
 // @Param        request body handler.CreateCategoryRequest true "请求参数"
-// @Success      200 {object} response.successResponse{data=handler.CategoryResponse} "请求成功"
+// @Success      200 {object} response.successResponse "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
@@ -298,18 +298,16 @@ func (h *HttpHandler) CreateCategory(ctx *gin.Context) {
 		return
 	}
 
-	res, err := h.service.CreateCategory(&domain.Category{
+	if err := h.service.CreateCategory(&domain.Category{
 		TenantID: req.TenantID,
 		Title:    req.Title,
 		Prefix:   req.Prefix,
-	})
-
-	if err != nil {
+	}); err != nil {
 		response.Error(ctx, err)
 		return
 	}
 
-	response.Success(ctx, domainCategoryToResponse(res))
+	response.Success(ctx)
 }
 
 // UpdateCategory godoc
@@ -320,7 +318,7 @@ func (h *HttpHandler) CreateCategory(ctx *gin.Context) {
 // @Param        id      		path   int64  true  "分类id"
 // @Param        tenant_id  path   int64  true  "租户id"
 // @Param        request body   handler.UpdateCategoryRequest true "请求参数"
-// @Success      200 {object} response.successResponse{data=handler.CategoryResponse} "请求成功"
+// @Success      200 {object} response.successResponse "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
@@ -331,19 +329,17 @@ func (h *HttpHandler) UpdateCategory(ctx *gin.Context) {
 		return
 	}
 
-	res, err := h.service.UpdateCategory(&domain.Category{
+	if err := h.service.UpdateCategory(&domain.Category{
 		ID:       req.ID,
 		TenantID: req.TenantID,
 		Title:    req.Title,
 		Prefix:   req.Prefix,
-	})
-
-	if err != nil {
+	}); err != nil {
 		response.Error(ctx, err)
 		return
 	}
 
-	response.Success(ctx, domainCategoryToResponse(res))
+	response.Success(ctx)
 }
 
 // DeleteCategory godoc

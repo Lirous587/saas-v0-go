@@ -167,31 +167,26 @@ func (repo *ImgPSQLRepository) List(query *domain.ImgQuery) (*domain.ImgList, er
 	}, nil
 }
 
-func (repo *ImgPSQLRepository) CreateCategory(category *domain.Category) (*domain.Category, error) {
+func (repo *ImgPSQLRepository) CreateCategory(category *domain.Category) error {
 	ormCategory := domainCategoryToORM(category)
 	if err := ormCategory.InsertG(boil.Infer()); err != nil {
-		return nil, err
+		return errors.WithStack(err)
 	}
-	return ormCategoryToDomain(ormCategory), nil
+	return nil
 }
 
-func (repo *ImgPSQLRepository) UpdateCategory(category *domain.Category) (*domain.Category, error) {
+func (repo *ImgPSQLRepository) UpdateCategory(category *domain.Category) error {
 	ormCategory := domainCategoryToORM(category)
 	rows, err := ormCategory.UpdateG(boil.Infer())
 	if err != nil {
-		return nil, err
+		return errors.WithStack(err)
 	}
 
 	if rows == 0 {
-		return nil, codes.ErrImgNotFound
+		return codes.ErrImgNotFound
 	}
 
-	updated, err := repo.FindCategoryByID(domain.TenantID(ormCategory.TenantID), ormCategory.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	return updated, err
+	return nil
 }
 
 func (repo *ImgPSQLRepository) DeleteCategory(tenantID domain.TenantID, id int64) error {

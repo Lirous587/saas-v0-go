@@ -13,8 +13,8 @@ type ImgService interface {
 	RestoreFromRecycleBin(tenantID TenantID, id int64) (*Img, error)
 
 	//	分类
-	CreateCategory(category *Category) (*Category, error)
-	UpdateCategory(category *Category) (*Category, error)
+	CreateCategory(category *Category) error
+	UpdateCategory(category *Category) error
 	DeleteCategory(tenantID TenantID, id int64) error
 	ListCategories(tenantID TenantID) (categories []*Category, err error)
 
