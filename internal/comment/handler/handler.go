@@ -397,7 +397,7 @@ func (h *HttpHandler) DeletePlate(ctx *gin.Context) {
 // @Param        keyword    query     string  false  "关键词"
 // @Param        page       query     int     false  "页码"
 // @Param        page_size  query     int     false  "每页数量"
-// @Success      200  {object}  response.successResponse "请求成功"
+// @Success      200  {object}  response.successResponse{data=handler.PlateListResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/comment/{tenant_id}/plate [get]

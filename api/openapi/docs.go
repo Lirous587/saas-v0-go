@@ -361,7 +361,19 @@ const docTemplate = `{
                     "200": {
                         "description": "请求成功",
                         "schema": {
-                            "$ref": "#/definitions/response.successResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.PlateListResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -3273,6 +3285,37 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "integer"
+                }
+            }
+        },
+        "handler.PlateListResponse": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.PlateResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.PlateResponse": {
+            "type": "object",
+            "properties": {
+                "belong_key": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "related_url": {
+                    "type": "string"
+                },
+                "summary": {
+                    "type": "string"
                 }
             }
         },
