@@ -44,46 +44,40 @@ func domainTenantListToResponse(data *domain.TenantList) *TenantListResponse {
 	}
 }
 
-func domainUserWithRoleToResponse(data *domain.UserWithRole) *UserWithRoleResponse {
+func domainUserToResponse(data *domain.User) *UserResponse {
 	if data == nil {
 		return nil
 	}
 
-	return &UserWithRoleResponse{
-		User: UserResponse{
-			ID:       data.User.ID,
-			Email:    data.User.Email,
-			Nickname: data.User.Nickname,
-		},
-		Role: RoleResponse{
-			ID:   data.Role.ID,
-			Name: data.Role.Name,
-		},
+	return &UserResponse{
+		ID:       data.ID,
+		Email:    data.Email,
+		Nickname: data.Nickname,
 	}
 }
 
-func domainUsersWithRoleToResponse(list []*domain.UserWithRole) []*UserWithRoleResponse {
+func domainUsersToResponse(list []*domain.User) []*UserResponse {
 	if len(list) == 0 {
 		return nil
 	}
 
-	ret := make([]*UserWithRoleResponse, 0, len(list))
+	ret := make([]*UserResponse, 0, len(list))
 
-	for _, item := range list {
-		if item != nil {
-			ret = append(ret, domainUserWithRoleToResponse(item))
+	for i := range list {
+		if list[i] != nil {
+			ret = append(ret, domainUserToResponse(list[i]))
 		}
 	}
 	return ret
 }
 
-func domainUserWithRoleListToResponse(data *domain.UserWithRoleList) *UserWithRoleListResponse {
+func domainUserListToResponse(data *domain.UserList) *UserListResponse {
 	if data == nil {
 		return nil
 	}
 
-	return &UserWithRoleListResponse{
+	return &UserListResponse{
 		Total: data.Total,
-		List:  domainUsersWithRoleToResponse(data.List),
+		List:  domainUsersToResponse(data.List),
 	}
 }

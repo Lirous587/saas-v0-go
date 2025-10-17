@@ -212,8 +212,8 @@ func (s *service) enterHelp(tenantID int64, email string) error {
 	return nil
 }
 
-func (s *service) ListUsersWithRole(query *domain.UserWithRoleQuery) (*domain.UserWithRoleList, error) {
-	return s.repo.ListUsersWithRole(query)
+func (s *service) ListUsers(query *domain.UserQuery) (*domain.UserList, error) {
+	return s.repo.ListUsers(query)
 }
 
 func (s *service) CheckRoleValidity(roleID int64) error {

@@ -26,7 +26,7 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 		protect.POST("/:id/invite", server.SetTenantID("id"), auth.CasbinValited(), handler.Invite)
 
 		// 租户下的用户信息及其角色
-		protect.GET("/:id/users", server.SetTenantID("id"), auth.CasbinValited(), handler.GetUserWithRole)
+		protect.GET("/:id/users", server.SetTenantID("id"), auth.CasbinValited(), handler.GetUsers)
 
 		// todo 分配角色
 		// protect.POST("/:id/:user_id", server.SetTenantID("id"), auth.CasbinValited(), handler.xx)

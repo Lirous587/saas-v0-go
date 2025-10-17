@@ -216,20 +216,6 @@ definitions:
     - emails
     - expire_second
     type: object
-  handler.ListUserWithRoleQueryRequestBody:
-    properties:
-      nickname:
-        type: string
-      page:
-        minimum: 1
-        type: integer
-      page_size:
-        maximum: 20
-        minimum: 5
-        type: integer
-      role_id:
-        type: integer
-    type: object
   handler.PlanListResponse:
     properties:
       list:
@@ -285,8 +271,19 @@ definitions:
     properties:
       list:
         items:
-          $ref: '#/definitions/saas_internal_role_handler.RoleResponse'
+          $ref: '#/definitions/handler.RoleResponse'
         type: array
+    type: object
+  handler.RoleResponse:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      tenant_id:
+        type: integer
     type: object
   handler.SetPlateConfigRequest:
     properties:
@@ -465,17 +462,6 @@ definitions:
         type: string
     required:
     - name
-    type: object
-  saas_internal_role_handler.RoleResponse:
-    properties:
-      description:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      tenant_id:
-        type: integer
     type: object
   saas_internal_role_handler.UpdateRequest:
     properties:
@@ -1794,7 +1780,7 @@ paths:
             - $ref: '#/definitions/response.successResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/saas_internal_role_handler.RoleResponse'
+                  $ref: '#/definitions/handler.RoleResponse'
               type: object
         "400":
           description: 参数错误
@@ -1864,7 +1850,7 @@ paths:
             - $ref: '#/definitions/response.successResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/saas_internal_role_handler.RoleResponse'
+                  $ref: '#/definitions/handler.RoleResponse'
               type: object
         "400":
           description: 参数错误
@@ -1959,17 +1945,23 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: id
+      - description: 租户id
         in: path
         name: id
         required: true
         type: integer
-      - description: 请求参数
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/handler.ListUserWithRoleQueryRequestBody'
+      - description: 用户名
+        in: query
+        name: nickname
+        type: string
+      - description: 页号
+        in: query
+        name: page
+        type: integer
+      - description: 页码
+        in: query
+        name: page_size
+        type: integer
       produces:
       - application/json
       responses:

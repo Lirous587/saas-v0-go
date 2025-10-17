@@ -12,5 +12,5 @@ type TenantService interface {
 	Enter(paylod *EnterPayload) error
 
 	CheckRoleValidity(roleID int64) error
-	ListUsersWithRole(query *UserWithRoleQuery) (*UserWithRoleList, error)
+	ListUsers(query *UserQuery) (*UserList, error)
 }

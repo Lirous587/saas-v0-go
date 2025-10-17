@@ -21,7 +21,7 @@ type TenantRepository interface {
 
 	AssignTenantUserRole(tenantID, userID, roleID int64) error
 
-	ListUsersWithRole(query *UserWithRoleQuery) (*UserWithRoleList, error)
+	ListUsers(query *UserQuery) (*UserList, error)
 }
 
 type TenantCache interface {

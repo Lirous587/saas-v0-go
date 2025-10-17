@@ -2073,7 +2073,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/saas_internal_role_handler.RoleResponse"
+                                            "$ref": "#/definitions/handler.RoleResponse"
                                         }
                                     }
                                 }
@@ -2142,7 +2142,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/saas_internal_role_handler.RoleResponse"
+                                            "$ref": "#/definitions/handler.RoleResponse"
                                         }
                                     }
                                 }
@@ -2356,19 +2356,28 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "id",
+                        "description": "租户id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "请求参数",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.ListUserWithRoleQueryRequestBody"
-                        }
+                        "type": "string",
+                        "description": "用户名",
+                        "name": "nickname",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页号",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page_size",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -3336,26 +3345,6 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.ListUserWithRoleQueryRequestBody": {
-            "type": "object",
-            "properties": {
-                "nickname": {
-                    "type": "string"
-                },
-                "page": {
-                    "type": "integer",
-                    "minimum": 1
-                },
-                "page_size": {
-                    "type": "integer",
-                    "maximum": 20,
-                    "minimum": 5
-                },
-                "role_id": {
-                    "type": "integer"
-                }
-            }
-        },
         "handler.PlanListResponse": {
             "type": "object",
             "properties": {
@@ -3441,8 +3430,25 @@ const docTemplate = `{
                 "list": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/saas_internal_role_handler.RoleResponse"
+                        "$ref": "#/definitions/handler.RoleResponse"
                     }
+                }
+            }
+        },
+        "handler.RoleResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "tenant_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -3707,23 +3713,6 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
-                }
-            }
-        },
-        "saas_internal_role_handler.RoleResponse": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "tenant_id": {
-                    "type": "integer"
                 }
             }
         },

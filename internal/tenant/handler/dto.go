@@ -58,17 +58,11 @@ type EntryRequest struct {
 	Email     string                 `json:"email" form:"number" binding:"required,email"`
 }
 
-type ListUserWithRoleQueryRequest struct {
-	TenantID int64 `json:"-" uri:"id" binding:"required"`
-	ListUserWithRoleQueryRequestBody
-}
-
-type ListUserWithRoleQueryRequestBody struct {
-	RoleID   int64  `form:"role_id"`
-	Nickname string `form:"nickname"`
-
-	Page     int `form:"page,default=1" binding:"min=1"`
-	PageSize int `form:"page_size,default=5" binding:"min=5,max=20"`
+type ListUserRequest struct {
+	TenantID int64  `json:"-" uri:"id" binding:"required"`
+	Nickname string `json:"-" form:"nickname"`
+	Page     int    `json:"-" form:"page,default=1" binding:"min=1"`
+	PageSize int    `json:"-" form:"page_size,default=5" binding:"min=5,max=15"`
 }
 
 type UserResponse struct {
@@ -77,17 +71,7 @@ type UserResponse struct {
 	Nickname string `json:"nickname"`
 }
 
-type RoleResponse struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
-}
-
-type UserWithRoleResponse struct {
-	User UserResponse `json:"user"`
-	Role RoleResponse `json:"role"`
-}
-
-type UserWithRoleListResponse struct {
-	Total int64                   `json:"total"`
-	List  []*UserWithRoleResponse `json:"list"`
+type UserListResponse struct {
+	Total int64           `json:"total"`
+	List  []*UserResponse `json:"list"`
 }

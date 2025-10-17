@@ -6,16 +6,18 @@ import (
 	"log"
 	"os"
 	_ "saas/api/openapi"
+	"saas/internal/comment"
 	"saas/internal/common/logger"
 	"saas/internal/common/metrics"
 	"saas/internal/common/middleware/auth"
 	"saas/internal/common/server"
 	"saas/internal/common/uid"
-	"saas/internal/comment"
+	"saas/internal/common/utils"
 	"saas/internal/img"
 	"saas/internal/role"
 	"saas/internal/tenant"
 	"saas/internal/user"
+	"time"
 
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/gin-gonic/gin"
@@ -26,12 +28,17 @@ import (
 )
 
 func setGDB() {
-	host := os.Getenv("PSQL_HOST")
-	port := os.Getenv("PSQL_PORT")
-	username := os.Getenv("PSQL_USERNAME")
-	password := os.Getenv("PSQL_PASSWORD")
-	dbname := os.Getenv("PSQL_DB_NAME")
-	sslmode := os.Getenv("PSQL_SSL_MODE")
+	host := utils.GetEnv("PSQL_HOST")
+	port := utils.GetEnv("PSQL_PORT")
+	username := utils.GetEnv("PSQL_USERNAME")
+	password := utils.GetEnv("PSQL_PASSWORD")
+	dbname := utils.GetEnv("PSQL_DB_NAME")
+	sslmode := utils.GetEnv("PSQL_SSL_MODE")
+
+	maxOpenConns := utils.GetEnvAsInt("DB_MAX_OPEN_CONNS")
+	maxIdleConns := utils.GetEnvAsInt("DB_MAX_IDLE_CONNS")
+	connMaxLifetime := time.Duration(utils.GetEnvAsInt("DB_CONN_MAX_LIFETIME_MINUTES")) * time.Minute
+	connMaxIdleTime := time.Duration(utils.GetEnvAsInt("DB_CONN_MAX_IDLE_TIME_MINUTES")) * time.Minute
 
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
@@ -42,6 +49,12 @@ func setGDB() {
 	if err != nil {
 		panic(err)
 	}
+
+	// 配置连接池
+	db.SetMaxOpenConns(maxOpenConns)
+	db.SetMaxIdleConns(maxIdleConns)
+	db.SetConnMaxLifetime(connMaxLifetime)
+	db.SetConnMaxIdleTime(connMaxIdleTime)
 
 	// 测试连接
 	if err := db.Ping(); err != nil {

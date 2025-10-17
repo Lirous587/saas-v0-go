@@ -310,36 +310,30 @@ func (h *HttpHandler) Enter(ctx *gin.Context) {
 	response.Success(ctx)
 }
 
-// GetUserWithRole godoc
+// GetUsers godoc
 // @Summary      获取租户下的用户
 // @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "id"
-// @Param        request body handler.ListUserWithRoleQueryRequestBody true "请求参数"
+// @Param        id   			path  		int  		true 	 "租户id"
+// @Param        nickname   query     string  false  "用户名"
+// @Param        page       query     int     false  "页号"
+// @Param        page_size  query     int     false  "页码"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant/:id/users [get]
-func (h *HttpHandler) GetUserWithRole(ctx *gin.Context) {
-	req := new(ListUserWithRoleQueryRequest)
+func (h *HttpHandler) GetUsers(ctx *gin.Context) {
+	req := new(ListUserRequest)
 
 	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
-	// 验证role_id是否有效
-	if err := h.service.CheckRoleValidity(req.RoleID); err != nil {
-		// 这里归为Error更加合适
-		response.Error(ctx, err)
-		return
-	}
-
-	data, err := h.service.ListUsersWithRole(&domain.UserWithRoleQuery{
+	data, err := h.service.ListUsers(&domain.UserQuery{
 		TenantID: req.TenantID,
 		Nickname: req.Nickname,
-		RoleID:   req.RoleID,
 		Page:     req.Page,
 		PageSize: req.PageSize,
 	})
@@ -349,5 +343,5 @@ func (h *HttpHandler) GetUserWithRole(ctx *gin.Context) {
 		return
 	}
 
-	response.Success(ctx, domainUserWithRoleListToResponse(data))
+	response.Success(ctx, domainUserListToResponse(data))
 }

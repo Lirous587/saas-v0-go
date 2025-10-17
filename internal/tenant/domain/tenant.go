@@ -56,11 +56,9 @@ type EnterPayload struct {
 	Email     string
 }
 
-type UserWithRoleQuery struct {
+type UserQuery struct {
 	TenantID int64
-	RoleID   int64
 	Nickname string
-
 	Page     int
 	PageSize int
 }
@@ -76,12 +74,7 @@ type Role struct {
 	Name string
 }
 
-type UserWithRole struct {
-	User User
-	Role Role
-}
-
-type UserWithRoleList struct {
+type UserList struct {
 	Total int64
-	List  []*UserWithRole
+	List  []*User
 }
