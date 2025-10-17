@@ -21,7 +21,3 @@ type UpdateRequest struct {
 	Description string  `json:"description" binding:"required"`
 	Price       float64 `json:"price" binding:"required"`
 }
-
-type PlanListResponse struct {
-	List []*PlanResponse `json:"list"`
-}

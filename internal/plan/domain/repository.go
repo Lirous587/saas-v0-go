@@ -3,12 +3,10 @@
 import "database/sql"
 
 type PlanRepository interface {
-	FindByID(id int64) (*Plan, error)
-
-	Create(plan *Plan) (*Plan, error)
-	Update(plan *Plan) (*Plan, error)
+	Create(plan *Plan) error
+	Update(plan *Plan) error
 	Delete(id int64) error
-	List() (*PlanList, error)
+	List() ([]*Plan, error)
 
 	AttchToTenantTx(tx *sql.Tx, planID, tenantID int64) error
 }

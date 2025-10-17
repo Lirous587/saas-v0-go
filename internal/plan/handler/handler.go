@@ -41,7 +41,7 @@ func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        request body handler.CreateRequest true "请求参数"
-// @Success      200  {object}  response.successResponse{data=handler.PlanResponse} "请求成功"
+// @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/plan [post]
@@ -52,46 +52,16 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.service.Create(&domain.Plan{
+	if err := h.service.Create(&domain.Plan{
 		Name:        req.Name,
 		Price:       req.Price,
 		Description: req.Description,
-	})
-
-	if err != nil {
+	}); err != nil {
 		response.Error(ctx, err)
 		return
 	}
 
-	response.Success(ctx, domainPlanToResponse(data))
-}
-
-// Read godoc
-// @Summary      读取单条数据
-// @Tags         plan
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        id   path int true "id"
-// @Success      200  {object}  response.successResponse{data=handler.PlanResponse} "请求成功"
-// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
-// @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/plan/{id} [get]
-func (h *HttpHandler) Read(ctx *gin.Context) {
-	id, err := h.getID(ctx)
-	if err != nil {
-		response.InvalidParams(ctx, err)
-		return
-	}
-
-	data, err := h.service.Read(id)
-
-	if err != nil {
-		response.Error(ctx, err)
-		return
-	}
-
-	response.Success(ctx, domainPlanToResponse(data))
+	response.Success(ctx)
 }
 
 // Update godoc
@@ -102,7 +72,7 @@ func (h *HttpHandler) Read(ctx *gin.Context) {
 // @Security     BearerAuth
 // @Param        id   path int true "id"
 // @Param        request body handler.UpdateRequest true "请求参数"
-// @Success      200  {object}  response.successResponse{data=handler.PlanResponse} "请求成功"
+// @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/plan/{id} [put]
@@ -113,19 +83,17 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.service.Update(&domain.Plan{
+	if err := h.service.Update(&domain.Plan{
 		ID:          req.ID,
 		Name:        req.Name,
 		Price:       req.Price,
 		Description: req.Description,
-	})
-
-	if err != nil {
+	}); err != nil {
 		response.Error(ctx, err)
 		return
 	}
 
-	response.Success(ctx, domainPlanToResponse(data))
+	response.Success(ctx)
 }
 
 // Delete godoc
@@ -159,7 +127,7 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Tags         plan
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}  response.successResponse{data=handler.PlanListResponse} "请求成功"
+// @Success      200  {object}  response.successResponse{data=[]handler.PlanResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/plan [get]
@@ -171,5 +139,5 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 		return
 	}
 
-	response.Success(ctx, domainPlanListToResponse(data))
+	response.Success(ctx, domainPlansToResponse(data))
 }

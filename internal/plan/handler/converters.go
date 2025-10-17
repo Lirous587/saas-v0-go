@@ -33,13 +33,3 @@ func domainPlansToResponse(plans []*domain.Plan) []*PlanResponse {
 	}
 	return ret
 }
-
-func domainPlanListToResponse(data *domain.PlanList) *PlanListResponse {
-	if data == nil {
-		return nil
-	}
-
-	return &PlanListResponse{
-		List: domainPlansToResponse(data.List),
-	}
-}

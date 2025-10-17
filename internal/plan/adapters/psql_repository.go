@@ -9,7 +9,6 @@ import (
 
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
-	"github.com/pkg/errors"
 )
 
 type PlanPSQLRepository struct {
@@ -19,40 +18,29 @@ func NewPlanPSQLRepository() domain.PlanRepository {
 	return &PlanPSQLRepository{}
 }
 
-func (repo *PlanPSQLRepository) FindByID(id int64) (*domain.Plan, error) {
-	ormPlan, err := orm.FindPlanG(id)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, codes.ErrPlanNotFound
-		}
-		return nil, err
-	}
-	return ormPlanToDomain(ormPlan), nil
-}
-
-func (repo *PlanPSQLRepository) Create(plan *domain.Plan) (*domain.Plan, error) {
+func (repo *PlanPSQLRepository) Create(plan *domain.Plan) error {
 	ormPlan := domainPlanToORM(plan)
 
 	if err := ormPlan.InsertG(boil.Infer()); err != nil {
-		return nil, err
+		return err
 	}
 
-	return ormPlanToDomain(ormPlan), nil
+	return nil
 }
 
-func (repo *PlanPSQLRepository) Update(plan *domain.Plan) (*domain.Plan, error) {
+func (repo *PlanPSQLRepository) Update(plan *domain.Plan) error {
 	ormPlan := domainPlanToORM(plan)
 
 	rows, err := ormPlan.UpdateG(boil.Infer())
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if rows == 0 {
-		return nil, codes.ErrPlanNotFound
+		return codes.ErrPlanNotFound
 	}
 
-	return ormPlanToDomain(ormPlan), nil
+	return nil
 }
 
 func (repo *PlanPSQLRepository) Delete(id int64) error {
@@ -70,15 +58,13 @@ func (repo *PlanPSQLRepository) Delete(id int64) error {
 	return nil
 }
 
-func (repo *PlanPSQLRepository) List() (*domain.PlanList, error) {
-	plan, err := orm.Plans(qm.OrderBy(fmt.Sprintf("%s ASC", orm.PlanColumns.Price))).AllG()
+func (repo *PlanPSQLRepository) List() ([]*domain.Plan, error) {
+	plans, err := orm.Plans(qm.OrderBy(fmt.Sprintf("%s ASC", orm.PlanColumns.Price))).AllG()
 	if err != nil {
 		return nil, err
 	}
 
-	return &domain.PlanList{
-		List: ormPlansToDomain(plan),
-	}, nil
+	return ormPlansToDomain(plans), nil
 }
 
 func (repo *PlanPSQLRepository) AttchToTenantTx(tx *sql.Tx, planID, tenantID int64) error {
