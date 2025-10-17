@@ -242,6 +242,10 @@ func (cache *CommentRedisCache) RemoveLike(tenantID domain.TenantID, userID int6
 }
 
 func (cache *CommentRedisCache) GetLikeMap(tenantID domain.TenantID, userID int64, commentIds []int64) (map[int64]struct{}, error) {
+	if len(commentIds) == 0 {
+		return nil,nil
+	}
+
 	preKey := utils.GetRedisKey(commentLikeKey)
 	key := fmt.Sprintf("%s-%d-%d", preKey, tenantID, userID)
 
