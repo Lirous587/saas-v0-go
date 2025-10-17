@@ -320,7 +320,7 @@ func (h *HttpHandler) Enter(ctx *gin.Context) {
 // @Param        nickname   query     string  false  "用户名"
 // @Param        page       query     int     false  "页号"
 // @Param        page_size  query     int     false  "页码"
-// @Success      200  {object}  response.successResponse "请求成功"
+// @Success      200  {object}  response.successResponse{data=handler.UserListResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant/:id/users [get]

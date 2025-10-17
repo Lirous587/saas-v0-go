@@ -2384,7 +2384,19 @@ const docTemplate = `{
                     "200": {
                         "description": "请求成功",
                         "schema": {
-                            "$ref": "#/definitions/response.successResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.UserListResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -3598,6 +3610,20 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.UserListResponse": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/saas_internal_tenant_handler.UserResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "response.errorResponse": {
             "type": "object",
             "properties": {
@@ -3761,6 +3787,20 @@ const docTemplate = `{
                     "maxLength": 120
                 },
                 "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "saas_internal_tenant_handler.UserResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "nickname": {
                     "type": "string"
                 }
             }

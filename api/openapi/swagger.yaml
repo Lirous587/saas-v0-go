@@ -382,6 +382,15 @@ definitions:
       nickname:
         type: string
     type: object
+  handler.UserListResponse:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/saas_internal_tenant_handler.UserResponse'
+        type: array
+      total:
+        type: integer
+    type: object
   response.errorResponse:
     properties:
       code:
@@ -495,6 +504,15 @@ definitions:
         type: string
     required:
     - id
+    type: object
+  saas_internal_tenant_handler.UserResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      nickname:
+        type: string
     type: object
   saas_internal_user_handler.UserResponse:
     properties:
@@ -1968,7 +1986,12 @@ paths:
         "200":
           description: 请求成功
           schema:
-            $ref: '#/definitions/response.successResponse'
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.UserListResponse'
+              type: object
         "400":
           description: 参数错误
           schema:
