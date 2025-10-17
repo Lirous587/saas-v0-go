@@ -1,10 +1,11 @@
-FROM golang:1.22
+FROM golang:1.25.1
 WORKDIR /app
-COPY ../main .
+COPY ../saas .
 COPY ../.env.docker .env
-RUN chmod +x main
-CMD ["./main"]
+COPY ../model.conf model.conf
+RUN chmod +x saas
+CMD ["./saas"]
 
 #$env:GOOS="linux"
 #$env:GOARCH="amd64"
-#go build -o main .
+#go build -o saas .
