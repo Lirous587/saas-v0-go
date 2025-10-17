@@ -3,8 +3,8 @@
 type RoleService interface {
 	NewRole() *Role
 
-	Create(role *Role) (*Role, error)
-	Update(role *Role) (*Role, error)
+	Create(role *Role) error
+	Update(role *Role) error
 	Delete(id int64) error
 	List() (*RoleList, error)
 

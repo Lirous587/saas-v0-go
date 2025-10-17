@@ -42,7 +42,7 @@ func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
 // @Security     BearerAuth
 // @Param        id   path int true "id"
 // @Param        request body handler.CreateRequest true "请求参数"
-// @Success      200  {object}  response.successResponse{data=handler.RoleResponse} "请求成功"
+// @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/role [post]
@@ -53,18 +53,16 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.service.Create(&domain.Role{
+	if err := h.service.Create(&domain.Role{
 		ID:          req.ID,
 		Name:        req.Name,
 		Description: req.Description,
-	})
-
-	if err != nil {
+	}); err != nil {
 		response.Error(ctx, err)
 		return
 	}
 
-	response.Success(ctx, domainRoleToResponse(data))
+	response.Success(ctx)
 }
 
 // Update godoc
@@ -75,7 +73,7 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 // @Security     BearerAuth
 // @Param        id   path int true "id"
 // @Param        request body handler.UpdateRequest true "请求参数"
-// @Success      200  {object}  response.successResponse{data=handler.RoleResponse} "请求成功"
+// @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/role/{id} [put]
@@ -86,18 +84,16 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.service.Update(&domain.Role{
+	if err := h.service.Update(&domain.Role{
 		ID:          req.ID,
 		Name:        req.Name,
 		Description: req.Description,
-	})
-
-	if err != nil {
+	}); err != nil {
 		response.Error(ctx, err)
 		return
 	}
 
-	response.Success(ctx, domainRoleToResponse(data))
+	response.Success(ctx)
 }
 
 // Delete godoc

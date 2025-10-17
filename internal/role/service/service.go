@@ -24,13 +24,13 @@ func (s *service) NewRole() *domain.Role {
 	return new(domain.Role)
 }
 
-func (s *service) Create(role *domain.Role) (*domain.Role, error) {
+func (s *service) Create(role *domain.Role) error {
 	return s.repo.Create(role)
 }
 
-func (s *service) Update(role *domain.Role) (*domain.Role, error) {
+func (s *service) Update(role *domain.Role) error {
 	if _, err := s.repo.FindByID(role.ID); err != nil {
-		return nil, err
+		return err
 	}
 	return s.repo.Update(role)
 }
