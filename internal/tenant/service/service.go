@@ -1,10 +1,8 @@
 package service
 
 import (
-	"saas/internal/common/email"
 	"saas/internal/common/utils"
 	planDomain "saas/internal/plan/domain"
-	userDomain "saas/internal/user/domain"
 
 	"github.com/friendsofgo/errors"
 	"saas/internal/tenant/domain"
@@ -14,21 +12,17 @@ type service struct {
 	myDomain    string
 	repo        domain.TenantRepository
 	cache       domain.TenantCache
-	mailer      email.Mailer
 	planService planDomain.PlanService
-	userRepo    userDomain.UserRepository
 }
 
-func NewTenantService(repo domain.TenantRepository, cache domain.TenantCache, mailer email.Mailer, planService planDomain.PlanService, userRepo userDomain.UserRepository) domain.TenantService {
+func NewTenantService(repo domain.TenantRepository, cache domain.TenantCache, planService planDomain.PlanService) domain.TenantService {
 	myDomain := utils.GetEnv("DOMAIN")
 
 	return &service{
 		myDomain:    myDomain,
 		repo:        repo,
 		cache:       cache,
-		mailer:      mailer,
 		planService: planService,
-		userRepo:    userRepo,
 	}
 }
 
