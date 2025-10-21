@@ -215,8 +215,8 @@ func (h *HttpHandler) Upgrade(ctx *gin.Context) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        id   path int true "id"
-// @Param        request body handler.GenInviteTokenRequest true "请求参数"
-// @Success      200  {object}  response.successResponse "请求成功"
+// @Param        request body handler.GenInviteTokenRequest{string} true "请求参数"
+// @Success      200  {object}  response.successResponse{data=handler.InviteResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant/{id}/gen_invite_token [post]
@@ -237,7 +237,9 @@ func (h *HttpHandler) GenInviteToken(ctx *gin.Context) {
 		return
 	}
 
-	response.Success(ctx, token)
+	response.Success(ctx, InviteResponse{
+		Token: token,
+	})
 }
 
 // Invite godoc

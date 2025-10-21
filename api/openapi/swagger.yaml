@@ -1,13 +1,5 @@
 basePath: /api
 definitions:
-  domain.CommentStatus:
-    enum:
-    - approved
-    - pending
-    type: string
-    x-enum-varnames:
-    - CommentStatusApproved
-    - CommentStatusPending
   domain.InviteTokenKind:
     enum:
     - public
@@ -22,12 +14,20 @@ definitions:
     type: string
     x-enum-varnames:
     - WayImageClick
+  handler.AuditAction:
+    enum:
+    - accept
+    - reject
+    type: string
+    x-enum-varnames:
+    - auditAccept
+    - auditReject
   handler.AuditRequest:
     properties:
-      status:
-        $ref: '#/definitions/domain.CommentStatus'
+      action:
+        $ref: '#/definitions/handler.AuditAction'
     required:
-    - status
+    - action
     type: object
   handler.AuthResponse:
     properties:
@@ -215,6 +215,11 @@ definitions:
     required:
     - emails
     - expire_second
+    type: object
+  handler.InviteResponse:
+    properties:
+      token:
+        type: string
     type: object
   handler.PlanResponse:
     properties:
@@ -2072,7 +2077,12 @@ paths:
         "200":
           description: 请求成功
           schema:
-            $ref: '#/definitions/response.successResponse'
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.InviteResponse'
+              type: object
         "400":
           description: 参数错误
           schema:

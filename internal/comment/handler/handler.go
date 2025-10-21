@@ -227,7 +227,14 @@ func (h *HttpHandler) Audit(ctx *gin.Context) {
 		return
 	}
 
-	err := h.service.Audit(req.TenantID, req.ID, req.Status)
+	var status domain.CommentStatus
+	if req.Action.isAccept() {
+		status.SetApproved()
+	} else {
+		status.SetPending()
+	}
+
+	err := h.service.Audit(req.TenantID, req.ID, status)
 
 	if err != nil {
 		response.Error(ctx, err)

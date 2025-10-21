@@ -78,10 +78,19 @@ type ToggleLikeRequest struct {
 	ID       int64           `json:"-" uri:"id" binding:"required"`
 }
 
+type AuditAction string
+
+func (ac *AuditAction) isAccept() bool {
+	return *ac == auditAccept
+}
+
+const auditAccept AuditAction = "accept"
+const auditReject AuditAction = "reject"
+
 type AuditRequest struct {
-	TenantID domain.TenantID      `json:"-" uri:"tenant_id" binding:"required"`
-	ID       int64                `json:"-" uri:"id" binding:"required"`
-	Status   domain.CommentStatus `json:"status" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	ID       int64           `json:"-" uri:"id" binding:"required"`
+	Action   AuditAction     `json:"action" binding:"required"`
 }
 
 // --- 评论板块

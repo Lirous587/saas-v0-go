@@ -2586,7 +2586,19 @@ const docTemplate = `{
                     "200": {
                         "description": "请求成功",
                         "schema": {
-                            "$ref": "#/definitions/response.successResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.InviteResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -2869,17 +2881,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "domain.CommentStatus": {
-            "type": "string",
-            "enum": [
-                "approved",
-                "pending"
-            ],
-            "x-enum-varnames": [
-                "CommentStatusApproved",
-                "CommentStatusPending"
-            ]
-        },
         "domain.InviteTokenKind": {
             "type": "string",
             "enum": [
@@ -2900,14 +2901,25 @@ const docTemplate = `{
                 "WayImageClick"
             ]
         },
+        "handler.AuditAction": {
+            "type": "string",
+            "enum": [
+                "accept",
+                "reject"
+            ],
+            "x-enum-varnames": [
+                "auditAccept",
+                "auditReject"
+            ]
+        },
         "handler.AuditRequest": {
             "type": "object",
             "required": [
-                "status"
+                "action"
             ],
             "properties": {
-                "status": {
-                    "$ref": "#/definitions/domain.CommentStatus"
+                "action": {
+                    "$ref": "#/definitions/handler.AuditAction"
                 }
             }
         },
@@ -3188,6 +3200,14 @@ const docTemplate = `{
                 },
                 "expire_second": {
                     "type": "integer"
+                }
+            }
+        },
+        "handler.InviteResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
                 }
             }
         },

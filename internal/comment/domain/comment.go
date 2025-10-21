@@ -26,6 +26,14 @@ type CommentStatus string
 const CommentStatusApproved CommentStatus = "approved"
 const CommentStatusPending CommentStatus = "pending"
 
+func (cs *CommentStatus) SetApproved() {
+	*cs = CommentStatusApproved
+}
+
+func (cs *CommentStatus) SetPending() {
+	*cs = CommentStatusPending
+}
+
 type Comment struct {
 	ID        int64
 	PlateID   int64

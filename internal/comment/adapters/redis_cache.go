@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"saas/internal/comment/domain"
 	"saas/internal/common/reskit/codes"
 	"saas/internal/common/utils"
@@ -174,7 +173,6 @@ func (cache *CommentRedisCache) GetPlateConfig(tenantID domain.TenantID, plateID
 	result, err := cache.client.HGet(context.Background(), key, field).Result()
 	if err != nil {
 		if err == redis.Nil {
-			log.Println("缓存未命中")
 			return nil, errors.WithStack(codes.ErrCommentPlateConfigCacheMissing)
 		}
 		return nil, errors.WithStack(err)

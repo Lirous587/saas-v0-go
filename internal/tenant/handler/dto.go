@@ -51,6 +51,10 @@ type InviteRequest struct {
 	Emails       []string `json:"emails" binding:"required,dive,email"`
 }
 
+type InviteResponse struct {
+	Token string `json:"token"`
+}
+
 type EntryRequest struct {
 	TenantID  int64                  `json:"-" uri:"id" binding:"required"`
 	TokenKind domain.InviteTokenKind `json:"token_kind" form:"token_kind" binding:"required,oneof=public secret"`
