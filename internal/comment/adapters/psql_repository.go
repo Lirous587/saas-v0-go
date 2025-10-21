@@ -8,7 +8,6 @@ import (
 	"saas/internal/common/orm"
 	"saas/internal/common/reskit/codes"
 	"saas/internal/common/utils"
-	roleDomain "saas/internal/role/domain"
 
 	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
@@ -18,7 +17,6 @@ import (
 )
 
 type CommentPSQLRepository struct {
-	role roleDomain.Role
 }
 
 func NewCommentPSQLRepository() domain.CommentRepository {
@@ -310,12 +308,11 @@ func (repo *CommentPSQLRepository) GetUserIdsByRootORParent(tenantID domain.Tena
 	return userIds, nil
 }
 
-func (repo *CommentPSQLRepository) GetDomainAdminByTenant(tenantID domain.TenantID) (*domain.UserInfo, error) {
-	tenantUserRole, err := orm.TenantUserRoles(
-		qm.Where(fmt.Sprintf("%s = ?", orm.TenantUserRoleColumns.TenantID), tenantID),
-		qm.Where(fmt.Sprintf("%s = ?", orm.TenantUserRoleColumns.RoleID), repo.role.GetTenantadmin().ID),
-		qm.Select(orm.TenantUserRoleColumns.UserID),
-		qm.Load(orm.TenantUserRoleRels.User),
+func (repo *CommentPSQLRepository) GetTenantCreator(tenantID domain.TenantID) (*domain.UserInfo, error) {
+	tenantUser, err := orm.Tenants(
+		orm.TenantWhere.ID.EQ(int64(tenantID)),
+		qm.Select(orm.TenantColumns.CreatorID),
+		qm.Load(orm.TenantRels.Creator),
 	).OneG()
 
 	if err != nil {
@@ -326,7 +323,7 @@ func (repo *CommentPSQLRepository) GetDomainAdminByTenant(tenantID domain.Tenant
 	}
 
 	// 获取关联的用户
-	user := tenantUserRole.R.User
+	user := tenantUser.R.Creator
 	if user == nil {
 		return nil, errors.WithStack(codes.ErrUserNotFound.WithSlug("关联用户不存在"))
 	}

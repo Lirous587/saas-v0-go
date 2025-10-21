@@ -12,7 +12,7 @@ type CommentRepository interface {
 	GetCommentUser(tenantID TenantID, commentID int64) (int64, error)
 
 	GetUserIdsByRootORParent(tenantID TenantID, plateID int64, rootID int64, parentID int64) ([]int64, error)
-	GetDomainAdminByTenant(tenantID TenantID) (*UserInfo, error)
+	GetTenantCreator(tenantID TenantID) (*UserInfo, error)
 	GetUserInfosByIds(ids []int64) ([]*UserInfo, error)
 	GetUserInfoByID(id int64) (*UserInfo, error)
 

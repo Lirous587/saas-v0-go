@@ -183,8 +183,8 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Tags         img
 // @Accept       json
 // @Produce      json
-// @Param        page        query int    false "页码"
-// @Param        page_size   query int    false "每页数量"
+// @Param        page        query int    false "页号"
+// @Param        page_size   query int    false "页码"
 // @Param        keyword     query string false "关键词"
 // @Param        deleted     query bool   false "是否查询回收站图片"
 // @Param        category_id query int64  false "分类id"

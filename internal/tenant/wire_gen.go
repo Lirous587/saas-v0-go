@@ -11,13 +11,11 @@ import (
 	"saas/internal/common/email"
 	adapters2 "saas/internal/plan/adapters"
 	"saas/internal/plan/service"
-	adapters3 "saas/internal/role/adapters"
-	service2 "saas/internal/role/service"
 	"saas/internal/tenant/adapters"
 	"saas/internal/tenant/handler"
-	service3 "saas/internal/tenant/service"
+	service2 "saas/internal/tenant/service"
 	"saas/internal/tenant/templates"
-	adapters4 "saas/internal/user/adapters"
+	adapters3 "saas/internal/user/adapters"
 )
 
 // Injectors from wire.go:
@@ -29,11 +27,8 @@ func InitV1(r *gin.RouterGroup) func() {
 	mailer := email.NewMailer(v)
 	planRepository := adapters2.NewPlanPSQLRepository()
 	planService := service.NewPlanService(planRepository)
-	roleRepository := adapters3.NewRolePSQLRepository()
-	roleCache := adapters3.NewRoleRedisCache()
-	roleService := service2.NewRoleService(roleRepository, roleCache)
-	userRepository := adapters4.NewUserPSQLRepository()
-	tenantService := service3.NewTenantService(tenantRepository, tenantCache, mailer, planService, roleService, userRepository)
+	userRepository := adapters3.NewUserPSQLRepository()
+	tenantService := service2.NewTenantService(tenantRepository, tenantCache, mailer, planService, userRepository)
 	httpHandler := handler.NewHttpHandler(tenantService)
 	v2 := RegisterV1(r, httpHandler)
 	return v2

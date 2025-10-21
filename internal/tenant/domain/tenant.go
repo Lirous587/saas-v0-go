@@ -10,6 +10,7 @@ type Tenant struct {
 	Description string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+	CreatorID   int64
 }
 
 type Plan struct {

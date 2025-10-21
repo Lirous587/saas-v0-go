@@ -25,7 +25,7 @@ func (s *service) Create(comment *domain.Comment, belongKey string) error {
 	}
 
 	// 查询租户管理员id 一次sql
-	admin, err := s.repo.GetDomainAdminByTenant(comment.TenantID)
+	admin, err := s.repo.GetTenantCreator(comment.TenantID)
 	if err != nil {
 		return errors.WithStack(err)
 	}

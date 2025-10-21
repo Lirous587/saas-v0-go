@@ -14,7 +14,6 @@ import (
 	"saas/internal/common/uid"
 	"saas/internal/common/utils"
 	"saas/internal/img"
-	"saas/internal/role"
 	"saas/internal/tenant"
 	"saas/internal/user"
 	"time"
@@ -140,7 +139,6 @@ func main() {
 		//captcha.InitV1(r)
 
 		tenant.InitV1(r)
-		role.InitV1(r)
 		comment.InitV1(r)
 	},
 		clear,

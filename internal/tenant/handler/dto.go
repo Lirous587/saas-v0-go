@@ -24,6 +24,10 @@ type UpdateRequest struct {
 	Description string `json:"description" binding:"max=120"`
 }
 
+type DeleteRequest struct {
+	ID int64 `json:"-" uri:"id" binding:"required"`
+}
+
 type ListRequest struct {
 	Page     int    `form:"page,default=1" binding:"min=1"`
 	PageSize int    `form:"page_size,default=5" binding:"min=5,max=20"`

@@ -1,13 +1,5 @@
 basePath: /api
 definitions:
-  domain.InviteTokenKind:
-    enum:
-    - public
-    - secret
-    type: string
-    x-enum-varnames:
-    - publicWay
-    - secretWay
   domain.VerifyWay:
     enum:
     - image:click
@@ -151,30 +143,6 @@ definitions:
     - related_url
     - summary
     type: object
-  handler.EntryRequest:
-    properties:
-      email:
-        type: string
-      token:
-        type: string
-      token_kind:
-        allOf:
-        - $ref: '#/definitions/domain.InviteTokenKind'
-        enum:
-        - public
-        - secret
-    required:
-    - email
-    - token
-    - token_kind
-    type: object
-  handler.GenInviteTokenRequest:
-    properties:
-      expire_second:
-        type: integer
-    required:
-    - expire_second
-    type: object
   handler.GithubAuthRequest:
     properties:
       code:
@@ -202,23 +170,6 @@ definitions:
       updated_at:
         type: integer
       url:
-        type: string
-    type: object
-  handler.InviteRequest:
-    properties:
-      emails:
-        items:
-          type: string
-        type: array
-      expire_second:
-        type: integer
-    required:
-    - emails
-    - expire_second
-    type: object
-  handler.InviteResponse:
-    properties:
-      token:
         type: string
     type: object
   handler.PlanResponse:
@@ -284,24 +235,6 @@ definitions:
         type: string
       refresh_token:
         type: string
-    type: object
-  handler.RoleListResponse:
-    properties:
-      list:
-        items:
-          $ref: '#/definitions/handler.RoleResponse'
-        type: array
-    type: object
-  handler.RoleResponse:
-    properties:
-      description:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      tenant_id:
-        type: integer
     type: object
   handler.SetPlateConfigRequest:
     properties:
@@ -399,15 +332,6 @@ definitions:
       nickname:
         type: string
     type: object
-  handler.UserListResponse:
-    properties:
-      list:
-        items:
-          $ref: '#/definitions/saas_internal_tenant_handler.UserResponse'
-        type: array
-      total:
-        type: integer
-    type: object
   response.errorResponse:
     properties:
       code:
@@ -479,26 +403,6 @@ definitions:
     - name
     - price
     type: object
-  saas_internal_role_handler.CreateRequest:
-    properties:
-      description:
-        maxLength: 60
-        type: string
-      name:
-        type: string
-    required:
-    - name
-    type: object
-  saas_internal_role_handler.UpdateRequest:
-    properties:
-      description:
-        maxLength: 60
-        type: string
-      name:
-        type: string
-    required:
-    - name
-    type: object
   saas_internal_tenant_handler.CreateRequest:
     properties:
       description:
@@ -521,15 +425,6 @@ definitions:
         type: string
     required:
     - id
-    type: object
-  saas_internal_tenant_handler.UserResponse:
-    properties:
-      email:
-        type: string
-      id:
-        type: integer
-      nickname:
-        type: string
     type: object
   saas_internal_user_handler.UserResponse:
     properties:
@@ -700,7 +595,7 @@ paths:
         in: query
         name: last_id
         type: integer
-      - description: 每页数量
+      - description: 页码
         in: query
         name: page_size
         type: integer
@@ -750,7 +645,7 @@ paths:
         in: query
         name: last_id
         type: integer
-      - description: 每页数量
+      - description: 页码
         in: query
         name: page_size
         type: integer
@@ -975,11 +870,11 @@ paths:
         in: query
         name: keyword
         type: string
-      - description: 页码
+      - description: 页号
         in: query
         name: page
         type: integer
-      - description: 每页数量
+      - description: 页码
         in: query
         name: page_size
         type: integer
@@ -1205,11 +1100,11 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: 页码
+      - description: 页号
         in: query
         name: page
         type: integer
-      - description: 每页数量
+      - description: 页码
         in: query
         name: page_size
         type: integer
@@ -1710,135 +1605,6 @@ paths:
       summary: 更新
       tags:
       - plan
-  /v1/role:
-    get:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 请求成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.RoleListResponse'
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 获取列表
-      tags:
-      - role
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 请求参数
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/saas_internal_role_handler.CreateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 请求成功
-          schema:
-            $ref: '#/definitions/response.successResponse'
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 创建
-      tags:
-      - role
-  /v1/role/{id}:
-    delete:
-      consumes:
-      - application/json
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 请求成功
-          schema:
-            $ref: '#/definitions/response.successResponse'
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 删除
-      tags:
-      - role
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 请求参数
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/saas_internal_role_handler.UpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 请求成功
-          schema:
-            $ref: '#/definitions/response.successResponse'
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 更新
-      tags:
-      - role
   /v1/tenant:
     get:
       consumes:
@@ -1848,11 +1614,11 @@ paths:
         in: query
         name: keyword
         type: string
-      - description: 页码
+      - description: 页号
         in: query
         name: page
         type: integer
-      - description: 每页数量
+      - description: 页码
         in: query
         name: page_size
         type: integer
@@ -1909,59 +1675,12 @@ paths:
       summary: 创建
       tags:
       - tenant
-  /v1/tenant/:id/users:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: 租户id
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 用户名
-        in: query
-        name: nickname
-        type: string
-      - description: 页号
-        in: query
-        name: page
-        type: integer
-      - description: 页码
-        in: query
-        name: page_size
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 请求成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.UserListResponse'
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 获取租户下的用户
-      tags:
-      - tenant
   /v1/tenant/{id}:
     delete:
       consumes:
       - application/json
       parameters:
-      - description: id
+      - description: 租户id
         in: path
         name: id
         required: true
@@ -1986,45 +1705,11 @@ paths:
       summary: 删除
       tags:
       - tenant
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 请求成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.TenantResponse'
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 读取单条数据
-      tags:
-      - tenant
     put:
       consumes:
       - application/json
       parameters:
-      - description: id
+      - description: 租户id
         in: path
         name: id
         required: true
@@ -2053,119 +1738,6 @@ paths:
       security:
       - BearerAuth: []
       summary: 更新
-      tags:
-      - tenant
-  /v1/tenant/{id}/gen_invite_token:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 请求参数
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/handler.GenInviteTokenRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 请求成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/handler.InviteResponse'
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 生成邀请令牌
-      tags:
-      - tenant
-  /v1/tenant/{id}/invite:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 请求参数
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/handler.InviteRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 请求成功
-          schema:
-            $ref: '#/definitions/response.successResponse'
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 邀请指定人员,通过邮箱通知
-      tags:
-      - tenant
-  /v1/tenant/entry/{id}:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 请求参数
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/handler.EntryRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 请求成功
-          schema:
-            $ref: '#/definitions/response.successResponse'
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 加入租户
       tags:
       - tenant
   /v1/tenant/upgrade/{id}:

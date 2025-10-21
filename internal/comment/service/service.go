@@ -77,7 +77,7 @@ func (s *service) Audit(tenantID domain.TenantID, id int64, status domain.Commen
 				}
 
 				// 2.查询租户
-				admin, err := s.repo.GetDomainAdminByTenant(tenantID)
+				admin, err := s.repo.GetTenantCreator(tenantID)
 				if err != nil {
 					zap.L().Error("获取租户管理员失败", zap.Error(err))
 					return
@@ -133,7 +133,7 @@ func (s *service) Delete(tenantID domain.TenantID, userID int64, id int64) error
 	// 如果请求用户和评论用户不一致
 	if uid != userID {
 		// 获取当前租户管理员
-		admin, err := s.repo.GetDomainAdminByTenant(tenantID)
+		admin, err := s.repo.GetTenantCreator(tenantID)
 		if err != nil {
 			return errors.WithStack(err)
 		}

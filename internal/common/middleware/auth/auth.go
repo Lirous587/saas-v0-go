@@ -2,12 +2,14 @@ package auth
 
 import (
 	casbinadapter "saas/internal/common/casbin"
+	"saas/internal/common/orm"
 	"saas/internal/common/reskit/codes"
 	"saas/internal/common/reskit/response"
 	"saas/internal/common/server"
-	roleadapter "saas/internal/role/adapters"
-	roleDomain "saas/internal/role/domain"
-	roleService "saas/internal/role/service"
+
+	// roleadapter "saas/internal/role/adapters"
+	// roleDomain "saas/internal/role/domain"
+	// roleService "saas/internal/role/service"
 	useradapter "saas/internal/user/adapters"
 	userdomain "saas/internal/user/domain"
 	userService "saas/internal/user/service"
@@ -21,8 +23,6 @@ import (
 
 var tokenServer userdomain.TokenService
 
-var roleServer roleDomain.RoleService
-
 var enforcer *casbin.Enforcer
 
 func Init() {
@@ -30,11 +30,6 @@ func Init() {
 	tokenCache := useradapter.NewTokenRedisCache()
 	userRepo := useradapter.NewUserPSQLRepository()
 	tokenServer = userService.NewTokenService(tokenCache, userRepo)
-
-	// 初始化roleService
-	roleCache := roleadapter.NewRoleRedisCache()
-	roleRepo := roleadapter.NewRolePSQLRepository()
-	roleServer = roleService.NewRoleService(roleRepo, roleCache)
 
 	// 初始化casbin服务
 	var err error
@@ -133,6 +128,55 @@ func OptionalJWTValidate() gin.HandlerFunc {
 	}
 }
 
+func TenantCreatorValited() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		// 获取useID
+		userID, err := server.GetUserID(ctx)
+		if err != nil {
+			response.Error(ctx, codes.ErrUnauthorized)
+			ctx.Abort()
+			return
+		}
+
+		// 获取tenantID
+		tenantID, err := server.GetTenantID(ctx)
+		if err != nil {
+			response.Error(ctx, err)
+			ctx.Abort()
+			return
+		}
+
+		// 检测用户是否为该租户的创建者
+		exist, err := orm.Tenants(
+			orm.TenantWhere.ID.EQ(tenantID),
+			orm.TenantWhere.CreatorID.EQ(userID),
+		).ExistsG()
+		if err != nil || exist {
+			response.Error(ctx, codes.ErrTenantNotCreator)
+		}
+
+		// 获取请求路径和方法
+		obj := ctx.Request.URL.Path
+		act := strings.ToLower(ctx.Request.Method)
+
+		ok, err := enforcer.Enforce('1', obj, act)
+		if err != nil {
+			response.Error(ctx, codes.ErrPermissionDenied)
+			ctx.Abort()
+			return
+		}
+		if !ok {
+			response.Error(ctx, codes.ErrPermissionDenied)
+			ctx.Abort()
+			return
+		}
+
+		ctx.Next()
+	}
+}
+
+const tenantAdmin = "domian_admin"
+
 func CasbinValited() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// 1.获取useID
@@ -151,19 +195,20 @@ func CasbinValited() gin.HandlerFunc {
 			return
 		}
 
-		// 查询用户在该租户下的角色
-		role, err := roleServer.GetUserRoleInTenant(userID, tenantID)
-		if err != nil {
-			response.Error(ctx, codes.ErrRoleNotFound)
-			ctx.Abort()
-			return
+		// 检测用户是否为该租户的创建者
+		exist, err := orm.Tenants(
+			orm.TenantWhere.ID.EQ(tenantID),
+			orm.TenantWhere.CreatorID.EQ(userID),
+		).ExistsG()
+		if err != nil || exist {
+			response.Error(ctx, codes.ErrTenantNotCreator)
 		}
 
 		// 获取请求路径和方法
 		obj := ctx.Request.URL.Path
 		act := strings.ToLower(ctx.Request.Method)
 
-		ok, err := enforcer.Enforce(role.Name, obj, act)
+		ok, err := enforcer.Enforce(tenantAdmin, obj, act)
 		if err != nil {
 			response.Error(ctx, codes.ErrPermissionDenied)
 			ctx.Abort()

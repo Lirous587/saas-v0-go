@@ -14,10 +14,6 @@ const (
 	UserErrorStart = 1000
 	UserErrorEnd   = 1199
 
-	// 角色模块(1200-1399)
-	RoleErrorStart = 1200
-	RoleErrorEnd   = 1399
-
 	// 计划模块(1400-1599)
 	TenantErrorStart = 1400
 	TenantErrorEnd   = 1599
