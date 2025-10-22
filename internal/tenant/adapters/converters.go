@@ -17,6 +17,7 @@ func domainTenantToORM(tenant *domain.Tenant) *orm.Tenant {
 		Name:      tenant.Name,
 		CreatedAt: tenant.CreatedAt,
 		UpdatedAt: tenant.UpdatedAt,
+		CreatorID: tenant.CreatorID,
 	}
 
 	// 处理null项
@@ -38,6 +39,7 @@ func ormTenantToDomain(ormTenant *orm.Tenant) *domain.Tenant {
 		Name:      ormTenant.Name,
 		CreatedAt: ormTenant.CreatedAt,
 		UpdatedAt: ormTenant.UpdatedAt,
+		CreatorID: ormTenant.CreatorID,
 	}
 
 	// 处理null项
@@ -60,18 +62,4 @@ func ormTenantsToDomain(ormTenants []*orm.Tenant) []*domain.Tenant {
 		}
 	}
 	return tenants
-}
-
-func ormPlanToDomain(ormPlan *orm.Plan) *domain.Plan {
-	if ormPlan == nil {
-		return nil
-	}
-
-	// 非null项
-	plan := &domain.Plan{
-		ID:   ormPlan.ID,
-		Name: ormPlan.Name,
-	}
-
-	return plan
 }

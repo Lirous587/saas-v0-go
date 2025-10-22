@@ -16,3 +16,7 @@ type Plan struct {
 type PlanList struct {
 	List []*Plan
 }
+
+const FreePlanID = 1
+const CaringPlanID = 2
+const ProfessionalPlanID = 3

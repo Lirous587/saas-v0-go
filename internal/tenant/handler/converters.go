@@ -10,7 +10,7 @@ func domainTenantToResponse(tenant *domain.Tenant) *TenantResponse {
 	}
 
 	return &TenantResponse{
-		ID:          tenant.ID,
+		ID:          int64(tenant.ID),
 		Name:        tenant.Name,
 		Description: tenant.Description,
 		CreatedAt:   tenant.CreatedAt.Unix(),
@@ -31,15 +31,4 @@ func domainTenantsToResponse(tenants []*domain.Tenant) []*TenantResponse {
 		}
 	}
 	return ret
-}
-
-func domainTenantListToResponse(data *domain.TenantList) *TenantListResponse {
-	if data == nil {
-		return nil
-	}
-
-	return &TenantListResponse{
-		Total: data.Total,
-		List:  domainTenantsToResponse(data.List),
-	}
 }

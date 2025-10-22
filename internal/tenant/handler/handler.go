@@ -1,12 +1,14 @@
 ﻿package handler
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 	"saas/internal/common/reqkit/bind"
+	"saas/internal/common/reskit/codes"
 	"saas/internal/common/reskit/response"
 	"saas/internal/common/server"
 	"saas/internal/tenant/domain"
+
+	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 )
 
 type HttpHandler struct {
@@ -31,13 +33,13 @@ func NewHttpHandler(service domain.TenantService) *HttpHandler {
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant [post]
 func (h *HttpHandler) Create(ctx *gin.Context) {
-	req := new(CreateRequest)
-
 	userID, err := server.GetUserID(ctx)
 	if err != nil {
 		response.InvalidParams(ctx, err)
 		return
 	}
+
+	req := new(CreateRequest)
 
 	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
@@ -115,18 +117,25 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 }
 
 // List godoc
-// @Summary      获取列表
+// @Summary      获取用户的租户列表
 // @Tags         tenant
 // @Accept       json
 // @Produce      json
+// @Security     BearerAuth
 // @Param        keyword    query     string  false  "关键词"
-// @Param        page       query     int     false  "页号"
+// @Param        last_id    query     int     false  "上页最后一条记录id"
 // @Param        page_size  query     int     false  "页码"
-// @Success      200  {object}  response.successResponse{data=handler.TenantListResponse} "请求成功"
+// @Success      200  {object}  response.successResponse{data=[]handler.TenantResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant [get]
 func (h *HttpHandler) List(ctx *gin.Context) {
+	userID, err := server.GetUserID(ctx)
+	if err != nil {
+		response.InvalidParams(ctx, err)
+		return
+	}
+
 	req := new(ListRequest)
 
 	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
@@ -134,9 +143,10 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 	}
 
 	data, err := h.service.List(&domain.TenantQuery{
-		Keyword:  req.KeyWord,
-		Page:     req.Page,
-		PageSize: req.PageSize,
+		CreatorID: userID,
+		Keyword:   req.KeyWord,
+		LastID:    req.LastID,
+		PageSize:  req.PageSize,
 	})
 
 	if err != nil {
@@ -144,7 +154,46 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 		return
 	}
 
-	response.Success(ctx, domainTenantListToResponse(data))
+	response.Success(ctx, domainTenantsToResponse(data))
+}
+
+// CheckName godoc
+// @Summary      检测是否有相同的租户名
+// @Tags         tenant
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        name    query     string  false  "租户名称"
+// @Success      200  {object}  response.successResponse "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/tenant/check_name [get]
+func (h *HttpHandler) CheckName(ctx *gin.Context) {
+	userID, err := server.GetUserID(ctx)
+	if err != nil {
+		response.InvalidParams(ctx, err)
+		return
+	}
+
+	req := new(CheckNameRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	exist, err := h.service.CheckName(userID, req.Name)
+
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	if exist {
+		response.Error(ctx, codes.ErrTenantHasSameName)
+		return
+	}
+
+	response.Success(ctx)
 }
 
 // Upgrade godoc

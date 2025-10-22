@@ -1,35 +1,35 @@
 package response
 
 import (
-	"saas/internal/common/reskit/codes"
 	"github.com/pkg/errors"
 	"net/http"
+	"saas/internal/common/reskit/codes"
 )
 
 // HTTPErrorResponse HTTP错误响应结构
 // 用于前端交互
 type HTTPErrorResponse struct {
-	Code	int			`json:"code"`
-	Message	string			`json:"message"`
-	Details	map[string]interface{}	`json:"details,omitempty"`
+	Code    int                    `json:"code"`
+	Message string                 `json:"message"`
+	Details map[string]interface{} `json:"details,omitempty"`
 }
 
 // HTTPError HTTP错误信息
 // 用于日志
 type HTTPError struct {
-	StatusCode	int
-	Response	HTTPErrorResponse
-	Cause		error
+	StatusCode int
+	Response   HTTPErrorResponse
+	Cause      error
 }
 
 // MapToHTTP 将领域错误映射为HTTP错误
 func MapToHTTP(err error) HTTPError {
 	if err == nil {
 		return HTTPError{
-			StatusCode:	http.StatusOK,
+			StatusCode: http.StatusOK,
 			Response: HTTPErrorResponse{
-				Code:		2000,
-				Message:	"Success",
+				Code:    2000,
+				Message: "Success",
 			},
 		}
 	}
@@ -45,46 +45,46 @@ func MapToHTTP(err error) HTTPError {
 	if !ok1 && !ok2 && !ok3 {
 		// 不是自定义错误，返回通用服务器错误
 		return HTTPError{
-			StatusCode:	http.StatusInternalServerError,
+			StatusCode: http.StatusInternalServerError,
 			Response: HTTPErrorResponse{
-				Code:		5000,
-				Message:	"Internal server error",
+				Code:    5000,
+				Message: "Internal server error",
 			},
-			Cause:	err,
+			Cause: err,
 		}
 	}
 	// 自定义的错误码
 	if ok1 {
 		return HTTPError{
-			StatusCode:	mapTypeToHTTPStatus(errCode.Type),
+			StatusCode: mapTypeToHTTPStatus(errCode.Type),
 			Response: HTTPErrorResponse{
-				Code:		errCode.Code,
-				Message:	errCode.Msg,
+				Code:    errCode.Code,
+				Message: errCode.Msg,
 			},
-			Cause:	err,
+			Cause: err,
 		}
 	}
 
 	if ok2 {
 		return HTTPError{
-			StatusCode:	mapTypeToHTTPStatus(errCode2.Type),
+			StatusCode: mapTypeToHTTPStatus(errCode2.Type),
 			Response: HTTPErrorResponse{
-				Code:		errCode2.Code,
-				Message:	errCode2.Msg,
-				Details:	errCode2.Detail,
+				Code:    errCode2.Code,
+				Message: errCode2.Msg,
+				Details: errCode2.Detail,
 			},
-			Cause:	err,
+			Cause: err,
 		}
 	}
 
 	return HTTPError{
-		StatusCode:	mapTypeToHTTPStatus(errCode3.Type),
+		StatusCode: mapTypeToHTTPStatus(errCode3.Type),
 		Response: HTTPErrorResponse{
-			Code:		errCode3.Code,
-			Message:	errCode3.Msg,
-			Details:	errCode3.Detail,
+			Code:    errCode3.Code,
+			Message: errCode3.Msg,
+			Details: errCode3.Detail,
 		},
-		Cause:	errCode3.Cause,
+		Cause: errCode3.Cause,
 	}
 }
 
@@ -97,6 +97,8 @@ func mapTypeToHTTPStatus(errorType codes.ErrorType) int {
 		return http.StatusNotFound
 	case codes.ErrorTypeAlreadyExists:
 		return http.StatusConflict
+	case codes.ErrorTypeConflict:
+		return http.StatusConflict
 	case codes.ErrorTypeUnauthorized:
 		return http.StatusUnauthorized
 	case codes.ErrorTypeForbidden:
@@ -105,7 +107,10 @@ func mapTypeToHTTPStatus(errorType codes.ErrorType) int {
 		return http.StatusTooManyRequests
 	case codes.ErrorTypeExternal:
 		return http.StatusBadGateway
-	default:	// ErrorTypeInternal
+	case codes.ErrorTypeCacheMiss:
+		// cache miss 对外通常表现为服务暂不可用
+		return http.StatusServiceUnavailable
+	default: // ErrorTypeInternal
 		return http.StatusInternalServerError
 	}
 }

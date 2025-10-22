@@ -1,11 +1,13 @@
 package service
 
 import (
+	"saas/internal/common/reskit/codes"
 	"saas/internal/common/utils"
 	planDomain "saas/internal/plan/domain"
 
-	"github.com/friendsofgo/errors"
 	"saas/internal/tenant/domain"
+
+	"github.com/friendsofgo/errors"
 )
 
 type service struct {
@@ -34,7 +36,19 @@ func (s *service) Create(tenant *domain.Tenant, planID int64) error {
 	}
 	defer tx.Rollback()
 
-	// 1.向tenants插入数据
+	// 1.检查用户租户限制 (Free/Caring)
+	if planID == planDomain.FreePlanID || planID == planDomain.CaringPlanID {
+		exist, err := s.planService.CreatorHasPlan(tenant.CreatorID, planID)
+		if err != nil {
+			return errors.WithMessage(err, "检查用户已有计划失败")
+		}
+
+		if exist {
+			return codes.ErrPlanUserLimit
+		}
+	}
+
+	// 2.向tenants插入数据
 	res, err := s.repo.InsertTx(tx, tenant)
 	if err != nil {
 		return errors.WithMessage(err, "向tenants插入数据失败")
@@ -42,16 +56,12 @@ func (s *service) Create(tenant *domain.Tenant, planID int64) error {
 
 	tenantID := res.ID
 
-	// 2.向tenant_plan插入数据
-	if err = s.planService.AttchToTenantTx(tx, planID, tenantID); err != nil {
+	// 3.向tenant_plan插入数据
+	if err = s.planService.AttchToTenantTx(tx, planID, int64(tenantID), tenant.CreatorID); err != nil {
 		return errors.WithMessage(err, "向tenant_plan插入数据失败")
 	}
 
 	return tx.Commit()
-}
-
-func (s *service) Read(id int64) (*domain.Tenant, error) {
-	return s.repo.FindByID(id)
 }
 
 func (s *service) Update(tenant *domain.Tenant) error {
@@ -62,6 +72,10 @@ func (s *service) Delete(id int64) error {
 	return s.repo.Delete(id)
 }
 
-func (s *service) List(query *domain.TenantQuery) (*domain.TenantList, error) {
+func (s *service) List(query *domain.TenantQuery) ([]*domain.Tenant, error) {
 	return s.repo.List(query)
+}
+
+func (s *service) CheckName(creatorID int64, tenantName string) (bool, error) {
+	return s.repo.ExistSameName(creatorID, tenantName)
 }

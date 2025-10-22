@@ -2,7 +2,6 @@ package tenant
 
 import (
 	"saas/internal/common/middleware/auth"
-	// "saas/internal/common/server"
 	"saas/internal/tenant/handler"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +15,8 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 		// todo 创建租户 目前未接入交易中间件
 		protect.POST("", handler.Create)
 		protect.PUT("/:id", handler.Update)
-		// protect.GET("", server.SetTenantID("id"), auth.CasbinValited(), handler.List)
+		protect.GET("", handler.List)
+		protect.GET("/check_name", handler.CheckName)
 	}
 	return nil
 }

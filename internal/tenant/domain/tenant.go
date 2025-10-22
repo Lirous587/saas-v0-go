@@ -19,9 +19,10 @@ type Plan struct {
 }
 
 type TenantQuery struct {
-	Keyword  string
-	Page     int
-	PageSize int
+	PageSize  int
+	CreatorID int64
+	LastID    int64
+	Keyword   string
 }
 
 type TenantList struct {

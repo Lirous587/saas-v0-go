@@ -9,6 +9,7 @@ import (
 
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
+	"github.com/pkg/errors"
 )
 
 type PlanPSQLRepository struct {
@@ -67,10 +68,24 @@ func (repo *PlanPSQLRepository) List() ([]*domain.Plan, error) {
 	return ormPlansToDomain(plans), nil
 }
 
-func (repo *PlanPSQLRepository) AttchToTenantTx(tx *sql.Tx, planID, tenantID int64) error {
+func (repo *PlanPSQLRepository) CreatorHasPlan(creatorID, planID int64) (bool, error) {
+	exist, err := orm.TenantPlans(
+		orm.TenantPlanWhere.CreatorID.EQ(creatorID),
+		orm.TenantPlanWhere.PlanID.EQ(planID),
+	).ExistsG()
+
+	if err != nil {
+		return false, errors.WithStack(err)
+	}
+
+	return exist, nil
+}
+
+func (repo *PlanPSQLRepository) AttchToTenantTx(tx *sql.Tx, planID, tenantID, creatorID int64) error {
 	ormTenantPlan := orm.TenantPlan{
-		TenantID: tenantID,
-		PlanID:   planID,
+		TenantID:  tenantID,
+		PlanID:    planID,
+		CreatorID: creatorID,
 	}
 
 	return ormTenantPlan.Insert(tx, boil.Infer())

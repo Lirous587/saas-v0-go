@@ -4,13 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"saas/internal/common/orm"
+	"saas/internal/common/reskit/codes"
+	"saas/internal/tenant/domain"
+
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/pkg/errors"
-	"saas/internal/common/orm"
-	"saas/internal/common/reskit/codes"
-	"saas/internal/common/utils"
-	"saas/internal/tenant/domain"
 )
 
 type TenantPSQLRepository struct {
@@ -31,38 +31,6 @@ func (repo *TenantPSQLRepository) BeginTx(option ...*sql.TxOptions) (*sql.Tx, er
 		}
 	}
 	return boil.BeginTx(context.TODO(), op)
-}
-
-func (repo *TenantPSQLRepository) FindByID(id int64) (*domain.Tenant, error) {
-	ormTenant, err := orm.FindTenantG(id)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, codes.ErrTenantNotFound
-		}
-		return nil, err
-	}
-	return ormTenantToDomain(ormTenant), nil
-}
-
-func (repo *TenantPSQLRepository) FindTenantPlanByID(id int64) (*domain.Plan, error) {
-	// 从tenant_plan中查询到plan_id
-	tp, err := orm.TenantPlans(
-		qm.Where(fmt.Sprintf("%s = ?", orm.TenantPlanColumns.TenantID), id),
-		qm.Load(orm.TenantPlanRels.Plan),
-	).OneG()
-
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, codes.ErrPlanNotFound
-		}
-		return nil, err
-	}
-
-	if tp.R == nil || tp.R.Plan == nil {
-		return nil, codes.ErrPlanNotFound
-	}
-
-	return ormPlanToDomain(tp.R.Plan), nil
 }
 
 func (repo *TenantPSQLRepository) InsertTx(tx *sql.Tx, tenant *domain.Tenant) (*domain.Tenant, error) {
@@ -105,34 +73,42 @@ func (repo *TenantPSQLRepository) Delete(id int64) error {
 	return nil
 }
 
-func (repo *TenantPSQLRepository) List(query *domain.TenantQuery) (*domain.TenantList, error) {
-	var whereMods []qm.QueryMod
+func (repo *TenantPSQLRepository) List(query *domain.TenantQuery) ([]*domain.Tenant, error) {
+	mods := make([]qm.QueryMod, 0, 4)
+
+	mods = append(mods, orm.TenantWhere.CreatorID.EQ(query.CreatorID))
+
 	if query.Keyword != "" {
 		like := "%" + query.Keyword + "%"
-		whereMods = append(whereMods, qm.Where(fmt.Sprintf("(%s LIKE ? OR %s LIKE ?)", orm.TenantColumns.Name, orm.TenantColumns.Description), like, like))
-	}
-	// 1.计算total
-	total, err := orm.Tenants(whereMods...).CountG()
-	if err != nil {
-		return nil, err
+		mods = append(mods, qm.Where(fmt.Sprintf("(%s LIKE ? OR %s LIKE ?)", orm.TenantColumns.Name, orm.TenantColumns.Description), like, like))
 	}
 
-	// 2.计算offset
-	offset, err := utils.ComputeOffset(query.Page, query.PageSize)
-	if err != nil {
-		return nil, err
+	// 游标
+	if query.LastID > 0 {
+		mods = append(mods, orm.TenantWhere.ID.GT(query.LastID))
 	}
 
-	listMods := append(whereMods, qm.Offset(offset), qm.Limit(query.PageSize))
+	// limit
+	mods = append(mods, qm.Limit(query.PageSize))
 
 	// 3.查询数据
-	tenant, err := orm.Tenants(listMods...).AllG()
+	tenants, err := orm.Tenants(mods...).AllG()
 	if err != nil {
 		return nil, err
 	}
 
-	return &domain.TenantList{
-		Total: total,
-		List:  ormTenantsToDomain(tenant),
-	}, nil
+	return ormTenantsToDomain(tenants), nil
+}
+
+func (repo *TenantPSQLRepository) ExistSameName(creatorID int64, name string) (bool, error) {
+	exist, err := orm.Tenants(
+		orm.TenantWhere.CreatorID.EQ(creatorID),
+		orm.TenantWhere.Name.EQ(name),
+	).ExistsG()
+
+	if err != nil {
+		return false, errors.WithStack(err)
+	}
+
+	return exist, nil
 }

@@ -106,7 +106,7 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Security     BearerAuth
 // @Param        tenant_id   path 	 int 	  true 	 "租户id"
 // @Param        belong_key  path 	 string true   "评论板块"
-// @Param        last_id     query   int    false  "上页最小id"
+// @Param        last_id     query   int    false  "上页最后一条记录id"
 // @Param        page_size   query   int    false  "页码"
 // @Success      200  {object}  response.successResponse{data=[]handler.CommentRootResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
@@ -144,7 +144,7 @@ func (h *HttpHandler) ListRoots(ctx *gin.Context) {
 // @Param        tenant_id   path 	 int 	  true 	 "租户id"
 // @Param        belong_key  path 	 string true   "评论板块"
 // @Param        root_id   	 path 	 int 	  true   "根评论id"
-// @Param        last_id     query   int    false  "上页最小id"
+// @Param        last_id     query   int    false  "上页最后一条记录id"
 // @Param        page_size   query   int    false  "页码"
 // @Success      200  {object}  response.successResponse{data=[]handler.CommentReplyResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"

@@ -794,7 +794,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "上页最小id",
+                        "description": "上页最后一条记录id",
                         "name": "last_id",
                         "in": "query"
                     },
@@ -883,7 +883,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "上页最小id",
+                        "description": "上页最后一条记录id",
                         "name": "last_id",
                         "in": "query"
                     },
@@ -1873,6 +1873,11 @@ const docTemplate = `{
         },
         "/v1/tenant": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -1882,7 +1887,7 @@ const docTemplate = `{
                 "tags": [
                     "tenant"
                 ],
-                "summary": "获取列表",
+                "summary": "获取用户的租户列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -1892,8 +1897,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "页号",
-                        "name": "page",
+                        "description": "上页最后一条记录id",
+                        "name": "last_id",
                         "in": "query"
                     },
                     {
@@ -1915,7 +1920,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/handler.TenantListResponse"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/handler.TenantResponse"
+                                            }
                                         }
                                     }
                                 }
@@ -1961,6 +1969,53 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/saas_internal_tenant_handler.CreateRequest"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/tenant/check_name": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tenant"
+                ],
+                "summary": "检测是否有相同的租户名",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "租户名称",
+                        "name": "name",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2267,7 +2322,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/saas_internal_user_handler.UserResponse"
+                                            "$ref": "#/definitions/handler.UserResponse"
                                         }
                                     }
                                 }
@@ -2394,7 +2449,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/saas_internal_user_handler.UserResponse"
+                    "$ref": "#/definitions/handler.UserResponse"
                 }
             }
         },
@@ -2776,20 +2831,6 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.TenantListResponse": {
-            "type": "object",
-            "properties": {
-                "list": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handler.TenantResponse"
-                    }
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
         "handler.TenantResponse": {
             "type": "object",
             "properties": {
@@ -2848,6 +2889,35 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "nickname": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.UserResponse": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "email_verified": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_login_at": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "integer"
+                },
+                "username": {
                     "type": "string"
                 }
             }
@@ -2985,35 +3055,6 @@ const docTemplate = `{
                     "maxLength": 120
                 },
                 "id": {
-                    "type": "string"
-                }
-            }
-        },
-        "saas_internal_user_handler.UserResponse": {
-            "type": "object",
-            "properties": {
-                "avatar_url": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "integer"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "email_verified": {
-                    "type": "boolean"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "last_login_at": {
-                    "type": "integer"
-                },
-                "updated_at": {
-                    "type": "integer"
-                },
-                "username": {
                     "type": "string"
                 }
             }

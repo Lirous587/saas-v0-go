@@ -46,8 +46,6 @@ CREATE TABLE public.plans
     id          bigserial PRIMARY KEY,
     name        varchar(50)    NOT NULL UNIQUE,
     price       numeric(12, 2) NOT NULL DEFAULT 0,
-    tenant_count int2 NOT NULL,
-    number_count int4 NOT NULL,
     description text NOT NULL,
     created_at  timestamptz(6) NOT NULL DEFAULT now(),
     updated_at  timestamptz(6) NOT NULL DEFAULT now()
@@ -70,24 +68,17 @@ CREATE INDEX IF NOT EXISTS idx_tenants_creator_id ON public.tenants (creator_id)
 -- 租户计划关联表
 CREATE TABLE public.tenant_plan
 (
-    tenant_id bigint         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
-    plan_id   bigint         NOT NULL REFERENCES public.plans (id),
-    start_at  timestamptz(6) NOT NULL DEFAULT now(),
-    end_at    timestamptz(6) NULL,
+    tenant_id   bigint         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
+    plan_id     bigint         NOT NULL REFERENCES public.plans (id),
+    creator_id  bigint       NOT NULL REFERENCES public.users (id) ON DELETE RESTRICT,
+    start_at    timestamptz(6) NOT NULL DEFAULT now(),
+    end_at      timestamptz(6) NULL,
     CONSTRAINT ux_tenant_plan_tenant UNIQUE (tenant_id),
     PRIMARY KEY (tenant_id, plan_id)
 );
-
-
--- 角色表 
--- 与租户无关 应预定义 避免去实现租户层面的权限分配 因为这对于非超大型SaaS系统而言是一个灾难设计
--- CREATE TABLE public.roles
--- (
---     id          bigserial PRIMARY KEY,
---     name        varchar(30) NOT NULL,
---     description text,
--- );
--- CREATE UNIQUE INDEX ux_roles_default_name ON public.roles (name);
+-- 确保每个用户只能有一个Free和一个Caring
+CREATE UNIQUE INDEX IF NOT EXISTS ux_user_one_free_plan ON public.tenant_plan (creator_id) WHERE plan_id = 1;
+CREATE UNIQUE INDEX IF NOT EXISTS ux_user_one_caring_plan ON public.tenant_plan (creator_id) WHERE plan_id = 2;
 
 
 

@@ -28,7 +28,7 @@ definitions:
       refresh_token:
         type: string
       user:
-        $ref: '#/definitions/saas_internal_user_handler.UserResponse'
+        $ref: '#/definitions/handler.UserResponse'
     type: object
   handler.CaptchaAnswerResponse:
     properties:
@@ -282,15 +282,6 @@ definitions:
       updated_at:
         type: integer
     type: object
-  handler.TenantListResponse:
-    properties:
-      list:
-        items:
-          $ref: '#/definitions/handler.TenantResponse'
-        type: array
-      total:
-        type: integer
-    type: object
   handler.TenantResponse:
     properties:
       created_at:
@@ -330,6 +321,25 @@ definitions:
       id:
         type: integer
       nickname:
+        type: string
+    type: object
+  handler.UserResponse:
+    properties:
+      avatar_url:
+        type: string
+      created_at:
+        type: integer
+      email:
+        type: string
+      email_verified:
+        type: boolean
+      id:
+        type: integer
+      last_login_at:
+        type: integer
+      updated_at:
+        type: integer
+      username:
         type: string
     type: object
   response.errorResponse:
@@ -425,25 +435,6 @@ definitions:
         type: string
     required:
     - id
-    type: object
-  saas_internal_user_handler.UserResponse:
-    properties:
-      avatar_url:
-        type: string
-      created_at:
-        type: integer
-      email:
-        type: string
-      email_verified:
-        type: boolean
-      id:
-        type: integer
-      last_login_at:
-        type: integer
-      updated_at:
-        type: integer
-      username:
-        type: string
     type: object
 host: localhost:8080
 info:
@@ -591,7 +582,7 @@ paths:
         name: root_id
         required: true
         type: integer
-      - description: 上页最小id
+      - description: 上页最后一条记录id
         in: query
         name: last_id
         type: integer
@@ -641,7 +632,7 @@ paths:
         name: belong_key
         required: true
         type: string
-      - description: 上页最小id
+      - description: 上页最后一条记录id
         in: query
         name: last_id
         type: integer
@@ -1614,9 +1605,9 @@ paths:
         in: query
         name: keyword
         type: string
-      - description: 页号
+      - description: 上页最后一条记录id
         in: query
-        name: page
+        name: last_id
         type: integer
       - description: 页码
         in: query
@@ -1632,7 +1623,9 @@ paths:
             - $ref: '#/definitions/response.successResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/handler.TenantListResponse'
+                  items:
+                    $ref: '#/definitions/handler.TenantResponse'
+                  type: array
               type: object
         "400":
           description: 参数错误
@@ -1642,7 +1635,9 @@ paths:
           description: 服务器错误
           schema:
             $ref: '#/definitions/response.errorResponse'
-      summary: 获取列表
+      security:
+      - BearerAuth: []
+      summary: 获取用户的租户列表
       tags:
       - tenant
     post:
@@ -1738,6 +1733,35 @@ paths:
       security:
       - BearerAuth: []
       summary: 更新
+      tags:
+      - tenant
+  /v1/tenant/check_name:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 租户名称
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 检测是否有相同的租户名
       tags:
       - tenant
   /v1/tenant/upgrade/{id}:
@@ -1847,7 +1871,7 @@ paths:
             - $ref: '#/definitions/response.successResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/saas_internal_user_handler.UserResponse'
+                  $ref: '#/definitions/handler.UserResponse'
               type: object
         "401":
           description: Unauthorized

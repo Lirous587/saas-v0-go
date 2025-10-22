@@ -23,66 +23,76 @@ import (
 
 // TenantPlan is an object representing the database table.
 type TenantPlan struct {
-	TenantID int64     `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
-	PlanID   int64     `boil:"plan_id" json:"plan_id" toml:"plan_id" yaml:"plan_id"`
-	StartAt  time.Time `boil:"start_at" json:"start_at" toml:"start_at" yaml:"start_at"`
-	EndAt    null.Time `boil:"end_at" json:"end_at,omitempty" toml:"end_at" yaml:"end_at,omitempty"`
+	TenantID  int64     `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
+	PlanID    int64     `boil:"plan_id" json:"plan_id" toml:"plan_id" yaml:"plan_id"`
+	StartAt   time.Time `boil:"start_at" json:"start_at" toml:"start_at" yaml:"start_at"`
+	EndAt     null.Time `boil:"end_at" json:"end_at,omitempty" toml:"end_at" yaml:"end_at,omitempty"`
+	CreatorID int64     `boil:"creator_id" json:"creator_id" toml:"creator_id" yaml:"creator_id"`
 
 	R *tenantPlanR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L tenantPlanL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var TenantPlanColumns = struct {
-	TenantID string
-	PlanID   string
-	StartAt  string
-	EndAt    string
+	TenantID  string
+	PlanID    string
+	StartAt   string
+	EndAt     string
+	CreatorID string
 }{
-	TenantID: "tenant_id",
-	PlanID:   "plan_id",
-	StartAt:  "start_at",
-	EndAt:    "end_at",
+	TenantID:  "tenant_id",
+	PlanID:    "plan_id",
+	StartAt:   "start_at",
+	EndAt:     "end_at",
+	CreatorID: "creator_id",
 }
 
 var TenantPlanTableColumns = struct {
-	TenantID string
-	PlanID   string
-	StartAt  string
-	EndAt    string
+	TenantID  string
+	PlanID    string
+	StartAt   string
+	EndAt     string
+	CreatorID string
 }{
-	TenantID: "tenant_plan.tenant_id",
-	PlanID:   "tenant_plan.plan_id",
-	StartAt:  "tenant_plan.start_at",
-	EndAt:    "tenant_plan.end_at",
+	TenantID:  "tenant_plan.tenant_id",
+	PlanID:    "tenant_plan.plan_id",
+	StartAt:   "tenant_plan.start_at",
+	EndAt:     "tenant_plan.end_at",
+	CreatorID: "tenant_plan.creator_id",
 }
 
 // Generated where
 
 var TenantPlanWhere = struct {
-	TenantID whereHelperint64
-	PlanID   whereHelperint64
-	StartAt  whereHelpertime_Time
-	EndAt    whereHelpernull_Time
+	TenantID  whereHelperint64
+	PlanID    whereHelperint64
+	StartAt   whereHelpertime_Time
+	EndAt     whereHelpernull_Time
+	CreatorID whereHelperint64
 }{
-	TenantID: whereHelperint64{field: "\"tenant_plan\".\"tenant_id\""},
-	PlanID:   whereHelperint64{field: "\"tenant_plan\".\"plan_id\""},
-	StartAt:  whereHelpertime_Time{field: "\"tenant_plan\".\"start_at\""},
-	EndAt:    whereHelpernull_Time{field: "\"tenant_plan\".\"end_at\""},
+	TenantID:  whereHelperint64{field: "\"tenant_plan\".\"tenant_id\""},
+	PlanID:    whereHelperint64{field: "\"tenant_plan\".\"plan_id\""},
+	StartAt:   whereHelpertime_Time{field: "\"tenant_plan\".\"start_at\""},
+	EndAt:     whereHelpernull_Time{field: "\"tenant_plan\".\"end_at\""},
+	CreatorID: whereHelperint64{field: "\"tenant_plan\".\"creator_id\""},
 }
 
 // TenantPlanRels is where relationship names are stored.
 var TenantPlanRels = struct {
-	Plan   string
-	Tenant string
+	Plan    string
+	Creator string
+	Tenant  string
 }{
-	Plan:   "Plan",
-	Tenant: "Tenant",
+	Plan:    "Plan",
+	Creator: "Creator",
+	Tenant:  "Tenant",
 }
 
 // tenantPlanR is where relationships are stored.
 type tenantPlanR struct {
-	Plan   *Plan   `boil:"Plan" json:"Plan" toml:"Plan" yaml:"Plan"`
-	Tenant *Tenant `boil:"Tenant" json:"Tenant" toml:"Tenant" yaml:"Tenant"`
+	Plan    *Plan   `boil:"Plan" json:"Plan" toml:"Plan" yaml:"Plan"`
+	Creator *User   `boil:"Creator" json:"Creator" toml:"Creator" yaml:"Creator"`
+	Tenant  *Tenant `boil:"Tenant" json:"Tenant" toml:"Tenant" yaml:"Tenant"`
 }
 
 // NewStruct creates a new relationship struct
@@ -106,6 +116,22 @@ func (r *tenantPlanR) GetPlan() *Plan {
 	return r.Plan
 }
 
+func (o *TenantPlan) GetCreator() *User {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetCreator()
+}
+
+func (r *tenantPlanR) GetCreator() *User {
+	if r == nil {
+		return nil
+	}
+
+	return r.Creator
+}
+
 func (o *TenantPlan) GetTenant() *Tenant {
 	if o == nil {
 		return nil
@@ -126,8 +152,8 @@ func (r *tenantPlanR) GetTenant() *Tenant {
 type tenantPlanL struct{}
 
 var (
-	tenantPlanAllColumns            = []string{"tenant_id", "plan_id", "start_at", "end_at"}
-	tenantPlanColumnsWithoutDefault = []string{"tenant_id", "plan_id"}
+	tenantPlanAllColumns            = []string{"tenant_id", "plan_id", "start_at", "end_at", "creator_id"}
+	tenantPlanColumnsWithoutDefault = []string{"tenant_id", "plan_id", "creator_id"}
 	tenantPlanColumnsWithDefault    = []string{"start_at", "end_at"}
 	tenantPlanPrimaryKeyColumns     = []string{"tenant_id", "plan_id"}
 	tenantPlanGeneratedColumns      = []string{}
@@ -433,6 +459,17 @@ func (o *TenantPlan) Plan(mods ...qm.QueryMod) planQuery {
 	return Plans(queryMods...)
 }
 
+// Creator pointed to by the foreign key.
+func (o *TenantPlan) Creator(mods ...qm.QueryMod) userQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.CreatorID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return Users(queryMods...)
+}
+
 // Tenant pointed to by the foreign key.
 func (o *TenantPlan) Tenant(mods ...qm.QueryMod) tenantQuery {
 	queryMods := []qm.QueryMod{
@@ -556,6 +593,126 @@ func (tenantPlanL) LoadPlan(e boil.Executor, singular bool, maybeTenantPlan inte
 					foreign.R = &planR{}
 				}
 				foreign.R.TenantPlans = append(foreign.R.TenantPlans, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadCreator allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (tenantPlanL) LoadCreator(e boil.Executor, singular bool, maybeTenantPlan interface{}, mods queries.Applicator) error {
+	var slice []*TenantPlan
+	var object *TenantPlan
+
+	if singular {
+		var ok bool
+		object, ok = maybeTenantPlan.(*TenantPlan)
+		if !ok {
+			object = new(TenantPlan)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeTenantPlan)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeTenantPlan))
+			}
+		}
+	} else {
+		s, ok := maybeTenantPlan.(*[]*TenantPlan)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeTenantPlan)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeTenantPlan))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &tenantPlanR{}
+		}
+		args[object.CreatorID] = struct{}{}
+
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &tenantPlanR{}
+			}
+
+			args[obj.CreatorID] = struct{}{}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`users`),
+		qm.WhereIn(`users.id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.Query(e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load User")
+	}
+
+	var resultSlice []*User
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice User")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for users")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for users")
+	}
+
+	if len(userAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.Creator = foreign
+		if foreign.R == nil {
+			foreign.R = &userR{}
+		}
+		foreign.R.CreatorTenantPlan = object
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.CreatorID == foreign.ID {
+				local.R.Creator = foreign
+				if foreign.R == nil {
+					foreign.R = &userR{}
+				}
+				foreign.R.CreatorTenantPlan = local
 				break
 			}
 		}
@@ -733,6 +890,60 @@ func (o *TenantPlan) SetPlan(exec boil.Executor, insert bool, related *Plan) err
 		}
 	} else {
 		related.R.TenantPlans = append(related.R.TenantPlans, o)
+	}
+
+	return nil
+}
+
+// SetCreatorG of the tenantPlan to the related item.
+// Sets o.R.Creator to related.
+// Adds o to related.R.CreatorTenantPlan.
+// Uses the global database handle.
+func (o *TenantPlan) SetCreatorG(insert bool, related *User) error {
+	return o.SetCreator(boil.GetDB(), insert, related)
+}
+
+// SetCreator of the tenantPlan to the related item.
+// Sets o.R.Creator to related.
+// Adds o to related.R.CreatorTenantPlan.
+func (o *TenantPlan) SetCreator(exec boil.Executor, insert bool, related *User) error {
+	var err error
+	if insert {
+		if err = related.Insert(exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"tenant_plan\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"creator_id"}),
+		strmangle.WhereClause("\"", "\"", 2, tenantPlanPrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.TenantID, o.PlanID}
+
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, updateQuery)
+		fmt.Fprintln(boil.DebugWriter, values)
+	}
+	if _, err = exec.Exec(updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	o.CreatorID = related.ID
+	if o.R == nil {
+		o.R = &tenantPlanR{
+			Creator: related,
+		}
+	} else {
+		o.R.Creator = related
+	}
+
+	if related.R == nil {
+		related.R = &userR{
+			CreatorTenantPlan: o,
+		}
+	} else {
+		related.R.CreatorTenantPlan = o
 	}
 
 	return nil

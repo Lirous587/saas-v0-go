@@ -37,4 +37,8 @@ var (
 	// 外部服务错误 (1080-1099)
 	ErrGitHubAPIError = ErrCode{Msg: "GitHub API调用失败", Type: ErrorTypeExternal, Code: 1080}
 	ErrGoogleAPIError = ErrCode{Msg: "Google API调用失败", Type: ErrorTypeExternal, Code: 1081}
+
+
+	// 
+	// ErrUser
 )
