@@ -63,6 +63,8 @@ CREATE TABLE public.tenants
     description varchar(120)
 );
 CREATE INDEX IF NOT EXISTS idx_tenants_creator_id ON public.tenants (creator_id);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_tenants_creator_name ON public.tenants (creator_id, name);
+
 
 
 -- 租户计划关联表
