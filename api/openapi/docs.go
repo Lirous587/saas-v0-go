@@ -1887,7 +1887,7 @@ const docTemplate = `{
                 "tags": [
                     "tenant"
                 ],
-                "summary": "获取用户的租户列表",
+                "summary": "获取用户的租户分页",
                 "parameters": [
                     {
                         "type": "string",
@@ -1897,8 +1897,14 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "上页最后一条记录id",
-                        "name": "last_id",
+                        "description": "用于下一页",
+                        "name": "after_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "用于上一页",
+                        "name": "before_id",
                         "in": "query"
                     },
                     {
@@ -1920,10 +1926,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/handler.TenantResponse"
-                                            }
+                                            "$ref": "#/definitions/handler.PagingResponse"
                                         }
                                     }
                                 }
@@ -2660,6 +2663,23 @@ const docTemplate = `{
                 },
                 "url": {
                     "type": "string"
+                }
+            }
+        },
+        "handler.PagingResponse": {
+            "type": "object",
+            "properties": {
+                "has_next": {
+                    "type": "boolean"
+                },
+                "has_prev": {
+                    "type": "boolean"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.TenantResponse"
+                    }
                 }
             }
         },

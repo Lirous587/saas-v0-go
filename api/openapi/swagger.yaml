@@ -172,6 +172,17 @@ definitions:
       url:
         type: string
     type: object
+  handler.PagingResponse:
+    properties:
+      has_next:
+        type: boolean
+      has_prev:
+        type: boolean
+      items:
+        items:
+          $ref: '#/definitions/handler.TenantResponse'
+        type: array
+    type: object
   handler.PlanResponse:
     properties:
       created_at:
@@ -1607,9 +1618,13 @@ paths:
         in: query
         name: keyword
         type: string
-      - description: 上页最后一条记录id
+      - description: 用于下一页
         in: query
-        name: last_id
+        name: after_id
+        type: integer
+      - description: 用于上一页
+        in: query
+        name: before_id
         type: integer
       - description: 页码
         in: query
@@ -1625,9 +1640,7 @@ paths:
             - $ref: '#/definitions/response.successResponse'
             - properties:
                 data:
-                  items:
-                    $ref: '#/definitions/handler.TenantResponse'
-                  type: array
+                  $ref: '#/definitions/handler.PagingResponse'
               type: object
         "400":
           description: 参数错误
@@ -1639,7 +1652,7 @@ paths:
             $ref: '#/definitions/response.errorResponse'
       security:
       - BearerAuth: []
-      summary: 获取用户的租户列表
+      summary: 获取用户的租户分页
       tags:
       - tenant
     post:

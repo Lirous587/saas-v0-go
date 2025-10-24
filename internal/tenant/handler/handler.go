@@ -126,7 +126,7 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Param        after_id   query     int     false  "用于下一页"
 // @Param        before_id  query     int     false  "用于上一页"
 // @Param        page_size  query     int     false  "页码"
-// @Success      200  {object}  response.successResponse{data=handler.PageResponse} "请求成功"
+// @Success      200  {object}  response.successResponse{data=handler.PagingResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant [get]
