@@ -10,7 +10,7 @@ type TenantRepository interface {
 	InsertTx(tx *sql.Tx, tenant *Tenant) (*Tenant, error)
 	Update(tenant *Tenant) error
 	Delete(id int64) error
-	List(query *TenantQuery) ([]*Tenant, error)
+	Paging(query *TenantPagingQuery) (*TenantPagination, error)
 	ExistSameName(creatorID int64, name string) (bool, error)
 }
 

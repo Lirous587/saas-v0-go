@@ -116,36 +116,38 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 	response.Success(ctx)
 }
 
-// List godoc
-// @Summary      获取用户的租户列表
+// Paging godoc
+// @Summary      获取用户的租户分页
 // @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
 // @Param        keyword    query     string  false  "关键词"
-// @Param        last_id    query     int     false  "上页最后一条记录id"
+// @Param        after_id   query     int     false  "用于下一页"
+// @Param        before_id  query     int     false  "用于上一页"
 // @Param        page_size  query     int     false  "页码"
-// @Success      200  {object}  response.successResponse{data=[]handler.TenantResponse} "请求成功"
+// @Success      200  {object}  response.successResponse{data=handler.PageResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
 // @Router       /v1/tenant [get]
-func (h *HttpHandler) List(ctx *gin.Context) {
+func (h *HttpHandler) Paging(ctx *gin.Context) {
 	userID, err := server.GetUserID(ctx)
 	if err != nil {
 		response.InvalidParams(ctx, err)
 		return
 	}
 
-	req := new(ListRequest)
+	req := new(PagingRequest)
 
 	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
-	data, err := h.service.List(&domain.TenantQuery{
+	data, err := h.service.Paging(&domain.TenantPagingQuery{
 		CreatorID: userID,
 		Keyword:   req.KeyWord,
-		LastID:    req.LastID,
+		AfterID:   req.AfterID,
+		BeforeID:  req.BeforeID,
 		PageSize:  req.PageSize,
 	})
 
@@ -154,7 +156,7 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 		return
 	}
 
-	response.Success(ctx, domainTenantsToResponse(data))
+	response.Success(ctx, domainTenantPagingToResponse(data))
 }
 
 // CheckName godoc

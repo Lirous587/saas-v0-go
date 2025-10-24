@@ -72,8 +72,8 @@ func (s *service) Delete(id int64) error {
 	return s.repo.Delete(id)
 }
 
-func (s *service) List(query *domain.TenantQuery) ([]*domain.Tenant, error) {
-	return s.repo.List(query)
+func (s *service) Paging(query *domain.TenantPagingQuery) (*domain.TenantPagination, error) {
+	return s.repo.Paging(query)
 }
 
 func (s *service) CheckName(creatorID int64, tenantName string) (bool, error) {
