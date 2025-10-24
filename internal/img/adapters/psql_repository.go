@@ -3,14 +3,15 @@ package adapters
 import (
 	"database/sql"
 	"fmt"
+	"saas/internal/common/orm"
+	"saas/internal/common/reskit/codes"
+	"saas/internal/common/utils/dbkit"
+	"saas/internal/img/domain"
+	"time"
+
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/pkg/errors"
-	"saas/internal/common/orm"
-	"saas/internal/common/reskit/codes"
-	"saas/internal/common/utils"
-	"saas/internal/img/domain"
-	"time"
 )
 
 type ImgPSQLRepository struct {
@@ -149,7 +150,7 @@ func (repo *ImgPSQLRepository) List(query *domain.ImgQuery) (*domain.ImgList, er
 	}
 
 	// 2.计算offset
-	offset, err := utils.ComputeOffset(query.Page, query.PageSize)
+	offset, err := dbkit.ComputeOffset(query.Page, query.PageSize)
 	if err != nil {
 		return nil, err
 	}

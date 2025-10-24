@@ -8,6 +8,7 @@ import (
 	"saas/internal/common/orm"
 	"saas/internal/common/reskit/codes"
 	"saas/internal/common/utils"
+	"saas/internal/common/utils/dbkit"
 
 	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
@@ -461,7 +462,7 @@ func (repo *CommentPSQLRepository) ListPlate(query *domain.PlateQuery) (*domain.
 	}
 
 	// 2.计算offset
-	offset, err := utils.ComputeOffset(query.Page, query.PageSize)
+	offset, err := dbkit.ComputeOffset(query.Page, query.PageSize)
 	if err != nil {
 		return nil, err
 	}
