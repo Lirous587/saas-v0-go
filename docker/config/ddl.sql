@@ -57,7 +57,7 @@ CREATE TABLE public.tenants
 (
     id          bigserial PRIMARY KEY,
     creator_id  bigint         NOT NULL REFERENCES public.users (id) ON DELETE RESTRICT,
-    name        varchar(50)    NOT NULL,
+    name        varchar(20)    NOT NULL,
     created_at  timestamptz(6) NOT NULL DEFAULT now(),
     updated_at  timestamptz(6) NOT NULL DEFAULT now(),
     description varchar(120)

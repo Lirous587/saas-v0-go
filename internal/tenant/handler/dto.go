@@ -9,14 +9,14 @@ type TenantResponse struct {
 }
 
 type CreateRequest struct {
-	Name        string `json:"name" binding:"required"`
+	Name        string `json:"name" binding:"required,max=20"`
 	Description string `json:"description" binding:"max=120"`
 	PlanID      int64  `json:"plan_id" binding:"required"`
 }
 
 type UpdateRequest struct {
 	ID          int64  `json:"-" uri:"id" binding:"required"`
-	Name        string `json:"id" binding:"required"`
+	Name        string `json:"id" binding:"required,max=20"`
 	Description string `json:"description" binding:"max=120"`
 }
 
@@ -31,7 +31,7 @@ type ListRequest struct {
 }
 
 type CheckNameRequest struct {
-	Name string `form:"name"  binding:"required"`
+	Name string `form:"name"  binding:"required,max=20"`
 }
 
 type UpgradeRequest struct {

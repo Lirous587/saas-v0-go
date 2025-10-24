@@ -3037,7 +3037,8 @@ const docTemplate = `{
                     "maxLength": 120
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 20
                 },
                 "plan_id": {
                     "type": "integer"
@@ -3055,7 +3056,8 @@ const docTemplate = `{
                     "maxLength": 120
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 20
                 }
             }
         }

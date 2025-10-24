@@ -419,6 +419,7 @@ definitions:
         maxLength: 120
         type: string
       name:
+        maxLength: 20
         type: string
       plan_id:
         type: integer
@@ -432,6 +433,7 @@ definitions:
         maxLength: 120
         type: string
       id:
+        maxLength: 20
         type: string
     required:
     - id
