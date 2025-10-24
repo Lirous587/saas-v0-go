@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"saas/internal/common/orm"
 	"saas/internal/common/reskit/codes"
+	"saas/internal/common/utils/dbkit"
 	"saas/internal/tenant/domain"
-	"slices"
 
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
@@ -80,72 +80,28 @@ func (repo *TenantPSQLRepository) Paging(query *domain.TenantPagingQuery) (*doma
 	// 基本条件
 	mods = append(mods, orm.TenantWhere.CreatorID.EQ(query.CreatorID))
 
-	fetchLimit := query.PageSize + 1
-
 	if query.Keyword != "" {
 		like := "%" + query.Keyword + "%"
 		mods = append(mods, qm.Where(fmt.Sprintf("(%s LIKE ? OR %s LIKE ?)", orm.TenantColumns.Name, orm.TenantColumns.Description), like, like))
 	}
 
-	// 游标与排序
-	if query.AfterID > 0 {
-		mods = append(mods, orm.TenantWhere.ID.GT(query.AfterID))
-		mods = append(mods, qm.OrderBy(orm.TenantColumns.ID+" ASC"))
-	} else if query.BeforeID > 0 {
-		mods = append(mods, orm.TenantWhere.ID.LT(query.BeforeID))
-		// 为了取到"上一页"的正确数据，先按 DESC 取最新的 N 条，然后反转切片返回给调用方（保持 ASC 展示）
-		mods = append(mods, qm.OrderBy(orm.TenantColumns.ID+" DESC"))
-	} else {
-		mods = append(mods, qm.OrderBy(orm.TenantColumns.ID+" ASC"))
-	}
+	keyset := dbkit.NewKeyset[domain.Tenant](query.PageSize, query.BeforeID, query.AfterID)
 
-	// limit
-	mods = append(mods, qm.Limit(fetchLimit))
+	mods = keyset.ApplyKeysetMods(mods, orm.TenantColumns.ID)
 
 	ormTenants, err := orm.Tenants(mods...).AllG()
 	if err != nil {
 		return nil, err
 	}
 
-	hasMore := len(ormTenants) > query.PageSize
+	domains := ormTenantsToDomain(ormTenants)
 
-	// 截取
-	if hasMore {
-		ormTenants = ormTenants[:query.PageSize]
-	}
-
-	// 如果是 Before 分页，先按 DESC 取，结果需要反转为 ASC 展示
-	if query.BeforeID > 0 && len(ormTenants) > 0 {
-		slices.Reverse(ormTenants)
-	}
-
-	// 转换为 domain
-	items := ormTenantsToDomain(ormTenants)
-
-	// 基于请求方向和是否多取一条来推断 hasPrev/hasNext，避免额外 DB 查询
-	isAfter := query.AfterID > 0
-	isBefore := query.BeforeID > 0
-
-	var hasPrev, hasNext bool
-	switch {
-	case isAfter:
-		// 请求为 after（向后翻页），代表存在上一页（客户端传了游标）
-		hasPrev = true
-		hasNext = hasMore
-	case isBefore:
-		// 请求为 before（向前翻页），代表存在下一页（客户端传了游标）
-		hasPrev = hasMore
-		hasNext = true
-	default:
-		// 首页
-		hasPrev = false
-		hasNext = hasMore
-	}
+	result := keyset.BuildPaginationResult(domains)
 
 	return &domain.TenantPagination{
-		Items:   items,
-		HasNext: hasNext,
-		HasPrev: hasPrev,
+		Items:   result.Items,
+		HasNext: result.HasNext,
+		HasPrev: result.HasPrev,
 	}, nil
 }
 
