@@ -2902,7 +2902,7 @@
         "handler.UserInfo": {
             "type": "object",
             "properties": {
-                "avatar": {
+                "avatar_url": {
                     "type": "string"
                 },
                 "id": {
@@ -2924,9 +2924,6 @@
                 },
                 "email": {
                     "type": "string"
-                },
-                "email_verified": {
-                    "type": "boolean"
                 },
                 "id": {
                     "type": "integer"

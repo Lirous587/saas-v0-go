@@ -28,6 +28,7 @@ CREATE TABLE public.users
     id            bigserial      NOT NULL PRIMARY KEY,
     nickname      varchar(20)    NOT NULL,
     email         varchar(80)    NOT NULL UNIQUE,
+    avatar_url    varchar(255)   NOT NULL,
     github_id     varchar(60)    NULL UNIQUE,
     google_id     varchar(60)    NULL UNIQUE,
     password_hash text           NULL,

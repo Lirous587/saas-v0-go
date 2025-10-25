@@ -16,9 +16,9 @@ func domainCommentRootsToResponse(roots []*domain.CommentRoot) []*CommentRootRes
 		}
 		CommentWithUser := roots[i].CommentWithUser
 		userInfo := &UserInfo{
-			ID:       CommentWithUser.User.ID,
-			NickName: CommentWithUser.User.NickName,
-			Avatar:   CommentWithUser.User.Avatar,
+			ID:        CommentWithUser.User.ID,
+			NickName:  CommentWithUser.User.NickName,
+			AvatarURL: CommentWithUser.User.AvatarURL,
 		}
 		responses = append(responses, &CommentRootResponse{
 			ID:           CommentWithUser.ID,
@@ -48,9 +48,9 @@ func domainCommentRepliesToResponse(replies []*domain.CommentReply) []*CommentRe
 		}
 		CommentWithUser := replies[i].CommentWithUser
 		userInfo := &UserInfo{
-			ID:       CommentWithUser.User.ID,
-			NickName: CommentWithUser.User.NickName,
-			Avatar:   CommentWithUser.User.Avatar,
+			ID:        CommentWithUser.User.ID,
+			NickName:  CommentWithUser.User.NickName,
+			AvatarURL: CommentWithUser.User.AvatarURL,
 		}
 		responses = append(responses, &CommentReplyResponse{
 			ID:        CommentWithUser.ID,

@@ -13,7 +13,7 @@ func domainUserToResponse(user *domain.User) *UserResponse {
 		ID:          user.ID,
 		Email:       user.Email,
 		NickName:    user.Nickname,
-		Avatar:      user.Avatar,
+		AvatarURL:   user.AvatarURL,
 		CreatedAt:   user.CreatedAt.Unix(),
 		UpdatedAt:   user.UpdatedAt.Unix(),
 		LastLoginAt: user.LastLoginAt.Unix(),

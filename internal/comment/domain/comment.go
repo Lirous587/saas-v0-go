@@ -7,10 +7,10 @@ import (
 type TenantID int64
 
 type UserInfo struct {
-	ID       int64
-	NickName string
-	Avatar   string
-	email    string
+	ID        int64
+	NickName  string
+	AvatarURL string
+	email     string
 }
 
 func (u *UserInfo) SetEmail(email string) {

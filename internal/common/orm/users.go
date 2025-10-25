@@ -32,7 +32,7 @@ type User struct {
 	LastLoginAt  time.Time   `boil:"last_login_at" json:"last_login_at" toml:"last_login_at" yaml:"last_login_at"`
 	CreatedAt    time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt    time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
-	Avatar       string      `boil:"avatar" json:"avatar" toml:"avatar" yaml:"avatar"`
+	AvatarURL    string      `boil:"avatar_url" json:"avatar_url" toml:"avatar_url" yaml:"avatar_url"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -48,7 +48,7 @@ var UserColumns = struct {
 	LastLoginAt  string
 	CreatedAt    string
 	UpdatedAt    string
-	Avatar       string
+	AvatarURL    string
 }{
 	ID:           "id",
 	Nickname:     "nickname",
@@ -59,7 +59,7 @@ var UserColumns = struct {
 	LastLoginAt:  "last_login_at",
 	CreatedAt:    "created_at",
 	UpdatedAt:    "updated_at",
-	Avatar:       "avatar",
+	AvatarURL:    "avatar_url",
 }
 
 var UserTableColumns = struct {
@@ -72,7 +72,7 @@ var UserTableColumns = struct {
 	LastLoginAt  string
 	CreatedAt    string
 	UpdatedAt    string
-	Avatar       string
+	AvatarURL    string
 }{
 	ID:           "users.id",
 	Nickname:     "users.nickname",
@@ -83,7 +83,7 @@ var UserTableColumns = struct {
 	LastLoginAt:  "users.last_login_at",
 	CreatedAt:    "users.created_at",
 	UpdatedAt:    "users.updated_at",
-	Avatar:       "users.avatar",
+	AvatarURL:    "users.avatar_url",
 }
 
 // Generated where
@@ -98,7 +98,7 @@ var UserWhere = struct {
 	LastLoginAt  whereHelpertime_Time
 	CreatedAt    whereHelpertime_Time
 	UpdatedAt    whereHelpertime_Time
-	Avatar       whereHelperstring
+	AvatarURL    whereHelperstring
 }{
 	ID:           whereHelperint64{field: "\"users\".\"id\""},
 	Nickname:     whereHelperstring{field: "\"users\".\"nickname\""},
@@ -109,7 +109,7 @@ var UserWhere = struct {
 	LastLoginAt:  whereHelpertime_Time{field: "\"users\".\"last_login_at\""},
 	CreatedAt:    whereHelpertime_Time{field: "\"users\".\"created_at\""},
 	UpdatedAt:    whereHelpertime_Time{field: "\"users\".\"updated_at\""},
-	Avatar:       whereHelperstring{field: "\"users\".\"avatar\""},
+	AvatarURL:    whereHelperstring{field: "\"users\".\"avatar_url\""},
 }
 
 // UserRels is where relationship names are stored.
@@ -187,8 +187,8 @@ func (r *userR) GetCreatorTenants() TenantSlice {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "nickname", "email", "github_id", "google_id", "password_hash", "last_login_at", "created_at", "updated_at", "avatar"}
-	userColumnsWithoutDefault = []string{"nickname", "email", "last_login_at", "avatar"}
+	userAllColumns            = []string{"id", "nickname", "email", "github_id", "google_id", "password_hash", "last_login_at", "created_at", "updated_at", "avatar_url"}
+	userColumnsWithoutDefault = []string{"nickname", "email", "last_login_at", "avatar_url"}
 	userColumnsWithDefault    = []string{"id", "github_id", "google_id", "password_hash", "created_at", "updated_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 	userGeneratedColumns      = []string{}

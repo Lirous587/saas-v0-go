@@ -331,7 +331,7 @@ definitions:
     type: object
   handler.UserInfo:
     properties:
-      avatar:
+      avatar_url:
         type: string
       id:
         type: integer
@@ -346,8 +346,6 @@ definitions:
         type: integer
       email:
         type: string
-      email_verified:
-        type: boolean
       id:
         type: integer
       last_login_at:

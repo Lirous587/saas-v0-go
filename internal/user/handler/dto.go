@@ -5,14 +5,13 @@ type GithubAuthRequest struct {
 }
 
 type UserResponse struct {
-	ID            int64  `json:"id"`
-	Email         string `json:"email"`
-	NickName      string `json:"username"`
-	Avatar        string `json:"avatar_url,omitempty"`
-	EmailVerified bool   `json:"email_verified"`
-	CreatedAt     int64  `json:"created_at"`
-	UpdatedAt     int64  `json:"updated_at"`
-	LastLoginAt   int64  `json:"last_login_at"`
+	ID          int64  `json:"id"`
+	Email       string `json:"email"`
+	NickName    string `json:"username"`
+	AvatarURL   string `json:"avatar_url,omitempty"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
+	LastLoginAt int64  `json:"last_login_at"`
 }
 
 type AuthResponse struct {

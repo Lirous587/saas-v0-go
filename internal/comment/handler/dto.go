@@ -6,9 +6,9 @@ import (
 )
 
 type UserInfo struct {
-	ID       int64  `json:"id"`
-	NickName string `json:"nickname"`
-	Avatar   string `json:"avatar,omitempty"`
+	ID        int64  `json:"id"`
+	NickName  string `json:"nickname"`
+	AvatarURL string `json:"avatar_url,omitempty"`
 }
 
 type CreateRequest struct {

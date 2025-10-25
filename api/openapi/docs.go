@@ -2908,7 +2908,7 @@ const docTemplate = `{
         "handler.UserInfo": {
             "type": "object",
             "properties": {
-                "avatar": {
+                "avatar_url": {
                     "type": "string"
                 },
                 "id": {
@@ -2930,9 +2930,6 @@ const docTemplate = `{
                 },
                 "email": {
                     "type": "string"
-                },
-                "email_verified": {
-                    "type": "boolean"
                 },
                 "id": {
                     "type": "integer"

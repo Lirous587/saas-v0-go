@@ -156,8 +156,8 @@ func (s *userService) bindOAuthToUser(user *domain.User, provider string, userIn
 	}
 
 	// 更新头像等信息
-	if userInfo.Avatar != "" {
-		user.Avatar = userInfo.Avatar
+	if userInfo.AvatarURL != "" {
+		user.AvatarURL = userInfo.AvatarURL
 	}
 
 	return s.userRepo.Update(user)

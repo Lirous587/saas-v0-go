@@ -12,9 +12,9 @@ func domainUserToORM(user *domain.User) *orm.User {
 	}
 
 	ormUser := &orm.User{
-		ID:		user.ID,
-		Email:		user.Email,
-		Nickname:	user.Nickname,
+		ID:       user.ID,
+		Email:    user.Email,
+		Nickname: user.Nickname,
 	}
 
 	if user.PasswordHash != "" {
@@ -34,12 +34,13 @@ func ormUserToDomain(ormUser *orm.User) *domain.User {
 	}
 
 	user := &domain.User{
-		ID:		ormUser.ID,
-		Email:		ormUser.Email,
-		Nickname:	ormUser.Nickname,
-		CreatedAt:	ormUser.CreatedAt,
-		UpdatedAt:	ormUser.UpdatedAt,
-		LastLoginAt:	ormUser.LastLoginAt,
+		ID:          ormUser.ID,
+		Email:       ormUser.Email,
+		Nickname:    ormUser.Nickname,
+		AvatarURL:   ormUser.AvatarURL,
+		CreatedAt:   ormUser.CreatedAt,
+		UpdatedAt:   ormUser.UpdatedAt,
+		LastLoginAt: ormUser.LastLoginAt,
 	}
 
 	if ormUser.PasswordHash.Valid {

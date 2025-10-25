@@ -165,7 +165,7 @@ func (h *HttpHandler) fetchGithubUserInfo(accessToken string) (*domain.OAuthUser
 		Login:    githubUser.Login,
 		Nickname: githubUser.Name,
 		Email:    githubUser.Email,
-		Avatar:   githubUser.AvatarURL,
+		AvatarURL:   githubUser.AvatarURL,
 	}, nil
 }
 

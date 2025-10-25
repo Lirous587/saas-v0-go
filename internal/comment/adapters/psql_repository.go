@@ -356,7 +356,7 @@ func (repo *CommentPSQLRepository) GetUserInfosByIds(ids []int64) ([]*domain.Use
 func (repo *CommentPSQLRepository) GetUserInfoByID(id int64) (*domain.UserInfo, error) {
 	ormUser, err := orm.Users(
 		qm.Where(fmt.Sprintf("%s = ?", orm.UserColumns.ID), id),
-		qm.Select(orm.UserColumns.ID, orm.UserColumns.Nickname, orm.UserColumns.Avatar, orm.UserColumns.Email),
+		qm.Select(orm.UserColumns.ID, orm.UserColumns.Nickname, orm.UserColumns.AvatarURL, orm.UserColumns.Email),
 	).OneG()
 
 	if err != nil {

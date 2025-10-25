@@ -5,10 +5,10 @@ import "time"
 type User struct {
 	ID           int64
 	Email        string
+	AvatarURL    string
 	PasswordHash string
 	Nickname     string
 	GithubID     string
-	Avatar       string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	LastLoginAt  time.Time
@@ -24,10 +24,10 @@ type User2Token struct {
 }
 
 type OAuthUserInfo struct {
-	Provider string
-	ID       string
-	Login    string
-	Nickname string
-	Email    string
-	Avatar   string
+	Provider  string
+	ID        string
+	Login     string
+	Nickname  string
+	Email     string
+	AvatarURL string
 }

@@ -91,9 +91,9 @@ func ormUserToDomain(ormUser *orm.User) *domain.UserInfo {
 
 	// 非null项
 	user := &domain.UserInfo{
-		ID:       ormUser.ID,
-		NickName: ormUser.Nickname,
-		Avatar:   ormUser.Avatar,
+		ID:        ormUser.ID,
+		NickName:  ormUser.Nickname,
+		AvatarURL: ormUser.AvatarURL,
 	}
 
 	user.SetEmail(ormUser.Email)
