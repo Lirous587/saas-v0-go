@@ -85,17 +85,7 @@ func (repo *TenantPSQLRepository) Paging(query *domain.TenantPagingQuery) (*doma
 		mods = append(mods, qm.Where(fmt.Sprintf("(%s LIKE ? OR %s LIKE ?)", orm.TenantColumns.Name, orm.TenantColumns.Description), like, like))
 	}
 
-	sortFields := []dbkit.SortField{
-		{Column: orm.TenantColumns.UpdatedAt, Direction: "DESC"},
-		{Column: orm.TenantColumns.ID, Direction: "DESC"},
-	}
-
-	keyset := dbkit.NewKeyset(
-		query.PageSize,
-		sortFields,
-		query.ToCursorDecoder(),
-		domain.TenantCursorEncoder{},
-	)
+	keyset := dbkit.NewKeyset[domain.Tenant](orm.TenantColumns.ID, orm.TenantColumns.CreatedAt, query.PrevCursor, query.NextCursor, query.PageSize)
 
 	mods = keyset.ApplyKeysetMods(mods)
 
@@ -105,14 +95,15 @@ func (repo *TenantPSQLRepository) Paging(query *domain.TenantPagingQuery) (*doma
 	}
 
 	domains := ormTenantsToDomain(ormTenants)
+
 	result := keyset.BuildPaginationResult(domains)
 
 	return &domain.TenantPagination{
 		Items:      result.Items,
-		HasNext:    result.HasNext,
-		HasPrev:    result.HasPrev,
-		NextCursor: result.NextCursor,
 		PrevCursor: result.PrevCursor,
+		NextCursor: result.NextCursor,
+		HasPrev:    result.HasPrev,
+		HasNext:    result.HasNext,
 	}, nil
 }
 

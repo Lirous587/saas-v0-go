@@ -1898,13 +1898,13 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "用于上一页游标",
-                        "name": "before_cursor",
+                        "name": "prev_cursor",
                         "in": "query"
                     },
                     {
                         "type": "string",
                         "description": "用于下一页游标",
-                        "name": "after_cursor",
+                        "name": "next_cursor",
                         "in": "query"
                     },
                     {

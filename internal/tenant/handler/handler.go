@@ -123,8 +123,8 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        keyword    		query     string  false  "关键词"
-// @Param        before_cursor  query     string  false  "用于上一页游标"
-// @Param        after_cursor   query     string  false  "用于下一页游标"
+// @Param        prev_cursor  query     string  false  "用于上一页游标"
+// @Param        next_cursor   query     string  false  "用于下一页游标"
 // @Param        page_size  		query     int     false  "页码"
 // @Success      200  {object}  response.successResponse{data=handler.PagingResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
@@ -144,11 +144,11 @@ func (h *HttpHandler) Paging(ctx *gin.Context) {
 	}
 
 	data, err := h.service.Paging(&domain.TenantPagingQuery{
-		CreatorID:    userID,
-		Keyword:      req.KeyWord,
-		AfterCursor:  req.AfterCursor,
-		BeforeCursor: req.BeforeCursor,
-		PageSize:     req.PageSize,
+		CreatorID:  userID,
+		Keyword:    req.KeyWord,
+		PrevCursor: req.PrevCursor,
+		NextCursor: req.NextCursor,
+		PageSize:   req.PageSize,
 	})
 
 	if err != nil {

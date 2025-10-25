@@ -25,10 +25,10 @@ type DeleteRequest struct {
 }
 
 type PagingRequest struct {
-	PageSize     int    `form:"page_size,default=5" binding:"min=5,max=20"`
-	AfterCursor  string `form:"after_cursor"`
-	BeforeCursor string `form:"before_cursor"`
-	KeyWord      string `form:"keyword" binding:"max=20"`
+	PageSize   int    `form:"page_size,default=5" binding:"min=5,max=20"`
+	PrevCursor string `form:"prev_cursor"`
+	NextCursor string `form:"next_cursor"`
+	KeyWord    string `form:"keyword" binding:"max=20"`
 }
 
 type PagingResponse struct {

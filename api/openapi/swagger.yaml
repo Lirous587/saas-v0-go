@@ -1624,11 +1624,11 @@ paths:
         type: string
       - description: 用于上一页游标
         in: query
-        name: before_cursor
+        name: prev_cursor
         type: string
       - description: 用于下一页游标
         in: query
-        name: after_cursor
+        name: next_cursor
         type: string
       - description: 页码
         in: query

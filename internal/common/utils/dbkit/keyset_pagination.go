@@ -1,166 +1,160 @@
 package dbkit
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"log"
 	"slices"
-	"strings"
+	"time"
 
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 )
 
-// SortField 定义排序字段和方向
-type SortField struct {
-	Column    string // 数据库列名
-	Direction string // "ASC" 或 "DESC"
+type keysetCursor struct {
+	CreatedAt time.Time
+	ID        int64
 }
 
-// KeysetCursor 表示分页游标值
-type KeysetCursor = []interface{}
-
-type CursorEncoder[T any] interface {
-	Encode(res *T) string
+type CursorFields interface {
+	GetCreatedAt() time.Time
+	GetID() int64
 }
 
-type CursorDecoder interface {
-	DecodePrev() KeysetCursor
-	DecodeNext() KeysetCursor
-}
-
-// Keyset 支持多字段排序的分页结构
-type Keyset[T any] struct {
-	BeforeCursor KeysetCursor
-	AfterCursor  KeysetCursor
+type keyset[T CursorFields] struct {
+	IDCol        string
+	CreatedAtCol string
+	PrevCursor   string
+	NextCursor   string
 	PageSize     int
-	SortFields   []SortField
-	encoder      CursorEncoder[T]
 }
 
-func NewKeyset[T any](pageSize int, sortFields []SortField, decoder CursorDecoder, encoder CursorEncoder[T]) *Keyset[T] {
+type paginationResult[T any] struct {
+	Items      []*T
+	PrevCursor string
+	NextCursor string
+	HasPrev    bool
+	HasNext    bool
+}
+
+func NewKeyset[T CursorFields](
+	idCol string,
+	createdAtCol string,
+	prevCursor string,
+	nextCursor string,
+	pageSize int,
+) *keyset[T] {
 	if pageSize <= 0 {
 		pageSize = 5
 	}
-	return &Keyset[T]{
+	return &keyset[T]{
+		IDCol:        idCol,
+		CreatedAtCol: createdAtCol,
+		PrevCursor:   prevCursor,
+		NextCursor:   nextCursor,
 		PageSize:     pageSize,
-		SortFields:   sortFields,
-		BeforeCursor: decoder.DecodePrev(),
-		AfterCursor:  decoder.DecodeNext(),
-		encoder:      encoder,
 	}
 }
 
-func (k *Keyset[T]) ApplyKeysetMods(base []qm.QueryMod) []qm.QueryMod {
-	if k.AfterCursor != nil {
-		base = append(base, k.buildWhereCondition(false))
-	} else if k.BeforeCursor != nil {
-		base = append(base, k.buildWhereCondition(true))
+func (k keyset[T]) encode(cursor *keysetCursor) string {
+	if cursor == nil {
+		return ""
 	}
-	orderByClause := k.buildOrderByClause()
-	base = append(base, qm.OrderBy(orderByClause))
+	data, _ := json.Marshal(cursor)
+	return base64.StdEncoding.EncodeToString(data)
+}
 
-	fetchLimit := k.PageSize + 1
-	base = append(base, qm.Limit(fetchLimit))
+func (k keyset[T]) decodeCursor(cursorStr string) *keysetCursor {
+	if cursorStr == "" {
+		return nil
+	}
+	data, err := base64.StdEncoding.DecodeString(cursorStr)
+	if err != nil {
+		return nil
+	}
+	var payload keysetCursor
+	if json.Unmarshal(data, &payload) != nil {
+		return nil
+	}
+	return &payload
+}
+
+func (k keyset[T]) extractKeysetCursor(item *T) *keysetCursor {
+	if item == nil {
+		return nil
+	}
+
+	return &keysetCursor{
+		CreatedAt: (*item).GetCreatedAt(),
+		ID:        (*item).GetID(),
+	}
+}
+
+func (k keyset[T]) ApplyKeysetMods(base []qm.QueryMod) []qm.QueryMod {
+	var cursor *keysetCursor
+	var order string
+
+	if k.NextCursor != "" {
+		cursor = k.decodeCursor(k.NextCursor)
+		if cursor != nil {
+			base = append(base, qm.Where(fmt.Sprintf("(%s, %s) > (?, ?)", k.CreatedAtCol, k.IDCol), cursor.CreatedAt, cursor.ID))
+		}
+		order = fmt.Sprintf("%s ASC, %s ASC", k.CreatedAtCol, k.IDCol)
+	} else if k.PrevCursor != "" {
+		cursor = k.decodeCursor(k.PrevCursor)
+		if cursor != nil {
+			base = append(base, qm.Where(fmt.Sprintf("(%s, %s) < (?, ?)", k.CreatedAtCol, k.IDCol), cursor.CreatedAt, cursor.ID))
+		}
+		order = fmt.Sprintf("%s DESC, %s DESC", k.CreatedAtCol, k.IDCol)
+	} else {
+		order = fmt.Sprintf("%s ASC, %s ASC", k.CreatedAtCol, k.IDCol)
+	}
+
+	base = append(base, qm.OrderBy(order))
+	base = append(base, qm.Limit(k.PageSize+1))
+
 	return base
 }
 
-func (k *Keyset[T]) buildWhereCondition(isBefore bool) qm.QueryMod {
-	cursor := k.AfterCursor
-	if isBefore && k.BeforeCursor != nil {
-		cursor = k.BeforeCursor
-	}
+func (k keyset[T]) BuildPaginationResult(domainSlice []*T) *paginationResult[T] {
+	hasMore := len(domainSlice) > k.PageSize
 
-	clauses := make([]string, 0, len(k.SortFields))
-	values := make([]interface{}, 0)
-
-	for i := range k.SortFields {
-		parts := make([]string, 0, i+1)
-		for j := 0; j < i; j++ {
-			parts = append(parts, fmt.Sprintf("%s = ?", k.SortFields[j].Column))
-			values = append(values, cursor[j])
-		}
-		parts = append(parts, fmt.Sprintf("%s %s ?", k.SortFields[i].Column, k.comparator(i, isBefore)))
-		values = append(values, cursor[i])
-		clauses = append(clauses, "("+strings.Join(parts, " AND ")+")")
-	}
-
-	return qm.Where(strings.Join(clauses, " OR "), values...)
-}
-
-func (k *Keyset[T]) comparator(idx int, isBefore bool) string {
-	dir := strings.ToUpper(k.SortFields[idx].Direction)
-	op := ">"
-	if dir == "DESC" {
-		op = "<"
-	}
-	if isBefore {
-		if op == ">" {
-			op = "<"
-		} else {
-			op = ">"
-		}
-	}
-	return op
-}
-
-// buildOrderByClause 构建ORDER BY子句
-func (k *Keyset[T]) buildOrderByClause() string {
-	clauses := make([]string, len(k.SortFields))
-	for i, field := range k.SortFields {
-		// 如果是上一页请求，反转排序方向
-		direction := field.Direction
-		if k.BeforeCursor != nil {
-			if direction == "ASC" {
-				direction = "DESC"
-			} else {
-				direction = "ASC"
-			}
-		}
-		clauses[i] = fmt.Sprintf("%s %s", field.Column, direction)
-	}
-	return strings.Join(clauses, ", ")
-}
-
-type PaginationResult[T any] struct {
-	Items      []*T
-	HasNext    bool
-	HasPrev    bool
-	NextCursor string
-	PrevCursor string
-}
-
-// BuildPaginationResult 构建分页结果
-func (k *Keyset[T]) BuildPaginationResult(items []*T) *PaginationResult[T] {
-	hasMore := len(items) > k.PageSize
-
-	// 截取结果
+	// 截取
 	if hasMore {
-		items = items[:k.PageSize]
+		domainSlice = domainSlice[:k.PageSize]
 	}
 
-	// 如果是上一页请求，反转结果
-	if k.BeforeCursor != nil && len(items) > 0 {
-		slices.Reverse(items)
+	// 判断分页方向
+	isPrev := k.PrevCursor != ""
+	isNext := k.NextCursor != ""
+
+	// 如果是 Prev 分页，先按 DESC 取，结果需要反转为 ASC 展示
+	if isPrev && len(domainSlice) > 0 {
+		slices.Reverse(domainSlice)
 	}
 
-	// 计算游标
-	var nextCursor, prevCursor string
-	if len(items) > 0 {
-		firstItem := items[0]
-		lastItem := items[len(items)-1]
+	// 生成新的游标
+	var prevCursor, nextCursor string
+	if len(domainSlice) > 0 {
+		// 首条和末条数据生成游标
+		first := domainSlice[0]
+		last := domainSlice[len(domainSlice)-1]
 
-		prevCursor = k.encoder.Encode(firstItem)
-		nextCursor = k.encoder.Encode(lastItem)
+		// 编码
+		prevCursor = k.encode(k.extractKeysetCursor(first))
+		nextCursor = k.encode(k.extractKeysetCursor(last))
+
+		log.Println(prevCursor)
+		log.Println(nextCursor)
 	}
 
-	// 判断分页状态
-	isAfter := k.AfterCursor != nil
-	isBefore := k.BeforeCursor != nil
-
+	// hasPrev/hasNext 判断
 	var hasPrev, hasNext bool
 	switch {
-	case isAfter:
+	case isNext:
 		hasPrev = true
 		hasNext = hasMore
-	case isBefore:
+	case isPrev:
 		hasPrev = hasMore
 		hasNext = true
 	default:
@@ -168,11 +162,11 @@ func (k *Keyset[T]) BuildPaginationResult(items []*T) *PaginationResult[T] {
 		hasNext = hasMore
 	}
 
-	return &PaginationResult[T]{
-		Items:      items,
+	return &paginationResult[T]{
+		Items:      domainSlice,
+		PrevCursor: prevCursor,
+		NextCursor: nextCursor,
 		HasPrev:    hasPrev,
 		HasNext:    hasNext,
-		NextCursor: nextCursor,
-		PrevCursor: prevCursor,
 	}
 }
