@@ -1896,15 +1896,15 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "description": "用于下一页",
-                        "name": "after_id",
+                        "type": "string",
+                        "description": "用于上一页游标",
+                        "name": "before_cursor",
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "description": "用于上一页",
-                        "name": "before_id",
+                        "type": "string",
+                        "description": "用于下一页游标",
+                        "name": "after_cursor",
                         "in": "query"
                     },
                     {
@@ -2680,6 +2680,12 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/handler.TenantResponse"
                     }
+                },
+                "next_cursor": {
+                    "type": "string"
+                },
+                "prev_cursor": {
+                    "type": "string"
                 }
             }
         },

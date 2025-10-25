@@ -39,8 +39,10 @@ func domainTenantPagingToResponse(pager *domain.TenantPagination) *PagingRespons
 	}
 
 	return &PagingResponse{
-		Items:   domainTenantsToResponse(pager.Items),
-		HasNext: pager.HasNext,
-		HasPrev: pager.HasPrev,
+		Items:      domainTenantsToResponse(pager.Items),
+		PrevCursor: pager.PrevCursor,
+		NextCursor: pager.NextCursor,
+		HasPrev:    pager.HasPrev,
+		HasNext:    pager.HasNext,
 	}
 }

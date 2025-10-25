@@ -3,92 +3,176 @@ package dbkit
 import (
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 )
 
-type keyset[T any] struct {
-	BeforeID int64
-	AfterID  int64
-
-	PageSize int
+// SortField 定义排序字段和方向
+type SortField struct {
+	Column    string // 数据库列名
+	Direction string // "ASC" 或 "DESC"
 }
 
-func NewKeyset[T any](pageSize int, beforeID, afterID int64) *keyset[T] {
+// KeysetCursor 表示分页游标值
+type KeysetCursor = []interface{}
+
+type CursorEncoder[T any] interface {
+	Encode(res *T) string
+}
+
+type CursorDecoder interface {
+	DecodePrev() KeysetCursor
+	DecodeNext() KeysetCursor
+}
+
+// Keyset 支持多字段排序的分页结构
+type Keyset[T any] struct {
+	BeforeCursor KeysetCursor
+	AfterCursor  KeysetCursor
+	PageSize     int
+	SortFields   []SortField
+	encoder      CursorEncoder[T]
+}
+
+func NewKeyset[T any](pageSize int, sortFields []SortField, decoder CursorDecoder, encoder CursorEncoder[T]) *Keyset[T] {
 	if pageSize <= 0 {
 		pageSize = 5
 	}
-	return &keyset[T]{
-		PageSize: pageSize,
-		BeforeID: beforeID,
-		AfterID:  afterID,
+	return &Keyset[T]{
+		PageSize:     pageSize,
+		SortFields:   sortFields,
+		BeforeCursor: decoder.DecodePrev(),
+		AfterCursor:  decoder.DecodeNext(),
+		encoder:      encoder,
 	}
 }
 
-// 把 Keyset 参数应用到查询 Mod 上
-func (k *keyset[T]) ApplyKeysetMods(base []qm.QueryMod, IDCol string) []qm.QueryMod {
-	// 游标与排序
-	if k.AfterID > 0 {
-		base = append(base, qm.Where(fmt.Sprintf("%s > ?", IDCol), k.AfterID))
-		base = append(base, qm.OrderBy(IDCol+" ASC"))
-	} else if k.BeforeID > 0 {
-		base = append(base, qm.Where(fmt.Sprintf("%s < ?", IDCol), k.BeforeID))
-		// 为了取到"上一页"的正确数据，先按 DESC 取最新的 N 条，然后反转切片返回给调用方（保持 ASC 展示）
-		base = append(base, qm.OrderBy(IDCol+" DESC"))
-	} else {
-		base = append(base, qm.OrderBy(IDCol+" ASC"))
+func (k *Keyset[T]) ApplyKeysetMods(base []qm.QueryMod) []qm.QueryMod {
+	if k.AfterCursor != nil {
+		base = append(base, k.buildWhereCondition(false))
+	} else if k.BeforeCursor != nil {
+		base = append(base, k.buildWhereCondition(true))
 	}
+	orderByClause := k.buildOrderByClause()
+	base = append(base, qm.OrderBy(orderByClause))
 
-	// limit
 	fetchLimit := k.PageSize + 1
 	base = append(base, qm.Limit(fetchLimit))
-
 	return base
 }
 
-type paginationResult[T any] struct {
-	Items   []*T
-	HasNext bool
-	HasPrev bool
+func (k *Keyset[T]) buildWhereCondition(isBefore bool) qm.QueryMod {
+	cursor := k.AfterCursor
+	if isBefore && k.BeforeCursor != nil {
+		cursor = k.BeforeCursor
+	}
+
+	clauses := make([]string, 0, len(k.SortFields))
+	values := make([]interface{}, 0)
+
+	for i := range k.SortFields {
+		parts := make([]string, 0, i+1)
+		for j := 0; j < i; j++ {
+			parts = append(parts, fmt.Sprintf("%s = ?", k.SortFields[j].Column))
+			values = append(values, cursor[j])
+		}
+		parts = append(parts, fmt.Sprintf("%s %s ?", k.SortFields[i].Column, k.comparator(i, isBefore)))
+		values = append(values, cursor[i])
+		clauses = append(clauses, "("+strings.Join(parts, " AND ")+")")
+	}
+
+	return qm.Where(strings.Join(clauses, " OR "), values...)
 }
 
-// BuildPaginationResult 从查询结果构建 PaginationResult
-func (k *keyset[T]) BuildPaginationResult(domainSlice []*T) *paginationResult[T] {
-	hasMore := len(domainSlice) > k.PageSize
+func (k *Keyset[T]) comparator(idx int, isBefore bool) string {
+	dir := strings.ToUpper(k.SortFields[idx].Direction)
+	op := ">"
+	if dir == "DESC" {
+		op = "<"
+	}
+	if isBefore {
+		if op == ">" {
+			op = "<"
+		} else {
+			op = ">"
+		}
+	}
+	return op
+}
 
-	// 截取
+// buildOrderByClause 构建ORDER BY子句
+func (k *Keyset[T]) buildOrderByClause() string {
+	clauses := make([]string, len(k.SortFields))
+	for i, field := range k.SortFields {
+		// 如果是上一页请求，反转排序方向
+		direction := field.Direction
+		if k.BeforeCursor != nil {
+			if direction == "ASC" {
+				direction = "DESC"
+			} else {
+				direction = "ASC"
+			}
+		}
+		clauses[i] = fmt.Sprintf("%s %s", field.Column, direction)
+	}
+	return strings.Join(clauses, ", ")
+}
+
+type PaginationResult[T any] struct {
+	Items      []*T
+	HasNext    bool
+	HasPrev    bool
+	NextCursor string
+	PrevCursor string
+}
+
+// BuildPaginationResult 构建分页结果
+func (k *Keyset[T]) BuildPaginationResult(items []*T) *PaginationResult[T] {
+	hasMore := len(items) > k.PageSize
+
+	// 截取结果
 	if hasMore {
-		domainSlice = domainSlice[:k.PageSize]
+		items = items[:k.PageSize]
 	}
 
-	// 如果是 Before 分页，先按 DESC 取，结果需要反转为 ASC 展示
-	if k.BeforeID > 0 && len(domainSlice) > 0 {
-		slices.Reverse(domainSlice)
+	// 如果是上一页请求，反转结果
+	if k.BeforeCursor != nil && len(items) > 0 {
+		slices.Reverse(items)
 	}
 
-	// 基于请求方向和是否多取一条来推断 hasPrev/hasNext，避免额外 DB 查询
-	isAfter := k.AfterID > 0
-	isBefore := k.BeforeID > 0
+	// 计算游标
+	var nextCursor, prevCursor string
+	if len(items) > 0 {
+		firstItem := items[0]
+		lastItem := items[len(items)-1]
+
+		prevCursor = k.encoder.Encode(firstItem)
+		nextCursor = k.encoder.Encode(lastItem)
+	}
+
+	// 判断分页状态
+	isAfter := k.AfterCursor != nil
+	isBefore := k.BeforeCursor != nil
 
 	var hasPrev, hasNext bool
 	switch {
 	case isAfter:
-		// 请求为 after（向后翻页），代表存在上一页（客户端传了游标）
 		hasPrev = true
 		hasNext = hasMore
 	case isBefore:
-		// 请求为 before（向前翻页），代表存在下一页（客户端传了游标）
 		hasPrev = hasMore
 		hasNext = true
 	default:
-		// 首页
 		hasPrev = false
 		hasNext = hasMore
 	}
 
-	return &paginationResult[T]{
-		Items:   domainSlice,
-		HasPrev: hasPrev,
-		HasNext: hasNext,
+	return &PaginationResult[T]{
+		Items:      items,
+		HasPrev:    hasPrev,
+		HasNext:    hasNext,
+		NextCursor: nextCursor,
+		PrevCursor: prevCursor,
 	}
 }

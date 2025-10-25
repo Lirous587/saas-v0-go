@@ -25,16 +25,18 @@ type DeleteRequest struct {
 }
 
 type PagingRequest struct {
-	PageSize int    `form:"page_size,default=5" binding:"min=5,max=20"`
-	AfterID  int64  `form:"after_id,default=0"`
-	BeforeID int64  `form:"before_id,default=0"`
-	KeyWord  string `form:"keyword" binding:"max=20"`
+	PageSize     int    `form:"page_size,default=5" binding:"min=5,max=20"`
+	AfterCursor  string `form:"after_cursor"`
+	BeforeCursor string `form:"before_cursor"`
+	KeyWord      string `form:"keyword" binding:"max=20"`
 }
 
 type PagingResponse struct {
-	Items   []*TenantResponse `json:"items"`
-	HasNext bool              `json:"has_next"`
-	HasPrev bool              `json:"has_prev"`
+	Items      []*TenantResponse `json:"items"`
+	PrevCursor string            `json:"prev_cursor"`
+	NextCursor string            `json:"next_cursor"`
+	HasPrev    bool              `json:"has_prev"`
+	HasNext    bool              `json:"has_next"`
 }
 
 type CheckNameRequest struct {
