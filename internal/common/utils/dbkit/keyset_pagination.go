@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log"
 	"slices"
 	"time"
 
@@ -60,6 +59,7 @@ func (k keyset[T]) encode(cursor *keysetCursor) string {
 	if cursor == nil {
 		return ""
 	}
+
 	data, _ := json.Marshal(cursor)
 	return base64.StdEncoding.EncodeToString(data)
 }
@@ -143,9 +143,6 @@ func (k keyset[T]) BuildPaginationResult(domainSlice []*T) *paginationResult[T] 
 		// 编码
 		prevCursor = k.encode(k.extractKeysetCursor(first))
 		nextCursor = k.encode(k.extractKeysetCursor(last))
-
-		log.Println(prevCursor)
-		log.Println(nextCursor)
 	}
 
 	// hasPrev/hasNext 判断
@@ -160,6 +157,15 @@ func (k keyset[T]) BuildPaginationResult(domainSlice []*T) *paginationResult[T] 
 	default:
 		hasPrev = false
 		hasNext = hasMore
+	}
+
+	// 没有下一页时 next_cursor置空
+	if !hasNext {
+		nextCursor = ""
+	}
+	// 没有上一页时 prev_cursor置空
+	if !hasPrev {
+		prevCursor = ""
 	}
 
 	return &paginationResult[T]{

@@ -33,8 +33,8 @@ type PagingRequest struct {
 
 type PagingResponse struct {
 	Items      []*TenantResponse `json:"items"`
-	PrevCursor string            `json:"prev_cursor"`
-	NextCursor string            `json:"next_cursor"`
+	PrevCursor string            `json:"prev_cursor,omitempty"`
+	NextCursor string            `json:"next_cursor,omitempty"`
 	HasPrev    bool              `json:"has_prev"`
 	HasNext    bool              `json:"has_next"`
 }
