@@ -14,9 +14,6 @@ const (
 	UserErrorStart = 1000
 	UserErrorEnd   = 1199
 
-	// 计划模块(1400-1599)
-	TenantErrorStart = 1400
-	TenantErrorEnd   = 1599
 
 	// 租户模块(1600-1799)
 	TenantErrorStart = 1600
