@@ -41,47 +41,52 @@ CREATE INDEX IF NOT EXISTS idx_users_updated_at ON public.users (updated_at);
 CREATE INDEX IF NOT EXISTS idx_users_nickname ON public.users (nickname);
 
 
--- 计划表
-CREATE TABLE public.plans
-(
-    id          bigserial PRIMARY KEY,
-    name        varchar(50)    NOT NULL UNIQUE,
-    price       numeric(12, 2) NOT NULL DEFAULT 0,
-    description text NOT NULL,
-    created_at  timestamptz(6) NOT NULL DEFAULT now(),
-    updated_at  timestamptz(6) NOT NULL DEFAULT now()
-);
-
 
 -- 租户表
+CREATE TYPE tenant_plan_type AS ENUM ('free', 'caring','professional');
+CREATE TYPE tenant_status AS ENUM ('active', 'inactive');
+CREATE TYPE tnant_plan_billing_cycle AS ENUM ('monthly', 'yearly', 'lifetime');
 CREATE TABLE public.tenants
 (
-    id          bigserial PRIMARY KEY,
-    creator_id  bigint         NOT NULL REFERENCES public.users (id) ON DELETE RESTRICT,
-    name        varchar(20)    NOT NULL,
-    created_at  timestamptz(6) NOT NULL DEFAULT now(),
-    updated_at  timestamptz(6) NOT NULL DEFAULT now(),
-    description varchar(120)
+    id             bigserial PRIMARY KEY,
+    creator_id     bigint               NOT NULL REFERENCES public.users (id) ON DELETE RESTRICT,
+    plan_type      tenant_plan_type     NOT NULL DEFAULT 'free',
+    name           varchar(20)          NOT NULL,
+    status         tenant_status        NOT NULL DEFAULT 'active',
+    billing_cycle  tnant_plan_billing_cycle  NOT NULL DEFAULT 'monthly',
+    description    varchar(120)         NULL,
+    start_at       timestamptz(6)       NOT NULL DEFAULT now(),
+    end_at         timestamptz(6)       NULL,
+    created_at     timestamptz(6)       NOT NULL DEFAULT now(),
+    updated_at     timestamptz(6)       NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_tenants_creator_id ON public.tenants (creator_id);
 CREATE UNIQUE INDEX IF NOT EXISTS ux_tenants_creator_name ON public.tenants (creator_id, name);
-
-
-
--- 租户计划关联表
-CREATE TABLE public.tenant_plan
-(
-    tenant_id   bigint         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
-    plan_id     bigint         NOT NULL REFERENCES public.plans (id),
-    creator_id  bigint       NOT NULL REFERENCES public.users (id) ON DELETE RESTRICT,
-    start_at    timestamptz(6) NOT NULL DEFAULT now(),
-    end_at      timestamptz(6) NULL,
-    CONSTRAINT ux_tenant_plan_tenant UNIQUE (tenant_id),
-    PRIMARY KEY (tenant_id, plan_id)
-);
 -- 确保每个用户只能有一个Free和一个Caring
-CREATE UNIQUE INDEX IF NOT EXISTS ux_user_one_free_plan ON public.tenant_plan (creator_id) WHERE plan_id = 1;
-CREATE UNIQUE INDEX IF NOT EXISTS ux_user_one_caring_plan ON public.tenant_plan (creator_id) WHERE plan_id = 2;
+CREATE UNIQUE INDEX IF NOT EXISTS ux_user_one_free_plan ON public.tenants (creator_id) WHERE plan_type = 'free';
+CREATE UNIQUE INDEX IF NOT EXISTS ux_user_one_caring_plan ON public.tenants (creator_id) WHERE plan_type = 'caring';
+
+
+
+-- -- 租户计划历史表
+-- CREATE TABLE public.tenant_plan_history
+-- (
+--     id            bigserial PRIMARY KEY,
+--     tenant_id     bigint         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
+--     old_plan_type tenant_plan_type,
+--     new_plan_type tenant_plan_type NOT NULL,
+--     upgraded_at   timestamptz(6) NOT NULL DEFAULT now()
+-- );
+
+-- 租户限制配置表
+-- CREATE TABLE public.tenant_limits
+-- (
+--     plan_id    bigint NOT NULL REFERENCES public.plans (id) ON DELETE CASCADE PRIMARY KEY,
+--     api_calls  int    NOT NULL DEFAULT 1000,
+--     plates     int    NOT NULL DEFAULT 5,
+--     created_at timestamptz(6) NOT NULL DEFAULT now(),
+--     updated_at timestamptz(6) NOT NULL DEFAULT now()
+-- );
 
 
 
