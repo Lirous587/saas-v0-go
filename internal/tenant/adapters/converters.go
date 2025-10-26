@@ -15,6 +15,7 @@ func domainTenantToORM(tenant *domain.Tenant) *orm.Tenant {
 	ormTenant := &orm.Tenant{
 		ID:        tenant.ID,
 		Name:      tenant.Name,
+		PlanType:  orm.TenantPlanType(tenant.PlanType),
 		CreatedAt: tenant.CreatedAt,
 		UpdatedAt: tenant.UpdatedAt,
 		CreatorID: tenant.CreatorID,
@@ -62,4 +63,31 @@ func ormTenantsToDomain(ormTenants []*orm.Tenant) []*domain.Tenant {
 		}
 	}
 	return tenants
+}
+
+func ormTenantPlanToDomain(ormTenant *orm.Tenant) *domain.Plan {
+	if ormTenant == nil {
+		return nil
+	}
+
+	// 非null项
+	tenantPlan := &domain.Plan{
+		TenantID:     ormTenant.ID,
+		PlanType:     domain.PlanType(ormTenant.PlanType),
+		StartTime:    ormTenant.StartAt,
+		Status:       domain.PlanStatus(ormTenant.Status),
+		BillingCycle: domain.PlanBillingCycle(ormTenant.BillingCycle),
+	}
+
+	tenantPlan.CanUpgrade = true
+	if ormTenant.PlanType == orm.TenantPlanTypeProfessional {
+		tenantPlan.CanUpgrade = false
+	}
+
+	// 处理null项
+	if ormTenant.EndAt.Valid {
+		tenantPlan.EndTime = ormTenant.EndAt.Time
+	}
+
+	return tenantPlan
 }

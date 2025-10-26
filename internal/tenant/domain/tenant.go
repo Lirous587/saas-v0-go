@@ -6,6 +6,7 @@ import (
 
 type Tenant struct {
 	ID          int64
+	PlanType    PlanType
 	Name        string
 	Description string
 	CreatedAt   time.Time

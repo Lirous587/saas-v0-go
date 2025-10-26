@@ -46,3 +46,19 @@ func domainTenantPagingToResponse(pager *domain.TenantPagination) *PagingRespons
 		HasNext:    pager.HasNext,
 	}
 }
+
+func domainPlanToResponse(plan *domain.Plan) *PlanResponse {
+	if plan == nil {
+		return nil
+	}
+
+	return &PlanResponse{
+		TenantID:     plan.TenantID,
+		PlanType:     plan.PlanType,
+		StartTime:    plan.StartTime.Unix(),
+		EndTime:      plan.EndTime.Unix(),
+		Status:       plan.Status,
+		BillingCycle: plan.BillingCycle,
+		CanUpgrade:   plan.CanUpgrade,
+	}
+}

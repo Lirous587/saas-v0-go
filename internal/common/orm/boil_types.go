@@ -90,3 +90,131 @@ func (e CommentStatus) Ordinal() int {
 		panic(errors.New("enum is not valid"))
 	}
 }
+
+type TenantPlanType string
+
+// Enum values for TenantPlanType
+const (
+	TenantPlanTypeFree         TenantPlanType = "free"
+	TenantPlanTypeCaring       TenantPlanType = "caring"
+	TenantPlanTypeProfessional TenantPlanType = "professional"
+)
+
+func AllTenantPlanType() []TenantPlanType {
+	return []TenantPlanType{
+		TenantPlanTypeFree,
+		TenantPlanTypeCaring,
+		TenantPlanTypeProfessional,
+	}
+}
+
+func (e TenantPlanType) IsValid() error {
+	switch e {
+	case TenantPlanTypeFree, TenantPlanTypeCaring, TenantPlanTypeProfessional:
+		return nil
+	default:
+		return errors.New("enum is not valid")
+	}
+}
+
+func (e TenantPlanType) String() string {
+	return string(e)
+}
+
+func (e TenantPlanType) Ordinal() int {
+	switch e {
+	case TenantPlanTypeFree:
+		return 0
+	case TenantPlanTypeCaring:
+		return 1
+	case TenantPlanTypeProfessional:
+		return 2
+
+	default:
+		panic(errors.New("enum is not valid"))
+	}
+}
+
+type TenantStatus string
+
+// Enum values for TenantStatus
+const (
+	TenantStatusActive   TenantStatus = "active"
+	TenantStatusInactive TenantStatus = "inactive"
+)
+
+func AllTenantStatus() []TenantStatus {
+	return []TenantStatus{
+		TenantStatusActive,
+		TenantStatusInactive,
+	}
+}
+
+func (e TenantStatus) IsValid() error {
+	switch e {
+	case TenantStatusActive, TenantStatusInactive:
+		return nil
+	default:
+		return errors.New("enum is not valid")
+	}
+}
+
+func (e TenantStatus) String() string {
+	return string(e)
+}
+
+func (e TenantStatus) Ordinal() int {
+	switch e {
+	case TenantStatusActive:
+		return 0
+	case TenantStatusInactive:
+		return 1
+
+	default:
+		panic(errors.New("enum is not valid"))
+	}
+}
+
+type TnantPlanBillingCycle string
+
+// Enum values for TnantPlanBillingCycle
+const (
+	TnantPlanBillingCycleMonthly  TnantPlanBillingCycle = "monthly"
+	TnantPlanBillingCycleYearly   TnantPlanBillingCycle = "yearly"
+	TnantPlanBillingCycleLifetime TnantPlanBillingCycle = "lifetime"
+)
+
+func AllTnantPlanBillingCycle() []TnantPlanBillingCycle {
+	return []TnantPlanBillingCycle{
+		TnantPlanBillingCycleMonthly,
+		TnantPlanBillingCycleYearly,
+		TnantPlanBillingCycleLifetime,
+	}
+}
+
+func (e TnantPlanBillingCycle) IsValid() error {
+	switch e {
+	case TnantPlanBillingCycleMonthly, TnantPlanBillingCycleYearly, TnantPlanBillingCycleLifetime:
+		return nil
+	default:
+		return errors.New("enum is not valid")
+	}
+}
+
+func (e TnantPlanBillingCycle) String() string {
+	return string(e)
+}
+
+func (e TnantPlanBillingCycle) Ordinal() int {
+	switch e {
+	case TnantPlanBillingCycleMonthly:
+		return 0
+	case TnantPlanBillingCycleYearly:
+		return 1
+	case TnantPlanBillingCycleLifetime:
+		return 2
+
+	default:
+		panic(errors.New("enum is not valid"))
+	}
+}

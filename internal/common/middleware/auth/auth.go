@@ -7,9 +7,6 @@ import (
 	"saas/internal/common/reskit/response"
 	"saas/internal/common/server"
 
-	// roleadapter "saas/internal/role/adapters"
-	// roleDomain "saas/internal/role/domain"
-	// roleService "saas/internal/role/service"
 	useradapter "saas/internal/user/adapters"
 	userdomain "saas/internal/user/domain"
 	userService "saas/internal/user/service"
@@ -151,31 +148,15 @@ func TenantCreatorValited() gin.HandlerFunc {
 			orm.TenantWhere.ID.EQ(tenantID),
 			orm.TenantWhere.CreatorID.EQ(userID),
 		).ExistsG()
-		if err != nil || exist {
+		if err != nil || !exist {
 			response.Error(ctx, codes.ErrTenantNotCreator)
-		}
-
-		// 获取请求路径和方法
-		obj := ctx.Request.URL.Path
-		act := strings.ToLower(ctx.Request.Method)
-
-		ok, err := enforcer.Enforce('1', obj, act)
-		if err != nil {
-			response.Error(ctx, codes.ErrPermissionDenied)
-			ctx.Abort()
-			return
-		}
-		if !ok {
-			response.Error(ctx, codes.ErrPermissionDenied)
-			ctx.Abort()
-			return
 		}
 
 		ctx.Next()
 	}
 }
 
-const tenantAdmin = "domian_admin"
+const tenantAdmin = "domain_admin"
 
 func CasbinValited() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -200,7 +181,7 @@ func CasbinValited() gin.HandlerFunc {
 			orm.TenantWhere.ID.EQ(tenantID),
 			orm.TenantWhere.CreatorID.EQ(userID),
 		).ExistsG()
-		if err != nil || exist {
+		if err != nil || !exist {
 			response.Error(ctx, codes.ErrTenantNotCreator)
 		}
 

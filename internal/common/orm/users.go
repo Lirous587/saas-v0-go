@@ -114,41 +114,22 @@ var UserWhere = struct {
 
 // UserRels is where relationship names are stored.
 var UserRels = struct {
-	CreatorTenantPlan string
-	Comments          string
-	CreatorTenants    string
+	Comments       string
+	CreatorTenants string
 }{
-	CreatorTenantPlan: "CreatorTenantPlan",
-	Comments:          "Comments",
-	CreatorTenants:    "CreatorTenants",
+	Comments:       "Comments",
+	CreatorTenants: "CreatorTenants",
 }
 
 // userR is where relationships are stored.
 type userR struct {
-	CreatorTenantPlan *TenantPlan  `boil:"CreatorTenantPlan" json:"CreatorTenantPlan" toml:"CreatorTenantPlan" yaml:"CreatorTenantPlan"`
-	Comments          CommentSlice `boil:"Comments" json:"Comments" toml:"Comments" yaml:"Comments"`
-	CreatorTenants    TenantSlice  `boil:"CreatorTenants" json:"CreatorTenants" toml:"CreatorTenants" yaml:"CreatorTenants"`
+	Comments       CommentSlice `boil:"Comments" json:"Comments" toml:"Comments" yaml:"Comments"`
+	CreatorTenants TenantSlice  `boil:"CreatorTenants" json:"CreatorTenants" toml:"CreatorTenants" yaml:"CreatorTenants"`
 }
 
 // NewStruct creates a new relationship struct
 func (*userR) NewStruct() *userR {
 	return &userR{}
-}
-
-func (o *User) GetCreatorTenantPlan() *TenantPlan {
-	if o == nil {
-		return nil
-	}
-
-	return o.R.GetCreatorTenantPlan()
-}
-
-func (r *userR) GetCreatorTenantPlan() *TenantPlan {
-	if r == nil {
-		return nil
-	}
-
-	return r.CreatorTenantPlan
 }
 
 func (o *User) GetComments() CommentSlice {
@@ -483,17 +464,6 @@ func (q userQuery) Exists(exec boil.Executor) (bool, error) {
 	return count > 0, nil
 }
 
-// CreatorTenantPlan pointed to by the foreign key.
-func (o *User) CreatorTenantPlan(mods ...qm.QueryMod) tenantPlanQuery {
-	queryMods := []qm.QueryMod{
-		qm.Where("\"creator_id\" = ?", o.ID),
-	}
-
-	queryMods = append(queryMods, mods...)
-
-	return TenantPlans(queryMods...)
-}
-
 // Comments retrieves all the comment's Comments with an executor.
 func (o *User) Comments(mods ...qm.QueryMod) commentQuery {
 	var queryMods []qm.QueryMod
@@ -520,123 +490,6 @@ func (o *User) CreatorTenants(mods ...qm.QueryMod) tenantQuery {
 	)
 
 	return Tenants(queryMods...)
-}
-
-// LoadCreatorTenantPlan allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-1 relationship.
-func (userL) LoadCreatorTenantPlan(e boil.Executor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
-	var slice []*User
-	var object *User
-
-	if singular {
-		var ok bool
-		object, ok = maybeUser.(*User)
-		if !ok {
-			object = new(User)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeUser)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUser))
-			}
-		}
-	} else {
-		s, ok := maybeUser.(*[]*User)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeUser)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUser))
-			}
-		}
-	}
-
-	args := make(map[interface{}]struct{})
-	if singular {
-		if object.R == nil {
-			object.R = &userR{}
-		}
-		args[object.ID] = struct{}{}
-	} else {
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &userR{}
-			}
-
-			args[obj.ID] = struct{}{}
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	argsSlice := make([]interface{}, len(args))
-	i := 0
-	for arg := range args {
-		argsSlice[i] = arg
-		i++
-	}
-
-	query := NewQuery(
-		qm.From(`tenant_plan`),
-		qm.WhereIn(`tenant_plan.creator_id in ?`, argsSlice...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.Query(e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load TenantPlan")
-	}
-
-	var resultSlice []*TenantPlan
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice TenantPlan")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for tenant_plan")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for tenant_plan")
-	}
-
-	if len(tenantPlanAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(e); err != nil {
-				return err
-			}
-		}
-	}
-
-	if len(resultSlice) == 0 {
-		return nil
-	}
-
-	if singular {
-		foreign := resultSlice[0]
-		object.R.CreatorTenantPlan = foreign
-		if foreign.R == nil {
-			foreign.R = &tenantPlanR{}
-		}
-		foreign.R.Creator = object
-	}
-
-	for _, local := range slice {
-		for _, foreign := range resultSlice {
-			if local.ID == foreign.CreatorID {
-				local.R.CreatorTenantPlan = foreign
-				if foreign.R == nil {
-					foreign.R = &tenantPlanR{}
-				}
-				foreign.R.Creator = local
-				break
-			}
-		}
-	}
-
-	return nil
 }
 
 // LoadComments allows an eager lookup of values, cached into the
@@ -862,63 +715,6 @@ func (userL) LoadCreatorTenants(e boil.Executor, singular bool, maybeUser interf
 		}
 	}
 
-	return nil
-}
-
-// SetCreatorTenantPlanG of the user to the related item.
-// Sets o.R.CreatorTenantPlan to related.
-// Adds o to related.R.Creator.
-// Uses the global database handle.
-func (o *User) SetCreatorTenantPlanG(insert bool, related *TenantPlan) error {
-	return o.SetCreatorTenantPlan(boil.GetDB(), insert, related)
-}
-
-// SetCreatorTenantPlan of the user to the related item.
-// Sets o.R.CreatorTenantPlan to related.
-// Adds o to related.R.Creator.
-func (o *User) SetCreatorTenantPlan(exec boil.Executor, insert bool, related *TenantPlan) error {
-	var err error
-
-	if insert {
-		related.CreatorID = o.ID
-
-		if err = related.Insert(exec, boil.Infer()); err != nil {
-			return errors.Wrap(err, "failed to insert into foreign table")
-		}
-	} else {
-		updateQuery := fmt.Sprintf(
-			"UPDATE \"tenant_plan\" SET %s WHERE %s",
-			strmangle.SetParamNames("\"", "\"", 1, []string{"creator_id"}),
-			strmangle.WhereClause("\"", "\"", 2, tenantPlanPrimaryKeyColumns),
-		)
-		values := []interface{}{o.ID, related.TenantID, related.PlanID}
-
-		if boil.DebugMode {
-			fmt.Fprintln(boil.DebugWriter, updateQuery)
-			fmt.Fprintln(boil.DebugWriter, values)
-		}
-		if _, err = exec.Exec(updateQuery, values...); err != nil {
-			return errors.Wrap(err, "failed to update foreign table")
-		}
-
-		related.CreatorID = o.ID
-	}
-
-	if o.R == nil {
-		o.R = &userR{
-			CreatorTenantPlan: related,
-		}
-	} else {
-		o.R.CreatorTenantPlan = related
-	}
-
-	if related.R == nil {
-		related.R = &tenantPlanR{
-			Creator: o,
-		}
-	} else {
-		related.R.Creator = o
-	}
 	return nil
 }
 

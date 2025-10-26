@@ -34,10 +34,10 @@ func (repo *TenantPSQLRepository) BeginTx(option ...*sql.TxOptions) (*sql.Tx, er
 	return boil.BeginTx(context.TODO(), op)
 }
 
-func (repo *TenantPSQLRepository) InsertTx(tx *sql.Tx, tenant *domain.Tenant) (*domain.Tenant, error) {
+func (repo *TenantPSQLRepository) Create(tenant *domain.Tenant) (*domain.Tenant, error) {
 	ormTenant := domainTenantToORM(tenant)
 
-	if err := ormTenant.Insert(tx, boil.Infer()); err != nil {
+	if err := ormTenant.InsertG(boil.Infer()); err != nil {
 		return nil, err
 	}
 
@@ -118,4 +118,32 @@ func (repo *TenantPSQLRepository) ExistSameName(creatorID int64, name string) (b
 	}
 
 	return exist, nil
+}
+
+func (repo *TenantPSQLRepository) IsCreatorHasPlan(creatorID int64, planType domain.PlanType) (bool, error) {
+	exist, err := orm.Tenants(
+		orm.TenantWhere.CreatorID.EQ(creatorID),
+		orm.TenantWhere.PlanType.EQ(orm.TenantPlanType(planType)),
+	).ExistsG()
+
+	if err != nil {
+		return false, errors.WithStack(err)
+	}
+	return exist, nil
+
+}
+
+func (repo *TenantPSQLRepository) GetPlan(id int64) (*domain.Plan, error) {
+	tenantPlan, err := orm.Tenants(
+		orm.TenantWhere.ID.EQ(id),
+	).OneG()
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, codes.ErrTenantPlanNotFound
+		}
+		return nil, errors.WithStack(err)
+	}
+
+	return ormTenantPlanToDomain(tenantPlan), nil
 }

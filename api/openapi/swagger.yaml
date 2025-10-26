@@ -1,5 +1,33 @@
 basePath: /api
 definitions:
+  domain.PlanBillingCycle:
+    enum:
+    - active
+    - yearly
+    - lifetime
+    type: string
+    x-enum-varnames:
+    - PlanMonthlyBillingCycle
+    - PlanYearlyBillingCycle
+    - PlanLifetimeBillingCycle
+  domain.PlanStatus:
+    enum:
+    - active
+    - inactive
+    type: string
+    x-enum-varnames:
+    - PlanActiveStatus
+    - PlanInactiveStatus
+  domain.PlanType:
+    enum:
+    - free
+    - caring
+    - professional
+    type: string
+    x-enum-varnames:
+    - PlanFreeType
+    - PlanCaringType
+    - PlanProfessionalType
   domain.VerifyWay:
     enum:
     - image:click
@@ -189,17 +217,19 @@ definitions:
     type: object
   handler.PlanResponse:
     properties:
-      created_at:
+      billing_cycle:
+        $ref: '#/definitions/domain.PlanBillingCycle'
+      can_upgrade:
+        type: boolean
+      end_time:
         type: integer
-      description:
-        type: string
-      id:
+      plan_type:
+        $ref: '#/definitions/domain.PlanType'
+      start_time:
         type: integer
-      name:
-        type: string
-      price:
-        type: number
-      updated_at:
+      status:
+        $ref: '#/definitions/domain.PlanStatus'
+      tenant_id:
         type: integer
     type: object
   handler.PlateConfigResponse:
@@ -322,6 +352,17 @@ definitions:
     - prefix
     - title
     type: object
+  handler.UpdateRequest:
+    properties:
+      description:
+        maxLength: 120
+        type: string
+      id:
+        maxLength: 20
+        type: string
+    required:
+    - id
+    type: object
   handler.UpgradeRequest:
     properties:
       plan_id:
@@ -398,58 +439,31 @@ definitions:
     required:
     - content
     type: object
-  saas_internal_plan_handler.CreateRequest:
-    properties:
-      description:
-        type: string
-      name:
-        maxLength: 50
-        type: string
-      price:
-        type: number
-    required:
-    - description
-    - name
-    - price
-    type: object
-  saas_internal_plan_handler.UpdateRequest:
-    properties:
-      description:
-        type: string
-      name:
-        maxLength: 50
-        type: string
-      price:
-        type: number
-    required:
-    - description
-    - name
-    - price
-    type: object
   saas_internal_tenant_handler.CreateRequest:
     properties:
+      billing_cycle:
+        enum:
+        - monthly
+        - yearly
+        - lifetime
+        type: string
       description:
         maxLength: 120
         type: string
       name:
         maxLength: 20
         type: string
-      plan_id:
-        type: integer
+      plan_type:
+        allOf:
+        - $ref: '#/definitions/domain.PlanType'
+        enum:
+        - free
+        - caring
+        - professional
     required:
+    - billing_cycle
     - name
-    - plan_id
-    type: object
-  saas_internal_tenant_handler.UpdateRequest:
-    properties:
-      description:
-        maxLength: 120
-        type: string
-      id:
-        maxLength: 20
-        type: string
-    required:
-    - id
+    - plan_type
     type: object
 host: localhost:8080
 info:
@@ -1487,130 +1501,6 @@ paths:
       summary: 上传图片
       tags:
       - img
-  /v1/plan:
-    get:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 请求成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.successResponse'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/handler.PlanResponse'
-                  type: array
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      summary: 获取列表
-      tags:
-      - plan
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: 请求参数
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/saas_internal_plan_handler.CreateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 请求成功
-          schema:
-            $ref: '#/definitions/response.successResponse'
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 创建
-      tags:
-      - plan
-  /v1/plan/{id}:
-    delete:
-      consumes:
-      - application/json
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 请求成功
-          schema:
-            $ref: '#/definitions/response.successResponse'
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 删除
-      tags:
-      - plan
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 请求参数
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/saas_internal_plan_handler.UpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 请求成功
-          schema:
-            $ref: '#/definitions/response.successResponse'
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 更新
-      tags:
-      - plan
   /v1/tenant:
     get:
       consumes:
@@ -1731,7 +1621,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/saas_internal_tenant_handler.UpdateRequest'
+          $ref: '#/definitions/handler.UpdateRequest'
       produces:
       - application/json
       responses:
@@ -1750,6 +1640,41 @@ paths:
       security:
       - BearerAuth: []
       summary: 更新
+      tags:
+      - tenant
+  /v1/tenant/{id}/plan:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 租户id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.PlanResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 获取租户计划
       tags:
       - tenant
   /v1/tenant/check_name:

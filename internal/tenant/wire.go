@@ -4,8 +4,6 @@
 package tenant
 
 import (
-	planAdapters "saas/internal/plan/adapters"
-	planService "saas/internal/plan/service"
 	"saas/internal/tenant/adapters"
 	"saas/internal/tenant/handler"
 	"saas/internal/tenant/service"
@@ -21,10 +19,6 @@ func InitV1(r *gin.RouterGroup) func() {
 		service.NewTenantService,
 		adapters.NewTenantPSQLRepository,
 		adapters.NewTenantRedisCache,
-
-		// plan服务
-		planAdapters.NewPlanPSQLRepository,
-		planService.NewPlanService,
 	)
 
 	return nil

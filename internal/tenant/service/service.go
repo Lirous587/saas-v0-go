@@ -2,8 +2,6 @@ package service
 
 import (
 	"saas/internal/common/reskit/codes"
-	"saas/internal/common/utils"
-	planDomain "saas/internal/plan/domain"
 
 	"saas/internal/tenant/domain"
 
@@ -11,34 +9,22 @@ import (
 )
 
 type service struct {
-	myDomain    string
-	repo        domain.TenantRepository
-	cache       domain.TenantCache
-	planService planDomain.PlanService
+	repo  domain.TenantRepository
+	cache domain.TenantCache
 }
 
-func NewTenantService(repo domain.TenantRepository, cache domain.TenantCache, planService planDomain.PlanService) domain.TenantService {
-	myDomain := utils.GetEnv("DOMAIN")
+func NewTenantService(repo domain.TenantRepository, cache domain.TenantCache) domain.TenantService {
 
 	return &service{
-		myDomain:    myDomain,
-		repo:        repo,
-		cache:       cache,
-		planService: planService,
+		repo:  repo,
+		cache: cache,
 	}
 }
 
-func (s *service) Create(tenant *domain.Tenant, planID int64) error {
-	// 1.创建事务
-	tx, err := s.repo.BeginTx()
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-
-	// 1.检查用户租户限制 (Free/Caring)
-	if planID == planDomain.FreePlanID || planID == planDomain.CaringPlanID {
-		exist, err := s.planService.CreatorHasPlan(tenant.CreatorID, planID)
+func (s *service) Create(tenant *domain.Tenant) error {
+	// 检查用户的租户计划限制 (Free/Caring)
+	if tenant.PlanType == domain.PlanFreeType || tenant.PlanType == domain.PlanCaringType {
+		exist, err := s.repo.IsCreatorHasPlan(tenant.CreatorID, tenant.PlanType)
 		if err != nil {
 			return errors.WithMessage(err, "检查用户已有计划失败")
 		}
@@ -48,20 +34,13 @@ func (s *service) Create(tenant *domain.Tenant, planID int64) error {
 		}
 	}
 
-	// 2.向tenants插入数据
-	res, err := s.repo.InsertTx(tx, tenant)
+	// 向tenants插入数据
+	_, err := s.repo.Create(tenant)
 	if err != nil {
-		return errors.WithMessage(err, "向tenants插入数据失败")
+		return errors.WithStack(err)
 	}
 
-	tenantID := res.ID
-
-	// 3.向tenant_plan插入数据
-	if err = s.planService.AttchToTenantTx(tx, planID, int64(tenantID), tenant.CreatorID); err != nil {
-		return errors.WithMessage(err, "向tenant_plan插入数据失败")
-	}
-
-	return tx.Commit()
+	return nil
 }
 
 func (s *service) Update(tenant *domain.Tenant) error {
@@ -78,4 +57,8 @@ func (s *service) Paging(query *domain.TenantPagingQuery) (*domain.TenantPaginat
 
 func (s *service) CheckName(creatorID int64, tenantName string) (bool, error) {
 	return s.repo.ExistSameName(creatorID, tenantName)
+}
+
+func (s *service) GetPlan(id int64) (*domain.Plan, error) {
+	return s.repo.GetPlan(id)
 }

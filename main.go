@@ -136,7 +136,6 @@ func main() {
 
 		user.InitV1(r)
 		img.InitV1(r)
-		//captcha.InitV1(r)
 
 		tenant.InitV1(r)
 		comment.InitV1(r)

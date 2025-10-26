@@ -1671,206 +1671,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/plan": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "plan"
-                ],
-                "summary": "获取列表",
-                "responses": {
-                    "200": {
-                        "description": "请求成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.successResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/handler.PlanResponse"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "参数错误",
-                        "schema": {
-                            "$ref": "#/definitions/response.invalidParamsResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器错误",
-                        "schema": {
-                            "$ref": "#/definitions/response.errorResponse"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "plan"
-                ],
-                "summary": "创建",
-                "parameters": [
-                    {
-                        "description": "请求参数",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/saas_internal_plan_handler.CreateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "请求成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.successResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "参数错误",
-                        "schema": {
-                            "$ref": "#/definitions/response.invalidParamsResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器错误",
-                        "schema": {
-                            "$ref": "#/definitions/response.errorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/plan/{id}": {
-            "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "plan"
-                ],
-                "summary": "更新",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "请求参数",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/saas_internal_plan_handler.UpdateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "请求成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.successResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "参数错误",
-                        "schema": {
-                            "$ref": "#/definitions/response.invalidParamsResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器错误",
-                        "schema": {
-                            "$ref": "#/definitions/response.errorResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "plan"
-                ],
-                "summary": "删除",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "请求成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.successResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "参数错误",
-                        "schema": {
-                            "$ref": "#/definitions/response.invalidParamsResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器错误",
-                        "schema": {
-                            "$ref": "#/definitions/response.errorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/v1/tenant": {
             "get": {
                 "security": [
@@ -2131,7 +1931,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/saas_internal_tenant_handler.UpdateRequest"
+                            "$ref": "#/definitions/handler.UpdateRequest"
                         }
                     }
                 ],
@@ -2186,6 +1986,66 @@ const docTemplate = `{
                         "description": "请求成功",
                         "schema": {
                             "$ref": "#/definitions/response.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/tenant/{id}/plan": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tenant"
+                ],
+                "summary": "获取租户计划",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "租户id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.PlanResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -2411,6 +2271,43 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "domain.PlanBillingCycle": {
+            "type": "string",
+            "enum": [
+                "active",
+                "yearly",
+                "lifetime"
+            ],
+            "x-enum-varnames": [
+                "PlanMonthlyBillingCycle",
+                "PlanYearlyBillingCycle",
+                "PlanLifetimeBillingCycle"
+            ]
+        },
+        "domain.PlanStatus": {
+            "type": "string",
+            "enum": [
+                "active",
+                "inactive"
+            ],
+            "x-enum-varnames": [
+                "PlanActiveStatus",
+                "PlanInactiveStatus"
+            ]
+        },
+        "domain.PlanType": {
+            "type": "string",
+            "enum": [
+                "free",
+                "caring",
+                "professional"
+            ],
+            "x-enum-varnames": [
+                "PlanFreeType",
+                "PlanCaringType",
+                "PlanProfessionalType"
+            ]
+        },
         "domain.VerifyWay": {
             "type": "string",
             "enum": [
@@ -2692,22 +2589,25 @@ const docTemplate = `{
         "handler.PlanResponse": {
             "type": "object",
             "properties": {
-                "created_at": {
+                "billing_cycle": {
+                    "$ref": "#/definitions/domain.PlanBillingCycle"
+                },
+                "can_upgrade": {
+                    "type": "boolean"
+                },
+                "end_time": {
                     "type": "integer"
                 },
-                "description": {
-                    "type": "string"
+                "plan_type": {
+                    "$ref": "#/definitions/domain.PlanType"
                 },
-                "id": {
+                "start_time": {
                     "type": "integer"
                 },
-                "name": {
-                    "type": "string"
+                "status": {
+                    "$ref": "#/definitions/domain.PlanStatus"
                 },
-                "price": {
-                    "type": "number"
-                },
-                "updated_at": {
+                "tenant_id": {
                     "type": "integer"
                 }
             }
@@ -2894,6 +2794,22 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.UpdateRequest": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 120
+                },
+                "id": {
+                    "type": "string",
+                    "maxLength": 20
+                }
+            }
+        },
         "handler.UpgradeRequest": {
             "type": "object",
             "required": [
@@ -3008,53 +2924,22 @@ const docTemplate = `{
                 }
             }
         },
-        "saas_internal_plan_handler.CreateRequest": {
-            "type": "object",
-            "required": [
-                "description",
-                "name",
-                "price"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 50
-                },
-                "price": {
-                    "type": "number"
-                }
-            }
-        },
-        "saas_internal_plan_handler.UpdateRequest": {
-            "type": "object",
-            "required": [
-                "description",
-                "name",
-                "price"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 50
-                },
-                "price": {
-                    "type": "number"
-                }
-            }
-        },
         "saas_internal_tenant_handler.CreateRequest": {
             "type": "object",
             "required": [
+                "billing_cycle",
                 "name",
-                "plan_id"
+                "plan_type"
             ],
             "properties": {
+                "billing_cycle": {
+                    "type": "string",
+                    "enum": [
+                        "monthly",
+                        "yearly",
+                        "lifetime"
+                    ]
+                },
                 "description": {
                     "type": "string",
                     "maxLength": 120
@@ -3063,24 +2948,17 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 20
                 },
-                "plan_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "saas_internal_tenant_handler.UpdateRequest": {
-            "type": "object",
-            "required": [
-                "id"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string",
-                    "maxLength": 120
-                },
-                "id": {
-                    "type": "string",
-                    "maxLength": 20
+                "plan_type": {
+                    "enum": [
+                        "free",
+                        "caring",
+                        "professional"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/domain.PlanType"
+                        }
+                    ]
                 }
             }
         }

@@ -12,8 +12,6 @@ var TableNames = struct {
 	Comments             string
 	ImgCategories        string
 	Imgs                 string
-	Plans                string
-	TenantPlan           string
 	TenantR2Configs      string
 	Tenants              string
 	Users                string
@@ -26,8 +24,6 @@ var TableNames = struct {
 	Comments:             "comments",
 	ImgCategories:        "img_categories",
 	Imgs:                 "imgs",
-	Plans:                "plans",
-	TenantPlan:           "tenant_plan",
 	TenantR2Configs:      "tenant_r2_configs",
 	Tenants:              "tenants",
 	Users:                "users",

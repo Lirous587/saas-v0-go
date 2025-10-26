@@ -49,9 +49,8 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 		Name:        req.Name,
 		Description: req.Description,
 		CreatorID:   userID,
-	},
-		req.PlanID,
-	); err != nil {
+		PlanType:    req.PlanType,
+	}); err != nil {
 		response.Error(ctx, err)
 		return
 	}
@@ -122,10 +121,10 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        keyword    		query     string  false  "关键词"
-// @Param        prev_cursor  query     string  false  "用于上一页游标"
+// @Param        keyword    	 query     string  false  "关键词"
+// @Param        prev_cursor   query     string  false  "用于上一页游标"
 // @Param        next_cursor   query     string  false  "用于下一页游标"
-// @Param        page_size  		query     int     false  "页码"
+// @Param        page_size  	 query     int     false  "页码"
 // @Success      200  {object}  response.successResponse{data=handler.PagingResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -157,6 +156,34 @@ func (h *HttpHandler) Paging(ctx *gin.Context) {
 	}
 
 	response.Success(ctx, domainTenantPagingToResponse(data))
+}
+
+// GetPlan godoc
+// @Summary      获取租户计划
+// @Tags         tenant
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path int true "租户id"
+// @Success      200  {object}  response.successResponse{data=handler.PlanResponse} "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/tenant/{id}/plan [get]
+func (h *HttpHandler) GetPlan(ctx *gin.Context) {
+	req := new(GetPlanRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	data, err := h.service.GetPlan(req.ID)
+
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx, domainPlanToResponse(data))
 }
 
 // CheckName godoc

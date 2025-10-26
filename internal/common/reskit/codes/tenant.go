@@ -7,4 +7,6 @@ var (
 	ErrTenantHasSameName = ErrCode{Msg: "存在相同的租户名", Type: ErrorTypeConflict, Code: 1601}
 
 	ErrTenantNotCreator = ErrCode{Msg: "当前用户不为租户创建者", Type: ErrorTypeUnauthorized, Code: 1610}
+
+	ErrTenantPlanNotFound = ErrCode{Msg: "当前租户不存在计划", Type: ErrorTypeNotFound, Code: 1620}
 )
