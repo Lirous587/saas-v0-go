@@ -22,6 +22,7 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 	// 仅租户创建者可访问的路由
 	creatorOnly := g.Group("", auth.JWTValidate(), server.SetTenantID("id"), auth.TenantCreatorValited())
 	{
+		creatorOnly.GET("/:id", handler.Read)
 		creatorOnly.PUT("/:id", handler.Update)
 		creatorOnly.GET("/:id/plan", handler.GetPlan)
 	}

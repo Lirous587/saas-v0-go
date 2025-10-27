@@ -90,6 +90,8 @@ func (k keyset[T]) extractKeysetCursor(item *T) *keysetCursor {
 	}
 }
 
+// ApplyKeysetMods 附加keyset查询的mods
+// mods建议额外预留4
 func (k keyset[T]) ApplyKeysetMods(base []qm.QueryMod) []qm.QueryMod {
 	var cursor *keysetCursor
 	var order string

@@ -58,6 +58,33 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 	response.Success(ctx)
 }
 
+// Read godoc
+// @Summary      查询单条租户信息
+// @Tags         tenant
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path int true "租户id"
+// @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/tenant/{id} [get]
+func (h *HttpHandler) Read(ctx *gin.Context) {
+	req := new(ReadRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	data, err := h.service.GetByID(req.ID)
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx, domainTenantToResponse(data))
+}
+
 // Update godoc
 // @Summary      更新
 // @Tags         tenant

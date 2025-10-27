@@ -34,6 +34,28 @@ func (repo *TenantPSQLRepository) BeginTx(option ...*sql.TxOptions) (*sql.Tx, er
 	return boil.BeginTx(context.TODO(), op)
 }
 
+func (repo *TenantPSQLRepository) GetByID(id int64) (*domain.Tenant, error) {
+	ormTenant, err := orm.FindTenantG(
+		id,
+		orm.TenantColumns.ID,
+		orm.TenantColumns.PlanType,
+		orm.TenantColumns.Name,
+		orm.TenantColumns.Description,
+		orm.TenantColumns.CreatedAt,
+		orm.TenantColumns.UpdatedAt,
+		orm.TenantColumns.CreatorID,
+	)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, codes.ErrTenantNotFound
+		}
+	}
+
+	return ormTenantToDomain(ormTenant), nil
+
+}
+
 func (repo *TenantPSQLRepository) Create(tenant *domain.Tenant) (*domain.Tenant, error) {
 	ormTenant := domainTenantToORM(tenant)
 
@@ -75,10 +97,23 @@ func (repo *TenantPSQLRepository) Delete(id int64) error {
 }
 
 func (repo *TenantPSQLRepository) Paging(query *domain.TenantPagingQuery) (*domain.TenantPagination, error) {
-	mods := make([]qm.QueryMod, 0, 5)
+	mods := make([]qm.QueryMod, 0, 7)
 
 	// 基本条件
 	mods = append(mods, orm.TenantWhere.CreatorID.EQ(query.CreatorID))
+
+	// 选择列
+	mods = append(mods,
+		qm.Select(
+			orm.TenantColumns.ID,
+			orm.TenantColumns.PlanType,
+			orm.TenantColumns.Name,
+			orm.TenantColumns.Description,
+			orm.TenantColumns.CreatedAt,
+			orm.TenantColumns.UpdatedAt,
+			orm.TenantColumns.CreatorID,
+		),
+	)
 
 	if query.Keyword != "" {
 		like := "%" + query.Keyword + "%"

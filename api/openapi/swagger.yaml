@@ -331,12 +331,16 @@ definitions:
     properties:
       created_at:
         type: integer
+      creator_id:
+        type: integer
       description:
         type: string
       id:
         type: integer
       name:
         type: string
+      plan_type:
+        $ref: '#/definitions/domain.PlanType'
       updated_at:
         type: integer
     type: object
@@ -1605,6 +1609,40 @@ paths:
       security:
       - BearerAuth: []
       summary: 删除
+      tags:
+      - tenant
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 租户id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.TenantResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 查询单条租户信息
       tags:
       - tenant
     put:

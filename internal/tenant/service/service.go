@@ -14,7 +14,6 @@ type service struct {
 }
 
 func NewTenantService(repo domain.TenantRepository, cache domain.TenantCache) domain.TenantService {
-
 	return &service{
 		repo:  repo,
 		cache: cache,
@@ -30,7 +29,7 @@ func (s *service) Create(tenant *domain.Tenant) error {
 		}
 
 		if exist {
-			return codes.ErrPlanUserLimit
+			return codes.ErrTenantPlanUserLimit
 		}
 	}
 
@@ -49,6 +48,10 @@ func (s *service) Update(tenant *domain.Tenant) error {
 
 func (s *service) Delete(id int64) error {
 	return s.repo.Delete(id)
+}
+
+func (s *service) GetByID(id int64) (*domain.Tenant, error) {
+	return s.repo.GetByID(id)
 }
 
 func (s *service) Paging(query *domain.TenantPagingQuery) (*domain.TenantPagination, error) {

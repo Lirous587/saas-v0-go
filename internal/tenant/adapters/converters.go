@@ -38,6 +38,7 @@ func ormTenantToDomain(ormTenant *orm.Tenant) *domain.Tenant {
 	tenant := &domain.Tenant{
 		ID:        ormTenant.ID,
 		Name:      ormTenant.Name,
+		PlanType:  domain.PlanType(ormTenant.PlanType),
 		CreatedAt: ormTenant.CreatedAt,
 		UpdatedAt: ormTenant.UpdatedAt,
 		CreatorID: ormTenant.CreatorID,

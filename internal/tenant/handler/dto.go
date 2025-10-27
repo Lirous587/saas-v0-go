@@ -3,11 +3,13 @@ package handler
 import "saas/internal/tenant/domain"
 
 type TenantResponse struct {
-	ID          int64  `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description,omitempty"`
-	CreatedAt   int64  `json:"created_at"`
-	UpdatedAt   int64  `json:"updated_at"`
+	ID          int64           `json:"id"`
+	Name        string          `json:"name"`
+	PlanType    domain.PlanType `json:"plan_type"`
+	CreatorID   int64           `json:"creator_id"`
+	Description string          `json:"description,omitempty"`
+	CreatedAt   int64           `json:"created_at"`
+	UpdatedAt   int64           `json:"updated_at"`
 }
 
 type CreateRequest struct {
@@ -15,6 +17,10 @@ type CreateRequest struct {
 	Description  string          `json:"description" binding:"max=120"`
 	PlanType     domain.PlanType `json:"plan_type" binding:"required,oneof=free caring professional"`
 	BillingCycle string          `json:"billing_cycle" binding:"required,oneof=monthly yearly lifetime"`
+}
+
+type ReadRequest struct {
+	ID int64 `json:"-" uri:"id" binding:"required"`
 }
 
 type UpdateRequest struct {

@@ -7,6 +7,8 @@ import (
 type TenantRepository interface {
 	BeginTx(option ...*sql.TxOptions) (*sql.Tx, error)
 
+	GetByID(id int64) (*Tenant, error)
+
 	Create(tenant *Tenant) (*Tenant, error)
 	Update(tenant *Tenant) error
 	Delete(id int64) error

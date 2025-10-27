@@ -1901,6 +1901,64 @@ const docTemplate = `{
             }
         },
         "/v1/tenant/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tenant"
+                ],
+                "summary": "查询单条租户信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "租户id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.TenantResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.invalidParamsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
             "put": {
                 "security": [
                     {
@@ -2763,6 +2821,9 @@ const docTemplate = `{
                 "created_at": {
                     "type": "integer"
                 },
+                "creator_id": {
+                    "type": "integer"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -2771,6 +2832,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "plan_type": {
+                    "$ref": "#/definitions/domain.PlanType"
                 },
                 "updated_at": {
                     "type": "integer"

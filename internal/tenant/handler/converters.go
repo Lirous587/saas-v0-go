@@ -10,7 +10,9 @@ func domainTenantToResponse(tenant *domain.Tenant) *TenantResponse {
 	}
 
 	return &TenantResponse{
-		ID:          int64(tenant.ID),
+		ID:          tenant.ID,
+		PlanType:    tenant.PlanType,
+		CreatorID:   tenant.CreatorID,
 		Name:        tenant.Name,
 		Description: tenant.Description,
 		CreatedAt:   tenant.CreatedAt.Unix(),
