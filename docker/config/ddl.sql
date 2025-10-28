@@ -43,7 +43,7 @@ CREATE INDEX IF NOT EXISTS idx_users_nickname ON public.users (nickname);
 
 
 -- 租户表
-CREATE TYPE tenant_plan_type AS ENUM ('free', 'caring','professional');
+CREATE TYPE tenant_plan_type AS ENUM ('free', 'care','pro');
 CREATE TYPE tenant_status AS ENUM ('active', 'inactive');
 CREATE TYPE tnant_plan_billing_cycle AS ENUM ('monthly', 'yearly', 'lifetime');
 CREATE TABLE public.tenants
@@ -62,9 +62,9 @@ CREATE TABLE public.tenants
 );
 CREATE INDEX IF NOT EXISTS idx_tenants_creator_id ON public.tenants (creator_id);
 CREATE UNIQUE INDEX IF NOT EXISTS ux_tenants_creator_name ON public.tenants (creator_id, name);
--- 确保每个用户只能有一个Free和一个Caring
+-- 确保每个用户只能有一个Free和一个Care
 CREATE UNIQUE INDEX IF NOT EXISTS ux_user_one_free_plan ON public.tenants (creator_id) WHERE plan_type = 'free';
-CREATE UNIQUE INDEX IF NOT EXISTS ux_user_one_caring_plan ON public.tenants (creator_id) WHERE plan_type = 'caring';
+CREATE UNIQUE INDEX IF NOT EXISTS ux_user_one_care_plan ON public.tenants (creator_id) WHERE plan_type = 'care';
 
 
 

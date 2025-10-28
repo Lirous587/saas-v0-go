@@ -2357,13 +2357,13 @@ const docTemplate = `{
             "type": "string",
             "enum": [
                 "free",
-                "caring",
-                "professional"
+                "care",
+                "pro"
             ],
             "x-enum-varnames": [
                 "PlanFreeType",
-                "PlanCaringType",
-                "PlanProfessionalType"
+                "PlanCareType",
+                "PlanProType"
             ]
         },
         "domain.VerifyWay": {
@@ -3015,8 +3015,8 @@ const docTemplate = `{
                 "plan_type": {
                     "enum": [
                         "free",
-                        "caring",
-                        "professional"
+                        "care",
+                        "pro"
                     ],
                     "allOf": [
                         {

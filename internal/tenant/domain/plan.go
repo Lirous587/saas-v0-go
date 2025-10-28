@@ -5,8 +5,8 @@ import "time"
 type PlanType string
 
 const PlanFreeType PlanType = "free"
-const PlanCaringType PlanType = "caring"
-const PlanProfessionalType PlanType = "professional"
+const PlanCareType PlanType = "care"
+const PlanProType PlanType = "pro"
 
 type PlanStatus string
 

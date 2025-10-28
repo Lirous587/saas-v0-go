@@ -81,7 +81,7 @@ func ormTenantPlanToDomain(ormTenant *orm.Tenant) *domain.Plan {
 	}
 
 	tenantPlan.CanUpgrade = true
-	if ormTenant.PlanType == orm.TenantPlanTypeProfessional {
+	if ormTenant.PlanType == orm.TenantPlanTypePro {
 		tenantPlan.CanUpgrade = false
 	}
 

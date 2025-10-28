@@ -21,13 +21,13 @@ definitions:
   domain.PlanType:
     enum:
     - free
-    - caring
-    - professional
+    - care
+    - pro
     type: string
     x-enum-varnames:
     - PlanFreeType
-    - PlanCaringType
-    - PlanProfessionalType
+    - PlanCareType
+    - PlanProType
   domain.VerifyWay:
     enum:
     - image:click
@@ -462,8 +462,8 @@ definitions:
         - $ref: '#/definitions/domain.PlanType'
         enum:
         - free
-        - caring
-        - professional
+        - care
+        - pro
     required:
     - billing_cycle
     - name

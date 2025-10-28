@@ -21,8 +21,8 @@ func NewTenantService(repo domain.TenantRepository, cache domain.TenantCache) do
 }
 
 func (s *service) Create(tenant *domain.Tenant) error {
-	// 检查用户的租户计划限制 (Free/Caring)
-	if tenant.PlanType == domain.PlanFreeType || tenant.PlanType == domain.PlanCaringType {
+	// 检查用户的租户计划限制 (Free/Care)
+	if tenant.PlanType == domain.PlanFreeType || tenant.PlanType == domain.PlanCareType {
 		exist, err := s.repo.IsCreatorHasPlan(tenant.CreatorID, tenant.PlanType)
 		if err != nil {
 			return errors.WithMessage(err, "检查用户已有计划失败")

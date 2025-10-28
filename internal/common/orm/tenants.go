@@ -29,11 +29,11 @@ type Tenant struct {
 	UpdatedAt    time.Time             `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 	Description  null.String           `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
 	CreatorID    int64                 `boil:"creator_id" json:"creator_id" toml:"creator_id" yaml:"creator_id"`
-	PlanType     TenantPlanType        `boil:"plan_type" json:"plan_type" toml:"plan_type" yaml:"plan_type"`
 	Status       TenantStatus          `boil:"status" json:"status" toml:"status" yaml:"status"`
 	BillingCycle TnantPlanBillingCycle `boil:"billing_cycle" json:"billing_cycle" toml:"billing_cycle" yaml:"billing_cycle"`
 	StartAt      time.Time             `boil:"start_at" json:"start_at" toml:"start_at" yaml:"start_at"`
 	EndAt        null.Time             `boil:"end_at" json:"end_at,omitempty" toml:"end_at" yaml:"end_at,omitempty"`
+	PlanType     TenantPlanType        `boil:"plan_type" json:"plan_type" toml:"plan_type" yaml:"plan_type"`
 
 	R *tenantR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L tenantL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -46,11 +46,11 @@ var TenantColumns = struct {
 	UpdatedAt    string
 	Description  string
 	CreatorID    string
-	PlanType     string
 	Status       string
 	BillingCycle string
 	StartAt      string
 	EndAt        string
+	PlanType     string
 }{
 	ID:           "id",
 	Name:         "name",
@@ -58,11 +58,11 @@ var TenantColumns = struct {
 	UpdatedAt:    "updated_at",
 	Description:  "description",
 	CreatorID:    "creator_id",
-	PlanType:     "plan_type",
 	Status:       "status",
 	BillingCycle: "billing_cycle",
 	StartAt:      "start_at",
 	EndAt:        "end_at",
+	PlanType:     "plan_type",
 }
 
 var TenantTableColumns = struct {
@@ -72,11 +72,11 @@ var TenantTableColumns = struct {
 	UpdatedAt    string
 	Description  string
 	CreatorID    string
-	PlanType     string
 	Status       string
 	BillingCycle string
 	StartAt      string
 	EndAt        string
+	PlanType     string
 }{
 	ID:           "tenants.id",
 	Name:         "tenants.name",
@@ -84,49 +84,14 @@ var TenantTableColumns = struct {
 	UpdatedAt:    "tenants.updated_at",
 	Description:  "tenants.description",
 	CreatorID:    "tenants.creator_id",
-	PlanType:     "tenants.plan_type",
 	Status:       "tenants.status",
 	BillingCycle: "tenants.billing_cycle",
 	StartAt:      "tenants.start_at",
 	EndAt:        "tenants.end_at",
+	PlanType:     "tenants.plan_type",
 }
 
 // Generated where
-
-type whereHelperTenantPlanType struct{ field string }
-
-func (w whereHelperTenantPlanType) EQ(x TenantPlanType) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.EQ, x)
-}
-func (w whereHelperTenantPlanType) NEQ(x TenantPlanType) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.NEQ, x)
-}
-func (w whereHelperTenantPlanType) LT(x TenantPlanType) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelperTenantPlanType) LTE(x TenantPlanType) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelperTenantPlanType) GT(x TenantPlanType) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelperTenantPlanType) GTE(x TenantPlanType) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-func (w whereHelperTenantPlanType) IN(slice []TenantPlanType) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelperTenantPlanType) NIN(slice []TenantPlanType) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
 
 type whereHelperTenantStatus struct{ field string }
 
@@ -198,6 +163,41 @@ func (w whereHelperTnantPlanBillingCycle) NIN(slice []TnantPlanBillingCycle) qm.
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
+type whereHelperTenantPlanType struct{ field string }
+
+func (w whereHelperTenantPlanType) EQ(x TenantPlanType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelperTenantPlanType) NEQ(x TenantPlanType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperTenantPlanType) LT(x TenantPlanType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelperTenantPlanType) LTE(x TenantPlanType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperTenantPlanType) GT(x TenantPlanType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelperTenantPlanType) GTE(x TenantPlanType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+func (w whereHelperTenantPlanType) IN(slice []TenantPlanType) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperTenantPlanType) NIN(slice []TenantPlanType) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
 var TenantWhere = struct {
 	ID           whereHelperint64
 	Name         whereHelperstring
@@ -205,11 +205,11 @@ var TenantWhere = struct {
 	UpdatedAt    whereHelpertime_Time
 	Description  whereHelpernull_String
 	CreatorID    whereHelperint64
-	PlanType     whereHelperTenantPlanType
 	Status       whereHelperTenantStatus
 	BillingCycle whereHelperTnantPlanBillingCycle
 	StartAt      whereHelpertime_Time
 	EndAt        whereHelpernull_Time
+	PlanType     whereHelperTenantPlanType
 }{
 	ID:           whereHelperint64{field: "\"tenants\".\"id\""},
 	Name:         whereHelperstring{field: "\"tenants\".\"name\""},
@@ -217,11 +217,11 @@ var TenantWhere = struct {
 	UpdatedAt:    whereHelpertime_Time{field: "\"tenants\".\"updated_at\""},
 	Description:  whereHelpernull_String{field: "\"tenants\".\"description\""},
 	CreatorID:    whereHelperint64{field: "\"tenants\".\"creator_id\""},
-	PlanType:     whereHelperTenantPlanType{field: "\"tenants\".\"plan_type\""},
 	Status:       whereHelperTenantStatus{field: "\"tenants\".\"status\""},
 	BillingCycle: whereHelperTnantPlanBillingCycle{field: "\"tenants\".\"billing_cycle\""},
 	StartAt:      whereHelpertime_Time{field: "\"tenants\".\"start_at\""},
 	EndAt:        whereHelpernull_Time{field: "\"tenants\".\"end_at\""},
+	PlanType:     whereHelperTenantPlanType{field: "\"tenants\".\"plan_type\""},
 }
 
 // TenantRels is where relationship names are stored.
@@ -394,9 +394,9 @@ func (r *tenantR) GetImgs() ImgSlice {
 type tenantL struct{}
 
 var (
-	tenantAllColumns            = []string{"id", "name", "created_at", "updated_at", "description", "creator_id", "plan_type", "status", "billing_cycle", "start_at", "end_at"}
+	tenantAllColumns            = []string{"id", "name", "created_at", "updated_at", "description", "creator_id", "status", "billing_cycle", "start_at", "end_at", "plan_type"}
 	tenantColumnsWithoutDefault = []string{"name", "creator_id"}
-	tenantColumnsWithDefault    = []string{"id", "created_at", "updated_at", "description", "plan_type", "status", "billing_cycle", "start_at", "end_at"}
+	tenantColumnsWithDefault    = []string{"id", "created_at", "updated_at", "description", "status", "billing_cycle", "start_at", "end_at", "plan_type"}
 	tenantPrimaryKeyColumns     = []string{"id"}
 	tenantGeneratedColumns      = []string{}
 )
