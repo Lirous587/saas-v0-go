@@ -64,7 +64,7 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "租户id"
+// @Param        id   path string true "租户id"
 // @Success      200  {object}  response.successResponse{data=handler.TenantResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -91,7 +91,7 @@ func (h *HttpHandler) Read(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "租户id"
+// @Param        id   path string true "租户id"
 // @Param        request body handler.UpdateRequest true "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
@@ -122,7 +122,7 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "租户id"
+// @Param        id   path string true "租户id"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -191,7 +191,7 @@ func (h *HttpHandler) Paging(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "租户id"
+// @Param        id   path string true "租户id"
 // @Success      200  {object}  response.successResponse{data=handler.PlanResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -258,7 +258,7 @@ func (h *HttpHandler) CheckName(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "id"
+// @Param        id   path string true "id"
 // @Param        request body handler.UpgradeRequest true "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"

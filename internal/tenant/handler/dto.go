@@ -3,10 +3,10 @@ package handler
 import "saas/internal/tenant/domain"
 
 type TenantResponse struct {
-	ID          int64           `json:"id"`
+	ID          string          `json:"id"`
 	Name        string          `json:"name"`
 	PlanType    domain.PlanType `json:"plan_type"`
-	CreatorID   int64           `json:"creator_id"`
+	CreatorID   string          `json:"creator_id"`
 	Description string          `json:"description,omitempty"`
 	CreatedAt   int64           `json:"created_at"`
 	UpdatedAt   int64           `json:"updated_at"`
@@ -20,17 +20,17 @@ type CreateRequest struct {
 }
 
 type ReadRequest struct {
-	ID int64 `json:"-" uri:"id" binding:"required"`
+	ID string `json:"-" uri:"id" binding:"required"`
 }
 
 type UpdateRequest struct {
-	ID          int64  `json:"-" uri:"id" binding:"required"`
-	Name        string `json:"id" binding:"required,max=20"`
+	ID          string `json:"-" uri:"id" binding:"required"`
+	Name        string `json:"name" binding:"required,max=20"`
 	Description string `json:"description" binding:"max=120"`
 }
 
 type DeleteRequest struct {
-	ID int64 `json:"-" uri:"id" binding:"required"`
+	ID string `json:"-" uri:"id" binding:"required"`
 }
 
 type PagingRequest struct {
@@ -53,16 +53,16 @@ type CheckNameRequest struct {
 }
 
 type UpgradeRequest struct {
-	TenantID int64 `json:"-" uri:"id" binding:"required"`
-	PlanID   int64 `json:"plan_id" binding:"required"`
+	TenantID string          `json:"-" uri:"id" binding:"required"`
+	PlanType domain.PlanType `json:"plan_type" binding:"required"`
 }
 
 type GetPlanRequest struct {
-	ID int64 `json:"-" uri:"id" binding:"required"`
+	ID string `json:"-" uri:"id" binding:"required"`
 }
 
 type PlanResponse struct {
-	TenantID     int64                   `json:"tenant_id"`
+	TenantID     string                  `json:"tenant_id"`
 	PlanType     domain.PlanType         `json:"plan_type"`
 	StartTime    int64                   `json:"start_time"`
 	EndTime      int64                   `json:"end_time"`

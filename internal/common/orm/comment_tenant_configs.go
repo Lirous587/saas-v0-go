@@ -22,58 +22,51 @@ import (
 
 // CommentTenantConfig is an object representing the database table.
 type CommentTenantConfig struct {
-	TenantID    int64     `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
-	ClientToken string    `boil:"client_token" json:"client_token" toml:"client_token" yaml:"client_token"`
-	IfAudit     bool      `boil:"if_audit" json:"if_audit" toml:"if_audit" yaml:"if_audit"`
-	CreatedAt   time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt   time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	TenantID  string    `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
+	IfAudit   bool      `boil:"if_audit" json:"if_audit" toml:"if_audit" yaml:"if_audit"`
+	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *commentTenantConfigR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L commentTenantConfigL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var CommentTenantConfigColumns = struct {
-	TenantID    string
-	ClientToken string
-	IfAudit     string
-	CreatedAt   string
-	UpdatedAt   string
+	TenantID  string
+	IfAudit   string
+	CreatedAt string
+	UpdatedAt string
 }{
-	TenantID:    "tenant_id",
-	ClientToken: "client_token",
-	IfAudit:     "if_audit",
-	CreatedAt:   "created_at",
-	UpdatedAt:   "updated_at",
+	TenantID:  "tenant_id",
+	IfAudit:   "if_audit",
+	CreatedAt: "created_at",
+	UpdatedAt: "updated_at",
 }
 
 var CommentTenantConfigTableColumns = struct {
-	TenantID    string
-	ClientToken string
-	IfAudit     string
-	CreatedAt   string
-	UpdatedAt   string
+	TenantID  string
+	IfAudit   string
+	CreatedAt string
+	UpdatedAt string
 }{
-	TenantID:    "comment_tenant_configs.tenant_id",
-	ClientToken: "comment_tenant_configs.client_token",
-	IfAudit:     "comment_tenant_configs.if_audit",
-	CreatedAt:   "comment_tenant_configs.created_at",
-	UpdatedAt:   "comment_tenant_configs.updated_at",
+	TenantID:  "comment_tenant_configs.tenant_id",
+	IfAudit:   "comment_tenant_configs.if_audit",
+	CreatedAt: "comment_tenant_configs.created_at",
+	UpdatedAt: "comment_tenant_configs.updated_at",
 }
 
 // Generated where
 
 var CommentTenantConfigWhere = struct {
-	TenantID    whereHelperint64
-	ClientToken whereHelperstring
-	IfAudit     whereHelperbool
-	CreatedAt   whereHelpertime_Time
-	UpdatedAt   whereHelpertime_Time
+	TenantID  whereHelperstring
+	IfAudit   whereHelperbool
+	CreatedAt whereHelpertime_Time
+	UpdatedAt whereHelpertime_Time
 }{
-	TenantID:    whereHelperint64{field: "\"comment_tenant_configs\".\"tenant_id\""},
-	ClientToken: whereHelperstring{field: "\"comment_tenant_configs\".\"client_token\""},
-	IfAudit:     whereHelperbool{field: "\"comment_tenant_configs\".\"if_audit\""},
-	CreatedAt:   whereHelpertime_Time{field: "\"comment_tenant_configs\".\"created_at\""},
-	UpdatedAt:   whereHelpertime_Time{field: "\"comment_tenant_configs\".\"updated_at\""},
+	TenantID:  whereHelperstring{field: "\"comment_tenant_configs\".\"tenant_id\""},
+	IfAudit:   whereHelperbool{field: "\"comment_tenant_configs\".\"if_audit\""},
+	CreatedAt: whereHelpertime_Time{field: "\"comment_tenant_configs\".\"created_at\""},
+	UpdatedAt: whereHelpertime_Time{field: "\"comment_tenant_configs\".\"updated_at\""},
 }
 
 // CommentTenantConfigRels is where relationship names are stored.
@@ -113,8 +106,8 @@ func (r *commentTenantConfigR) GetTenant() *Tenant {
 type commentTenantConfigL struct{}
 
 var (
-	commentTenantConfigAllColumns            = []string{"tenant_id", "client_token", "if_audit", "created_at", "updated_at"}
-	commentTenantConfigColumnsWithoutDefault = []string{"tenant_id", "client_token"}
+	commentTenantConfigAllColumns            = []string{"tenant_id", "if_audit", "created_at", "updated_at"}
+	commentTenantConfigColumnsWithoutDefault = []string{"tenant_id"}
 	commentTenantConfigColumnsWithDefault    = []string{"if_audit", "created_at", "updated_at"}
 	commentTenantConfigPrimaryKeyColumns     = []string{"tenant_id"}
 	commentTenantConfigGeneratedColumns      = []string{}
@@ -606,13 +599,13 @@ func CommentTenantConfigs(mods ...qm.QueryMod) commentTenantConfigQuery {
 }
 
 // FindCommentTenantConfigG retrieves a single record by ID.
-func FindCommentTenantConfigG(tenantID int64, selectCols ...string) (*CommentTenantConfig, error) {
+func FindCommentTenantConfigG(tenantID string, selectCols ...string) (*CommentTenantConfig, error) {
 	return FindCommentTenantConfig(boil.GetDB(), tenantID, selectCols...)
 }
 
 // FindCommentTenantConfig retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindCommentTenantConfig(exec boil.Executor, tenantID int64, selectCols ...string) (*CommentTenantConfig, error) {
+func FindCommentTenantConfig(exec boil.Executor, tenantID string, selectCols ...string) (*CommentTenantConfig, error) {
 	commentTenantConfigObj := &CommentTenantConfig{}
 
 	sel := "*"
@@ -1189,12 +1182,12 @@ func (o *CommentTenantConfigSlice) ReloadAll(exec boil.Executor) error {
 }
 
 // CommentTenantConfigExistsG checks if the CommentTenantConfig row exists.
-func CommentTenantConfigExistsG(tenantID int64) (bool, error) {
+func CommentTenantConfigExistsG(tenantID string) (bool, error) {
 	return CommentTenantConfigExists(boil.GetDB(), tenantID)
 }
 
 // CommentTenantConfigExists checks if the CommentTenantConfig row exists.
-func CommentTenantConfigExists(exec boil.Executor, tenantID int64) (bool, error) {
+func CommentTenantConfigExists(exec boil.Executor, tenantID string) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"comment_tenant_configs\" where \"tenant_id\"=$1 limit 1)"
 

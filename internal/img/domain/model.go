@@ -4,10 +4,10 @@ import (
 	"time"
 )
 
-type TenantID int64
+type TenantID string
 
 type Img struct {
-	ID           int64
+	ID           string
 	TenantID     TenantID
 	Path         string
 	Description  string
@@ -37,7 +37,7 @@ func (img *Img) GetPublicPreURL() string {
 
 type ImgQuery struct {
 	TenantID   TenantID
-	CategoryID int64
+	CategoryID string
 	Keyword    string
 	Page       int
 	PageSize   int
@@ -50,7 +50,7 @@ type ImgList struct {
 }
 
 type Category struct {
-	ID        int64
+	ID        string
 	TenantID  TenantID
 	Title     string
 	Prefix    string

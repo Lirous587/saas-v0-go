@@ -20,7 +20,7 @@ const PlanYearlyBillingCycle PlanBillingCycle = "yearly"
 const PlanLifetimeBillingCycle PlanBillingCycle = "lifetime"
 
 type Plan struct {
-	TenantID     int64
+	TenantID     string
 	PlanType     PlanType
 	StartTime    time.Time
 	EndTime      time.Time

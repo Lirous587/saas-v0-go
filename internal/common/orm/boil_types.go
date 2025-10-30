@@ -91,6 +91,50 @@ func (e CommentStatus) Ordinal() int {
 	}
 }
 
+type TenantPlanType string
+
+// Enum values for TenantPlanType
+const (
+	TenantPlanTypeFree TenantPlanType = "free"
+	TenantPlanTypeCare TenantPlanType = "care"
+	TenantPlanTypePro  TenantPlanType = "pro"
+)
+
+func AllTenantPlanType() []TenantPlanType {
+	return []TenantPlanType{
+		TenantPlanTypeFree,
+		TenantPlanTypeCare,
+		TenantPlanTypePro,
+	}
+}
+
+func (e TenantPlanType) IsValid() error {
+	switch e {
+	case TenantPlanTypeFree, TenantPlanTypeCare, TenantPlanTypePro:
+		return nil
+	default:
+		return errors.New("enum is not valid")
+	}
+}
+
+func (e TenantPlanType) String() string {
+	return string(e)
+}
+
+func (e TenantPlanType) Ordinal() int {
+	switch e {
+	case TenantPlanTypeFree:
+		return 0
+	case TenantPlanTypeCare:
+		return 1
+	case TenantPlanTypePro:
+		return 2
+
+	default:
+		panic(errors.New("enum is not valid"))
+	}
+}
+
 type TenantStatus string
 
 // Enum values for TenantStatus
@@ -168,50 +212,6 @@ func (e TnantPlanBillingCycle) Ordinal() int {
 	case TnantPlanBillingCycleYearly:
 		return 1
 	case TnantPlanBillingCycleLifetime:
-		return 2
-
-	default:
-		panic(errors.New("enum is not valid"))
-	}
-}
-
-type TenantPlanType string
-
-// Enum values for TenantPlanType
-const (
-	TenantPlanTypeFree TenantPlanType = "free"
-	TenantPlanTypeCare TenantPlanType = "care"
-	TenantPlanTypePro  TenantPlanType = "pro"
-)
-
-func AllTenantPlanType() []TenantPlanType {
-	return []TenantPlanType{
-		TenantPlanTypeFree,
-		TenantPlanTypeCare,
-		TenantPlanTypePro,
-	}
-}
-
-func (e TenantPlanType) IsValid() error {
-	switch e {
-	case TenantPlanTypeFree, TenantPlanTypeCare, TenantPlanTypePro:
-		return nil
-	default:
-		return errors.New("enum is not valid")
-	}
-}
-
-func (e TenantPlanType) String() string {
-	return string(e)
-}
-
-func (e TenantPlanType) Ordinal() int {
-	switch e {
-	case TenantPlanTypeFree:
-		return 0
-	case TenantPlanTypeCare:
-		return 1
-	case TenantPlanTypePro:
 		return 2
 
 	default:

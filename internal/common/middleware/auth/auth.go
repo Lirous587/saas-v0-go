@@ -1,7 +1,6 @@
 package auth
 
 import (
-	casbinadapter "saas/internal/common/casbin"
 	"saas/internal/common/orm"
 	"saas/internal/common/reskit/codes"
 	"saas/internal/common/reskit/response"
@@ -28,18 +27,6 @@ func Init() {
 	userRepo := useradapter.NewUserPSQLRepository()
 	tokenServer = userService.NewTokenService(tokenCache, userRepo)
 
-	// 初始化casbin服务
-	var err error
-	adapter := casbinadapter.NewSQLBoilerCasbinAdapter()
-	enforcer, err = casbin.NewEnforcer("./model.conf", adapter)
-	if err != nil {
-		panic("创建执行器失败: " + err.Error())
-	}
-
-	err = enforcer.LoadPolicy()
-	if err != nil {
-		panic("加载策略失败:" + err.Error())
-	}
 }
 
 const (
@@ -160,7 +147,7 @@ const tenantAdmin = "domain_admin"
 
 func CasbinValited() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		// 1.获取useID
+		// 获取useID
 		userID, err := server.GetUserID(ctx)
 		if err != nil {
 			response.Error(ctx, codes.ErrUnauthorized)
@@ -168,7 +155,7 @@ func CasbinValited() gin.HandlerFunc {
 			return
 		}
 
-		// 2.获取tenantID
+		// 获取tenantID
 		tenantID, err := server.GetTenantID(ctx)
 		if err != nil {
 			response.Error(ctx, err)
@@ -183,22 +170,6 @@ func CasbinValited() gin.HandlerFunc {
 		).ExistsG()
 		if err != nil || !exist {
 			response.Error(ctx, codes.ErrTenantNotCreator)
-		}
-
-		// 获取请求路径和方法
-		obj := ctx.Request.URL.Path
-		act := strings.ToLower(ctx.Request.Method)
-
-		ok, err := enforcer.Enforce(tenantAdmin, obj, act)
-		if err != nil {
-			response.Error(ctx, codes.ErrPermissionDenied)
-			ctx.Abort()
-			return
-		}
-		if !ok {
-			response.Error(ctx, codes.ErrPermissionDenied)
-			ctx.Abort()
-			return
 		}
 
 		ctx.Next()

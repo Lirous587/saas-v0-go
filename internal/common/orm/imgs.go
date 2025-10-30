@@ -23,14 +23,14 @@ import (
 
 // Img is an object representing the database table.
 type Img struct {
-	ID          int64       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	TenantID    int64       `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
+	ID          string      `boil:"id" json:"id" toml:"id" yaml:"id"`
+	TenantID    string      `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
 	Path        string      `boil:"path" json:"path" toml:"path" yaml:"path"`
 	Description null.String `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
 	CreatedAt   time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt   time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 	DeletedAt   null.Time   `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
-	CategoryID  null.Int64  `boil:"category_id" json:"category_id,omitempty" toml:"category_id" yaml:"category_id,omitempty"`
+	CategoryID  null.String `boil:"category_id" json:"category_id,omitempty" toml:"category_id" yaml:"category_id,omitempty"`
 
 	R *imgR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L imgL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -103,23 +103,23 @@ func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsN
 func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 var ImgWhere = struct {
-	ID          whereHelperint64
-	TenantID    whereHelperint64
+	ID          whereHelperstring
+	TenantID    whereHelperstring
 	Path        whereHelperstring
 	Description whereHelpernull_String
 	CreatedAt   whereHelpertime_Time
 	UpdatedAt   whereHelpertime_Time
 	DeletedAt   whereHelpernull_Time
-	CategoryID  whereHelpernull_Int64
+	CategoryID  whereHelpernull_String
 }{
-	ID:          whereHelperint64{field: "\"imgs\".\"id\""},
-	TenantID:    whereHelperint64{field: "\"imgs\".\"tenant_id\""},
+	ID:          whereHelperstring{field: "\"imgs\".\"id\""},
+	TenantID:    whereHelperstring{field: "\"imgs\".\"tenant_id\""},
 	Path:        whereHelperstring{field: "\"imgs\".\"path\""},
 	Description: whereHelpernull_String{field: "\"imgs\".\"description\""},
 	CreatedAt:   whereHelpertime_Time{field: "\"imgs\".\"created_at\""},
 	UpdatedAt:   whereHelpertime_Time{field: "\"imgs\".\"updated_at\""},
 	DeletedAt:   whereHelpernull_Time{field: "\"imgs\".\"deleted_at\""},
-	CategoryID:  whereHelpernull_Int64{field: "\"imgs\".\"category_id\""},
+	CategoryID:  whereHelpernull_String{field: "\"imgs\".\"category_id\""},
 }
 
 // ImgRels is where relationship names are stored.
@@ -179,8 +179,8 @@ type imgL struct{}
 
 var (
 	imgAllColumns            = []string{"id", "tenant_id", "path", "description", "created_at", "updated_at", "deleted_at", "category_id"}
-	imgColumnsWithoutDefault = []string{"tenant_id", "path", "updated_at"}
-	imgColumnsWithDefault    = []string{"id", "description", "created_at", "deleted_at", "category_id"}
+	imgColumnsWithoutDefault = []string{"tenant_id", "path"}
+	imgColumnsWithDefault    = []string{"id", "description", "created_at", "updated_at", "deleted_at", "category_id"}
 	imgPrimaryKeyColumns     = []string{"id"}
 	imgGeneratedColumns      = []string{}
 )
@@ -901,13 +901,13 @@ func Imgs(mods ...qm.QueryMod) imgQuery {
 }
 
 // FindImgG retrieves a single record by ID.
-func FindImgG(iD int64, selectCols ...string) (*Img, error) {
+func FindImgG(iD string, selectCols ...string) (*Img, error) {
 	return FindImg(boil.GetDB(), iD, selectCols...)
 }
 
 // FindImg retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindImg(exec boil.Executor, iD int64, selectCols ...string) (*Img, error) {
+func FindImg(exec boil.Executor, iD string, selectCols ...string) (*Img, error) {
 	imgObj := &Img{}
 
 	sel := "*"
@@ -1525,12 +1525,12 @@ func (o *ImgSlice) ReloadAll(exec boil.Executor) error {
 }
 
 // ImgExistsG checks if the Img row exists.
-func ImgExistsG(iD int64) (bool, error) {
+func ImgExistsG(iD string) (bool, error) {
 	return ImgExists(boil.GetDB(), iD)
 }
 
 // ImgExists checks if the Img row exists.
-func ImgExists(exec boil.Executor, iD int64) (bool, error) {
+func ImgExists(exec boil.Executor, iD string) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"imgs\" where \"id\"=$1 and \"deleted_at\" is null limit 1)"
 

@@ -97,7 +97,7 @@ definitions:
       created_at:
         type: integer
       id:
-        type: integer
+        type: string
       prefix:
         type: string
       title:
@@ -110,15 +110,15 @@ definitions:
       created_at:
         type: integer
       id:
-        type: integer
+        type: string
       is_liked:
         type: boolean
       like_count:
         type: integer
       parent_id:
-        type: integer
+        type: string
       root_id:
-        type: integer
+        type: string
       user:
         $ref: '#/definitions/handler.UserInfo'
     type: object
@@ -129,17 +129,17 @@ definitions:
       created_at:
         type: integer
       id:
-        type: integer
+        type: string
       is_liked:
         type: boolean
       like_count:
         type: integer
       parent_id:
-        type: integer
+        type: string
       replies_count:
         type: integer
       root_id:
-        type: integer
+        type: string
       user:
         $ref: '#/definitions/handler.UserInfo'
     type: object
@@ -194,7 +194,7 @@ definitions:
       description:
         type: string
       id:
-        type: integer
+        type: string
       updated_at:
         type: integer
       url:
@@ -230,7 +230,7 @@ definitions:
       status:
         $ref: '#/definitions/domain.PlanStatus'
       tenant_id:
-        type: integer
+        type: string
     type: object
   handler.PlateConfigResponse:
     properties:
@@ -255,7 +255,7 @@ definitions:
       belong_key:
         type: string
       id:
-        type: integer
+        type: string
       related_url:
         type: string
       summary:
@@ -332,11 +332,11 @@ definitions:
       created_at:
         type: integer
       creator_id:
-        type: integer
+        type: string
       description:
         type: string
       id:
-        type: integer
+        type: string
       name:
         type: string
       plan_type:
@@ -361,25 +361,25 @@ definitions:
       description:
         maxLength: 120
         type: string
-      id:
+      name:
         maxLength: 20
         type: string
     required:
-    - id
+    - name
     type: object
   handler.UpgradeRequest:
     properties:
-      plan_id:
-        type: integer
+      plan_type:
+        $ref: '#/definitions/domain.PlanType'
     required:
-    - plan_id
+    - plan_type
     type: object
   handler.UserInfo:
     properties:
       avatar_url:
         type: string
       id:
-        type: integer
+        type: string
       nickname:
         type: string
     type: object
@@ -392,7 +392,7 @@ definitions:
       email:
         type: string
       id:
-        type: integer
+        type: string
       last_login_at:
         type: integer
       updated_at:
@@ -437,9 +437,9 @@ definitions:
       content:
         type: string
       parent_id:
-        type: integer
+        type: string
       root_id:
-        type: integer
+        type: string
     required:
     - content
     type: object
@@ -563,7 +563,7 @@ paths:
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       - description: 板块key
         in: path
         name: belong_key
@@ -604,7 +604,7 @@ paths:
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       - description: 评论板块
         in: path
         name: belong_key
@@ -614,11 +614,11 @@ paths:
         in: path
         name: root_id
         required: true
-        type: integer
+        type: string
       - description: 上页最后一条记录id
         in: query
         name: last_id
-        type: integer
+        type: string
       - description: 页码
         in: query
         name: page_size
@@ -659,7 +659,7 @@ paths:
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       - description: 评论板块
         in: path
         name: belong_key
@@ -668,7 +668,7 @@ paths:
       - description: 上页最后一条记录id
         in: query
         name: last_id
-        type: integer
+        type: string
       - description: 页码
         in: query
         name: page_size
@@ -709,12 +709,12 @@ paths:
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       - description: 评论id
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -743,12 +743,12 @@ paths:
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       - description: 评论id
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: 请求参数
         in: body
         name: request
@@ -784,7 +784,7 @@ paths:
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -818,7 +818,7 @@ paths:
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       - description: 请求参数
         in: body
         name: request
@@ -854,12 +854,12 @@ paths:
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       - description: 评论id
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -889,7 +889,7 @@ paths:
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       - description: 关键词
         in: query
         name: keyword
@@ -935,7 +935,7 @@ paths:
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       - description: 请求参数
         in: body
         name: request
@@ -971,12 +971,12 @@ paths:
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       - description: 板块id
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: 请求参数
         in: body
         name: request
@@ -1012,12 +1012,12 @@ paths:
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       - description: 板块id
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1047,7 +1047,7 @@ paths:
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       - description: 板块key
         in: path
         name: belong_key
@@ -1088,12 +1088,12 @@ paths:
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       - description: 板块id
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1143,7 +1143,7 @@ paths:
       - description: 分类id
         in: query
         name: category_id
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1234,7 +1234,7 @@ paths:
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       - description: 请求参数
         in: body
         name: request
@@ -1270,12 +1270,12 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: 租户id
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1304,12 +1304,12 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: 租户id
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       - description: 请求参数
         in: body
         name: request
@@ -1345,7 +1345,7 @@ paths:
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1375,7 +1375,7 @@ paths:
         in: path
         name: tenant_id
         required: true
-        type: integer
+        type: string
       - description: 请求参数
         in: body
         name: request
@@ -1407,7 +1407,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1436,12 +1436,12 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: 图片id
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1484,7 +1484,7 @@ paths:
       - description: 分类id
         in: formData
         name: category_id
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1590,7 +1590,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1619,7 +1619,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1653,7 +1653,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: 请求参数
         in: body
         name: request
@@ -1689,7 +1689,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1753,7 +1753,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: 请求参数
         in: body
         name: request

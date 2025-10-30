@@ -46,11 +46,11 @@ func (s *service) Update(tenant *domain.Tenant) error {
 	return s.repo.Update(tenant)
 }
 
-func (s *service) Delete(id int64) error {
+func (s *service) Delete(id string) error {
 	return s.repo.Delete(id)
 }
 
-func (s *service) GetByID(id int64) (*domain.Tenant, error) {
+func (s *service) GetByID(id string) (*domain.Tenant, error) {
 	return s.repo.GetByID(id)
 }
 
@@ -58,10 +58,10 @@ func (s *service) Paging(query *domain.TenantPagingQuery) (*domain.TenantPaginat
 	return s.repo.Paging(query)
 }
 
-func (s *service) CheckName(creatorID int64, tenantName string) (bool, error) {
+func (s *service) CheckName(creatorID string, tenantName string) (bool, error) {
 	return s.repo.ExistSameName(creatorID, tenantName)
 }
 
-func (s *service) GetPlan(id int64) (*domain.Plan, error) {
+func (s *service) GetPlan(id string) (*domain.Plan, error) {
 	return s.repo.GetPlan(id)
 }

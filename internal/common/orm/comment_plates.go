@@ -22,11 +22,11 @@ import (
 
 // CommentPlate is an object representing the database table.
 type CommentPlate struct {
-	ID         int64  `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID         string `boil:"id" json:"id" toml:"id" yaml:"id"`
 	BelongKey  string `boil:"belong_key" json:"belong_key" toml:"belong_key" yaml:"belong_key"`
-	TenantID   int64  `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
-	Summary    string `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
 	RelatedURL string `boil:"related_url" json:"related_url" toml:"related_url" yaml:"related_url"`
+	Summary    string `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+	TenantID   string `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
 
 	R *commentPlateR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L commentPlateL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -35,45 +35,45 @@ type CommentPlate struct {
 var CommentPlateColumns = struct {
 	ID         string
 	BelongKey  string
-	TenantID   string
-	Summary    string
 	RelatedURL string
+	Summary    string
+	TenantID   string
 }{
 	ID:         "id",
 	BelongKey:  "belong_key",
-	TenantID:   "tenant_id",
-	Summary:    "summary",
 	RelatedURL: "related_url",
+	Summary:    "summary",
+	TenantID:   "tenant_id",
 }
 
 var CommentPlateTableColumns = struct {
 	ID         string
 	BelongKey  string
-	TenantID   string
-	Summary    string
 	RelatedURL string
+	Summary    string
+	TenantID   string
 }{
 	ID:         "comment_plates.id",
 	BelongKey:  "comment_plates.belong_key",
-	TenantID:   "comment_plates.tenant_id",
-	Summary:    "comment_plates.summary",
 	RelatedURL: "comment_plates.related_url",
+	Summary:    "comment_plates.summary",
+	TenantID:   "comment_plates.tenant_id",
 }
 
 // Generated where
 
 var CommentPlateWhere = struct {
-	ID         whereHelperint64
+	ID         whereHelperstring
 	BelongKey  whereHelperstring
-	TenantID   whereHelperint64
-	Summary    whereHelperstring
 	RelatedURL whereHelperstring
+	Summary    whereHelperstring
+	TenantID   whereHelperstring
 }{
-	ID:         whereHelperint64{field: "\"comment_plates\".\"id\""},
+	ID:         whereHelperstring{field: "\"comment_plates\".\"id\""},
 	BelongKey:  whereHelperstring{field: "\"comment_plates\".\"belong_key\""},
-	TenantID:   whereHelperint64{field: "\"comment_plates\".\"tenant_id\""},
-	Summary:    whereHelperstring{field: "\"comment_plates\".\"summary\""},
 	RelatedURL: whereHelperstring{field: "\"comment_plates\".\"related_url\""},
+	Summary:    whereHelperstring{field: "\"comment_plates\".\"summary\""},
+	TenantID:   whereHelperstring{field: "\"comment_plates\".\"tenant_id\""},
 }
 
 // CommentPlateRels is where relationship names are stored.
@@ -151,8 +151,8 @@ func (r *commentPlateR) GetPlateComments() CommentSlice {
 type commentPlateL struct{}
 
 var (
-	commentPlateAllColumns            = []string{"id", "belong_key", "tenant_id", "summary", "related_url"}
-	commentPlateColumnsWithoutDefault = []string{"belong_key", "tenant_id", "summary", "related_url"}
+	commentPlateAllColumns            = []string{"id", "belong_key", "related_url", "summary", "tenant_id"}
+	commentPlateColumnsWithoutDefault = []string{"belong_key", "related_url", "summary", "tenant_id"}
 	commentPlateColumnsWithDefault    = []string{"id"}
 	commentPlatePrimaryKeyColumns     = []string{"id"}
 	commentPlateGeneratedColumns      = []string{}
@@ -1020,13 +1020,13 @@ func CommentPlates(mods ...qm.QueryMod) commentPlateQuery {
 }
 
 // FindCommentPlateG retrieves a single record by ID.
-func FindCommentPlateG(iD int64, selectCols ...string) (*CommentPlate, error) {
+func FindCommentPlateG(iD string, selectCols ...string) (*CommentPlate, error) {
 	return FindCommentPlate(boil.GetDB(), iD, selectCols...)
 }
 
 // FindCommentPlate retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindCommentPlate(exec boil.Executor, iD int64, selectCols ...string) (*CommentPlate, error) {
+func FindCommentPlate(exec boil.Executor, iD string, selectCols ...string) (*CommentPlate, error) {
 	commentPlateObj := &CommentPlate{}
 
 	sel := "*"
@@ -1585,12 +1585,12 @@ func (o *CommentPlateSlice) ReloadAll(exec boil.Executor) error {
 }
 
 // CommentPlateExistsG checks if the CommentPlate row exists.
-func CommentPlateExistsG(iD int64) (bool, error) {
+func CommentPlateExistsG(iD string) (bool, error) {
 	return CommentPlateExists(boil.GetDB(), iD)
 }
 
 // CommentPlateExists checks if the CommentPlate row exists.
-func CommentPlateExists(exec boil.Executor, iD int64) (bool, error) {
+func CommentPlateExists(exec boil.Executor, iD string) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"comment_plates\" where \"id\"=$1 limit 1)"
 

@@ -22,8 +22,8 @@ import (
 
 // CommentPlateConfig is an object representing the database table.
 type CommentPlateConfig struct {
-	TenantID  int64     `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
-	PlateID   int64     `boil:"plate_id" json:"plate_id" toml:"plate_id" yaml:"plate_id"`
+	TenantID  string    `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
+	PlateID   string    `boil:"plate_id" json:"plate_id" toml:"plate_id" yaml:"plate_id"`
 	IfAudit   bool      `boil:"if_audit" json:"if_audit" toml:"if_audit" yaml:"if_audit"`
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
@@ -62,6 +62,37 @@ var CommentPlateConfigTableColumns = struct {
 
 // Generated where
 
+type whereHelperstring struct{ field string }
+
+func (w whereHelperstring) EQ(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperstring) NEQ(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperstring) LT(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperstring) LTE(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperstring) GT(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperstring) GTE(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperstring) LIKE(x string) qm.QueryMod    { return qm.Where(w.field+" LIKE ?", x) }
+func (w whereHelperstring) NLIKE(x string) qm.QueryMod   { return qm.Where(w.field+" NOT LIKE ?", x) }
+func (w whereHelperstring) ILIKE(x string) qm.QueryMod   { return qm.Where(w.field+" ILIKE ?", x) }
+func (w whereHelperstring) NILIKE(x string) qm.QueryMod  { return qm.Where(w.field+" NOT ILIKE ?", x) }
+func (w whereHelperstring) SIMILAR(x string) qm.QueryMod { return qm.Where(w.field+" SIMILAR TO ?", x) }
+func (w whereHelperstring) NSIMILAR(x string) qm.QueryMod {
+	return qm.Where(w.field+" NOT SIMILAR TO ?", x)
+}
+func (w whereHelperstring) IN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
 type whereHelperbool struct{ field string }
 
 func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
@@ -93,14 +124,14 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 }
 
 var CommentPlateConfigWhere = struct {
-	TenantID  whereHelperint64
-	PlateID   whereHelperint64
+	TenantID  whereHelperstring
+	PlateID   whereHelperstring
 	IfAudit   whereHelperbool
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 }{
-	TenantID:  whereHelperint64{field: "\"comment_plate_configs\".\"tenant_id\""},
-	PlateID:   whereHelperint64{field: "\"comment_plate_configs\".\"plate_id\""},
+	TenantID:  whereHelperstring{field: "\"comment_plate_configs\".\"tenant_id\""},
+	PlateID:   whereHelperstring{field: "\"comment_plate_configs\".\"plate_id\""},
 	IfAudit:   whereHelperbool{field: "\"comment_plate_configs\".\"if_audit\""},
 	CreatedAt: whereHelpertime_Time{field: "\"comment_plate_configs\".\"created_at\""},
 	UpdatedAt: whereHelpertime_Time{field: "\"comment_plate_configs\".\"updated_at\""},
@@ -840,13 +871,13 @@ func CommentPlateConfigs(mods ...qm.QueryMod) commentPlateConfigQuery {
 }
 
 // FindCommentPlateConfigG retrieves a single record by ID.
-func FindCommentPlateConfigG(tenantID int64, plateID int64, selectCols ...string) (*CommentPlateConfig, error) {
+func FindCommentPlateConfigG(tenantID string, plateID string, selectCols ...string) (*CommentPlateConfig, error) {
 	return FindCommentPlateConfig(boil.GetDB(), tenantID, plateID, selectCols...)
 }
 
 // FindCommentPlateConfig retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindCommentPlateConfig(exec boil.Executor, tenantID int64, plateID int64, selectCols ...string) (*CommentPlateConfig, error) {
+func FindCommentPlateConfig(exec boil.Executor, tenantID string, plateID string, selectCols ...string) (*CommentPlateConfig, error) {
 	commentPlateConfigObj := &CommentPlateConfig{}
 
 	sel := "*"
@@ -1423,12 +1454,12 @@ func (o *CommentPlateConfigSlice) ReloadAll(exec boil.Executor) error {
 }
 
 // CommentPlateConfigExistsG checks if the CommentPlateConfig row exists.
-func CommentPlateConfigExistsG(tenantID int64, plateID int64) (bool, error) {
+func CommentPlateConfigExistsG(tenantID string, plateID string) (bool, error) {
 	return CommentPlateConfigExists(boil.GetDB(), tenantID, plateID)
 }
 
 // CommentPlateConfigExists checks if the CommentPlateConfig row exists.
-func CommentPlateConfigExists(exec boil.Executor, tenantID int64, plateID int64) (bool, error) {
+func CommentPlateConfigExists(exec boil.Executor, tenantID string, plateID string) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"comment_plate_configs\" where \"tenant_id\"=$1 AND \"plate_id\"=$2 limit 1)"
 

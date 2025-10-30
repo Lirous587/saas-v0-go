@@ -22,8 +22,8 @@ import (
 
 // ImgCategory is an object representing the database table.
 type ImgCategory struct {
-	ID        int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
-	TenantID  int64     `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
+	ID        string    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	TenantID  string    `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
 	Title     string    `boil:"title" json:"title" toml:"title" yaml:"title"`
 	Prefix    string    `boil:"prefix" json:"prefix" toml:"prefix" yaml:"prefix"`
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
@@ -63,14 +63,14 @@ var ImgCategoryTableColumns = struct {
 // Generated where
 
 var ImgCategoryWhere = struct {
-	ID        whereHelperint64
-	TenantID  whereHelperint64
+	ID        whereHelperstring
+	TenantID  whereHelperstring
 	Title     whereHelperstring
 	Prefix    whereHelperstring
 	CreatedAt whereHelpertime_Time
 }{
-	ID:        whereHelperint64{field: "\"img_categories\".\"id\""},
-	TenantID:  whereHelperint64{field: "\"img_categories\".\"tenant_id\""},
+	ID:        whereHelperstring{field: "\"img_categories\".\"id\""},
+	TenantID:  whereHelperstring{field: "\"img_categories\".\"tenant_id\""},
 	Title:     whereHelperstring{field: "\"img_categories\".\"title\""},
 	Prefix:    whereHelperstring{field: "\"img_categories\".\"prefix\""},
 	CreatedAt: whereHelpertime_Time{field: "\"img_categories\".\"created_at\""},
@@ -906,13 +906,13 @@ func ImgCategories(mods ...qm.QueryMod) imgCategoryQuery {
 }
 
 // FindImgCategoryG retrieves a single record by ID.
-func FindImgCategoryG(iD int64, selectCols ...string) (*ImgCategory, error) {
+func FindImgCategoryG(iD string, selectCols ...string) (*ImgCategory, error) {
 	return FindImgCategory(boil.GetDB(), iD, selectCols...)
 }
 
 // FindImgCategory retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindImgCategory(exec boil.Executor, iD int64, selectCols ...string) (*ImgCategory, error) {
+func FindImgCategory(exec boil.Executor, iD string, selectCols ...string) (*ImgCategory, error) {
 	imgCategoryObj := &ImgCategory{}
 
 	sel := "*"
@@ -1481,12 +1481,12 @@ func (o *ImgCategorySlice) ReloadAll(exec boil.Executor) error {
 }
 
 // ImgCategoryExistsG checks if the ImgCategory row exists.
-func ImgCategoryExistsG(iD int64) (bool, error) {
+func ImgCategoryExistsG(iD string) (bool, error) {
 	return ImgCategoryExists(boil.GetDB(), iD)
 }
 
 // ImgCategoryExists checks if the ImgCategory row exists.
-func ImgCategoryExists(exec boil.Executor, iD int64) (bool, error) {
+func ImgCategoryExists(exec boil.Executor, iD string) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"img_categories\" where \"id\"=$1 limit 1)"
 

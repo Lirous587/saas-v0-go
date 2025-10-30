@@ -5,26 +5,26 @@ import (
 )
 
 type Tenant struct {
-	ID          int64
+	ID          string
 	PlanType    PlanType
 	Name        string
 	Description string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	CreatorID   int64
+	CreatorID   string
 }
 
 func (t Tenant) GetCreatedAt() time.Time {
 	return t.CreatedAt
 }
 
-func (t Tenant) GetID() int64 {
+func (t Tenant) GetID() string {
 	return t.ID
 }
 
 type TenantPagingQuery struct {
 	PageSize   int
-	CreatorID  int64
+	CreatorID  string
 	PrevCursor string
 	NextCursor string
 	Keyword    string

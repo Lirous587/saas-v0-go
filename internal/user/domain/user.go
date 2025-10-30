@@ -3,7 +3,7 @@ package domain
 import "time"
 
 type User struct {
-	ID           int64
+	ID           string
 	Email        string
 	AvatarURL    string
 	PasswordHash string
@@ -15,7 +15,7 @@ type User struct {
 }
 
 type JwtPayload struct {
-	UserID int64 `json:"user_id"`
+	UserID string `json:"user_id"`
 }
 
 type User2Token struct {

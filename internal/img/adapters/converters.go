@@ -13,7 +13,7 @@ func domainImgToORM(img *domain.Img) *orm.Img {
 
 	ormImg := &orm.Img{
 		ID:        img.ID,
-		TenantID:  int64(img.TenantID),
+		TenantID:  string(img.TenantID),
 		Path:      img.Path,
 		UpdatedAt: img.UpdatedAt,
 	}
@@ -74,7 +74,7 @@ func domainCategoryToORM(category *domain.Category) *orm.ImgCategory {
 
 	ormImg := &orm.ImgCategory{
 		ID:       category.ID,
-		TenantID: int64(category.TenantID),
+		TenantID: string(category.TenantID),
 		Title:    category.Title,
 		Prefix:   category.Prefix,
 	}
@@ -124,7 +124,7 @@ func doaminR2ConfigToORM(r2Config *domain.R2Config) *orm.TenantR2Config {
 	}
 
 	ormR2Config := &orm.TenantR2Config{
-		TenantID:        int64(r2Config.TenantID),
+		TenantID:        string(r2Config.TenantID),
 		AccountID:       r2Config.AccountID,
 		AccessKeyID:     r2Config.AccessKeyID,
 		SecretAccessKey: r2Config.GetSecretAccessKey(),

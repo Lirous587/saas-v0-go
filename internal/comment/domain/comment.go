@@ -4,10 +4,10 @@ import (
 	"time"
 )
 
-type TenantID int64
+type TenantID string
 
 type UserInfo struct {
-	ID        int64
+	ID        string
 	NickName  string
 	AvatarURL string
 	email     string
@@ -35,12 +35,12 @@ func (cs *CommentStatus) SetPending() {
 }
 
 type Comment struct {
-	ID        int64
-	PlateID   int64
-	UserID    int64
+	ID        string
+	PlateID   string
+	UserID    string
 	TenantID  TenantID
-	ParentID  int64
-	RootID    int64
+	ParentID  string
+	RootID    string
 	Content   string
 	status    CommentStatus
 	LikeCount int64
@@ -65,7 +65,7 @@ func (c *Comment) IsApproved() bool {
 }
 
 func (c *Comment) IsRootComment() bool {
-	return c.RootID == 0 && c.ParentID == 0
+	return c.RootID == "" && c.ParentID == ""
 }
 
 func (c *Comment) IsReply() bool {
@@ -73,23 +73,23 @@ func (c *Comment) IsReply() bool {
 }
 
 func (c *Comment) IsReplyRootComment() bool {
-	return c.RootID != 0 && c.ParentID == 0
+	return c.RootID != "" && c.ParentID == ""
 }
 
 func (c *Comment) IsReplyParentComment() bool {
-	return c.RootID != 0 && c.ParentID != 0
+	return c.RootID != "" && c.ParentID != ""
 }
 
 func (c *Comment) CanReply() bool {
 	return c.status == CommentStatusApproved
 }
 
-func (c *Comment) IsCommentByAdmin(userID int64) bool {
+func (c *Comment) IsCommentByAdmin(userID string) bool {
 	return c.UserID == userID
 }
 
-func (c *Comment) FilterSelf(userIds []int64) []int64 {
-	filteredIds := make([]int64, 0, 3)
+func (c *Comment) FilterSelf(userIds []string) []string {
+	filteredIds := make([]string, 0, 3)
 	for i := range userIds {
 		if userIds[i] != c.UserID {
 			filteredIds = append(filteredIds, userIds[i])
@@ -127,10 +127,10 @@ func (l *LikeStatus) Toogle() {
 // -- 评论响应
 
 type CommentWithUser struct {
-	ID        int64
+	ID        string
 	User      *UserInfo
-	ParentID  int64
-	RootID    int64
+	ParentID  string
+	RootID    string
 	Content   string
 	LikeCount int64
 	CreatedAt time.Time
@@ -139,8 +139,8 @@ type CommentWithUser struct {
 
 type CommentRootsQuery struct {
 	TenantID TenantID
-	PlateID  int64
-	LastID   int64
+	PlateID  string
+	LastID   string
 	PageSize int
 }
 
@@ -151,9 +151,9 @@ type CommentRoot struct {
 
 type CommentRepliesQuery struct {
 	TenantID TenantID
-	PlateID  int64
-	RootID   int64
-	LastID   int64
+	PlateID  string
+	RootID   string
+	LastID   string
 	PageSize int
 }
 
@@ -164,7 +164,7 @@ type CommentReply struct {
 // -- 板块
 
 type Plate struct {
-	ID         int64
+	ID         string
 	TenantID   TenantID
 	BelongKey  string
 	RelatedURL string
@@ -172,7 +172,7 @@ type Plate struct {
 }
 
 type PlateBelong struct {
-	ID        int64
+	ID        string
 	BelongKey string
 }
 
@@ -195,7 +195,6 @@ type CommentConfig struct {
 // TenantConfig 基于租户的全局配置
 type TenantConfig struct {
 	TenantID    TenantID
-	ClientToken string
 	IfAudit     bool
 	CreatedAt   time.Time
 	UpdatedAt   time.Time

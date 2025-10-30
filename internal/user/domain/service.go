@@ -3,7 +3,7 @@ package domain
 type UserService interface {
 	AuthenticateWithOAuth(provider string, userInfo *OAuthUserInfo) (*User2Token, error)
 	RefreshUserToken(refreshToken string) (*User2Token, error)
-	GetUser(id int64) (*User, error)
+	GetUser(id string) (*User, error)
 }
 
 type TokenService interface {

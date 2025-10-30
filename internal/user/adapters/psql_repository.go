@@ -21,7 +21,7 @@ func NewUserPSQLRepository() domain.UserRepository {
 	return &UserPSQLRepository{}
 }
 
-func (r *UserPSQLRepository) FindByID(id int64) (*domain.User, error) {
+func (r *UserPSQLRepository) FindByID(id string) (*domain.User, error) {
 	ormUser, err := orm.Users(orm.UserWhere.ID.EQ(id)).OneG()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -87,7 +87,7 @@ func (r *UserPSQLRepository) FindByOAuthID(provider, oauthID string) (*domain.Us
 	return ormUserToDomain(ormUser), nil
 }
 
-func (r *UserPSQLRepository) UpdateLastLogin(id int64) error {
+func (r *UserPSQLRepository) UpdateLastLogin(id string) error {
 	ormUser, err := orm.Users(orm.UserWhere.ID.EQ(id)).OneG()
 	if err != nil {
 		return fmt.Errorf("failed to find user: %w", err)

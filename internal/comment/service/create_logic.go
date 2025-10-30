@@ -114,8 +114,8 @@ func (s *service) validateCommentLegitimacy(comment *domain.Comment) error {
 }
 
 // 获取评论配置
-func (s *service) getCommentConfig(tenantID domain.TenantID, plateID int64) (*domain.CommentConfig, error) {
-	if tenantID == 0 || plateID == 0 {
+func (s *service) getCommentConfig(tenantID domain.TenantID, plateID string) (*domain.CommentConfig, error) {
+	if tenantID == "" || plateID == "" {
 		return nil, codes.ErrCommentIllegalReply
 	}
 
@@ -144,8 +144,8 @@ func (s *service) getCommentConfig(tenantID domain.TenantID, plateID int64) (*do
 
 	// 出现意外错误 记录日志 并且返回默认配置
 	zap.L().Error("获取配置失败",
-		zap.Int64("tenant_id", int64(tenantID)),
-		zap.Int64("plate_id", plateID),
+		zap.String("tenant_id", string(tenantID)),
+		zap.String("plate_id", plateID),
 		zap.Error(err))
 
 	return &domain.CommentConfig{
@@ -184,7 +184,7 @@ func (s *service) adminCommnet(comment *domain.Comment) error {
 			// 排除自己
 			filteredUids := comment.FilterSelf(uids)
 			// 去重
-			toUserIds := utils.UniqueInt64s(filteredUids)
+			toUserIds := utils.UniqueStrings(filteredUids)
 
 			// 无toUserIds 无需发送邮件
 			if len(toUserIds) == 0 {
@@ -273,7 +273,7 @@ func (s *service) viewerComment(comment *domain.Comment, admin *domain.UserInfo)
 				// 排除自己
 				filteredUids := comment.FilterSelf(uids)
 				// 去重 并添加管理员(此时可以确保管理员id不为用户id)
-				toUserIds := utils.UniqueInt64s(append(filteredUids, admin.ID))
+				toUserIds := utils.UniqueStrings(append(filteredUids, admin.ID))
 
 				// 无toUserIds 无需发送邮件
 				if len(toUserIds) == 0 {

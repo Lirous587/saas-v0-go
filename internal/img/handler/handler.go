@@ -82,7 +82,7 @@ func getExtByContentType(realType string) (ext string) {
 // @Param        object      formData  file  true  "图片文件"
 // @Param        path        formData  string false "自定义图片路径"
 // @Param        description formData  string false "图片描述"
-// @Param        category_id formData  int64  false "分类id"
+// @Param        category_id formData  string  false "分类id"
 // @Success      200 {object} response.successResponse "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
@@ -187,7 +187,7 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Param        page_size   query int    false "页码"
 // @Param        keyword     query string false "关键词"
 // @Param        deleted     query bool   false "是否查询回收站图片"
-// @Param        category_id query int64  false "分类id"
+// @Param        category_id query string  false "分类id"
 // @Success      200 {object} response.successResponse{data=handler.ImgListResponse} "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
@@ -223,7 +223,7 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 // @Tags         img
 // @Accept       json
 // @Produce      json
-// @Param        id path int64 true "图片id"
+// @Param        id path string true "图片id"
 // @Success      200 {object} response.successResponse "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
@@ -249,8 +249,8 @@ func (h *HttpHandler) ClearRecycleBin(ctx *gin.Context) {
 // @Tags         img
 // @Accept       json
 // @Produce      json
-// @Param        id path int64 true "图片id"
-// @Param        id path int64 true "图片id"
+// @Param        id path string true "图片id"
+// @Param        id path string true "图片id"
 // @Success      200 {object} response.successResponse "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
@@ -282,7 +282,7 @@ func (h *HttpHandler) ListenDeleteQueue() {
 // @Tags         img-category
 // @Accept       json
 // @Produce      json
-// @Param        tenant_id    path   int64  true  "租户id"
+// @Param        tenant_id    path   string  true  "租户id"
 // @Param        request body handler.CreateCategoryRequest true "请求参数"
 // @Success      200 {object} response.successResponse "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
@@ -312,8 +312,8 @@ func (h *HttpHandler) CreateCategory(ctx *gin.Context) {
 // @Tags         img-category
 // @Accept       json
 // @Produce      json
-// @Param        id      		path   int64  true  "分类id"
-// @Param        tenant_id  path   int64  true  "租户id"
+// @Param        id      		path   string  true  "分类id"
+// @Param        tenant_id  path   string  true  "租户id"
 // @Param        request body   handler.UpdateCategoryRequest true "请求参数"
 // @Success      200 {object} response.successResponse "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
@@ -344,8 +344,8 @@ func (h *HttpHandler) UpdateCategory(ctx *gin.Context) {
 // @Tags         img-category
 // @Accept       json
 // @Produce      json
-// @Param        id path int64 true "分类id"
-// @Param        tenant_id path int64 true "租户id"
+// @Param        id path string true "分类id"
+// @Param        tenant_id path string true "租户id"
 // @Success      200 {object} response.successResponse "删除成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
@@ -394,7 +394,7 @@ func (h *HttpHandler) ListCategories(ctx *gin.Context) {
 // @Tags         img
 // @Accept       json
 // @Produce      json
-// @Param        tenant_id      path   int64  true  "租户id"
+// @Param        tenant_id      path   string  true  "租户id"
 // @Param        request body   handler.SetR2ConfigRequest true "请求参数"
 // @Success      200 {object} response.successResponse "请求成功"
 // @Failure      500 {object} response.errorResponse "服务器错误"
@@ -431,7 +431,7 @@ func (h *HttpHandler) SetR2Config(ctx *gin.Context) {
 // @Tags         img
 // @Accept       json
 // @Produce      json
-// @Param        tenant_id      path   int64  true  "租户id"
+// @Param        tenant_id      path   string  true  "租户id"
 // @Success      200 {object} response.successResponse{data=handler.R2ConfigResponse} "请求成功"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth

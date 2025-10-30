@@ -25,7 +25,7 @@ func NewHttpHandler(service domain.CommentService) *HttpHandler {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id   	path int true "租户id"
+// @Param        tenant_id   	path string true "租户id"
 // @Param        belong_key   path string true "板块key"
 // @Param        request body handler.CreateRequest true "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
@@ -71,8 +71,8 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id   	path int true "租户id"
-// @Param        id   				path int true "评论id"
+// @Param        tenant_id   	path string true "租户id"
+// @Param        id   				path string true "评论id"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -104,10 +104,10 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id   path 	 int 	  true 	 "租户id"
-// @Param        belong_key  path 	 string true   "评论板块"
-// @Param        last_id     query   int    false  "上页最后一条记录id"
-// @Param        page_size   query   int    false  "页码"
+// @Param        tenant_id   path 	 string 	  true 	 "租户id"
+// @Param        belong_key  path 	 string 		true   "评论板块"
+// @Param        last_id     query   string     false  "上页最后一条记录id"
+// @Param        page_size   query   int    		false  "页码"
 // @Success      200  {object}  response.successResponse{data=[]handler.CommentRootResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -141,10 +141,10 @@ func (h *HttpHandler) ListRoots(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id   path 	 int 	  true 	 "租户id"
+// @Param        tenant_id   path 	 string 	  true 	 "租户id"
 // @Param        belong_key  path 	 string true   "评论板块"
-// @Param        root_id   	 path 	 int 	  true   "根评论id"
-// @Param        last_id     query   int    false  "上页最后一条记录id"
+// @Param        root_id   	 path 	 string 	  true   "根评论id"
+// @Param        last_id     query   string    false  "上页最后一条记录id"
 // @Param        page_size   query   int    false  "页码"
 // @Success      200  {object}  response.successResponse{data=[]handler.CommentReplyResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
@@ -180,8 +180,8 @@ func (h *HttpHandler) ListReplies(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id   	path int true "租户id"
-// @Param        id   				path int true "评论id"
+// @Param        tenant_id   	path string true "租户id"
+// @Param        id   				path string true "评论id"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -213,8 +213,8 @@ func (h *HttpHandler) ToggleLike(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id   path int true "租户id"
-// @Param        id   			 path int true "评论id"
+// @Param        tenant_id   path string true "租户id"
+// @Param        id   			 path string true "评论id"
 // @Param        request body handler.AuditRequest true "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
@@ -250,7 +250,7 @@ func (h *HttpHandler) Audit(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id   path int true "租户id"
+// @Param        tenant_id   path string true "租户id"
 // @Param        request body handler.SetTenantConfigRequest true "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
@@ -280,7 +280,7 @@ func (h *HttpHandler) SetTenantConfig(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id   path int true "租户id"
+// @Param        tenant_id   path string true "租户id"
 // @Success      200  {object}  response.successResponse{data=handler.TenantConfigResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -307,7 +307,7 @@ func (h *HttpHandler) GetTenantConfig(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id   path int true "租户id"
+// @Param        tenant_id   path string true "租户id"
 // @Param        request body handler.CreatePlateRequest true "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
@@ -339,8 +339,8 @@ func (h *HttpHandler) CreatePlate(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id   path int true "租户id"
-// @Param        id   			 path int true "板块id"
+// @Param        tenant_id   path string true "租户id"
+// @Param        id   			 path string true "板块id"
 // @Param        request body handler.CreatePlateRequest true "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
@@ -373,8 +373,8 @@ func (h *HttpHandler) UpdatePlate(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id   path int true "租户id"
-// @Param        id   			 path int true "板块id"
+// @Param        tenant_id   path string true "租户id"
+// @Param        id   			 path string true "板块id"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -400,7 +400,7 @@ func (h *HttpHandler) DeletePlate(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id   path int true "租户id"
+// @Param        tenant_id   path string true "租户id"
 // @Param        keyword    query     string  false  "关键词"
 // @Param        page       query     int     false  "页号"
 // @Param        page_size  query     int     false  "页码"
@@ -435,7 +435,7 @@ func (h *HttpHandler) ListPlate(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id   	path int true "租户id"
+// @Param        tenant_id   	path string true "租户id"
 // @Param        belong_key   path string true "板块key"
 // @Param        request body handler.SetPlateConfigRequest true "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
@@ -469,8 +469,8 @@ func (h *HttpHandler) SetPlateConfig(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        tenant_id path int true 	"租户id"
-// @Param        id  		   path int true 	"板块id"
+// @Param        tenant_id path string true 	"租户id"
+// @Param        id  		   path string true 	"板块id"
 // @Success      200  {object}  response.successResponse{data=handler.PlateConfigResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"

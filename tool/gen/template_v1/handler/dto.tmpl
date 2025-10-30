@@ -1,7 +1,7 @@
 package handler
 
 type {{.DomainTitle}}Response struct {
-    ID          int64  `json:"id"`
+    ID          string  `json:"id"`
     Title       string `json:"title"`
     Description string `json:"description,omitempty"`
     CreatedAt   int64  `json:"created_at"`
@@ -14,17 +14,17 @@ type CreateRequest struct {
 }
 
 type UpdateRequest struct {
-    ID          int64   `json:"-" uri:"id" binding:"required"`
+    ID          string   `json:"-" uri:"id" binding:"required"`
     Title       string  `json:"title" binding:"required,max=30"`
     Description string  `json:"description" binding:"max=60"`
 }
 
 type DeleteRequest struct {
-    ID          int64   `json:"-" uri:"id" binding:"required"`
+    ID          string   `json:"-" uri:"id" binding:"required"`
 }
 
 type ReadRequest struct {
-    ID          int64   `json:"-" uri:"id" binding:"required"`
+    ID          string   `json:"-" uri:"id" binding:"required"`
 }
 
 type ListRequest struct {

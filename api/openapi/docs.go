@@ -162,7 +162,7 @@ const docTemplate = `{
                 "summary": "获取租户级别的评论系统配置",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
@@ -220,7 +220,7 @@ const docTemplate = `{
                 "summary": "设置租户级别的评论系统配置",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
@@ -277,14 +277,14 @@ const docTemplate = `{
                 "summary": "点赞/取消点赞评论",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "评论id",
                         "name": "id",
                         "in": "path",
@@ -332,7 +332,7 @@ const docTemplate = `{
                 "summary": "评论板块列表",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
@@ -408,7 +408,7 @@ const docTemplate = `{
                 "summary": "新增评论板块",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
@@ -465,14 +465,14 @@ const docTemplate = `{
                 "summary": "修改评论板块",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "板块id",
                         "name": "id",
                         "in": "path",
@@ -529,7 +529,7 @@ const docTemplate = `{
                 "summary": "设置板块级别的评论系统配置",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
@@ -593,14 +593,14 @@ const docTemplate = `{
                 "summary": "获取板块级别的评论系统配置",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "板块id",
                         "name": "id",
                         "in": "path",
@@ -660,14 +660,14 @@ const docTemplate = `{
                 "summary": "删除评论板块",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "板块id",
                         "name": "id",
                         "in": "path",
@@ -715,7 +715,7 @@ const docTemplate = `{
                 "summary": "创建/回复评论",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
@@ -779,7 +779,7 @@ const docTemplate = `{
                 "summary": "获取根级评论列表",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
@@ -793,7 +793,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "上页最后一条记录id",
                         "name": "last_id",
                         "in": "query"
@@ -861,7 +861,7 @@ const docTemplate = `{
                 "summary": "获取根树下的回复评论列表",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
@@ -875,14 +875,14 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "根评论id",
                         "name": "root_id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "上页最后一条记录id",
                         "name": "last_id",
                         "in": "query"
@@ -950,14 +950,14 @@ const docTemplate = `{
                 "summary": "评论审计",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "评论id",
                         "name": "id",
                         "in": "path",
@@ -1012,14 +1012,14 @@ const docTemplate = `{
                 "summary": "删除评论",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "评论id",
                         "name": "id",
                         "in": "path",
@@ -1091,7 +1091,7 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "分类id",
                         "name": "category_id",
                         "in": "query"
@@ -1198,7 +1198,7 @@ const docTemplate = `{
                 "summary": "创建图片分类",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
@@ -1255,14 +1255,14 @@ const docTemplate = `{
                 "summary": "更新图片分类",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "分类id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
@@ -1317,14 +1317,14 @@ const docTemplate = `{
                 "summary": "删除图片分类",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "分类id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
@@ -1372,7 +1372,7 @@ const docTemplate = `{
                 "summary": "获取配置图库R2配置",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
@@ -1424,7 +1424,7 @@ const docTemplate = `{
                 "summary": "配置图库R2配置",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
@@ -1475,14 +1475,14 @@ const docTemplate = `{
                 "summary": "恢复回收站图片",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "图片id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "图片id",
                         "name": "id",
                         "in": "path",
@@ -1528,7 +1528,7 @@ const docTemplate = `{
                 "summary": "移除回收站图片",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "图片id",
                         "name": "id",
                         "in": "path",
@@ -1596,7 +1596,7 @@ const docTemplate = `{
                         "in": "formData"
                     },
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "分类id",
                         "name": "category_id",
                         "in": "formData"
@@ -1862,7 +1862,7 @@ const docTemplate = `{
                 "summary": "升级租户",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "id",
                         "name": "id",
                         "in": "path",
@@ -1919,7 +1919,7 @@ const docTemplate = `{
                 "summary": "查询单条租户信息",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "id",
                         "in": "path",
@@ -1977,7 +1977,7 @@ const docTemplate = `{
                 "summary": "更新",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "id",
                         "in": "path",
@@ -2032,7 +2032,7 @@ const docTemplate = `{
                 "summary": "删除",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "id",
                         "in": "path",
@@ -2080,7 +2080,7 @@ const docTemplate = `{
                 "summary": "获取租户计划",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "租户id",
                         "name": "id",
                         "in": "path",
@@ -2466,7 +2466,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "prefix": {
                     "type": "string"
@@ -2486,7 +2486,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "is_liked": {
                     "type": "boolean"
@@ -2495,10 +2495,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "parent_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "root_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "user": {
                     "$ref": "#/definitions/handler.UserInfo"
@@ -2515,7 +2515,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "is_liked": {
                     "type": "boolean"
@@ -2524,13 +2524,13 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "parent_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "replies_count": {
                     "type": "integer"
                 },
                 "root_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "user": {
                     "$ref": "#/definitions/handler.UserInfo"
@@ -2611,7 +2611,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "updated_at": {
                     "type": "integer"
@@ -2666,7 +2666,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/domain.PlanStatus"
                 },
                 "tenant_id": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },
@@ -2705,7 +2705,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "related_url": {
                     "type": "string"
@@ -2822,13 +2822,13 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "creator_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "description": {
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
@@ -2861,14 +2861,14 @@ const docTemplate = `{
         "handler.UpdateRequest": {
             "type": "object",
             "required": [
-                "id"
+                "name"
             ],
             "properties": {
                 "description": {
                     "type": "string",
                     "maxLength": 120
                 },
-                "id": {
+                "name": {
                     "type": "string",
                     "maxLength": 20
                 }
@@ -2877,11 +2877,11 @@ const docTemplate = `{
         "handler.UpgradeRequest": {
             "type": "object",
             "required": [
-                "plan_id"
+                "plan_type"
             ],
             "properties": {
-                "plan_id": {
-                    "type": "integer"
+                "plan_type": {
+                    "$ref": "#/definitions/domain.PlanType"
                 }
             }
         },
@@ -2892,7 +2892,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "nickname": {
                     "type": "string"
@@ -2912,7 +2912,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "last_login_at": {
                     "type": "integer"
@@ -2981,10 +2981,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "parent_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "root_id": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },

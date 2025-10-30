@@ -9,15 +9,15 @@ import (
 
 const UserIDKey = "user_id"
 
-func GetUserID(ctx *gin.Context) (int64, error) {
+func GetUserID(ctx *gin.Context) (string, error) {
 	uidStr, exist := ctx.Get(UserIDKey)
 	if !exist {
-		return 0, codes.ErrUserNotFound
+		return "", codes.ErrUserNotFound
 	}
 
-	userID, ok := uidStr.(int64)
+	userID, ok := uidStr.(string)
 	if !ok {
-		return 0, codes.ErrUserIDInvalid
+		return "", codes.ErrUserIDInvalid
 	}
 
 	return userID, nil
@@ -54,20 +54,16 @@ func SetTenantID(key string) gin.HandlerFunc {
 	}
 }
 
-func GetTenantID(ctx *gin.Context) (int64, error) {
+func GetTenantID(ctx *gin.Context) (string, error) {
 	if tenantIDStr := ctx.Param(TenantIDKey); tenantIDStr != "" {
-		tenantID, err := strconv.ParseInt(tenantIDStr, 10, 64)
-		if err != nil {
-			return 0, codes.ErrInvalidRequest.WithCause(err)
-		}
-		return tenantID, nil
+		return tenantIDStr, nil
 	}
 
 	if tid, exists := ctx.Get(TenantIDKey); exists {
-		if id, ok := tid.(int64); ok {
+		if id, ok := tid.(string); ok {
 			return id, nil
 		}
 	}
 
-	return 0, codes.ErrInvalidRequest.WithSlug("无租户id来源")
+	return "", codes.ErrInvalidRequest.WithSlug("无租户id来源")
 }

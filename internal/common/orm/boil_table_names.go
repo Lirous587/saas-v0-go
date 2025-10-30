@@ -4,8 +4,6 @@
 package orm
 
 var TableNames = struct {
-	Apis                 string
-	CasbinRule           string
 	CommentPlateConfigs  string
 	CommentPlates        string
 	CommentTenantConfigs string
@@ -16,8 +14,6 @@ var TableNames = struct {
 	Tenants              string
 	Users                string
 }{
-	Apis:                 "apis",
-	CasbinRule:           "casbin_rule",
 	CommentPlateConfigs:  "comment_plate_configs",
 	CommentPlates:        "comment_plates",
 	CommentTenantConfigs: "comment_tenant_configs",

@@ -43,7 +43,7 @@ func (s *userService) AuthenticateWithOAuth(provider string, userInfo *domain.OA
 	// 2. 更新最后登录时间
 	if err := s.userRepo.UpdateLastLogin(user.ID); err != nil {
 		// 这个错误不应该阻止登录流程，记录日志即可
-		zap.L().Error("更新用户最后登录时间失败", zap.Int64("user_id", user.ID), zap.Error(err))
+		zap.L().Error("更新用户最后登录时间失败", zap.String("user_id", user.ID), zap.Error(err))
 	}
 
 	// 3. 生成 Token
@@ -163,10 +163,10 @@ func (s *userService) bindOAuthToUser(user *domain.User, provider string, userIn
 	return s.userRepo.Update(user)
 }
 
-func (s *userService) GetUser(id int64) (*domain.User, error) {
+func (s *userService) GetUser(id string) (*domain.User, error) {
 	if err := s.userRepo.UpdateLastLogin(id); err != nil {
 		zap.L().Error("更新用户登录时间失败",
-			zap.Int64("id", id),
+			zap.String("id", id),
 			zap.Error(err))
 	}
 	return s.userRepo.FindByID(id)

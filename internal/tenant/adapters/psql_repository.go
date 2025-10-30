@@ -34,7 +34,7 @@ func (repo *TenantPSQLRepository) BeginTx(option ...*sql.TxOptions) (*sql.Tx, er
 	return boil.BeginTx(context.TODO(), op)
 }
 
-func (repo *TenantPSQLRepository) GetByID(id int64) (*domain.Tenant, error) {
+func (repo *TenantPSQLRepository) GetByID(id string) (*domain.Tenant, error) {
 	ormTenant, err := orm.FindTenantG(
 		id,
 		orm.TenantColumns.ID,
@@ -81,7 +81,7 @@ func (repo *TenantPSQLRepository) Update(tenant *domain.Tenant) error {
 	return nil
 }
 
-func (repo *TenantPSQLRepository) Delete(id int64) error {
+func (repo *TenantPSQLRepository) Delete(id string) error {
 	ormTenant := orm.Tenant{
 		ID: id,
 	}
@@ -142,7 +142,7 @@ func (repo *TenantPSQLRepository) Paging(query *domain.TenantPagingQuery) (*doma
 	}, nil
 }
 
-func (repo *TenantPSQLRepository) ExistSameName(creatorID int64, name string) (bool, error) {
+func (repo *TenantPSQLRepository) ExistSameName(creatorID string, name string) (bool, error) {
 	exist, err := orm.Tenants(
 		orm.TenantWhere.CreatorID.EQ(creatorID),
 		orm.TenantWhere.Name.EQ(name),
@@ -155,7 +155,7 @@ func (repo *TenantPSQLRepository) ExistSameName(creatorID int64, name string) (b
 	return exist, nil
 }
 
-func (repo *TenantPSQLRepository) IsCreatorHasPlan(creatorID int64, planType domain.PlanType) (bool, error) {
+func (repo *TenantPSQLRepository) IsCreatorHasPlan(creatorID string, planType domain.PlanType) (bool, error) {
 	exist, err := orm.Tenants(
 		orm.TenantWhere.CreatorID.EQ(creatorID),
 		orm.TenantWhere.PlanType.EQ(orm.TenantPlanType(planType)),
@@ -168,7 +168,7 @@ func (repo *TenantPSQLRepository) IsCreatorHasPlan(creatorID int64, planType dom
 
 }
 
-func (repo *TenantPSQLRepository) GetPlan(id int64) (*domain.Plan, error) {
+func (repo *TenantPSQLRepository) GetPlan(id string) (*domain.Plan, error) {
 	tenantPlan, err := orm.Tenants(
 		orm.TenantWhere.ID.EQ(id),
 	).OneG()

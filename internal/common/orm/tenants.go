@@ -23,17 +23,17 @@ import (
 
 // Tenant is an object representing the database table.
 type Tenant struct {
-	ID           int64                 `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID           string                `boil:"id" json:"id" toml:"id" yaml:"id"`
+	CreatorID    string                `boil:"creator_id" json:"creator_id" toml:"creator_id" yaml:"creator_id"`
+	PlanType     TenantPlanType        `boil:"plan_type" json:"plan_type" toml:"plan_type" yaml:"plan_type"`
 	Name         string                `boil:"name" json:"name" toml:"name" yaml:"name"`
-	CreatedAt    time.Time             `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt    time.Time             `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
-	Description  null.String           `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
-	CreatorID    int64                 `boil:"creator_id" json:"creator_id" toml:"creator_id" yaml:"creator_id"`
 	Status       TenantStatus          `boil:"status" json:"status" toml:"status" yaml:"status"`
 	BillingCycle TnantPlanBillingCycle `boil:"billing_cycle" json:"billing_cycle" toml:"billing_cycle" yaml:"billing_cycle"`
+	Description  null.String           `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
 	StartAt      time.Time             `boil:"start_at" json:"start_at" toml:"start_at" yaml:"start_at"`
 	EndAt        null.Time             `boil:"end_at" json:"end_at,omitempty" toml:"end_at" yaml:"end_at,omitempty"`
-	PlanType     TenantPlanType        `boil:"plan_type" json:"plan_type" toml:"plan_type" yaml:"plan_type"`
+	CreatedAt    time.Time             `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt    time.Time             `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *tenantR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L tenantL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -41,57 +41,92 @@ type Tenant struct {
 
 var TenantColumns = struct {
 	ID           string
-	Name         string
-	CreatedAt    string
-	UpdatedAt    string
-	Description  string
 	CreatorID    string
+	PlanType     string
+	Name         string
 	Status       string
 	BillingCycle string
+	Description  string
 	StartAt      string
 	EndAt        string
-	PlanType     string
+	CreatedAt    string
+	UpdatedAt    string
 }{
 	ID:           "id",
-	Name:         "name",
-	CreatedAt:    "created_at",
-	UpdatedAt:    "updated_at",
-	Description:  "description",
 	CreatorID:    "creator_id",
+	PlanType:     "plan_type",
+	Name:         "name",
 	Status:       "status",
 	BillingCycle: "billing_cycle",
+	Description:  "description",
 	StartAt:      "start_at",
 	EndAt:        "end_at",
-	PlanType:     "plan_type",
+	CreatedAt:    "created_at",
+	UpdatedAt:    "updated_at",
 }
 
 var TenantTableColumns = struct {
 	ID           string
-	Name         string
-	CreatedAt    string
-	UpdatedAt    string
-	Description  string
 	CreatorID    string
+	PlanType     string
+	Name         string
 	Status       string
 	BillingCycle string
+	Description  string
 	StartAt      string
 	EndAt        string
-	PlanType     string
+	CreatedAt    string
+	UpdatedAt    string
 }{
 	ID:           "tenants.id",
-	Name:         "tenants.name",
-	CreatedAt:    "tenants.created_at",
-	UpdatedAt:    "tenants.updated_at",
-	Description:  "tenants.description",
 	CreatorID:    "tenants.creator_id",
+	PlanType:     "tenants.plan_type",
+	Name:         "tenants.name",
 	Status:       "tenants.status",
 	BillingCycle: "tenants.billing_cycle",
+	Description:  "tenants.description",
 	StartAt:      "tenants.start_at",
 	EndAt:        "tenants.end_at",
-	PlanType:     "tenants.plan_type",
+	CreatedAt:    "tenants.created_at",
+	UpdatedAt:    "tenants.updated_at",
 }
 
 // Generated where
+
+type whereHelperTenantPlanType struct{ field string }
+
+func (w whereHelperTenantPlanType) EQ(x TenantPlanType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelperTenantPlanType) NEQ(x TenantPlanType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperTenantPlanType) LT(x TenantPlanType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelperTenantPlanType) LTE(x TenantPlanType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperTenantPlanType) GT(x TenantPlanType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelperTenantPlanType) GTE(x TenantPlanType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+func (w whereHelperTenantPlanType) IN(slice []TenantPlanType) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperTenantPlanType) NIN(slice []TenantPlanType) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
 
 type whereHelperTenantStatus struct{ field string }
 
@@ -163,65 +198,30 @@ func (w whereHelperTnantPlanBillingCycle) NIN(slice []TnantPlanBillingCycle) qm.
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
-type whereHelperTenantPlanType struct{ field string }
-
-func (w whereHelperTenantPlanType) EQ(x TenantPlanType) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.EQ, x)
-}
-func (w whereHelperTenantPlanType) NEQ(x TenantPlanType) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.NEQ, x)
-}
-func (w whereHelperTenantPlanType) LT(x TenantPlanType) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelperTenantPlanType) LTE(x TenantPlanType) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelperTenantPlanType) GT(x TenantPlanType) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelperTenantPlanType) GTE(x TenantPlanType) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-func (w whereHelperTenantPlanType) IN(slice []TenantPlanType) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelperTenantPlanType) NIN(slice []TenantPlanType) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
 var TenantWhere = struct {
-	ID           whereHelperint64
+	ID           whereHelperstring
+	CreatorID    whereHelperstring
+	PlanType     whereHelperTenantPlanType
 	Name         whereHelperstring
-	CreatedAt    whereHelpertime_Time
-	UpdatedAt    whereHelpertime_Time
-	Description  whereHelpernull_String
-	CreatorID    whereHelperint64
 	Status       whereHelperTenantStatus
 	BillingCycle whereHelperTnantPlanBillingCycle
+	Description  whereHelpernull_String
 	StartAt      whereHelpertime_Time
 	EndAt        whereHelpernull_Time
-	PlanType     whereHelperTenantPlanType
+	CreatedAt    whereHelpertime_Time
+	UpdatedAt    whereHelpertime_Time
 }{
-	ID:           whereHelperint64{field: "\"tenants\".\"id\""},
+	ID:           whereHelperstring{field: "\"tenants\".\"id\""},
+	CreatorID:    whereHelperstring{field: "\"tenants\".\"creator_id\""},
+	PlanType:     whereHelperTenantPlanType{field: "\"tenants\".\"plan_type\""},
 	Name:         whereHelperstring{field: "\"tenants\".\"name\""},
-	CreatedAt:    whereHelpertime_Time{field: "\"tenants\".\"created_at\""},
-	UpdatedAt:    whereHelpertime_Time{field: "\"tenants\".\"updated_at\""},
-	Description:  whereHelpernull_String{field: "\"tenants\".\"description\""},
-	CreatorID:    whereHelperint64{field: "\"tenants\".\"creator_id\""},
 	Status:       whereHelperTenantStatus{field: "\"tenants\".\"status\""},
 	BillingCycle: whereHelperTnantPlanBillingCycle{field: "\"tenants\".\"billing_cycle\""},
+	Description:  whereHelpernull_String{field: "\"tenants\".\"description\""},
 	StartAt:      whereHelpertime_Time{field: "\"tenants\".\"start_at\""},
 	EndAt:        whereHelpernull_Time{field: "\"tenants\".\"end_at\""},
-	PlanType:     whereHelperTenantPlanType{field: "\"tenants\".\"plan_type\""},
+	CreatedAt:    whereHelpertime_Time{field: "\"tenants\".\"created_at\""},
+	UpdatedAt:    whereHelpertime_Time{field: "\"tenants\".\"updated_at\""},
 }
 
 // TenantRels is where relationship names are stored.
@@ -394,9 +394,9 @@ func (r *tenantR) GetImgs() ImgSlice {
 type tenantL struct{}
 
 var (
-	tenantAllColumns            = []string{"id", "name", "created_at", "updated_at", "description", "creator_id", "status", "billing_cycle", "start_at", "end_at", "plan_type"}
-	tenantColumnsWithoutDefault = []string{"name", "creator_id"}
-	tenantColumnsWithDefault    = []string{"id", "created_at", "updated_at", "description", "status", "billing_cycle", "start_at", "end_at", "plan_type"}
+	tenantAllColumns            = []string{"id", "creator_id", "plan_type", "name", "status", "billing_cycle", "description", "start_at", "end_at", "created_at", "updated_at"}
+	tenantColumnsWithoutDefault = []string{"creator_id", "name"}
+	tenantColumnsWithDefault    = []string{"id", "plan_type", "status", "billing_cycle", "description", "start_at", "end_at", "created_at", "updated_at"}
 	tenantPrimaryKeyColumns     = []string{"id"}
 	tenantGeneratedColumns      = []string{}
 )
@@ -893,7 +893,7 @@ func (tenantL) LoadCreator(e boil.Executor, singular bool, maybeTenant interface
 		if foreign.R == nil {
 			foreign.R = &userR{}
 		}
-		foreign.R.CreatorTenants = append(foreign.R.CreatorTenants, object)
+		foreign.R.CreatorTenant = object
 		return nil
 	}
 
@@ -904,7 +904,7 @@ func (tenantL) LoadCreator(e boil.Executor, singular bool, maybeTenant interface
 				if foreign.R == nil {
 					foreign.R = &userR{}
 				}
-				foreign.R.CreatorTenants = append(foreign.R.CreatorTenants, local)
+				foreign.R.CreatorTenant = local
 				break
 			}
 		}
@@ -1715,7 +1715,7 @@ func (tenantL) LoadImgs(e boil.Executor, singular bool, maybeTenant interface{},
 
 // SetCreatorG of the tenant to the related item.
 // Sets o.R.Creator to related.
-// Adds o to related.R.CreatorTenants.
+// Adds o to related.R.CreatorTenant.
 // Uses the global database handle.
 func (o *Tenant) SetCreatorG(insert bool, related *User) error {
 	return o.SetCreator(boil.GetDB(), insert, related)
@@ -1723,7 +1723,7 @@ func (o *Tenant) SetCreatorG(insert bool, related *User) error {
 
 // SetCreator of the tenant to the related item.
 // Sets o.R.Creator to related.
-// Adds o to related.R.CreatorTenants.
+// Adds o to related.R.CreatorTenant.
 func (o *Tenant) SetCreator(exec boil.Executor, insert bool, related *User) error {
 	var err error
 	if insert {
@@ -1758,10 +1758,10 @@ func (o *Tenant) SetCreator(exec boil.Executor, insert bool, related *User) erro
 
 	if related.R == nil {
 		related.R = &userR{
-			CreatorTenants: TenantSlice{o},
+			CreatorTenant: o,
 		}
 	} else {
-		related.R.CreatorTenants = append(related.R.CreatorTenants, o)
+		related.R.CreatorTenant = o
 	}
 
 	return nil
@@ -2198,13 +2198,13 @@ func Tenants(mods ...qm.QueryMod) tenantQuery {
 }
 
 // FindTenantG retrieves a single record by ID.
-func FindTenantG(iD int64, selectCols ...string) (*Tenant, error) {
+func FindTenantG(iD string, selectCols ...string) (*Tenant, error) {
 	return FindTenant(boil.GetDB(), iD, selectCols...)
 }
 
 // FindTenant retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindTenant(exec boil.Executor, iD int64, selectCols ...string) (*Tenant, error) {
+func FindTenant(exec boil.Executor, iD string, selectCols ...string) (*Tenant, error) {
 	tenantObj := &Tenant{}
 
 	sel := "*"
@@ -2781,12 +2781,12 @@ func (o *TenantSlice) ReloadAll(exec boil.Executor) error {
 }
 
 // TenantExistsG checks if the Tenant row exists.
-func TenantExistsG(iD int64) (bool, error) {
+func TenantExistsG(iD string) (bool, error) {
 	return TenantExists(boil.GetDB(), iD)
 }
 
 // TenantExists checks if the Tenant row exists.
-func TenantExists(exec boil.Executor, iD int64) (bool, error) {
+func TenantExists(exec boil.Executor, iD string) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"tenants\" where \"id\"=$1 limit 1)"
 

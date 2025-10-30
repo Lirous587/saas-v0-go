@@ -2,11 +2,11 @@
 
 
 type {{.DomainTitle}}Repository interface {
-	FindByID(id int64) (*{{.DomainTitle}}, error)
+	FindByID(id string) (*{{.DomainTitle}}, error)
 
 	Create({{.Domain}} *{{.DomainTitle}}) (*{{.DomainTitle}}, error)
 	Update({{.Domain}} *{{.DomainTitle}})  error
-	Delete(id int64) error
+	Delete(id string) error
 	List(query *{{.DomainTitle}}Query) (*{{.DomainTitle}}List, error)
 }
 

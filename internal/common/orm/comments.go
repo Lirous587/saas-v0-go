@@ -23,12 +23,12 @@ import (
 
 // Comment is an object representing the database table.
 type Comment struct {
-	ID        int64         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	TenantID  int64         `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
-	PlateID   int64         `boil:"plate_id" json:"plate_id" toml:"plate_id" yaml:"plate_id"`
-	UserID    int64         `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
-	ParentID  null.Int64    `boil:"parent_id" json:"parent_id,omitempty" toml:"parent_id" yaml:"parent_id,omitempty"`
-	RootID    null.Int64    `boil:"root_id" json:"root_id,omitempty" toml:"root_id" yaml:"root_id,omitempty"`
+	ID        string        `boil:"id" json:"id" toml:"id" yaml:"id"`
+	TenantID  string        `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
+	PlateID   string        `boil:"plate_id" json:"plate_id" toml:"plate_id" yaml:"plate_id"`
+	UserID    string        `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	ParentID  null.String   `boil:"parent_id" json:"parent_id,omitempty" toml:"parent_id" yaml:"parent_id,omitempty"`
+	RootID    null.String   `boil:"root_id" json:"root_id,omitempty" toml:"root_id" yaml:"root_id,omitempty"`
 	Content   string        `boil:"content" json:"content" toml:"content" yaml:"content"`
 	Status    CommentStatus `boil:"status" json:"status" toml:"status" yaml:"status"`
 	LikeCount int64         `boil:"like_count" json:"like_count" toml:"like_count" yaml:"like_count"`
@@ -88,34 +88,52 @@ var CommentTableColumns = struct {
 
 // Generated where
 
-type whereHelpernull_Int64 struct{ field string }
+type whereHelpernull_String struct{ field string }
 
-func (w whereHelpernull_Int64) EQ(x null.Int64) qm.QueryMod {
+func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
 	return qmhelper.WhereNullEQ(w.field, false, x)
 }
-func (w whereHelpernull_Int64) NEQ(x null.Int64) qm.QueryMod {
+func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
 	return qmhelper.WhereNullEQ(w.field, true, x)
 }
-func (w whereHelpernull_Int64) LT(x null.Int64) qm.QueryMod {
+func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LT, x)
 }
-func (w whereHelpernull_Int64) LTE(x null.Int64) qm.QueryMod {
+func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LTE, x)
 }
-func (w whereHelpernull_Int64) GT(x null.Int64) qm.QueryMod {
+func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GT, x)
 }
-func (w whereHelpernull_Int64) GTE(x null.Int64) qm.QueryMod {
+func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
-func (w whereHelpernull_Int64) IN(slice []int64) qm.QueryMod {
+func (w whereHelpernull_String) LIKE(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" LIKE ?", x)
+}
+func (w whereHelpernull_String) NLIKE(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" NOT LIKE ?", x)
+}
+func (w whereHelpernull_String) ILIKE(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" ILIKE ?", x)
+}
+func (w whereHelpernull_String) NILIKE(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" NOT ILIKE ?", x)
+}
+func (w whereHelpernull_String) SIMILAR(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" SIMILAR TO ?", x)
+}
+func (w whereHelpernull_String) NSIMILAR(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" NOT SIMILAR TO ?", x)
+}
+func (w whereHelpernull_String) IN(slice []string) qm.QueryMod {
 	values := make([]interface{}, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
-func (w whereHelpernull_Int64) NIN(slice []int64) qm.QueryMod {
+func (w whereHelpernull_String) NIN(slice []string) qm.QueryMod {
 	values := make([]interface{}, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
@@ -123,8 +141,8 @@ func (w whereHelpernull_Int64) NIN(slice []int64) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
-func (w whereHelpernull_Int64) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Int64) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 type whereHelperCommentStatus struct{ field string }
 
@@ -161,24 +179,47 @@ func (w whereHelperCommentStatus) NIN(slice []CommentStatus) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
+type whereHelperint64 struct{ field string }
+
+func (w whereHelperint64) EQ(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint64) NEQ(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint64) LT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint64) LTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint64) GT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint64) GTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperint64) IN(slice []int64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperint64) NIN(slice []int64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
 var CommentWhere = struct {
-	ID        whereHelperint64
-	TenantID  whereHelperint64
-	PlateID   whereHelperint64
-	UserID    whereHelperint64
-	ParentID  whereHelpernull_Int64
-	RootID    whereHelpernull_Int64
+	ID        whereHelperstring
+	TenantID  whereHelperstring
+	PlateID   whereHelperstring
+	UserID    whereHelperstring
+	ParentID  whereHelpernull_String
+	RootID    whereHelpernull_String
 	Content   whereHelperstring
 	Status    whereHelperCommentStatus
 	LikeCount whereHelperint64
 	CreatedAt whereHelpertime_Time
 }{
-	ID:        whereHelperint64{field: "\"comments\".\"id\""},
-	TenantID:  whereHelperint64{field: "\"comments\".\"tenant_id\""},
-	PlateID:   whereHelperint64{field: "\"comments\".\"plate_id\""},
-	UserID:    whereHelperint64{field: "\"comments\".\"user_id\""},
-	ParentID:  whereHelpernull_Int64{field: "\"comments\".\"parent_id\""},
-	RootID:    whereHelpernull_Int64{field: "\"comments\".\"root_id\""},
+	ID:        whereHelperstring{field: "\"comments\".\"id\""},
+	TenantID:  whereHelperstring{field: "\"comments\".\"tenant_id\""},
+	PlateID:   whereHelperstring{field: "\"comments\".\"plate_id\""},
+	UserID:    whereHelperstring{field: "\"comments\".\"user_id\""},
+	ParentID:  whereHelpernull_String{field: "\"comments\".\"parent_id\""},
+	RootID:    whereHelpernull_String{field: "\"comments\".\"root_id\""},
 	Content:   whereHelperstring{field: "\"comments\".\"content\""},
 	Status:    whereHelperCommentStatus{field: "\"comments\".\"status\""},
 	LikeCount: whereHelperint64{field: "\"comments\".\"like_count\""},
@@ -2219,13 +2260,13 @@ func Comments(mods ...qm.QueryMod) commentQuery {
 }
 
 // FindCommentG retrieves a single record by ID.
-func FindCommentG(iD int64, selectCols ...string) (*Comment, error) {
+func FindCommentG(iD string, selectCols ...string) (*Comment, error) {
 	return FindComment(boil.GetDB(), iD, selectCols...)
 }
 
 // FindComment retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindComment(exec boil.Executor, iD int64, selectCols ...string) (*Comment, error) {
+func FindComment(exec boil.Executor, iD string, selectCols ...string) (*Comment, error) {
 	commentObj := &Comment{}
 
 	sel := "*"
@@ -2794,12 +2835,12 @@ func (o *CommentSlice) ReloadAll(exec boil.Executor) error {
 }
 
 // CommentExistsG checks if the Comment row exists.
-func CommentExistsG(iD int64) (bool, error) {
+func CommentExistsG(iD string) (bool, error) {
 	return CommentExists(boil.GetDB(), iD)
 }
 
 // CommentExists checks if the Comment row exists.
-func CommentExists(exec boil.Executor, iD int64) (bool, error) {
+func CommentExists(exec boil.Executor, iD string) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"comments\" where \"id\"=$1 limit 1)"
 

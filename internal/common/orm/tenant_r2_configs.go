@@ -22,7 +22,7 @@ import (
 
 // TenantR2Config is an object representing the database table.
 type TenantR2Config struct {
-	TenantID        int64     `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
+	TenantID        string    `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
 	AccountID       string    `boil:"account_id" json:"account_id" toml:"account_id" yaml:"account_id"`
 	AccessKeyID     string    `boil:"access_key_id" json:"access_key_id" toml:"access_key_id" yaml:"access_key_id"`
 	SecretAccessKey string    `boil:"secret_access_key" json:"secret_access_key" toml:"secret_access_key" yaml:"secret_access_key"`
@@ -83,7 +83,7 @@ var TenantR2ConfigTableColumns = struct {
 // Generated where
 
 var TenantR2ConfigWhere = struct {
-	TenantID        whereHelperint64
+	TenantID        whereHelperstring
 	AccountID       whereHelperstring
 	AccessKeyID     whereHelperstring
 	SecretAccessKey whereHelperstring
@@ -93,7 +93,7 @@ var TenantR2ConfigWhere = struct {
 	CreatedAt       whereHelpertime_Time
 	UpdatedAt       whereHelpertime_Time
 }{
-	TenantID:        whereHelperint64{field: "\"tenant_r2_configs\".\"tenant_id\""},
+	TenantID:        whereHelperstring{field: "\"tenant_r2_configs\".\"tenant_id\""},
 	AccountID:       whereHelperstring{field: "\"tenant_r2_configs\".\"account_id\""},
 	AccessKeyID:     whereHelperstring{field: "\"tenant_r2_configs\".\"access_key_id\""},
 	SecretAccessKey: whereHelperstring{field: "\"tenant_r2_configs\".\"secret_access_key\""},
@@ -634,13 +634,13 @@ func TenantR2Configs(mods ...qm.QueryMod) tenantR2ConfigQuery {
 }
 
 // FindTenantR2ConfigG retrieves a single record by ID.
-func FindTenantR2ConfigG(tenantID int64, selectCols ...string) (*TenantR2Config, error) {
+func FindTenantR2ConfigG(tenantID string, selectCols ...string) (*TenantR2Config, error) {
 	return FindTenantR2Config(boil.GetDB(), tenantID, selectCols...)
 }
 
 // FindTenantR2Config retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindTenantR2Config(exec boil.Executor, tenantID int64, selectCols ...string) (*TenantR2Config, error) {
+func FindTenantR2Config(exec boil.Executor, tenantID string, selectCols ...string) (*TenantR2Config, error) {
 	tenantR2ConfigObj := &TenantR2Config{}
 
 	sel := "*"
@@ -1217,12 +1217,12 @@ func (o *TenantR2ConfigSlice) ReloadAll(exec boil.Executor) error {
 }
 
 // TenantR2ConfigExistsG checks if the TenantR2Config row exists.
-func TenantR2ConfigExistsG(tenantID int64) (bool, error) {
+func TenantR2ConfigExistsG(tenantID string) (bool, error) {
 	return TenantR2ConfigExists(boil.GetDB(), tenantID)
 }
 
 // TenantR2ConfigExists checks if the TenantR2Config row exists.
-func TenantR2ConfigExists(exec boil.Executor, tenantID int64) (bool, error) {
+func TenantR2ConfigExists(exec boil.Executor, tenantID string) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"tenant_r2_configs\" where \"tenant_id\"=$1 limit 1)"
 

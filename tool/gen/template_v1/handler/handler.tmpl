@@ -19,20 +19,6 @@ func NewHttpHandler(service domain.{{.DomainTitle}}Service) *HttpHandler {
     }
 }
 
-func (h *HttpHandler) getID(ctx *gin.Context) (int64, error) {
-    idStr := ctx.Param("id")
-    if idStr == "" {
-        return 0,errors.New("请传递id参数")
-	}
-    idInt, err := strconv.Atoi(idStr)
-    if err != nil {
-        return 0, errors.WithStack(err)
-    }
-    if idInt == 0 {
-       	return 0, errors.WithStack(errors.New("无效的id"))
-    }
-    return int64(idInt), nil
-}
 
 // Create godoc
 // @Summary      创建
@@ -69,7 +55,7 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "id"
+// @Param        id   path string true "id"
 // @Param        request body handler.UpdateRequest true "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
@@ -102,7 +88,7 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path int true "id"
+// @Param        id   path string true "id"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -127,7 +113,7 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Tags         {{.Domain}}
 // @Accept       json
 // @Produce      json
-// @Param        id   path int true "id"
+// @Param        id   path string true "id"
 // @Success      200  {object}  response.successResponse{data=handler.{{.DomainTitle}}Response} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"

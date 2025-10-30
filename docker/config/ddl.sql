@@ -1,31 +1,10 @@
 -- 安装扩展
-CREATE
-    EXTENSION IF NOT EXISTS pg_trgm;
-
-
--- casbin_rule
-CREATE TABLE public.casbin_rule
-(
-    id    serial4      NOT NULL,
-    ptype varchar(100) NOT NULL,
-    v0    varchar(100) NULL,
-    v1    varchar(100) NULL,
-    v2    varchar(100) NULL,
-    v3    varchar(100) NULL,
-    v4    varchar(100) NULL,
-    v5    varchar(100) NULL,
-    CONSTRAINT casbin_rule_pkey PRIMARY KEY (id)
-);
-CREATE INDEX idx_casbin_rule_ptype ON public.casbin_rule USING btree (ptype);
-CREATE INDEX idx_casbin_rule_v0 ON public.casbin_rule USING btree (v0);
-CREATE INDEX idx_casbin_rule_v1 ON public.casbin_rule USING btree (v1);
-CREATE INDEX IF NOT EXISTS idx_casbin_rule_ptype_v0_v1_v2 ON public.casbin_rule (ptype, v0, v1, v2);
-
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- 用户表
 CREATE TABLE public.users
 (
-    id            bigserial      NOT NULL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     nickname      varchar(20)    NOT NULL,
     email         varchar(80)    NOT NULL UNIQUE,
     avatar_url    varchar(255)   NOT NULL,
@@ -48,8 +27,8 @@ CREATE TYPE tenant_status AS ENUM ('active', 'inactive');
 CREATE TYPE tnant_plan_billing_cycle AS ENUM ('monthly', 'yearly', 'lifetime');
 CREATE TABLE public.tenants
 (
-    id             bigserial PRIMARY KEY,
-    creator_id     bigint               NOT NULL REFERENCES public.users (id) ON DELETE RESTRICT,
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    creator_id     UUID               NOT NULL REFERENCES public.users (id) ON DELETE RESTRICT,
     plan_type      tenant_plan_type     NOT NULL DEFAULT 'free',
     name           varchar(20)          NOT NULL,
     status         tenant_status        NOT NULL DEFAULT 'active',
@@ -72,7 +51,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_user_one_care_plan ON public.tenants (creat
 -- CREATE TABLE public.tenant_plan_history
 -- (
 --     id            bigserial PRIMARY KEY,
---     tenant_id     bigint         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
+--     tenant_id     UUID         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
 --     old_plan_type tenant_plan_type,
 --     new_plan_type tenant_plan_type NOT NULL,
 --     upgraded_at   timestamptz(6) NOT NULL DEFAULT now()
@@ -81,7 +60,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_user_one_care_plan ON public.tenants (creat
 -- 租户限制配置表
 -- CREATE TABLE public.tenant_limits
 -- (
---     plan_id    bigint NOT NULL REFERENCES public.plans (id) ON DELETE CASCADE PRIMARY KEY,
+--     plan_id    UUID NOT NULL REFERENCES public.plans (id) ON DELETE CASCADE PRIMARY KEY,
 --     api_calls  int    NOT NULL DEFAULT 1000,
 --     plates     int    NOT NULL DEFAULT 5,
 --     created_at timestamptz(6) NOT NULL DEFAULT now(),
@@ -93,8 +72,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_user_one_care_plan ON public.tenants (creat
 -- img_categories
 CREATE TABLE public.img_categories
 (
-    id         bigserial PRIMARY KEY,
-    tenant_id  bigint         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    tenant_id  UUID         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
     title      varchar(10)    NOT NULL,
     prefix     varchar(20)    NOT NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
@@ -102,26 +81,28 @@ CREATE TABLE public.img_categories
 );
 
 
+
 -- img 表
 CREATE TABLE public.imgs
 (
-    id          bigserial PRIMARY KEY,
-    tenant_id   bigint         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
+    id          UUID PRIMARY KEY DEFAULT uuidv7(),
+    tenant_id   UUID         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
+    category_id UUID REFERENCES img_categories (id),
     path        varchar(120)   NOT NULL,
     description varchar(60),
     created_at  timestamptz(6) NOT NULL DEFAULT now(),
-    updated_at  timestamptz(6) NOT NULL,
+    updated_at  timestamptz(6) NOT NULL DEFAULT now(),
     deleted_at  timestamptz(6),
-    category_id bigint REFERENCES img_categories (id),
     UNIQUE (tenant_id, path)
 );
 CREATE INDEX idx_img_deleted_at ON public.imgs (deleted_at);
 CREATE INDEX idx_img_description_trgm ON public.imgs USING gin (description gin_trgm_ops);
 
 
+
 -- 租户r2配置表
 CREATE TABLE public.tenant_r2_configs (
-    tenant_id bigint NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE PRIMARY KEY,  
+    tenant_id UUID NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE PRIMARY KEY,  
     account_id varchar(255) NOT NULL,
     access_key_id varchar(255) NOT NULL,
     secret_access_key varchar(255) NOT NULL,  -- 加密存储
@@ -133,19 +114,22 @@ CREATE TABLE public.tenant_r2_configs (
 );
 
 
+
 -- 评论板块表
 CREATE TABLE public.comment_plates
 (
-    id          bigserial      PRIMARY KEY,
-    summary     varchar(60)    NOT NULL,
+    id          UUID PRIMARY KEY DEFAULT uuidv7(),
     belong_key  varchar(50)    NOT NULL,  -- 资源标识，如 "article:123"
-    tenant_id   bigint         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
+    related_url  varchar(255) NOT NULL,
+    summary     varchar(60)    NOT NULL,
+    tenant_id   UUID         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
     UNIQUE (tenant_id, belong_key)
 );
 -- 索引优化
 CREATE INDEX IF NOT EXISTS idx_comment_plates_tenant_id ON public.comment_plates (tenant_id);
 CREATE INDEX IF NOT EXISTS idx_comment_plates_belong_key ON public.comment_plates (belong_key);
-CREATE INDEX idx_comment_plates_description_trgm ON public.comment_plates USING gin (description gin_trgm_ops);
+CREATE INDEX idx_comment_plates_summary_trgm ON public.comment_plates USING gin (summary gin_trgm_ops);
+
 
 
 -- 评论表
@@ -155,12 +139,12 @@ CREATE TYPE comment_status AS ENUM (
 );
 CREATE TABLE public.comments
 (
-    id         bigserial      PRIMARY KEY,
-    tenant_id  bigint         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
-    plate_id   bigint         NOT NULL REFERENCES public.comment_plates (id) ON DELETE CASCADE,
-    user_id    bigint         NOT NULL REFERENCES public.users (id) ON DELETE CASCADE,
-    parent_id  bigint         NULL REFERENCES public.comments (id) ON DELETE CASCADE,
-    root_id    bigint         NULL REFERENCES public.comments (id) ON DELETE CASCADE,
+    id         UUID PRIMARY KEY DEFAULT uuidv7(),
+    tenant_id  UUID         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
+    plate_id   UUID         NOT NULL REFERENCES public.comment_plates (id) ON DELETE CASCADE,
+    user_id    UUID         NOT NULL REFERENCES public.users (id) ON DELETE CASCADE,
+    parent_id  UUID         NULL REFERENCES public.comments (id) ON DELETE CASCADE,
+    root_id    UUID         NULL REFERENCES public.comments (id) ON DELETE CASCADE,
     content    text           NOT NULL,
     status     comment_status NOT NULL DEFAULT 'pending',
     like_count int8           NOT NULL DEFAULT 0,
@@ -184,11 +168,11 @@ CREATE INDEX IF NOT EXISTS idx_comments_like_count ON public.comments (like_coun
 CREATE INDEX idx_comments_tenant_plate_status_root_parent ON public.comments (tenant_id, plate_id, status, root_id, parent_id);
 
 
+
 -- 评论租户全局配置（默认配置）
 CREATE TABLE public.comment_tenant_configs
 (
-    tenant_id    bigint      NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE PRIMARY KEY,
-    client_token text        NOT NULL,  -- 客户端令牌，用于 API 访问控制，防止接口被刷
+    tenant_id    UUID      NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE PRIMARY KEY,
     if_audit     boolean     NOT NULL DEFAULT true,   -- 是否开启审核
     created_at   timestamptz(6) NOT NULL DEFAULT now(),
     updated_at   timestamptz(6) NOT NULL DEFAULT now()
@@ -198,8 +182,8 @@ CREATE INDEX IF NOT EXISTS idx_comment_tenant_configs_if_audit ON public.comment
 -- 评论板块配置（资源级别，高精细度）
 CREATE TABLE public.comment_plate_configs
 (
-    tenant_id     bigint      NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
-    plate_id      bigint         NOT NULL REFERENCES public.comment_plates (id) ON DELETE CASCADE,
+    tenant_id     UUID      NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
+    plate_id      UUID         NOT NULL REFERENCES public.comment_plates (id) ON DELETE CASCADE,
     if_audit      boolean     NOT NULL DEFAULT true,  -- 是否开启审核
     created_at    timestamptz(6) NOT NULL DEFAULT now(),
     updated_at    timestamptz(6) NOT NULL DEFAULT now(),

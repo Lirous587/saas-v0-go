@@ -19,7 +19,7 @@ func New{{.DomainTitle}}PSQLRepository() domain.{{.DomainTitle}}Repository {
 	return &{{.DomainTitle}}PSQLRepository{}
 }
 
-func (repo *{{.DomainTitle}}PSQLRepository) FindByID(id int64) (*domain.{{.DomainTitle}}, error) {
+func (repo *{{.DomainTitle}}PSQLRepository) FindByID(id string) (*domain.{{.DomainTitle}}, error) {
 	orm{{.DomainTitle}}, err := orm.Find{{.DomainTitle}}G(id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -55,7 +55,7 @@ func (repo *{{.DomainTitle}}PSQLRepository) Update({{.Domain}} *domain.{{.Domain
 	return nil
 }
 
-func (repo *{{.DomainTitle}}PSQLRepository) Delete(id int64) error {
+func (repo *{{.DomainTitle}}PSQLRepository) Delete(id string) error {
 	orm{{.DomainTitle}} := orm.{{.DomainTitle}}{
 		ID: id,
 	}

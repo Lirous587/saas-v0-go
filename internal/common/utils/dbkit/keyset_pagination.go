@@ -12,12 +12,12 @@ import (
 
 type keysetCursor struct {
 	CreatedAt time.Time
-	ID        int64
+	ID        string
 }
 
 type CursorFields interface {
 	GetCreatedAt() time.Time
-	GetID() int64
+	GetID() string
 }
 
 type keyset[T CursorFields] struct {

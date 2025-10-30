@@ -5,7 +5,7 @@ type GithubAuthRequest struct {
 }
 
 type UserResponse struct {
-	ID          int64  `json:"id"`
+	ID          string  `json:"id"`
 	Email       string `json:"email"`
 	NickName    string `json:"username"`
 	AvatarURL   string `json:"avatar_url,omitempty"`

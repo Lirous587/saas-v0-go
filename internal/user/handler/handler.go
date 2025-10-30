@@ -3,6 +3,7 @@ package handler
 import (
 	"saas/internal/common/reskit/codes"
 	"saas/internal/common/reskit/response"
+	"saas/internal/common/server"
 	"saas/internal/common/utils"
 	"strconv"
 
@@ -169,22 +170,6 @@ func (h *HttpHandler) fetchGithubUserInfo(accessToken string) (*domain.OAuthUser
 	}, nil
 }
 
-func (h *HttpHandler) getUserID(ctx *gin.Context) (int64, error) {
-	userID, exists := ctx.Get("user_id")
-	if !exists {
-		return 0, codes.ErrTokenInvalid
-	}
-
-	userID64, ok := userID.(int64)
-	if !ok {
-		return 0, codes.ErrTokenInvalid
-	}
-	if userID64 == 0 {
-		return 0, errors.New("无效的id")
-	}
-	return userID64, nil
-}
-
 // ValidateAuth godoc
 // @Summary      校验令牌
 // @Description  校验当前访问令牌是否有效
@@ -211,7 +196,7 @@ func (h *HttpHandler) ValidateAuth(ctx *gin.Context) {
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Router       /v1/user/profile [get]
 func (h *HttpHandler) GetProfile(ctx *gin.Context) {
-	userID, err := h.getUserID(ctx)
+	userID, err := server.GetUserID(ctx)
 	if err != nil {
 		response.Error(ctx, err)
 	}

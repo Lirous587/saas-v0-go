@@ -21,7 +21,7 @@ func NewImgPSQLRepository() domain.ImgRepository {
 	return &ImgPSQLRepository{}
 }
 
-func (repo *ImgPSQLRepository) FindByID(tenantID domain.TenantID, id int64, deleted ...bool) (*domain.Img, error) {
+func (repo *ImgPSQLRepository) FindByID(tenantID domain.TenantID, id string, deleted ...bool) (*domain.Img, error) {
 	selectDeleted := len(deleted) > 0 && deleted[0]
 
 	var whereMods []qm.QueryMod
@@ -57,15 +57,15 @@ func (repo *ImgPSQLRepository) ExistByPath(tenantID domain.TenantID, path string
 	return exist, nil
 }
 
-func (repo *ImgPSQLRepository) Create(img *domain.Img, categoryID int64) (*domain.Img, error) {
+func (repo *ImgPSQLRepository) Create(img *domain.Img, categoryID string) (*domain.Img, error) {
 	ormImg := domainImgToORM(img)
 
 	var category *domain.Category
 	var err error
 	// 如果有分类ID，在插入前设置
-	if categoryID != 0 {
+	if categoryID != "" {
 		ormImg.CategoryID.Valid = true
-		ormImg.CategoryID.Int64 = categoryID
+		ormImg.CategoryID.String = categoryID
 
 		category, err = repo.FindCategoryByID(img.TenantID, categoryID)
 		if err != nil {
@@ -84,7 +84,7 @@ func (repo *ImgPSQLRepository) Create(img *domain.Img, categoryID int64) (*domai
 	return ormImgToDomain(ormImg), nil
 }
 
-func (repo *ImgPSQLRepository) Delete(tenantID domain.TenantID, id int64, hard bool) error {
+func (repo *ImgPSQLRepository) Delete(tenantID domain.TenantID, id string, hard bool) error {
 	rows, err := orm.Imgs(
 		qm.Where(fmt.Sprintf("%s = ?", orm.ImgColumns.TenantID), tenantID),
 		qm.And(fmt.Sprintf("%s = ?", orm.ImgColumns.ID), id),
@@ -99,7 +99,7 @@ func (repo *ImgPSQLRepository) Delete(tenantID domain.TenantID, id int64, hard b
 	return nil
 }
 
-func (repo *ImgPSQLRepository) Restore(tenantID domain.TenantID, id int64) (*domain.Img, error) {
+func (repo *ImgPSQLRepository) Restore(tenantID domain.TenantID, id string) (*domain.Img, error) {
 	rows, err := orm.Imgs(
 		qm.Where(fmt.Sprintf("%s = ?", orm.ImgColumns.TenantID), tenantID),
 		qm.And(fmt.Sprintf("%s = ?", orm.ImgColumns.ID), id),
@@ -134,7 +134,7 @@ func (repo *ImgPSQLRepository) List(query *domain.ImgQuery) (*domain.ImgList, er
 		whereMods = append(whereMods, qm.Where("description ILIKE ?", like))
 	}
 
-	if query.CategoryID != 0 {
+	if query.CategoryID != "" {
 		whereMods = append(whereMods, qm.Where(fmt.Sprintf("%s = ?", orm.ImgColumns.CategoryID), query.CategoryID))
 	}
 
@@ -187,10 +187,10 @@ func (repo *ImgPSQLRepository) UpdateCategory(category *domain.Category) error {
 	return nil
 }
 
-func (repo *ImgPSQLRepository) DeleteCategory(tenantID domain.TenantID, id int64) error {
+func (repo *ImgPSQLRepository) DeleteCategory(tenantID domain.TenantID, id string) error {
 	ormCategory := orm.ImgCategory{
 		ID:       id,
-		TenantID: int64(tenantID),
+		TenantID: string(tenantID),
 	}
 
 	rows, err := ormCategory.DeleteG()
@@ -214,7 +214,7 @@ func (repo *ImgPSQLRepository) ListCategories(tenantID domain.TenantID) ([]*doma
 	return ormCategoriesToDomain(ormCategories), nil
 }
 
-func (repo *ImgPSQLRepository) FindCategoryByID(tenantID domain.TenantID, id int64) (*domain.Category, error) {
+func (repo *ImgPSQLRepository) FindCategoryByID(tenantID domain.TenantID, id string) (*domain.Category, error) {
 	ormCategory, err := orm.ImgCategories(
 		qm.Where(fmt.Sprintf("%s = ?", orm.ImgCategoryColumns.TenantID), tenantID),
 		qm.And(fmt.Sprintf("%s = ?", orm.ImgCategoryColumns.ID), id),
@@ -243,7 +243,7 @@ func (repo *ImgPSQLRepository) FindCategoryByTitle(tenantID domain.TenantID, tit
 	return ormCategoryToDomain(ormCategory), nil
 }
 
-func (repo *ImgPSQLRepository) CategoryExistByID(tenantID domain.TenantID, id int64) (bool, error) {
+func (repo *ImgPSQLRepository) CategoryExistByID(tenantID domain.TenantID, id string) (bool, error) {
 	exist, err := orm.Imgs(
 		qm.Where(fmt.Sprintf("%s = ?", orm.ImgCategoryColumns.TenantID), tenantID),
 		qm.And(fmt.Sprintf("%s = ?", orm.ImgColumns.CategoryID), id),
@@ -277,7 +277,7 @@ func (repo *ImgPSQLRepository) CountCategory(tenantID domain.TenantID) (int64, e
 	return count, nil
 }
 
-func (repo *ImgPSQLRepository) IsCategoryExistImg(tenantID domain.TenantID, id int64) (bool, error) {
+func (repo *ImgPSQLRepository) IsCategoryExistImg(tenantID domain.TenantID, id string) (bool, error) {
 	existing2, err := orm.Imgs(
 		qm.Where(fmt.Sprintf("%s = ?", orm.ImgCategoryColumns.TenantID), tenantID),
 		qm.And(fmt.Sprintf("%s = ?", orm.ImgColumns.CategoryID), id),
@@ -330,7 +330,7 @@ func (repo *ImgPSQLRepository) SetTenantR2Config(config *domain.R2Config) error 
 
 func (repo *ImgPSQLRepository) ExistTenantR2Config(tenantID domain.TenantID) (bool, error) {
 	exist, err := orm.TenantR2Configs(
-		orm.TenantR2ConfigWhere.TenantID.EQ(int64(tenantID)),
+		orm.TenantR2ConfigWhere.TenantID.EQ(string(tenantID)),
 	).ExistsG()
 	if err != nil {
 		return false, errors.WithStack(err)

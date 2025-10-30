@@ -17,7 +17,7 @@ func domainCommentToORM(comment *domain.Comment) *orm.Comment {
 		ID:        comment.ID,
 		PlateID:   comment.PlateID,
 		UserID:    comment.UserID,
-		TenantID:  int64(comment.TenantID),
+		TenantID:  string(comment.TenantID),
 		Content:   comment.Content,
 		LikeCount: comment.LikeCount,
 		CreatedAt: comment.CreatedAt,
@@ -25,12 +25,12 @@ func domainCommentToORM(comment *domain.Comment) *orm.Comment {
 	}
 
 	// 处理null项
-	if comment.RootID != 0 {
-		ormComment.RootID = null.Int64From(comment.RootID)
+	if comment.RootID != "" {
+		ormComment.RootID = null.StringFrom(comment.RootID)
 		ormComment.RootID.Valid = true
 	}
-	if comment.ParentID != 0 {
-		ormComment.ParentID = null.Int64From(comment.ParentID)
+	if comment.ParentID != "" {
+		ormComment.ParentID = null.StringFrom(comment.ParentID)
 		ormComment.ParentID.Valid = true
 	}
 
@@ -61,10 +61,10 @@ func ormCommentToDomain(ormComment *orm.Comment) *domain.Comment {
 
 	// 处理null项
 	if ormComment.RootID.Valid {
-		comment.RootID = ormComment.RootID.Int64
+		comment.RootID = ormComment.RootID.String
 	}
 	if ormComment.ParentID.Valid {
-		comment.ParentID = ormComment.ParentID.Int64
+		comment.ParentID = ormComment.ParentID.String
 	}
 
 	return comment
@@ -123,7 +123,7 @@ func domainPlateToORM(plate *domain.Plate) *orm.CommentPlate {
 	// 非null项
 	ormPlate := &orm.CommentPlate{
 		ID:         plate.ID,
-		TenantID:   int64(plate.TenantID),
+		TenantID:   string(plate.TenantID),
 		BelongKey:  plate.BelongKey,
 		RelatedURL: plate.RelatedURL,
 		Summary:    plate.Summary,
@@ -174,8 +174,7 @@ func domainTenantConfigToORM(config *domain.TenantConfig) *orm.CommentTenantConf
 
 	// 非null项
 	ormConfig := &orm.CommentTenantConfig{
-		TenantID:    int64(config.TenantID),
-		ClientToken: config.ClientToken,
+		TenantID:    string(config.TenantID),
 		IfAudit:     config.IfAudit,
 	}
 
@@ -193,7 +192,6 @@ func ormTenantConfigToDomain(ormConfig *orm.CommentTenantConfig) *domain.TenantC
 	config := &domain.TenantConfig{
 		TenantID:    domain.TenantID(ormConfig.TenantID),
 		IfAudit:     ormConfig.IfAudit,
-		ClientToken: ormConfig.ClientToken,
 		CreatedAt:   ormConfig.CreatedAt,
 		UpdatedAt:   ormConfig.UpdatedAt,
 	}
@@ -211,7 +209,7 @@ func domainPlateConfigToORM(config *domain.PlateConfig) *orm.CommentPlateConfig 
 	// 非null项
 	ormConfig := &orm.CommentPlateConfig{
 		PlateID:  config.Plate.ID,
-		TenantID: int64(config.TenantID),
+		TenantID: string(config.TenantID),
 		IfAudit:  config.IfAudit,
 	}
 
