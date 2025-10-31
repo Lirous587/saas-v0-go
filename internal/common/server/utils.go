@@ -2,7 +2,6 @@ package server
 
 import (
 	"saas/internal/common/reskit/codes"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,35 +27,26 @@ const TenantIDKey = "tenant_id"
 func SetTenantID(key string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// 从请求头获取
-		if tenantIDStr := ctx.GetHeader(key); tenantIDStr != "" {
-			if tenantID, err := strconv.ParseInt(tenantIDStr, 10, 64); err == nil {
-				ctx.Set(TenantIDKey, tenantID)
-				return
-			}
+		if tenantID := ctx.GetHeader(key); tenantID != "" {
+			ctx.Set(TenantIDKey, tenantID)
 		}
 
 		// 从路径参数获取
-		if tenantIDStr := ctx.Param(key); tenantIDStr != "" {
-			if tenantID, err := strconv.ParseInt(tenantIDStr, 10, 64); err == nil {
-				ctx.Set(TenantIDKey, tenantID)
-				return
-			}
+		if tenantID := ctx.Param(key); tenantID != "" {
+			ctx.Set(TenantIDKey, tenantID)
 		}
 
 		// 从查询参数获取
-		if tenantIDStr := ctx.Query(key); tenantIDStr != "" {
-			if tenantID, err := strconv.ParseInt(tenantIDStr, 10, 64); err == nil {
-				ctx.Set(TenantIDKey, tenantID)
-				return
-			}
+		if tenantID := ctx.Query(key); tenantID != "" {
+			ctx.Set(TenantIDKey, tenantID)
 		}
 
 	}
 }
 
 func GetTenantID(ctx *gin.Context) (string, error) {
-	if tenantIDStr := ctx.Param(TenantIDKey); tenantIDStr != "" {
-		return tenantIDStr, nil
+	if tenantID := ctx.Param(TenantIDKey); tenantID != "" {
+		return tenantID, nil
 	}
 
 	if tid, exists := ctx.Get(TenantIDKey); exists {
