@@ -24,8 +24,8 @@ func NewCommentService(repo domain.CommentRepository, cache domain.CommentCache,
 	}
 }
 
-func (s *service) Audit(tenantID domain.TenantID, id string, status domain.CommentStatus) error {
-	comment, err := s.repo.GetByID(tenantID, id)
+func (s *service) Audit(tenantID domain.TenantID, commentID domain.CommentID, status domain.CommentStatus) error {
+	comment, err := s.repo.GetByID(tenantID, commentID)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -34,17 +34,17 @@ func (s *service) Audit(tenantID domain.TenantID, id string, status domain.Comme
 		return codes.ErrCommentIllegalAudit
 	}
 
-	if status == domain.CommentStatusApproved {
+	if status.IsApproved() {
 		comment.SetApproved()
 	}
 
 	// 同意
 	if comment.IsApproved() {
-		if err := s.repo.Approve(tenantID, id); err != nil {
+		if err := s.repo.Approve(tenantID, commentID); err != nil {
 			return errors.WithMessage(err, "同意评论时候更新status失败")
 		}
 	} else {
-		if err := s.repo.Delete(tenantID, id); err != nil {
+		if err := s.repo.Delete(tenantID, commentID); err != nil {
 			return errors.WithMessage(err, "拒绝评论时候删除评论记录失败")
 		}
 	}
@@ -70,7 +70,7 @@ func (s *service) Audit(tenantID domain.TenantID, id string, status domain.Comme
 
 				// - 通知回复者
 				// 1.根据当前评论的root和parent去查询uids
-				uids, err := s.repo.GetUserIdsByRootORParent(tenantID, comment.PlateID, comment.RootID, comment.ParentID)
+				uids, err := s.repo.GetUserIDsByRootORParent(tenantID, comment.PlateID, comment.RootID, comment.ParentID)
 				if err != nil {
 					zap.L().Error("根据当前评论的root和parent去查询uids失败", zap.Error(err))
 					return
@@ -84,18 +84,23 @@ func (s *service) Audit(tenantID domain.TenantID, id string, status domain.Comme
 				}
 
 				// 通知其回复人员 从uids中除去自己和租户管理员(因为此时租户审核了就无需通知)
-				filterSelfIds := comment.FilterSelf(uids)
-				filterIds := make([]string, 0, 3)
-				for _, id := range filterSelfIds {
+				filterSelfIDs := comment.FilterSelf(uids)
+				filterUIDs := make([]domain.UserID, 0, 3)
+				for _, id := range filterSelfIDs {
 					if id == admin.ID {
 						continue
 					}
-					filterIds = append(filterIds, id)
+					filterUIDs = append(filterUIDs, id)
 				}
 
-				toUids := utils.UniqueStrings(filterIds)
+				filterUIDsStr := domain.UserIDs(filterUIDs).ToStringSlice()
+
+				toUIDs := utils.UniqueStrings(filterUIDsStr)
+
+				toUserIDs := domain.NewUserIDsFromStrings(toUIDs)
+
 				// 获取待通知的用户信息
-				toUsers, err := s.repo.GetUserInfosByIds(toUids)
+				toUsers, err := s.repo.GetUserInfosByIDs(toUserIDs)
 				if err != nil {
 					zap.L().Error("获取待通知的用户信息失败", zap.Error(err))
 					return
@@ -123,9 +128,9 @@ func (s *service) Audit(tenantID domain.TenantID, id string, status domain.Comme
 	return nil
 }
 
-func (s *service) Delete(tenantID domain.TenantID, userID string, id string) error {
+func (s *service) Delete(tenantID domain.TenantID, userID domain.UserID, commentID domain.CommentID) error {
 	// 查询当前评论用户
-	uid, err := s.repo.GetCommentUser(tenantID, id)
+	uid, err := s.repo.GetCommentUser(tenantID, commentID)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -143,10 +148,10 @@ func (s *service) Delete(tenantID domain.TenantID, userID string, id string) err
 		}
 	}
 
-	return s.repo.Delete(tenantID, id)
+	return s.repo.Delete(tenantID, commentID)
 }
 
-func (s *service) ListRoots(belongKey string, userID string, query *domain.CommentRootsQuery) ([]*domain.CommentRoot, error) {
+func (s *service) ListRoots(belongKey string, userID domain.UserID, query *domain.CommentRootsQuery) ([]*domain.CommentRoot, error) {
 	plateID, err := s.getPlateID(query.TenantID, belongKey)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -161,14 +166,14 @@ func (s *service) ListRoots(belongKey string, userID string, query *domain.Comme
 	}
 
 	// 登录用户则处理点赞
-	if userID != "" {
-		rootIds := make([]string, 0, len(roots))
+	if !userID.IsZero() {
+		rootIDs := make([]domain.CommentID, 0, len(roots))
 		for i := range roots {
-			rootIds = append(rootIds, roots[i].CommentWithUser.ID)
+			rootIDs = append(rootIDs, roots[i].CommentWithUser.ID)
 		}
 
 		// 整合点赞记录
-		likeMap, err := s.cache.GetLikeMap(query.TenantID, userID, rootIds)
+		likeMap, err := s.cache.GetLikeMap(query.TenantID, userID, rootIDs)
 		if err != nil {
 			zap.L().Error("获取点赞状态失败", zap.Error(err))
 		}
@@ -184,7 +189,7 @@ func (s *service) ListRoots(belongKey string, userID string, query *domain.Comme
 	return roots, nil
 }
 
-func (s *service) ListReplies(belongKey string, userID string, query *domain.CommentRepliesQuery) ([]*domain.CommentReply, error) {
+func (s *service) ListReplies(belongKey string, userID domain.UserID, query *domain.CommentRepliesQuery) ([]*domain.CommentReply, error) {
 	plateID, err := s.getPlateID(query.TenantID, belongKey)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -200,13 +205,13 @@ func (s *service) ListReplies(belongKey string, userID string, query *domain.Com
 
 	// 登录用户则处理点赞
 	if userID != "" {
-		replyIds := make([]string, 0, len(replies))
+		replyIDs := make([]domain.CommentID, 0, len(replies))
 		for i := range replies {
-			replyIds = append(replyIds, replies[i].CommentWithUser.ID)
+			replyIDs = append(replyIDs, replies[i].CommentWithUser.ID)
 		}
 
 		// 整合点赞记录
-		likeMap, err := s.cache.GetLikeMap(query.TenantID, userID, replyIds)
+		likeMap, err := s.cache.GetLikeMap(query.TenantID, userID, replyIDs)
 		if err != nil {
 			zap.L().Error("获取点赞状态失败", zap.Error(err))
 		}
@@ -222,9 +227,9 @@ func (s *service) ListReplies(belongKey string, userID string, query *domain.Com
 	return replies, nil
 }
 
-func (s *service) ToggleLike(tenantID domain.TenantID, userID string, id string) error {
+func (s *service) ToggleLike(tenantID domain.TenantID, userID domain.UserID, commentID domain.CommentID) error {
 	// 去查询当前status
-	likeStatus, err := s.cache.GetLikeStatus(tenantID, userID, id)
+	likeStatus, err := s.cache.GetLikeStatus(tenantID, userID, commentID)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -235,18 +240,18 @@ func (s *service) ToggleLike(tenantID domain.TenantID, userID string, id string)
 	// 判断当前操作
 	if likeStatus.IsLike() {
 		// 当前操作为点赞点赞
-		if err := s.cache.AddLike(tenantID, userID, id); err != nil {
+		if err := s.cache.AddLike(tenantID, userID, commentID); err != nil {
 			return errors.WithStack(err)
 		}
-		if err := s.repo.UpdateLikeCount(tenantID, id, likeStatus.IsLike()); err != nil {
+		if err := s.repo.UpdateLikeCount(tenantID, commentID, likeStatus.IsLike()); err != nil {
 			return errors.WithStack(err)
 		}
 	} else {
 		// 当前操作为取消点赞
-		if err := s.cache.RemoveLike(tenantID, userID, id); err != nil {
+		if err := s.cache.RemoveLike(tenantID, userID, commentID); err != nil {
 			return errors.WithStack(err)
 		}
-		if err := s.repo.UpdateLikeCount(tenantID, id, likeStatus.IsLike()); err != nil {
+		if err := s.repo.UpdateLikeCount(tenantID, commentID, likeStatus.IsLike()); err != nil {
 			return errors.WithStack(err)
 		}
 	}
@@ -288,15 +293,15 @@ func (s *service) UpdatePlate(plate *domain.Plate) error {
 	return nil
 }
 
-func (s *service) DeletePlate(tenantID domain.TenantID, id string) error {
-	return s.repo.DeletePlate(tenantID, id)
+func (s *service) DeletePlate(tenantID domain.TenantID, plateID domain.PlateID) error {
+	return s.repo.DeletePlate(tenantID, plateID)
 }
 
 func (s *service) ListPlate(query *domain.PlateQuery) (*domain.PlateList, error) {
 	return s.repo.ListPlate(query)
 }
 
-func (s *service) getPlateID(tenantID domain.TenantID, belongKey string) (string, error) {
+func (s *service) getPlateID(tenantID domain.TenantID, belongKey string) (domain.PlateID, error) {
 	// 尝试从缓存获取
 	plateID, cacheErr := s.cache.GetPlateID(tenantID, belongKey)
 	if cacheErr == nil {
@@ -318,7 +323,7 @@ func (s *service) getPlateID(tenantID domain.TenantID, belongKey string) (string
 					zap.Error(setErr),
 					zap.String("tenant_id", string(tenantID)),
 					zap.String("belong_key", belong.BelongKey),
-					zap.String("plate_id", belong.ID),
+					zap.String("plate_id", string(belong.ID)),
 				)
 			}
 		}()
@@ -382,7 +387,7 @@ func (s *service) SetPlateConfig(config *domain.PlateConfig) error {
 			"删除板块级别评论配置缓存失败",
 			zap.Error(err),
 			zap.String("tenant_id", string(config.TenantID)),
-			zap.String("plate_id", config.Plate.ID),
+			zap.String("plate_id", string(config.Plate.ID)),
 		)
 	}
 
@@ -393,7 +398,7 @@ func (s *service) SetPlateConfig(config *domain.PlateConfig) error {
 	return nil
 }
 
-func (s *service) GetPlateConfig(tenantID domain.TenantID, plateID string) (*domain.PlateConfig, error) {
+func (s *service) GetPlateConfig(tenantID domain.TenantID, plateID domain.PlateID) (*domain.PlateConfig, error) {
 	// 尝试从缓存获取
 	config, cacheErr := s.cache.GetPlateConfig(tenantID, plateID)
 	if cacheErr == nil {
@@ -414,7 +419,7 @@ func (s *service) GetPlateConfig(tenantID domain.TenantID, plateID string) (*dom
 					"设置板块级别评论配置缓存失败",
 					zap.Error(setErr),
 					zap.String("tenant_id", string(tenantID)),
-					zap.String("plate_id", plateID),
+					zap.String("plate_id", string(plateID)),
 				)
 			}
 		}()

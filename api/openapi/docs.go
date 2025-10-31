@@ -2801,9 +2801,6 @@ const docTemplate = `{
         "handler.TenantConfigResponse": {
             "type": "object",
             "properties": {
-                "client_token": {
-                    "type": "string"
-                },
                 "created_at": {
                     "type": "integer"
                 },

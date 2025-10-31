@@ -114,8 +114,8 @@ func (s *service) validateCommentLegitimacy(comment *domain.Comment) error {
 }
 
 // 获取评论配置
-func (s *service) getCommentConfig(tenantID domain.TenantID, plateID string) (*domain.CommentConfig, error) {
-	if tenantID == "" || plateID == "" {
+func (s *service) getCommentConfig(tenantID domain.TenantID, plateID domain.PlateID) (*domain.CommentConfig, error) {
+	if tenantID.IsZero() || plateID.IsZero() {
 		return nil, codes.ErrCommentIllegalReply
 	}
 
@@ -145,7 +145,7 @@ func (s *service) getCommentConfig(tenantID domain.TenantID, plateID string) (*d
 	// 出现意外错误 记录日志 并且返回默认配置
 	zap.L().Error("获取配置失败",
 		zap.String("tenant_id", string(tenantID)),
-		zap.String("plate_id", plateID),
+		zap.String("plate_id", string(plateID)),
 		zap.Error(err))
 
 	return &domain.CommentConfig{
@@ -175,25 +175,30 @@ func (s *service) adminCommnet(comment *domain.Comment) error {
 			}
 
 			// 获取root和parent用户id
-			uids, err := s.repo.GetUserIdsByRootORParent(comment.TenantID, comment.PlateID, comment.RootID, comment.ParentID)
+			uids, err := s.repo.GetUserIDsByRootORParent(comment.TenantID, comment.PlateID, comment.RootID, comment.ParentID)
 			if err != nil {
 				zap.L().Error("获取root和parent用户id失败", zap.Error(err))
 				return
 			}
 
 			// 排除自己
-			filteredUids := comment.FilterSelf(uids)
-			// 去重
-			toUserIds := utils.UniqueStrings(filteredUids)
+			filterUIDs := comment.FilterSelf(uids)
 
-			// 无toUserIds 无需发送邮件
-			if len(toUserIds) == 0 {
+			filterUIDsStr := domain.UserIDs(filterUIDs).ToStringSlice()
+
+			// 去重
+			toUIDs := utils.UniqueStrings(filterUIDsStr)
+
+			// 无toUIDs 无需发送邮件
+			if len(toUIDs) == 0 {
 				zap.L().Debug("无需发送邮件")
 				return
 			}
 
+			toUserIDs := domain.NewUserIDsFromStrings(toUIDs)
+
 			// 查询所要发送邮件的用户
-			toUsers, err := s.repo.GetUserInfosByIds(toUserIds)
+			toUsers, err := s.repo.GetUserInfosByIDs(toUserIDs)
 			if err != nil {
 				zap.L().Error("查询所要发送邮件的用户失败", zap.Error(err))
 				return
@@ -264,25 +269,31 @@ func (s *service) viewerComment(comment *domain.Comment, admin *domain.UserInfo)
 			} else {
 				// 发邮件给租户以及root和parent
 				// 获取root和parent用户id
-				uids, err := s.repo.GetUserIdsByRootORParent(comment.TenantID, comment.PlateID, comment.RootID, comment.ParentID)
+				uids, err := s.repo.GetUserIDsByRootORParent(comment.TenantID, comment.PlateID, comment.RootID, comment.ParentID)
 				if err != nil {
 					zap.L().Error("获取root和parent用户id失败", zap.Error(err))
 					return
 				}
 
 				// 排除自己
-				filteredUids := comment.FilterSelf(uids)
-				// 去重 并添加管理员(此时可以确保管理员id不为用户id)
-				toUserIds := utils.UniqueStrings(append(filteredUids, admin.ID))
+				// filteredUids := comment.FilterSelf(uids)
+				filterUIDs := comment.FilterSelf(uids)
 
-				// 无toUserIds 无需发送邮件
-				if len(toUserIds) == 0 {
+				filterUIDsStr := domain.UserIDs(filterUIDs).ToStringSlice()
+
+				// 去重 并添加管理员(此时可以确保管理员id不为用户id)
+				toUIDs := utils.UniqueStrings(append(filterUIDsStr, string(admin.ID)))
+
+				// 无toUIDs 无需发送邮件
+				if len(toUIDs) == 0 {
 					zap.L().Debug("无需发送邮件")
 					return
 				}
 
+				toUserIDs := domain.NewUserIDsFromStrings(toUIDs)
+
 				// 查询所要发送邮件的用户
-				toUsers, err := s.repo.GetUserInfosByIds(toUserIds)
+				toUsers, err := s.repo.GetUserInfosByIDs(toUserIDs)
 				if err != nil {
 					zap.L().Error("查询所要发送邮件的用户失败", zap.Error(err))
 					return

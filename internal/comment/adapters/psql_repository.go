@@ -24,10 +24,10 @@ func NewCommentPSQLRepository() domain.CommentRepository {
 	return &CommentPSQLRepository{}
 }
 
-func (repo *CommentPSQLRepository) GetByID(tenantID domain.TenantID, id string) (*domain.Comment, error) {
+func (repo *CommentPSQLRepository) GetByID(tenantID domain.TenantID, commentID domain.CommentID) (*domain.Comment, error) {
 	ormComment, err := orm.Comments(
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentColumns.TenantID), tenantID),
-		qm.And(fmt.Sprintf("%s = ?", orm.CommentColumns.ID), id),
+		orm.CommentWhere.TenantID.EQ(string(tenantID)),
+		orm.CommentWhere.ID.EQ(string(commentID)),
 	).OneG()
 
 	if err != nil {
@@ -50,10 +50,10 @@ func (repo *CommentPSQLRepository) Create(comment *domain.Comment) (*domain.Comm
 	return ormCommentToDomain(ormComment), nil
 }
 
-func (repo *CommentPSQLRepository) Delete(tenantID domain.TenantID, id string) error {
+func (repo *CommentPSQLRepository) Delete(tenantID domain.TenantID, commentID domain.CommentID) error {
 	rows, err := orm.Comments(
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentColumns.TenantID), tenantID),
-		qm.And(fmt.Sprintf("%s = ?", orm.CommentColumns.ID), id),
+		orm.CommentWhere.TenantID.EQ(string(tenantID)),
+		orm.CommentWhere.ID.EQ(string(commentID)),
 	).DeleteAllG()
 
 	if err != nil {
@@ -67,10 +67,10 @@ func (repo *CommentPSQLRepository) Delete(tenantID domain.TenantID, id string) e
 	return nil
 }
 
-func (repo *CommentPSQLRepository) Approve(tenantID domain.TenantID, id string) error {
+func (repo *CommentPSQLRepository) Approve(tenantID domain.TenantID, commentID domain.CommentID) error {
 	ormComment := &orm.Comment{
 		TenantID: string(tenantID),
-		ID:       id,
+		ID:       string(commentID),
 		Status:   orm.CommentStatusApproved,
 	}
 
@@ -97,7 +97,7 @@ const (
 func (repo *CommentPSQLRepository) ListRoots(query *domain.CommentRootsQuery) ([]*domain.CommentRoot, error) {
 	mods := make([]qm.QueryMod, 0, 9)
 	mods = append(mods, orm.CommentWhere.TenantID.EQ(string(query.TenantID)))
-	mods = append(mods, orm.CommentWhere.PlateID.EQ(query.PlateID))
+	mods = append(mods, orm.CommentWhere.PlateID.EQ(string(query.PlateID)))
 	// 评论状态为approved
 	mods = append(mods, orm.CommentWhere.Status.EQ(orm.CommentStatusApproved))
 	// 根评论过滤：root_id is null parent_id is null
@@ -106,7 +106,7 @@ func (repo *CommentPSQLRepository) ListRoots(query *domain.CommentRootsQuery) ([
 
 	// 使用游标代替offest
 	if query.LastID != "" {
-		mods = append(mods, orm.CommentWhere.ID.GT(query.LastID))
+		mods = append(mods, orm.CommentWhere.ID.GT(string(query.LastID)))
 	}
 
 	// order 按ID升序排序
@@ -137,7 +137,7 @@ func (repo *CommentPSQLRepository) ListRoots(query *domain.CommentRootsQuery) ([
 			qm.Select(orm.CommentTableColumns.RootID, replyCountSelect),
 			qm.From(orm.TableNames.Comments),
 			orm.CommentWhere.TenantID.EQ(string(query.TenantID)),
-			orm.CommentWhere.PlateID.EQ(query.PlateID),
+			orm.CommentWhere.PlateID.EQ(string(query.PlateID)),
 			orm.CommentWhere.Status.EQ(orm.CommentStatusApproved),
 			orm.CommentWhere.RootID.IN(rootIDs),
 			qm.GroupBy(orm.CommentTableColumns.RootID),
@@ -157,14 +157,13 @@ func (repo *CommentPSQLRepository) ListRoots(query *domain.CommentRootsQuery) ([
 	for _, ormComment := range ormComments {
 		userInfo := ormUserToDomain(ormComment.R.User)
 		commentWithUser := &domain.CommentWithUser{
-			ID:        ormComment.ID,
+			ID:        domain.CommentID(ormComment.ID),
 			User:      userInfo,
-			ParentID:  ormComment.ParentID.String,
-			RootID:    ormComment.RootID.String,
+			ParentID:  domain.CommentID(ormComment.ParentID.String),
+			RootID:    domain.CommentID(ormComment.RootID.String),
 			Content:   ormComment.Content,
 			LikeCount: ormComment.LikeCount,
 			CreatedAt: ormComment.CreatedAt,
-			// IsLiked:   false, // 待补充
 		}
 		roots = append(roots, &domain.CommentRoot{
 			CommentWithUser: commentWithUser,
@@ -178,15 +177,15 @@ func (repo *CommentPSQLRepository) ListRoots(query *domain.CommentRootsQuery) ([
 func (repo *CommentPSQLRepository) ListReplies(query *domain.CommentRepliesQuery) ([]*domain.CommentReply, error) {
 	mods := make([]qm.QueryMod, 0, 8)
 	mods = append(mods, orm.CommentWhere.TenantID.EQ(string(query.TenantID)))
-	mods = append(mods, orm.CommentWhere.PlateID.EQ(query.PlateID))
+	mods = append(mods, orm.CommentWhere.PlateID.EQ(string(query.PlateID)))
 	// 评论状态为approved
 	mods = append(mods, orm.CommentWhere.Status.EQ(orm.CommentStatusApproved))
 	// 根root条件
-	mods = append(mods, orm.CommentWhere.RootID.EQ(null.StringFrom(query.RootID)))
+	mods = append(mods, orm.CommentWhere.RootID.EQ(null.StringFrom(string(query.RootID))))
 
 	// 使用游标代替offest
 	if query.LastID != "" {
-		mods = append(mods, orm.CommentWhere.ID.GT(query.LastID))
+		mods = append(mods, orm.CommentWhere.ID.GT(string(query.LastID)))
 	}
 
 	// order 按ID升序排序（确保游标有效）
@@ -210,10 +209,10 @@ func (repo *CommentPSQLRepository) ListReplies(query *domain.CommentRepliesQuery
 		userInfo := ormUserToDomain(ormComments[i].R.User)
 
 		commentWithUser := &domain.CommentWithUser{
-			ID:        ormComments[i].ID,
+			ID:        domain.CommentID(ormComments[i].ID),
 			User:      userInfo,
-			ParentID:  ormComments[i].ParentID.String,
-			RootID:    ormComments[i].RootID.String,
+			ParentID:  domain.CommentID(ormComments[i].ParentID.String),
+			RootID:    domain.CommentID(ormComments[i].RootID.String),
 			Content:   ormComments[i].Content,
 			LikeCount: ormComments[i].LikeCount,
 			CreatedAt: ormComments[i].CreatedAt,
@@ -228,7 +227,7 @@ func (repo *CommentPSQLRepository) ListReplies(query *domain.CommentRepliesQuery
 	return replies, nil
 }
 
-func (repo *CommentPSQLRepository) UpdateLikeCount(tenantID domain.TenantID, commentID string, isLike bool) error {
+func (repo *CommentPSQLRepository) UpdateLikeCount(tenantID domain.TenantID, commentID domain.CommentID, isLike bool) error {
 	tx, err := boil.BeginTx(context.Background(), nil)
 	if err != nil {
 		return err
@@ -265,10 +264,10 @@ func (repo *CommentPSQLRepository) UpdateLikeCount(tenantID domain.TenantID, com
 	return tx.Commit()
 }
 
-func (repo *CommentPSQLRepository) GetCommentUser(tenantID domain.TenantID, commentID string) (string, error) {
+func (repo *CommentPSQLRepository) GetCommentUser(tenantID domain.TenantID, commentID domain.CommentID) (domain.UserID, error) {
 	ormComment, err := orm.Comments(
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentColumns.TenantID), tenantID),
-		qm.And(fmt.Sprintf("%s = ?", orm.CommentColumns.ID), commentID),
+		orm.CommentWhere.TenantID.EQ(string(tenantID)),
+		orm.CommentWhere.ID.EQ(string(commentID)),
 		qm.Select(orm.CommentColumns.UserID),
 	).OneG()
 
@@ -280,10 +279,10 @@ func (repo *CommentPSQLRepository) GetCommentUser(tenantID domain.TenantID, comm
 		return "", err
 	}
 
-	return ormComment.UserID, nil
+	return domain.UserID(ormComment.UserID), nil
 }
 
-func (repo *CommentPSQLRepository) GetUserIdsByRootORParent(tenantID domain.TenantID, plateID string, rootID string, parentID string) ([]string, error) {
+func (repo *CommentPSQLRepository) GetUserIDsByRootORParent(tenantID domain.TenantID, plateID domain.PlateID, rootID domain.CommentID, parentID domain.CommentID) ([]domain.UserID, error) {
 	comments, err := orm.Comments(
 		qm.Where(fmt.Sprintf("%s = ? AND %s = ? AND (%s = ? OR %s = ?)",
 			orm.CommentColumns.TenantID,
@@ -301,12 +300,12 @@ func (repo *CommentPSQLRepository) GetUserIdsByRootORParent(tenantID domain.Tena
 		return nil, err
 	}
 
-	userIds := make([]string, 0, 2)
+	userIDs := make([]domain.UserID, 0, 2)
 	for i := range comments {
-		userIds = append(userIds, comments[i].UserID)
+		userIDs = append(userIDs, domain.UserID(comments[i].UserID))
 	}
 
-	return userIds, nil
+	return userIDs, nil
 }
 
 func (repo *CommentPSQLRepository) GetTenantCreator(tenantID domain.TenantID) (*domain.UserInfo, error) {
@@ -331,7 +330,7 @@ func (repo *CommentPSQLRepository) GetTenantCreator(tenantID domain.TenantID) (*
 
 	// 填充 UserInfo
 	userInfo := &domain.UserInfo{
-		ID:       user.ID,
+		ID:       domain.UserID(user.ID),
 		NickName: user.Nickname,
 	}
 
@@ -340,9 +339,11 @@ func (repo *CommentPSQLRepository) GetTenantCreator(tenantID domain.TenantID) (*
 	return userInfo, nil
 }
 
-func (repo *CommentPSQLRepository) GetUserInfosByIds(ids []string) ([]*domain.UserInfo, error) {
+func (repo *CommentPSQLRepository) GetUserInfosByIDs(userIDs []domain.UserID) ([]*domain.UserInfo, error) {
+	stringIDs := domain.UserIDs(userIDs).ToStringSlice()
+
 	ormUsers, err := orm.Users(
-		qm.WhereIn(fmt.Sprintf("%s in ?", orm.UserColumns.ID), utils.StringSliceToInterface(ids)...),
+		qm.WhereIn(fmt.Sprintf("%s in ?", orm.UserColumns.ID), utils.StringSliceToInterface(stringIDs)...),
 		qm.Select(orm.UserColumns.ID, orm.UserColumns.Nickname, orm.UserColumns.Email),
 	).AllG()
 
@@ -353,9 +354,9 @@ func (repo *CommentPSQLRepository) GetUserInfosByIds(ids []string) ([]*domain.Us
 	return ormUsersToDomain(ormUsers), nil
 }
 
-func (repo *CommentPSQLRepository) GetUserInfoByID(id string) (*domain.UserInfo, error) {
+func (repo *CommentPSQLRepository) GetUserInfoByID(userID domain.UserID) (*domain.UserInfo, error) {
 	ormUser, err := orm.Users(
-		qm.Where(fmt.Sprintf("%s = ?", orm.UserColumns.ID), id),
+		orm.UserWhere.ID.EQ(string(userID)),
 		qm.Select(orm.UserColumns.ID, orm.UserColumns.Nickname, orm.UserColumns.AvatarURL, orm.UserColumns.Email),
 	).OneG()
 
@@ -430,10 +431,10 @@ func (repo *CommentPSQLRepository) UpdatePlate(plate *domain.Plate) error {
 	return nil
 }
 
-func (repo *CommentPSQLRepository) DeletePlate(tenantID domain.TenantID, id string) error {
+func (repo *CommentPSQLRepository) DeletePlate(tenantID domain.TenantID, plateID domain.PlateID) error {
 	rows, err := orm.CommentPlates(
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.TenantID), tenantID),
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.ID), id),
+		orm.CommentPlateWhere.TenantID.EQ(string(tenantID)),
+		orm.CommentPlateWhere.ID.EQ(string(plateID)),
 	).DeleteAllG()
 
 	if err != nil {
@@ -492,9 +493,9 @@ func (repo *CommentPSQLRepository) ExistPlateBykey(tenantID domain.TenantID, bel
 	return exist, nil
 }
 
-func (repo *CommentPSQLRepository) GetPlateBelongByID(id string) (*domain.PlateBelong, error) {
+func (repo *CommentPSQLRepository) GetPlateBelongByID(plateID domain.PlateID) (*domain.PlateBelong, error) {
 	plate, err := orm.CommentPlates(
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.ID), id),
+		orm.CommentPlateWhere.ID.EQ(string(plateID)),
 		qm.Select(orm.CommentPlateColumns.ID, orm.CommentPlateColumns.BelongKey),
 	).OneG()
 
@@ -506,15 +507,15 @@ func (repo *CommentPSQLRepository) GetPlateBelongByID(id string) (*domain.PlateB
 	}
 
 	return &domain.PlateBelong{
-		ID:        plate.ID,
+		ID:        domain.PlateID(plate.ID),
 		BelongKey: plate.BelongKey,
 	}, nil
 }
 
 func (repo *CommentPSQLRepository) GetPlateBelongByKey(tenantID domain.TenantID, belongKey string) (*domain.PlateBelong, error) {
 	plate, err := orm.CommentPlates(
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.TenantID), tenantID),
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.BelongKey), belongKey),
+		orm.CommentPlateWhere.TenantID.EQ(string(tenantID)),
+		orm.CommentPlateWhere.BelongKey.EQ(belongKey),
 		qm.Select(orm.CommentPlateColumns.ID, orm.CommentPlateColumns.BelongKey),
 	).OneG()
 
@@ -526,15 +527,15 @@ func (repo *CommentPSQLRepository) GetPlateBelongByKey(tenantID domain.TenantID,
 	}
 
 	return &domain.PlateBelong{
-		ID:        plate.ID,
+		ID:        domain.PlateID(plate.ID),
 		BelongKey: plate.BelongKey,
 	}, nil
 }
 
-func (repo *CommentPSQLRepository) GetPlateRelatedURlByID(tenantID domain.TenantID, id string) (string, error) {
+func (repo *CommentPSQLRepository) GetPlateRelatedURlByID(tenantID domain.TenantID, plateID domain.PlateID) (string, error) {
 	plate, err := orm.CommentPlates(
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.TenantID), tenantID),
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.ID), id),
+		orm.CommentPlateWhere.TenantID.EQ(string(tenantID)),
+		orm.CommentPlateWhere.ID.EQ(string(plateID)),
 		qm.Select(orm.CommentPlateColumns.RelatedURL),
 	).OneG()
 
@@ -566,10 +567,10 @@ func (repo *CommentPSQLRepository) SetPlateConfig(config *domain.PlateConfig) er
 	return nil
 }
 
-func (repo *CommentPSQLRepository) GetPlateConfig(tenantID domain.TenantID, plateID string) (*domain.PlateConfig, error) {
+func (repo *CommentPSQLRepository) GetPlateConfig(tenantID domain.TenantID, plateID domain.PlateID) (*domain.PlateConfig, error) {
 	ormConfig, err := orm.CommentPlateConfigs(
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateConfigColumns.TenantID), tenantID),
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateConfigColumns.PlateID), plateID),
+		orm.CommentPlateConfigWhere.TenantID.EQ(string(tenantID)),
+		orm.CommentPlateConfigWhere.PlateID.EQ(string(plateID)),
 	).OneG()
 
 	if err != nil {

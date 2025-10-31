@@ -318,8 +318,6 @@ definitions:
     type: object
   handler.TenantConfigResponse:
     properties:
-      client_token:
-        type: string
       created_at:
         type: integer
       if_audit:

@@ -4,10 +4,8 @@ import (
 	"time"
 )
 
-type TenantID string
-
 type UserInfo struct {
-	ID        string
+	ID        UserID
 	NickName  string
 	AvatarURL string
 	email     string
@@ -34,13 +32,17 @@ func (cs *CommentStatus) SetPending() {
 	*cs = CommentStatusPending
 }
 
+func (cs *CommentStatus) IsApproved() bool {
+	return *cs == CommentStatusApproved
+}
+
 type Comment struct {
-	ID        string
-	PlateID   string
-	UserID    string
+	ID        CommentID
+	PlateID   PlateID
+	UserID    UserID
 	TenantID  TenantID
-	ParentID  string
-	RootID    string
+	ParentID  CommentID
+	RootID    CommentID
 	Content   string
 	status    CommentStatus
 	LikeCount int64
@@ -65,7 +67,7 @@ func (c *Comment) IsApproved() bool {
 }
 
 func (c *Comment) IsRootComment() bool {
-	return c.RootID == "" && c.ParentID == ""
+	return c.RootID.IsZero() && c.ParentID.IsZero()
 }
 
 func (c *Comment) IsReply() bool {
@@ -73,30 +75,30 @@ func (c *Comment) IsReply() bool {
 }
 
 func (c *Comment) IsReplyRootComment() bool {
-	return c.RootID != "" && c.ParentID == ""
+	return !c.RootID.IsZero() && c.ParentID.IsZero()
 }
 
 func (c *Comment) IsReplyParentComment() bool {
-	return c.RootID != "" && c.ParentID != ""
+	return c.RootID.IsZero() && !c.ParentID.IsZero()
 }
 
 func (c *Comment) CanReply() bool {
 	return c.status == CommentStatusApproved
 }
 
-func (c *Comment) IsCommentByAdmin(userID string) bool {
+func (c *Comment) IsCommentByAdmin(userID UserID) bool {
 	return c.UserID == userID
 }
 
-func (c *Comment) FilterSelf(userIds []string) []string {
-	filteredIds := make([]string, 0, 3)
-	for i := range userIds {
-		if userIds[i] != c.UserID {
-			filteredIds = append(filteredIds, userIds[i])
+func (c *Comment) FilterSelf(userIDs []UserID) []UserID {
+	filteredIDs := make([]UserID, 0, 3)
+	for i := range userIDs {
+		if userIDs[i] != c.UserID {
+			filteredIDs = append(filteredIDs, userIDs[i])
 		}
 	}
 
-	return filteredIds
+	return filteredIDs
 }
 
 func (c *Comment) CanAudit() bool {
@@ -127,10 +129,10 @@ func (l *LikeStatus) Toogle() {
 // -- 评论响应
 
 type CommentWithUser struct {
-	ID        string
+	ID        CommentID
 	User      *UserInfo
-	ParentID  string
-	RootID    string
+	ParentID  CommentID
+	RootID    CommentID
 	Content   string
 	LikeCount int64
 	CreatedAt time.Time
@@ -139,8 +141,8 @@ type CommentWithUser struct {
 
 type CommentRootsQuery struct {
 	TenantID TenantID
-	PlateID  string
-	LastID   string
+	PlateID  PlateID
+	LastID   CommentID
 	PageSize int
 }
 
@@ -151,9 +153,9 @@ type CommentRoot struct {
 
 type CommentRepliesQuery struct {
 	TenantID TenantID
-	PlateID  string
-	RootID   string
-	LastID   string
+	PlateID  PlateID
+	RootID   CommentID
+	LastID   CommentID
 	PageSize int
 }
 
@@ -164,7 +166,7 @@ type CommentReply struct {
 // -- 板块
 
 type Plate struct {
-	ID         string
+	ID         PlateID
 	TenantID   TenantID
 	BelongKey  string
 	RelatedURL string
@@ -172,15 +174,15 @@ type Plate struct {
 }
 
 type PlateBelong struct {
-	ID        string
+	ID        PlateID
 	BelongKey string
 }
 
 type PlateQuery struct {
 	TenantID TenantID
+	Keyword  string
 	Page     int
 	PageSize int
-	Keyword  string
 }
 
 type PlateList struct {
@@ -194,10 +196,10 @@ type CommentConfig struct {
 
 // TenantConfig 基于租户的全局配置
 type TenantConfig struct {
-	TenantID    TenantID
-	IfAudit     bool
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	TenantID  TenantID
+	IfAudit   bool
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 // PlateConfig  板块级别的配置 优先级更高

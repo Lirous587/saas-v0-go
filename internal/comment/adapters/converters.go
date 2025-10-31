@@ -14,9 +14,9 @@ func domainCommentToORM(comment *domain.Comment) *orm.Comment {
 
 	// 非null项
 	ormComment := &orm.Comment{
-		ID:        comment.ID,
-		PlateID:   comment.PlateID,
-		UserID:    comment.UserID,
+		ID:        string(comment.ID),
+		PlateID:   string(comment.PlateID),
+		UserID:    string(comment.UserID),
 		TenantID:  string(comment.TenantID),
 		Content:   comment.Content,
 		LikeCount: comment.LikeCount,
@@ -26,11 +26,11 @@ func domainCommentToORM(comment *domain.Comment) *orm.Comment {
 
 	// 处理null项
 	if comment.RootID != "" {
-		ormComment.RootID = null.StringFrom(comment.RootID)
+		ormComment.RootID = null.StringFrom(string(comment.RootID))
 		ormComment.RootID.Valid = true
 	}
 	if comment.ParentID != "" {
-		ormComment.ParentID = null.StringFrom(comment.ParentID)
+		ormComment.ParentID = null.StringFrom(string(comment.ParentID))
 		ormComment.ParentID.Valid = true
 	}
 
@@ -44,9 +44,9 @@ func ormCommentToDomain(ormComment *orm.Comment) *domain.Comment {
 
 	// 非null项
 	comment := &domain.Comment{
-		ID:        ormComment.ID,
-		PlateID:   ormComment.PlateID,
-		UserID:    ormComment.UserID,
+		ID:        domain.CommentID(ormComment.ID),
+		PlateID:   domain.PlateID(ormComment.PlateID),
+		UserID:    domain.UserID(ormComment.UserID),
 		TenantID:  domain.TenantID(ormComment.TenantID),
 		Content:   ormComment.Content,
 		LikeCount: ormComment.LikeCount,
@@ -61,10 +61,10 @@ func ormCommentToDomain(ormComment *orm.Comment) *domain.Comment {
 
 	// 处理null项
 	if ormComment.RootID.Valid {
-		comment.RootID = ormComment.RootID.String
+		comment.RootID = domain.CommentID(ormComment.RootID.String)
 	}
 	if ormComment.ParentID.Valid {
-		comment.ParentID = ormComment.ParentID.String
+		comment.ParentID = domain.CommentID(ormComment.ParentID.String)
 	}
 
 	return comment
@@ -91,7 +91,7 @@ func ormUserToDomain(ormUser *orm.User) *domain.UserInfo {
 
 	// 非null项
 	user := &domain.UserInfo{
-		ID:        ormUser.ID,
+		ID:        domain.UserID(ormUser.ID),
 		NickName:  ormUser.Nickname,
 		AvatarURL: ormUser.AvatarURL,
 	}
@@ -122,7 +122,7 @@ func domainPlateToORM(plate *domain.Plate) *orm.CommentPlate {
 
 	// 非null项
 	ormPlate := &orm.CommentPlate{
-		ID:         plate.ID,
+		ID:         string(plate.ID),
 		TenantID:   string(plate.TenantID),
 		BelongKey:  plate.BelongKey,
 		RelatedURL: plate.RelatedURL,
@@ -141,7 +141,7 @@ func ormPlateToDomain(ormPlate *orm.CommentPlate) *domain.Plate {
 
 	// 非null项
 	plate := &domain.Plate{
-		ID:         ormPlate.ID,
+		ID:         domain.PlateID(ormPlate.ID),
 		TenantID:   domain.TenantID(ormPlate.TenantID),
 		BelongKey:  ormPlate.BelongKey,
 		RelatedURL: ormPlate.RelatedURL,
@@ -174,8 +174,8 @@ func domainTenantConfigToORM(config *domain.TenantConfig) *orm.CommentTenantConf
 
 	// 非null项
 	ormConfig := &orm.CommentTenantConfig{
-		TenantID:    string(config.TenantID),
-		IfAudit:     config.IfAudit,
+		TenantID: string(config.TenantID),
+		IfAudit:  config.IfAudit,
 	}
 
 	// 处理null项
@@ -190,10 +190,10 @@ func ormTenantConfigToDomain(ormConfig *orm.CommentTenantConfig) *domain.TenantC
 
 	// 非null项
 	config := &domain.TenantConfig{
-		TenantID:    domain.TenantID(ormConfig.TenantID),
-		IfAudit:     ormConfig.IfAudit,
-		CreatedAt:   ormConfig.CreatedAt,
-		UpdatedAt:   ormConfig.UpdatedAt,
+		TenantID:  domain.TenantID(ormConfig.TenantID),
+		IfAudit:   ormConfig.IfAudit,
+		CreatedAt: ormConfig.CreatedAt,
+		UpdatedAt: ormConfig.UpdatedAt,
 	}
 
 	// 处理null项
@@ -208,7 +208,7 @@ func domainPlateConfigToORM(config *domain.PlateConfig) *orm.CommentPlateConfig 
 
 	// 非null项
 	ormConfig := &orm.CommentPlateConfig{
-		PlateID:  config.Plate.ID,
+		PlateID:  string(config.Plate.ID),
 		TenantID: string(config.TenantID),
 		IfAudit:  config.IfAudit,
 	}
@@ -226,7 +226,7 @@ func ormPlateConfigToDomain(ormConfig *orm.CommentPlateConfig) *domain.PlateConf
 	// 非null项
 	config := &domain.PlateConfig{
 		Plate: &domain.PlateBelong{
-			ID: ormConfig.PlateID,
+			ID: domain.PlateID(ormConfig.PlateID),
 		},
 		TenantID:  domain.TenantID(ormConfig.TenantID),
 		IfAudit:   ormConfig.IfAudit,

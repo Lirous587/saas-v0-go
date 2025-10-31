@@ -73,9 +73,9 @@ func domainTenantConfigToResponse(config *domain.TenantConfig) *TenantConfigResp
 	}
 
 	return &TenantConfigResponse{
-		IfAudit:     config.IfAudit,
-		CreatedAt:   config.CreatedAt.Unix(),
-		UpdatedAt:   config.UpdatedAt.Unix(),
+		IfAudit:   config.IfAudit,
+		CreatedAt: config.CreatedAt.Unix(),
+		UpdatedAt: config.UpdatedAt.Unix(),
 	}
 }
 

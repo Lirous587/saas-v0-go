@@ -56,7 +56,7 @@ func (h *HttpHandler) Create(ctx *gin.Context) {
 		RootID:   req.RootID,
 		ParentID: req.ParentID,
 		Content:  req.Content,
-		UserID:   userID,
+		UserID:   domain.UserID(userID),
 	}, req.BelongKey); err != nil {
 		response.Error(ctx, err)
 		return
@@ -90,7 +90,7 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.service.Delete(req.TenantID, userID, req.ID); err != nil {
+	if err := h.service.Delete(req.TenantID, domain.UserID(userID), req.ID); err != nil {
 		response.Error(ctx, err)
 		return
 	}
@@ -121,7 +121,7 @@ func (h *HttpHandler) ListRoots(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.service.ListRoots(req.BelongKey, userID, &domain.CommentRootsQuery{
+	data, err := h.service.ListRoots(req.BelongKey, domain.UserID(userID), &domain.CommentRootsQuery{
 		TenantID: req.TenantID,
 		PageSize: req.PageSize,
 		LastID:   req.LastID,
@@ -159,7 +159,7 @@ func (h *HttpHandler) ListReplies(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.service.ListReplies(req.BelongKey, userID, &domain.CommentRepliesQuery{
+	data, err := h.service.ListReplies(req.BelongKey, domain.UserID(userID), &domain.CommentRepliesQuery{
 		TenantID: req.TenantID,
 		RootID:   req.RootID,
 		LastID:   req.LastID,
@@ -199,7 +199,7 @@ func (h *HttpHandler) ToggleLike(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.service.ToggleLike(req.TenantID, userID, req.ID); err != nil {
+	if err := h.service.ToggleLike(req.TenantID, domain.UserID(userID), req.ID); err != nil {
 		response.Error(ctx, err)
 		return
 	}
