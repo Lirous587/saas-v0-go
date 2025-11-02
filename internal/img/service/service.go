@@ -8,6 +8,7 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io"
+	"log"
 	"saas/internal/common/reskit/codes"
 	"saas/internal/common/utils"
 	"saas/internal/img/domain"
@@ -369,7 +370,9 @@ func (s *service) ListenDeleteQueue() {
 			return
 		}
 
-		//2.删除R3
+		log.Println(img)
+
+		//2.删除记录
 		if err := s.repo.Delete(tenantID, imgID, true); err != nil {
 			zap.L().Error("定时删除队列：删除数据库记录失败",
 				zap.String("tenant_id:", tenantID.String()),
@@ -380,7 +383,7 @@ func (s *service) ListenDeleteQueue() {
 			return
 		}
 
-		//	3.删除记录
+		// 3.删除R3
 		if err := s.DeleteFile(r2Config.s3Client, r2Config.deleteBucket, img.Path); err != nil {
 			zap.L().Error("定时删除队列：删除存储文件失败",
 				zap.String("img_id", imgID.String()),
@@ -584,7 +587,7 @@ func (s *service) SetR2Config(config *domain.R2Config) error {
 	// 已有配置 则可不再提供secret
 	// 如果有secret 就去做加密
 	if config.GetSecretAccessKey() != "" {
-		encryptSecret, err := s.ace256Encryptor.Encrypt(config.AccessKeyID)
+		encryptSecret, err := s.ace256Encryptor.Encrypt(config.GetSecretAccessKey())
 		if err != nil {
 			return err
 		}
