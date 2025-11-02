@@ -127,7 +127,10 @@ func (repo *ImgPSQLRepository) Restore(tenantID domain.TenantID, imgID domain.Im
 func (repo *ImgPSQLRepository) List(query *domain.ImgQuery) (*domain.ImgList, error) {
 	var whereMods []qm.QueryMod
 
-	whereMods = append(whereMods, qm.Where(fmt.Sprintf("%s = ?", orm.ImgColumns.TenantID), query.TenantID))
+	whereMods = append(
+		whereMods,
+		orm.ImgWhere.TenantID.EQ(query.TenantID.String()),
+	)
 
 	if query.Keyword != "" {
 		like := "%" + query.Keyword + "%"
@@ -135,7 +138,9 @@ func (repo *ImgPSQLRepository) List(query *domain.ImgQuery) (*domain.ImgList, er
 	}
 
 	if query.CategoryID != "" {
-		whereMods = append(whereMods, qm.Where(fmt.Sprintf("%s = ?", orm.ImgColumns.CategoryID), query.CategoryID))
+		whereMods = append(
+			whereMods,
+			qm.Where(fmt.Sprintf("%s = ?", orm.ImgColumns.CategoryID), query.CategoryID))
 	}
 
 	if query.Deleted {
@@ -205,7 +210,7 @@ func (repo *ImgPSQLRepository) DeleteCategory(tenantID domain.TenantID, category
 
 func (repo *ImgPSQLRepository) ListCategories(tenantID domain.TenantID) ([]*domain.Category, error) {
 	ormCategories, err := orm.ImgCategories(
-		qm.Where(fmt.Sprintf("%s = ?", orm.ImgCategoryColumns.TenantID), tenantID),
+		orm.ImgCategoryWhere.TenantID.EQ(tenantID.String()),
 	).AllG()
 	if err != nil {
 		return nil, err
@@ -231,8 +236,8 @@ func (repo *ImgPSQLRepository) FindCategoryByID(tenantID domain.TenantID, catego
 
 func (repo *ImgPSQLRepository) FindCategoryByTitle(tenantID domain.TenantID, title string) (*domain.Category, error) {
 	ormCategory, err := orm.ImgCategories(
-		qm.Where(fmt.Sprintf("%s = ?", orm.ImgCategoryColumns.TenantID), tenantID),
-		qm.And(fmt.Sprintf("%s = ?", orm.ImgCategoryColumns.Title), title),
+		orm.ImgCategoryWhere.TenantID.EQ(tenantID.String()),
+		orm.ImgCategoryWhere.Title.EQ(title),
 	).OneG()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -245,8 +250,8 @@ func (repo *ImgPSQLRepository) FindCategoryByTitle(tenantID domain.TenantID, tit
 
 func (repo *ImgPSQLRepository) CategoryExistByID(tenantID domain.TenantID, categoryID domain.CategoryID) (bool, error) {
 	exist, err := orm.Imgs(
-		qm.Where(fmt.Sprintf("%s = ?", orm.ImgCategoryColumns.TenantID), tenantID),
-		qm.And(fmt.Sprintf("%s = ?", orm.ImgColumns.CategoryID), categoryID),
+		orm.ImgCategoryWhere.TenantID.EQ(tenantID.String()),
+		orm.ImgCategoryWhere.ID.EQ(categoryID.String()),
 	).ExistsG()
 
 	if err != nil {
@@ -258,8 +263,8 @@ func (repo *ImgPSQLRepository) CategoryExistByID(tenantID domain.TenantID, categ
 
 func (repo *ImgPSQLRepository) CategoryExistByTitle(tenantID domain.TenantID, title string) (bool, error) {
 	exist, err := orm.ImgCategories(
-		qm.Where(fmt.Sprintf("%s = ?", orm.ImgCategoryColumns.TenantID), tenantID),
-		qm.And(fmt.Sprintf("%s = ?", orm.ImgCategoryColumns.Title), title),
+		orm.ImgCategoryWhere.TenantID.EQ(tenantID.String()),
+		orm.ImgCategoryWhere.Title.EQ(title),
 	).ExistsG()
 	if err != nil {
 		return false, err
@@ -269,7 +274,7 @@ func (repo *ImgPSQLRepository) CategoryExistByTitle(tenantID domain.TenantID, ti
 
 func (repo *ImgPSQLRepository) CountCategory(tenantID domain.TenantID) (int64, error) {
 	count, err := orm.ImgCategories(
-		qm.Where(fmt.Sprintf("%s = ?", orm.ImgCategoryColumns.TenantID), tenantID),
+		orm.ImgCategoryWhere.TenantID.EQ(tenantID.String()),
 	).CountG()
 	if err != nil {
 		return 0, err
@@ -279,8 +284,8 @@ func (repo *ImgPSQLRepository) CountCategory(tenantID domain.TenantID) (int64, e
 
 func (repo *ImgPSQLRepository) IsCategoryExistImg(tenantID domain.TenantID, categoryID domain.CategoryID) (bool, error) {
 	existing2, err := orm.Imgs(
-		qm.Where(fmt.Sprintf("%s = ?", orm.ImgCategoryColumns.TenantID), tenantID),
-		qm.And(fmt.Sprintf("%s = ?", orm.ImgColumns.CategoryID), categoryID),
+		orm.ImgCategoryWhere.TenantID.EQ(tenantID.String()),
+		orm.ImgCategoryWhere.ID.EQ(categoryID.String()),
 		qm.WithDeleted(),
 	).ExistsG()
 	if err != nil {
@@ -292,7 +297,7 @@ func (repo *ImgPSQLRepository) IsCategoryExistImg(tenantID domain.TenantID, cate
 
 func (repo *ImgPSQLRepository) GetTenantR2Config(tenantID domain.TenantID) (*domain.R2Config, error) {
 	config, err := orm.TenantR2Configs(
-		qm.Where(fmt.Sprintf("%s = ?", orm.TenantR2ConfigColumns.TenantID), tenantID),
+		orm.TenantR2ConfigWhere.TenantID.EQ(tenantID.String()),
 	).OneG()
 
 	if err != nil {

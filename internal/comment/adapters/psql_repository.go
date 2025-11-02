@@ -7,7 +7,6 @@ import (
 	"saas/internal/comment/domain"
 	"saas/internal/common/orm"
 	"saas/internal/common/reskit/codes"
-	"saas/internal/common/utils"
 	"saas/internal/common/utils/dbkit"
 
 	"github.com/aarondl/null/v8"
@@ -343,7 +342,7 @@ func (repo *CommentPSQLRepository) GetUserInfosByIDs(userIDs []domain.UserID) ([
 	stringIDs := domain.UserIDs(userIDs).ToStringSlice()
 
 	ormUsers, err := orm.Users(
-		qm.WhereIn(fmt.Sprintf("%s in ?", orm.UserColumns.ID), utils.StringSliceToInterface(stringIDs)...),
+		orm.UserWhere.ID.IN(stringIDs),
 		qm.Select(orm.UserColumns.ID, orm.UserColumns.Nickname, orm.UserColumns.Email),
 	).AllG()
 
@@ -385,7 +384,7 @@ func (repo *CommentPSQLRepository) SetTenantConfig(config *domain.TenantConfig) 
 
 func (repo *CommentPSQLRepository) GetTenantConfig(tenantID domain.TenantID) (*domain.TenantConfig, error) {
 	ormConfig, err := orm.CommentTenantConfigs(
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentTenantConfigColumns.TenantID), tenantID),
+		orm.CommentTenantConfigWhere.TenantID.EQ(tenantID.String()),
 	).OneG()
 
 	if err != nil {
@@ -400,7 +399,7 @@ func (repo *CommentPSQLRepository) GetTenantConfig(tenantID domain.TenantID) (*d
 
 func (repo *CommentPSQLRepository) ExistTenantConfigByID(tenantID domain.TenantID) (bool, error) {
 	exist, err := orm.CommentTenantConfigs(
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentTenantConfigColumns.TenantID), tenantID),
+		orm.CommentTenantConfigWhere.TenantID.EQ(tenantID.String()),
 	).ExistsG()
 
 	if err != nil {
@@ -482,8 +481,8 @@ func (repo *CommentPSQLRepository) ListPlate(query *domain.PlateQuery) (*domain.
 
 func (repo *CommentPSQLRepository) ExistPlateBykey(tenantID domain.TenantID, belongKey string) (bool, error) {
 	exist, err := orm.CommentPlates(
-		qm.Where(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.TenantID), tenantID),
-		qm.And(fmt.Sprintf("%s = ?", orm.CommentPlateColumns.BelongKey), belongKey),
+		orm.CommentPlateWhere.TenantID.EQ(tenantID.String()),
+		orm.CommentPlateWhere.BelongKey.EQ(belongKey),
 	).ExistsG()
 
 	if err != nil {

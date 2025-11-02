@@ -99,7 +99,7 @@ func (cache *CommentRedisCache) SetPlateID(tenantID domain.TenantID, belongKey s
 	field := fmt.Sprintf("%s-%s", tenantID, belongKey)
 
 	pipeline := cache.client.Pipeline()
-	pipeline.HSet(context.Background(), key, field, plateID)
+	pipeline.HSet(context.Background(), key, field, plateID.String())
 	pipeline.HExpire(context.Background(), key, commentPlateIDExpired, field).Err()
 	_, err := pipeline.Exec(context.Background())
 	if err != nil {
