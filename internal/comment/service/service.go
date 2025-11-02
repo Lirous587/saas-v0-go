@@ -152,6 +152,43 @@ func (s *service) Delete(tenantID domain.TenantID, userID domain.UserID, comment
 	return s.repo.Delete(tenantID, commentID)
 }
 
+type commentLikeHelper interface {
+	CommentID() domain.CommentID
+	Like()
+}
+
+// 泛型函数：处理点赞记录
+func applyLikeStatus[T commentLikeHelper](repo domain.CommentRepository, comments []T, tenantID domain.TenantID, userID domain.UserID) {
+	if userID.IsZero() || comments == nil {
+		zap.L().Debug("用户未登录或无评论数据 applyLikeStatus无效处理后续逻辑")
+		return
+	}
+
+	commentIDs := make([]domain.CommentID, 0, len(comments))
+
+	for i := range comments {
+		commentIDs = append(commentIDs, comments[i].CommentID())
+	}
+
+	ids, err := repo.GetLikeRecords(tenantID, commentIDs, userID)
+	if err != nil {
+		zap.L().Error("获取点赞状态失败", zap.Error(err))
+	}
+
+	if len(ids) == 0 {
+		return
+	}
+
+	cMap := domain.CommentIDs(ids).ToMap()
+
+	for i := range comments {
+		_, exist := cMap[comments[i].CommentID()]
+		if exist {
+			comments[i].Like()
+		}
+	}
+}
+
 func (s *service) ListRoots(belongKey string, userID domain.UserID, query *domain.CommentRootsQuery) ([]*domain.CommentRoot, error) {
 	plateID, err := s.getPlateID(query.TenantID, belongKey)
 	if err != nil {
@@ -160,32 +197,14 @@ func (s *service) ListRoots(belongKey string, userID domain.UserID, query *domai
 
 	query.PlateID = plateID
 
-	// 获取到roots
+	// 获取评论基础信息和相关用户信息
 	roots, err := s.repo.ListRoots(query)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	// 登录用户则处理点赞
-	if !userID.IsZero() {
-		rootIDs := make([]domain.CommentID, 0, len(roots))
-		for i := range roots {
-			rootIDs = append(rootIDs, roots[i].CommentWithUser.ID)
-		}
-
-		// 整合点赞记录
-		likeMap, err := s.cache.GetLikeMap(query.TenantID, userID, rootIDs)
-		if err != nil {
-			zap.L().Error("获取点赞状态失败", zap.Error(err))
-		}
-
-		// 设置 IsLiked 字段
-		for i := range roots {
-			if _, liked := likeMap[roots[i].CommentWithUser.ID]; liked {
-				roots[i].CommentWithUser.IsLiked = true
-			}
-		}
-	}
+	// 为评论设置点赞状态
+	applyLikeStatus(s.repo, roots, query.TenantID, userID)
 
 	return roots, nil
 }
@@ -204,26 +223,7 @@ func (s *service) ListReplies(belongKey string, userID domain.UserID, query *dom
 		return nil, errors.WithStack(err)
 	}
 
-	// 登录用户则处理点赞
-	if userID != "" {
-		replyIDs := make([]domain.CommentID, 0, len(replies))
-		for i := range replies {
-			replyIDs = append(replyIDs, replies[i].CommentWithUser.ID)
-		}
-
-		// 整合点赞记录
-		likeMap, err := s.cache.GetLikeMap(query.TenantID, userID, replyIDs)
-		if err != nil {
-			zap.L().Error("获取点赞状态失败", zap.Error(err))
-		}
-
-		// 设置 IsLiked 字段
-		for i := range replies {
-			if _, liked := likeMap[replies[i].CommentWithUser.ID]; liked {
-				replies[i].CommentWithUser.IsLiked = true
-			}
-		}
-	}
+	applyLikeStatus(s.repo, replies, query.TenantID, userID)
 
 	return replies, nil
 }

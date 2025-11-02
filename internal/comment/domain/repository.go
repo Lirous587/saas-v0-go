@@ -34,7 +34,8 @@ type CommentRepository interface {
 	GetLikeStatus(tenantID TenantID, commentID CommentID, userID UserID) (LikeStatus, error)
 	AddLike(tenantID TenantID, commentID CommentID, userID UserID) error
 	RemoveLike(tenantID TenantID, commentID CommentID, userID UserID) error
-	// GetLikeMap(tenantID TenantID, userID UserID, commentIDs []CommentID) (map[CommentID]struct{}, error)
+	// GetLikeRecords 获取到点赞过的评论列表
+	GetLikeRecords(tenantID TenantID, commentIDs []CommentID, userID UserID) ([]CommentID, error)
 }
 
 type CommentCache interface {
@@ -49,8 +50,5 @@ type CommentCache interface {
 	GetPlateConfig(tenantID TenantID, plateID PlateID) (*PlateConfig, error)
 	DeletePlateConfig(tenantID TenantID, plateID PlateID) error
 
-	// GetLikeStatus(tenantID TenantID, userID UserID, commentID CommentID) (LikeStatus, error)
-	// AddLike(tenantID TenantID, userID UserID, commentID CommentID) error
-	// RemoveLike(tenantID TenantID, userID UserID, commentID CommentID) error
-	GetLikeMap(tenantID TenantID, userID UserID, commentIDs []CommentID) (map[CommentID]struct{}, error)
+	// GetLikeMap(tenantID TenantID, userID UserID, commentIDs []CommentID) (map[CommentID]struct{}, error)
 }

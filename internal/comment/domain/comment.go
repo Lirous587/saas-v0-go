@@ -151,6 +151,14 @@ type CommentRoot struct {
 	RepliesCount    int64
 }
 
+func (cr *CommentRoot) CommentID() CommentID {
+	return cr.CommentWithUser.ID
+}
+
+func (cr *CommentRoot) Like() {
+	cr.CommentWithUser.IsLiked = true
+}
+
 type CommentRepliesQuery struct {
 	TenantID TenantID
 	PlateID  PlateID
@@ -161,6 +169,13 @@ type CommentRepliesQuery struct {
 
 type CommentReply struct {
 	CommentWithUser *CommentWithUser
+}
+
+func (cr *CommentReply) CommentID() CommentID {
+	return cr.CommentWithUser.ID
+}
+func (cr *CommentReply) Like() {
+	cr.CommentWithUser.IsLiked = true
 }
 
 // -- 板块

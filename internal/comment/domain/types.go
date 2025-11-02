@@ -58,6 +58,20 @@ func (ids CommentIDs) ToStringSlice() []string {
 	return result
 }
 
+func (ids CommentIDs) ToMap() map[CommentID]struct{} {
+	if len(ids) == 0 {
+		return nil
+	}
+
+	cMap := make(map[CommentID]struct{}, len(ids))
+
+	for i := range ids {
+		cMap[ids[i]] = struct{}{}
+	}
+
+	return cMap
+}
+
 type PlateID string
 
 func (p PlateID) IsZero() bool {

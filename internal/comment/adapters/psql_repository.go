@@ -636,3 +636,30 @@ func (repo *CommentPSQLRepository) RemoveLike(tenantID domain.TenantID, commentI
 
 	return nil
 }
+
+func (repo *CommentPSQLRepository) GetLikeRecords(tenantID domain.TenantID, commentIDs []domain.CommentID, userID domain.UserID) ([]domain.CommentID, error) {
+	cids := domain.CommentIDs(commentIDs)
+
+	records, err := orm.CommentLikes(
+		orm.CommentLikeWhere.TenantID.EQ(tenantID.String()),
+		orm.CommentLikeWhere.UserID.EQ(userID.String()),
+		orm.CommentLikeWhere.CommentID.IN(cids.ToStringSlice()),
+		qm.Select(orm.CommentLikeColumns.CommentID),
+	).AllG()
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(records) == 0 {
+		return nil, nil
+	}
+
+	ids := make([]domain.CommentID, 0, len(records))
+
+	for i := range records {
+		ids = append(ids, domain.CommentID(records[i].CommentID))
+	}
+
+	return ids, nil
+}
