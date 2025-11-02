@@ -221,9 +221,10 @@ func (repo *ImgPSQLRepository) ListCategories(tenantID domain.TenantID) ([]*doma
 
 func (repo *ImgPSQLRepository) FindCategoryByID(tenantID domain.TenantID, categoryID domain.CategoryID) (*domain.Category, error) {
 	ormCategory, err := orm.ImgCategories(
-		orm.ImgWhere.TenantID.EQ(tenantID.String()),
-		orm.ImgWhere.ID.EQ(categoryID.String()),
+		orm.ImgCategoryWhere.TenantID.EQ(tenantID.String()),
+		qm.And(fmt.Sprintf("%s = ?", orm.ImgCategoryColumns.ID), categoryID),
 	).OneG()
+
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, codes.ErrImgCategoryNotFound

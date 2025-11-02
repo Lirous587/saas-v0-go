@@ -42,11 +42,10 @@ func NewImgRedisCache() domain.ImgMsgQueue {
 const (
 	keyImgDeleteQueueKey = "img:delete"
 	deleteImgExpire      = time.Hour * 24 * 7
-	//deleteImgExpire = time.Second * 20
 )
 
 func (c *ImgRedisCache) buildDeletedQueueKey(tenantID domain.TenantID, imgID domain.ImgID) string {
-	return fmt.Sprintf("%s:%s:%d", utils.GetRedisKey(keyImgDeleteQueueKey), tenantID, imgID)
+	return fmt.Sprintf("%s:%s:%s", utils.GetRedisKey(keyImgDeleteQueueKey), tenantID, imgID)
 }
 
 // AddToDeleteQueue 软删除时写入 redis 并设置过期
@@ -65,10 +64,12 @@ func (c *ImgRedisCache) ListenDeleteQueue(onExpire func(tenantID domain.TenantID
 	for msg := range pubsub.Channel() {
 		// 解析 key: img:delete:tenantID:imgID
 		if strings.HasPrefix(msg.Payload, preKey) {
-			parts := strings.Split(msg.Payload, ":")
-			if len(parts) == 4 { // 确保格式正确：img:delete:tenantID:imgID
-				tenantID := parts[2]
-				imgID := parts[3]
+			// 获取 preKey 后面的数据 tenantID:imgID
+			suffix := strings.TrimPrefix(msg.Payload, preKey)
+			parts := strings.Split(suffix, ":")
+			if len(parts) == 2 {
+				tenantID := parts[0]
+				imgID := parts[1]
 				onExpire(domain.TenantID(tenantID), domain.ImgID(imgID))
 			}
 		}
