@@ -30,7 +30,7 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 		g.GET("/:belong_key/:root_id/replies", auth.OptionalJWTValidate(), handler.ListReplies)
 	}
 
-	protect := g.Group("", auth.JWTValidate(), auth.CasbinValited())
+	protect := g.Group("", auth.JWTValidate())
 	{
 		// 创建评论
 		protect.POST("/:belong_key", handler.Create)
@@ -39,19 +39,21 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 
 		// 低优先级 点赞/取消点赞
 		protect.PUT("/like/:id", handler.ToggleLike)
+	}
 
+	// 仅租户创建者可访问的路由
+	creatorOnly := g.Group("", auth.JWTValidate(), auth.TenantCreatorValited())
+	{
 		// 管理员
 		// 审计
-		protect.PUT("/:id", handler.Audit)
-		// 高级查询
-		// protect.GET("/advanced", handler.AdvancedList)
+		creatorOnly.PUT("/:id", auth.TenantCreatorValited(), handler.Audit)
 
 		// 全局配置
-		protect.PUT("/config", handler.SetTenantConfig)
-		protect.GET("/config", handler.GetTenantConfig)
+		creatorOnly.PUT("/config", handler.SetTenantConfig)
+		creatorOnly.GET("/config", handler.GetTenantConfig)
 
 		// 板块管理子组
-		plateGroup := protect.Group("/plate")
+		plateGroup := creatorOnly.Group("/plate")
 		{
 			plateGroup.POST("", handler.CreatePlate)
 			plateGroup.PUT("/:id", handler.UpdatePlate)
@@ -61,6 +63,7 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 			plateGroup.PUT("/config/:belong_key", handler.SetPlateConfig)
 			plateGroup.GET("/config/:id", handler.GetPlateConfig)
 		}
+
 	}
 
 	return nil

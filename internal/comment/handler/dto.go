@@ -12,10 +12,10 @@ type UserInfo struct {
 }
 
 type CreateRequest struct {
-	TenantID  domain.TenantID  `json:"-" uri:"tenant_id" binding:"required"`
+	TenantID  domain.TenantID  `json:"-" uri:"tenant_id" binding:"required,uuid"`
 	BelongKey string           `json:"-" uri:"belong_key" binding:"required,max=50"`
-	RootID    domain.CommentID `json:"root_id"`
-	ParentID  domain.CommentID `json:"parent_id"`
+	RootID    domain.CommentID `json:"root_id" binding:"omitempty,uuid"`
+	ParentID  domain.CommentID `json:"parent_id" binding:"omitempty,uuid"`
 	Content   string           `json:"content" binding:"required"`
 }
 
@@ -31,14 +31,14 @@ func (cq *CreateRequest) Validate() error {
 }
 
 type DeleteRequest struct {
-	TenantID domain.TenantID  `json:"-" uri:"tenant_id" binding:"required"`
-	ID       domain.CommentID `json:"-" uri:"id" binding:"required"`
+	TenantID domain.TenantID  `json:"-" uri:"tenant_id" binding:"required,uuid"`
+	ID       domain.CommentID `json:"-" uri:"id" binding:"required,uuid"`
 }
 
 type ListRootsRequest struct {
-	TenantID  domain.TenantID  `json:"-" uri:"tenant_id" binding:"required"`
+	TenantID  domain.TenantID  `json:"-" uri:"tenant_id" binding:"required,uuid"`
 	BelongKey string           `json:"-" uri:"belong_key" binding:"required"`
-	LastID    domain.CommentID `json:"-" form:"last_id" binding:"min=0"`
+	LastID    domain.CommentID `json:"-" form:"last_id" binding:"omitempty,uuid"`
 	PageSize  int              `json:"-" form:"page_size,default=5" binding:"min=5,max=15"`
 }
 
@@ -55,10 +55,10 @@ type CommentRootResponse struct {
 }
 
 type ListRepliesRequest struct {
-	TenantID  domain.TenantID  `json:"-" uri:"tenant_id" binding:"required"`
+	TenantID  domain.TenantID  `json:"-" uri:"tenant_id" binding:"required,uuid"`
 	BelongKey string           `json:"-" uri:"belong_key" binding:"required"`
-	RootID    domain.CommentID `json:"-" uri:"root_id" binding:"required"`
-	LastID    domain.CommentID `json:"-" form:"last_id" binding:"min=0"`
+	RootID    domain.CommentID `json:"-" uri:"root_id" binding:"required,uuid"`
+	LastID    domain.CommentID `json:"-" form:"last_id" binding:"omitempty,uuid"`
 	PageSize  int              `json:"-" form:"page_size,default=5" binding:"min=5,max=15"`
 }
 
@@ -74,8 +74,8 @@ type CommentReplyResponse struct {
 }
 
 type ToggleLikeRequest struct {
-	TenantID domain.TenantID  `json:"-" uri:"tenant_id" binding:"required"`
-	ID       domain.CommentID `json:"-" uri:"id" binding:"required"`
+	TenantID domain.TenantID  `json:"-" uri:"tenant_id" binding:"required,uuid"`
+	ID       domain.CommentID `json:"-" uri:"id" binding:"required,uuid"`
 }
 
 type AuditAction string
@@ -88,8 +88,8 @@ const auditAccept AuditAction = "accept"
 const auditReject AuditAction = "reject"
 
 type AuditRequest struct {
-	TenantID domain.TenantID  `json:"-" uri:"tenant_id" binding:"required"`
-	ID       domain.CommentID `json:"-" uri:"id" binding:"required"`
+	TenantID domain.TenantID  `json:"-" uri:"tenant_id" binding:"required,uuid"`
+	ID       domain.CommentID `json:"-" uri:"id" binding:"required,uuid"`
 	Action   AuditAction      `json:"action" binding:"required"`
 }
 
@@ -108,27 +108,27 @@ type PlateListResponse struct {
 }
 
 type CreatePlateRequest struct {
-	TenantID   domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	TenantID   domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
 	BelongKey  string          `json:"belong_key" binding:"required,max=50"`
 	RelatedURL string          `json:"related_url" binding:"required,url,max=255"`
 	Summary    string          `json:"summary" binding:"required,max=60"`
 }
 
 type UpdatePlateRequest struct {
-	TenantID   domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
-	ID         domain.PlateID  `json:"-" uri:"id" binding:"required"`
+	TenantID   domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
+	ID         domain.PlateID  `json:"-" uri:"id" binding:"required,uuid"`
 	BelongKey  string          `json:"belong_key" binding:"required,max=50"`
 	RelatedURL string          `json:"related_url" binding:"required,url,max=255"`
 	Summary    string          `json:"summary" binding:"required,max=60"`
 }
 
 type DeletePlateRequest struct {
-	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
-	ID       domain.PlateID  `json:"-" uri:"id" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
+	ID       domain.PlateID  `json:"-" uri:"id" binding:"required,uuid"`
 }
 
 type PlateListRequest struct {
-	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
 	Page     int             `form:"page,default=1" binding:"min=1"`
 	PageSize int             `form:"page_size,default=5" binding:"min=5,max=20"`
 	Keyword  string          `form:"keyword" binding:"max=20"`
@@ -137,12 +137,12 @@ type PlateListRequest struct {
 // --- 租户级别配置
 
 type SetTenantConfigRequest struct {
-	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
 	IfAudit  *bool           `json:"if_audit" binding:"required"`
 }
 
 type GetTenantConfigRequest struct {
-	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
 }
 
 type TenantConfigResponse struct {
@@ -154,7 +154,7 @@ type TenantConfigResponse struct {
 // --- 板块级别配置
 
 type SetPlateConfigRequest struct {
-	TenantID  domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	TenantID  domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
 	BelongKey string          `json:"-" uri:"belong_key" binding:"required,max=50"`
 	IfAudit   *bool           `json:"if_audit" binding:"required"`
 }

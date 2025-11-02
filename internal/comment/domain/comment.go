@@ -50,7 +50,7 @@ type Comment struct {
 	IsLiked   bool
 }
 
-func (c *Comment) GetStatus() CommentStatus {
+func (c *Comment) Status() CommentStatus {
 	return c.status
 }
 
@@ -86,8 +86,8 @@ func (c *Comment) CanReply() bool {
 	return c.status == CommentStatusApproved
 }
 
-func (c *Comment) IsCommentByAdmin(userID UserID) bool {
-	return c.UserID == userID
+func (c *Comment) IsCommentByAdmin(adminID UserID) bool {
+	return c.UserID == adminID
 }
 
 func (c *Comment) FilterSelf(userIDs []UserID) []UserID {

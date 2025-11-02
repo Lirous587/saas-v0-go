@@ -21,7 +21,7 @@ func domainCommentToORM(comment *domain.Comment) *orm.Comment {
 		Content:   comment.Content,
 		LikeCount: comment.LikeCount,
 		CreatedAt: comment.CreatedAt,
-		Status:    orm.CommentStatus(comment.GetStatus()),
+		Status:    orm.CommentStatus(comment.Status()),
 	}
 
 	// 处理null项

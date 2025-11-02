@@ -6,10 +6,18 @@ func (t TenantID) IsZero() bool {
 	return t == ""
 }
 
+func (t TenantID) String() string {
+	return string(t)
+}
+
 type UserID string
 
 func (u UserID) IsZero() bool {
 	return u == ""
+}
+
+func (u UserID) String() string {
+	return string(u)
 }
 
 type UserIDs []UserID
@@ -36,6 +44,10 @@ func (c CommentID) IsZero() bool {
 	return c == ""
 }
 
+func (c CommentID) String() string {
+	return string(c)
+}
+
 type CommentIDs []CommentID
 
 func (ids CommentIDs) ToStringSlice() []string {
@@ -50,4 +62,8 @@ type PlateID string
 
 func (p PlateID) IsZero() bool {
 	return p == ""
+}
+
+func (p PlateID) String() string {
+	return string(p)
 }
