@@ -155,18 +155,15 @@ func (repo *CommentPSQLRepository) ListRoots(query *domain.CommentRootsQuery) ([
 	roots := make([]*domain.CommentRoot, 0, len(ormComments))
 	for _, ormComment := range ormComments {
 		userInfo := ormUserToDomain(ormComment.R.User)
-		commentWithUser := &domain.CommentWithUser{
-			ID:        domain.CommentID(ormComment.ID),
-			User:      userInfo,
-			ParentID:  domain.CommentID(ormComment.ParentID.String),
-			RootID:    domain.CommentID(ormComment.RootID.String),
-			Content:   ormComment.Content,
-			LikeCount: ormComment.LikeCount,
-			CreatedAt: ormComment.CreatedAt,
-		}
 		roots = append(roots, &domain.CommentRoot{
-			CommentWithUser: commentWithUser,
-			RepliesCount:    repliesCountMap[ormComment.ID],
+			ID:           domain.CommentID(ormComment.ID),
+			User:         userInfo,
+			ParentID:     domain.CommentID(ormComment.ParentID.String),
+			RootID:       domain.CommentID(ormComment.RootID.String),
+			Content:      ormComment.Content,
+			LikeCount:    ormComment.LikeCount,
+			CreatedAt:    ormComment.CreatedAt,
+			RepliesCount: repliesCountMap[ormComment.ID],
 		})
 	}
 
@@ -182,24 +179,47 @@ func (repo *CommentPSQLRepository) ListReplies(query *domain.CommentRepliesQuery
 	// 根root条件
 	mods = append(mods, orm.CommentWhere.RootID.EQ(null.StringFrom(query.RootID.String())))
 
-	// 使用游标代替offest
 	if query.LastID != "" {
 		mods = append(mods, orm.CommentWhere.ID.GT(query.LastID.String()))
 	}
 
 	// order 按ID升序排序（确保游标有效）
 	mods = append(mods, qm.OrderBy(orm.CommentColumns.ID+" ASC"))
-
-	// limit
 	mods = append(mods, qm.Limit(query.PageSize))
 
-	// 连表加载用户
+	// 加载当前回复者信息
 	mods = append(mods, qm.Load(orm.CommentRels.User))
 
-	// 执行查询
 	ormComments, err := orm.Comments(mods...).AllG()
 	if err != nil {
 		return nil, err
+	}
+
+	// 加载父评论的用户信息
+	parentCommentIDs := make([]string, 0, len(ormComments))
+	for _, c := range ormComments {
+		if c.ParentID.Valid && c.ParentID.String != "" {
+			parentCommentIDs = append(parentCommentIDs, c.ParentID.String)
+		}
+	}
+
+	// 批量加载父评论
+	parentCommentsMap := make(map[string]*orm.Comment)
+	if len(parentCommentIDs) > 0 {
+		parentComments, err := orm.Comments(
+			orm.CommentWhere.TenantID.EQ(query.TenantID.String()),
+			orm.CommentWhere.ID.IN(parentCommentIDs),
+			qm.Load(orm.CommentRels.User),
+			qm.Select(orm.CommentColumns.ID, orm.CommentColumns.UserID),
+		).AllG()
+
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		for _, pc := range parentComments {
+			parentCommentsMap[pc.ID] = pc
+		}
 	}
 
 	// 转换结果
@@ -207,19 +227,21 @@ func (repo *CommentPSQLRepository) ListReplies(query *domain.CommentRepliesQuery
 	for i := range ormComments {
 		userInfo := ormUserToDomain(ormComments[i].R.User)
 
-		commentWithUser := &domain.CommentWithUser{
+		// 获取被回复用户信息
+		var toUserInfo *domain.UserInfo
+		if parentComment, ok := parentCommentsMap[ormComments[i].ParentID.String]; ok && parentComment.R.User != nil {
+			toUserInfo = ormUserToDomain(parentComment.R.User)
+		}
+
+		replies = append(replies, &domain.CommentReply{
 			ID:        domain.CommentID(ormComments[i].ID),
 			User:      userInfo,
+			ToUser:    toUserInfo,
 			ParentID:  domain.CommentID(ormComments[i].ParentID.String),
 			RootID:    domain.CommentID(ormComments[i].RootID.String),
 			Content:   ormComments[i].Content,
 			LikeCount: ormComments[i].LikeCount,
 			CreatedAt: ormComments[i].CreatedAt,
-			// IsLiked:   false, // 待补充
-		}
-
-		replies = append(replies, &domain.CommentReply{
-			CommentWithUser: commentWithUser,
 		})
 	}
 

@@ -4,6 +4,17 @@ import (
 	"saas/internal/comment/domain"
 )
 
+func userInfoToResponse(user *domain.UserInfo) *UserInfo {
+	if user == nil {
+		return nil
+	}
+	return &UserInfo{
+		ID:        user.ID,
+		NickName:  user.NickName,
+		AvatarURL: user.AvatarURL,
+	}
+}
+
 func domainCommentRootsToResponse(roots []*domain.CommentRoot) []*CommentRootResponse {
 	if len(roots) == 0 {
 		return nil
@@ -11,24 +22,19 @@ func domainCommentRootsToResponse(roots []*domain.CommentRoot) []*CommentRootRes
 
 	responses := make([]*CommentRootResponse, 0, len(roots))
 	for i := range roots {
-		if roots[i] == nil || roots[i].CommentWithUser == nil {
+		if roots[i] == nil {
 			continue
 		}
-		CommentWithUser := roots[i].CommentWithUser
-		userInfo := &UserInfo{
-			ID:        CommentWithUser.User.ID,
-			NickName:  CommentWithUser.User.NickName,
-			AvatarURL: CommentWithUser.User.AvatarURL,
-		}
+
 		responses = append(responses, &CommentRootResponse{
-			ID:           CommentWithUser.ID,
-			User:         userInfo,
-			ParentID:     CommentWithUser.ParentID,
-			RootID:       CommentWithUser.RootID,
-			Content:      CommentWithUser.Content,
-			LikeCount:    CommentWithUser.LikeCount,
-			CreatedAt:    CommentWithUser.CreatedAt.Unix(),
-			IsLiked:      CommentWithUser.IsLiked,
+			ID:           roots[i].ID,
+			User:         userInfoToResponse(roots[i].User),
+			ParentID:     roots[i].ParentID,
+			RootID:       roots[i].RootID,
+			Content:      roots[i].Content,
+			LikeCount:    roots[i].LikeCount,
+			CreatedAt:    roots[i].CreatedAt.Unix(),
+			IsLiked:      roots[i].IsLiked,
 			RepliesCount: roots[i].RepliesCount,
 		})
 	}
@@ -43,24 +49,20 @@ func domainCommentRepliesToResponse(replies []*domain.CommentReply) []*CommentRe
 
 	responses := make([]*CommentReplyResponse, 0, len(replies))
 	for i := range replies {
-		if replies[i] == nil || replies[i].CommentWithUser == nil {
+		if replies[i] == nil {
 			continue
 		}
-		CommentWithUser := replies[i].CommentWithUser
-		userInfo := &UserInfo{
-			ID:        CommentWithUser.User.ID,
-			NickName:  CommentWithUser.User.NickName,
-			AvatarURL: CommentWithUser.User.AvatarURL,
-		}
+
 		responses = append(responses, &CommentReplyResponse{
-			ID:        CommentWithUser.ID,
-			User:      userInfo,
-			ParentID:  CommentWithUser.ParentID,
-			RootID:    CommentWithUser.RootID,
-			Content:   CommentWithUser.Content,
-			LikeCount: CommentWithUser.LikeCount,
-			CreatedAt: CommentWithUser.CreatedAt.Unix(),
-			IsLiked:   CommentWithUser.IsLiked,
+			ID:        replies[i].ID,
+			ToUser:    userInfoToResponse(replies[i].ToUser),
+			User:      userInfoToResponse(replies[i].User),
+			ParentID:  replies[i].ParentID,
+			RootID:    replies[i].RootID,
+			Content:   replies[i].Content,
+			LikeCount: replies[i].LikeCount,
+			CreatedAt: replies[i].CreatedAt.Unix(),
+			IsLiked:   replies[i].IsLiked,
 		})
 	}
 

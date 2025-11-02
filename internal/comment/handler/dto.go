@@ -64,6 +64,7 @@ type ListRepliesRequest struct {
 
 type CommentReplyResponse struct {
 	ID        domain.CommentID `json:"id"`
+	ToUser    *UserInfo        `json:"to_user,omitempty"`
 	User      *UserInfo        `json:"user"`
 	ParentID  domain.CommentID `json:"parent_id,omitempty"`
 	RootID    domain.CommentID `json:"root_id,omitempty"`
