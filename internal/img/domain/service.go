@@ -5,17 +5,17 @@ import (
 )
 
 type ImgService interface {
-	Upload(src io.Reader, img *Img, categoryID string) error
-	Delete(tenantID TenantID, id string, hard ...bool) error
+	Upload(src io.Reader, img *Img, categoryID CategoryID) error
+	Delete(tenantID TenantID, imgID ImgID, hard ...bool) error
 	List(query *ImgQuery) (*ImgList, error)
-	ClearRecycleBin(tenantID TenantID, id string) error
+	ClearRecycleBin(tenantID TenantID, imgID ImgID) error
 	ListenDeleteQueue()
-	RestoreFromRecycleBin(tenantID TenantID, id string) error
+	RestoreFromRecycleBin(tenantID TenantID, imgID ImgID) error
 
 	//	分类
 	CreateCategory(category *Category) error
 	UpdateCategory(category *Category) error
-	DeleteCategory(tenantID TenantID, id string) error
+	DeleteCategory(tenantID TenantID, categoryID CategoryID) error
 	ListCategories(tenantID TenantID) (categories []*Category, err error)
 
 	// 配置

@@ -45,18 +45,18 @@ const (
 	//deleteImgExpire = time.Second * 20
 )
 
-func (c *ImgRedisCache) buildDeletedQueueKey(tenantID domain.TenantID, imgID string) string {
+func (c *ImgRedisCache) buildDeletedQueueKey(tenantID domain.TenantID, imgID domain.ImgID) string {
 	return fmt.Sprintf("%s:%s:%d", utils.GetRedisKey(keyImgDeleteQueueKey), tenantID, imgID)
 }
 
 // AddToDeleteQueue 软删除时写入 redis 并设置过期
-func (c *ImgRedisCache) AddToDeleteQueue(tenantID domain.TenantID, imgID string) error {
+func (c *ImgRedisCache) AddToDeleteQueue(tenantID domain.TenantID, imgID domain.ImgID) error {
 	key := c.buildDeletedQueueKey(tenantID, imgID)
 	return c.client.SetEx(context.Background(), key, "", deleteImgExpire).Err()
 }
 
 // ListenDeleteQueue 后台监听 key 过期事件
-func (c *ImgRedisCache) ListenDeleteQueue(onExpire func(tenantID domain.TenantID, imgID string)) {
+func (c *ImgRedisCache) ListenDeleteQueue(onExpire func(tenantID domain.TenantID, imgID domain.ImgID)) {
 	pubsub := c.client.PSubscribe(context.Background(), "__keyevent@0__:expired")
 	defer pubsub.Close() // 确保资源释放
 
@@ -69,14 +69,14 @@ func (c *ImgRedisCache) ListenDeleteQueue(onExpire func(tenantID domain.TenantID
 			if len(parts) == 4 { // 确保格式正确：img:delete:tenantID:imgID
 				tenantID := parts[2]
 				imgID := parts[3]
-				onExpire(domain.TenantID(tenantID), imgID)
+				onExpire(domain.TenantID(tenantID), domain.ImgID(imgID))
 			}
 		}
 	}
 }
 
 // RemoveFromDeleteQueue 从删除队列中移除指定图片ID
-func (c *ImgRedisCache) RemoveFromDeleteQueue(tenantID domain.TenantID, imgID string) error {
+func (c *ImgRedisCache) RemoveFromDeleteQueue(tenantID domain.TenantID, imgID domain.ImgID) error {
 	key := c.buildDeletedQueueKey(tenantID, imgID)
 	return c.client.Del(context.Background(), key).Err()
 }

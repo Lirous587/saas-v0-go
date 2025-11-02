@@ -3,43 +3,43 @@ package handler
 import "saas/internal/img/domain"
 
 type ImgResponse struct {
-	ID          string  `json:"id"`
-	Url         string `json:"url"`
-	Description string `json:"description,omitempty"`
-	CreatedAt   int64  `json:"created_at"`
-	UpdatedAt   int64  `json:"updated_at"`
+	ID          domain.ImgID `json:"id"`
+	URL         string       `json:"url"`
+	Description string       `json:"description,omitempty"`
+	CreatedAt   int64        `json:"created_at"`
+	UpdatedAt   int64        `json:"updated_at"`
 }
 
 type UploadRequest struct {
-	TenantID    domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
-	Path        string          `form:"path" binding:"omitempty,slug"`
-	Description string          `form:"description" binding:"max=60"`
-	CategoryID  string           `form:"category_id"`
+	TenantID    domain.TenantID   `json:"-" uri:"tenant_id" binding:"required,uuid"`
+	Path        string            `form:"path" binding:"omitempty,slug"`
+	Description string            `form:"description" binding:"max=60"`
+	CategoryID  domain.CategoryID `form:"category_id" binding:"omitempty,uuid"`
 }
 
 type DeleteRequest struct {
-	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
-	ID       string           `uri:"id" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
+	ID       domain.ImgID    `uri:"id" binding:"required,uuid"`
 	Hard     bool            `form:"hard,default=false"`
 }
 
 type ClearRecycleBinRequest struct {
-	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
-	ID       string           `uri:"id" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
+	ID       domain.ImgID    `uri:"id" binding:"required,uuid"`
 }
 
 type RestoreFromRecycleBinRequest struct {
-	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
-	ID       string           `uri:"id" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
+	ID       domain.ImgID    `uri:"id" binding:"required,uuid"`
 }
 
 type ListRequest struct {
-	TenantID   domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
-	KeyWord    string          `form:"keyword" binding:"max=20"`
-	CategoryID string           `form:"category_id"`
-	Deleted    bool            `form:"deleted,default=false"`
-	PageSize   int             `form:"page_size,default=5" binding:"min=5,max=50"`
-	Page       int             `form:"page,default=1" binding:"min=1"`
+	TenantID   domain.TenantID   `json:"-" uri:"tenant_id" binding:"required,uuid"`
+	CategoryID domain.CategoryID `form:"category_id" binding:"omitempty,uuid"`
+	KeyWord    string            `form:"keyword" binding:"max=20"`
+	Deleted    bool              `form:"deleted,default=false"`
+	PageSize   int               `form:"page_size,default=5" binding:"min=5,max=50"`
+	Page       int               `form:"page,default=1" binding:"min=1"`
 }
 
 type ImgListResponse struct {
@@ -48,36 +48,36 @@ type ImgListResponse struct {
 }
 
 type CategoryResponse struct {
-	ID        string  `json:"id"`
-	Title     string `json:"title"`
-	Prefix    string `json:"prefix"`
-	CreatedAt int64  `json:"created_at"`
+	ID        domain.CategoryID `json:"id"`
+	Title     string            `json:"title"`
+	Prefix    string            `json:"prefix"`
+	CreatedAt int64             `json:"created_at"`
 }
 
 type CreateCategoryRequest struct {
-	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
 	Title    string          `json:"title" binding:"required,max=10"`
 	Prefix   string          `json:"prefix" binding:"required,max=20,slug"`
 }
 
 type UpdateCategoryRequest struct {
-	ID       string           `json:"-" uri:"id" binding:"required"`
-	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
-	Title    string          `json:"title" binding:"required,max=10"`
-	Prefix   string          `json:"prefix" binding:"required,max=20,slug"`
+	ID       domain.CategoryID `json:"-" uri:"id" binding:"required,uuid"`
+	TenantID domain.TenantID   `json:"-" uri:"tenant_id" binding:"required,uuid"`
+	Title    string            `json:"title" binding:"required,max=10"`
+	Prefix   string            `json:"prefix" binding:"required,max=20,slug"`
 }
 
 type DeleteCategoryRequest struct {
-	ID       string           `json:"-" uri:"id" binding:"required"`
-	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	ID       domain.CategoryID `json:"-" uri:"id" binding:"required,uuid"`
+	TenantID domain.TenantID   `json:"-" uri:"tenant_id" binding:"required,uuid"`
 }
 
 type ListCategoryRequest struct {
-	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
 }
 
 type SetR2ConfigRequest struct {
-	TenantID        domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	TenantID        domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
 	AccountID       string          `json:"account_id" binding:"required"`
 	AccessKeyID     string          `json:"access_key_id" binding:"required"`
 	SecretAccessKey string          `json:"secret_access_key"`
@@ -95,5 +95,5 @@ type R2ConfigResponse struct {
 }
 
 type GetR2ConfigRequest struct {
-	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required"`
+	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
 }

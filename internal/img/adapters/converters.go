@@ -12,8 +12,8 @@ func domainImgToORM(img *domain.Img) *orm.Img {
 	}
 
 	ormImg := &orm.Img{
-		ID:        img.ID,
-		TenantID:  string(img.TenantID),
+		ID:        img.ID.String(),
+		TenantID:  img.TenantID.String(),
 		Path:      img.Path,
 		UpdatedAt: img.UpdatedAt,
 	}
@@ -32,7 +32,7 @@ func ormImgToDomain(ormImg *orm.Img) *domain.Img {
 	}
 
 	img := &domain.Img{
-		ID:        ormImg.ID,
+		ID:        domain.ImgID(ormImg.ID),
 		TenantID:  domain.TenantID(ormImg.TenantID),
 		Path:      ormImg.Path,
 		CreatedAt: ormImg.CreatedAt,
@@ -73,8 +73,8 @@ func domainCategoryToORM(category *domain.Category) *orm.ImgCategory {
 	}
 
 	ormImg := &orm.ImgCategory{
-		ID:       category.ID,
-		TenantID: string(category.TenantID),
+		ID:       category.ID.String(),
+		TenantID: category.TenantID.String(),
 		Title:    category.Title,
 		Prefix:   category.Prefix,
 	}
@@ -90,7 +90,7 @@ func ormCategoryToDomain(ormCategory *orm.ImgCategory) *domain.Category {
 	}
 
 	img := &domain.Category{
-		ID:        ormCategory.ID,
+		ID:        domain.CategoryID(ormCategory.ID),
 		TenantID:  domain.TenantID(ormCategory.TenantID),
 		Title:     ormCategory.Title,
 		Prefix:    ormCategory.Prefix,
@@ -124,7 +124,7 @@ func doaminR2ConfigToORM(r2Config *domain.R2Config) *orm.TenantR2Config {
 	}
 
 	ormR2Config := &orm.TenantR2Config{
-		TenantID:        string(r2Config.TenantID),
+		TenantID:        r2Config.TenantID.String(),
 		AccountID:       r2Config.AccountID,
 		AccessKeyID:     r2Config.AccessKeyID,
 		SecretAccessKey: r2Config.GetSecretAccessKey(),

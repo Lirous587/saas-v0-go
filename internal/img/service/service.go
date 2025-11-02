@@ -43,8 +43,8 @@ type tenantR2ConfigWithOnce struct {
 type service struct {
 	repo            domain.ImgRepository
 	msgQueue        domain.ImgMsgQueue
-	tenantR2        sync.Map // key: int64 (tenant_id), value: *TenantR2Config
-	imgMutex        sync.Map // key: int64 (imgID), value: *sync.Mutex
+	tenantR2        sync.Map // key: TenantID (tenant_id), value: *TenantR2Config
+	imgMutex        sync.Map // key: ImgID (imgID), value: *sync.Mutex
 	ace256Encryptor *utils.AES256Encryptor
 }
 
@@ -182,7 +182,7 @@ func (s *service) Compress(src io.Reader) (io.Reader, error) {
 	return bytes.NewReader(output.Bytes()), nil
 }
 
-func (s *service) Upload(src io.Reader, img *domain.Img, categoryID string) error {
+func (s *service) Upload(src io.Reader, img *domain.Img, categoryID domain.CategoryID) error {
 	// 压缩图片
 	compressed, err := s.Compress(src)
 	if err != nil {
@@ -238,9 +238,9 @@ func (s *service) Upload(src io.Reader, img *domain.Img, categoryID string) erro
 	if !uploadOk {
 		if err := s.repo.Delete(img.TenantID, res.ID, true); err != nil {
 			zap.L().Error("数据库入库成功但图片上传失败，尝试回滚删除数据库记录时出错",
-				zap.String("tenant_id:", string(img.TenantID)),
-				zap.String("id:", res.ID),
-				zap.String("category_id:", categoryID),
+				zap.String("tenant_id:", img.TenantID.String()),
+				zap.String("id:", res.ID.String()),
+				zap.String("category_id:", categoryID.String()),
 				zap.String("path", res.Path),
 				zap.Error(err),
 			)
@@ -255,14 +255,14 @@ func (s *service) Upload(src io.Reader, img *domain.Img, categoryID string) erro
 // Delete 删除逻辑
 // 硬删除 -> 直接删除 publicBucket 中的对象
 // 软删除 -> 复制原有对象到不可公共访问的 deleteBucket 删除 publicBucket 中的对象 -> 类似于回收站功能
-func (s *service) Delete(tenantID domain.TenantID, id string, hard ...bool) error {
+func (s *service) Delete(tenantID domain.TenantID, imgID domain.ImgID, hard ...bool) error {
 	// 为每个图片创建或获取锁
-	value, _ := s.imgMutex.LoadOrStore(id, &sync.Mutex{})
+	value, _ := s.imgMutex.LoadOrStore(imgID, &sync.Mutex{})
 	mu := value.(*sync.Mutex)
 	mu.Lock()
 	defer mu.Unlock()
 
-	img, err := s.repo.FindByID(tenantID, id)
+	img, err := s.repo.FindByID(tenantID, imgID)
 	if err != nil {
 		return err
 	}
@@ -306,7 +306,7 @@ func (s *service) Delete(tenantID domain.TenantID, id string, hard ...bool) erro
 		// 4.将id记录到消息队列
 		if err := s.msgQueue.AddToDeleteQueue(tenantID, img.ID); err != nil {
 			zap.L().Error("图片软删除：添加到定时删除队列失败",
-				zap.String("img_id", img.ID),
+				zap.String("img_id", img.ID.String()),
 				zap.String("path", img.Path),
 				zap.Error(err),
 			)
@@ -347,12 +347,12 @@ func (s *service) List(query *domain.ImgQuery) (*domain.ImgList, error) {
 }
 
 func (s *service) ListenDeleteQueue() {
-	s.msgQueue.ListenDeleteQueue(func(tenantID domain.TenantID, imgID string) {
+	s.msgQueue.ListenDeleteQueue(func(tenantID domain.TenantID, imgID domain.ImgID) {
 		// 加载配置
 		r2Config, err := s.getTenantR2Config(tenantID)
 		if err != nil {
 			zap.L().Error("加载租户R2配置失败",
-				zap.String("tenant_id:", string(tenantID)),
+				zap.String("tenant_id:", tenantID.String()),
 				zap.Error(err),
 			)
 			return
@@ -362,8 +362,8 @@ func (s *service) ListenDeleteQueue() {
 		img, err := s.repo.FindByID(tenantID, imgID, true)
 		if err != nil {
 			zap.L().Error("定时删除队列：查询图片失败",
-				zap.String("tenant_id:", string(tenantID)),
-				zap.String("img_id", imgID),
+				zap.String("tenant_id:", tenantID.String()),
+				zap.String("img_id", imgID.String()),
 				zap.Error(err),
 			)
 			return
@@ -372,8 +372,8 @@ func (s *service) ListenDeleteQueue() {
 		//2.删除R3
 		if err := s.repo.Delete(tenantID, imgID, true); err != nil {
 			zap.L().Error("定时删除队列：删除数据库记录失败",
-				zap.String("tenant_id:", string(tenantID)),
-				zap.String("img_id", imgID),
+				zap.String("tenant_id:", tenantID.String()),
+				zap.String("img_id", imgID.String()),
 				zap.String("path", img.Path),
 				zap.Error(err),
 			)
@@ -383,7 +383,7 @@ func (s *service) ListenDeleteQueue() {
 		//	3.删除记录
 		if err := s.DeleteFile(r2Config.s3Client, r2Config.deleteBucket, img.Path); err != nil {
 			zap.L().Error("定时删除队列：删除存储文件失败",
-				zap.String("img_id", imgID),
+				zap.String("img_id", imgID.String()),
 				zap.String("path", img.Path),
 				zap.String("bucket", r2Config.deleteBucket.string()),
 				zap.Error(err),
@@ -391,7 +391,7 @@ func (s *service) ListenDeleteQueue() {
 		}
 
 		zap.L().Info("定时删除队列：图片删除成功",
-			zap.String("img_id", imgID),
+			zap.String("img_id", imgID.String()),
 			zap.String("path", img.Path),
 		)
 	})
@@ -399,14 +399,14 @@ func (s *service) ListenDeleteQueue() {
 
 // ClearRecycleBin 删除被软删除的数据
 // 此时删除 deleteBucket对象 数据库记录 消息队列key
-func (s *service) ClearRecycleBin(tenantID domain.TenantID, id string) error {
-	value, _ := s.imgMutex.LoadOrStore(id, &sync.Mutex{})
+func (s *service) ClearRecycleBin(tenantID domain.TenantID, imgID domain.ImgID) error {
+	value, _ := s.imgMutex.LoadOrStore(imgID, &sync.Mutex{})
 	mu := value.(*sync.Mutex)
 	mu.Lock()
 	defer mu.Unlock()
 
 	// 1.先查询图片信息
-	img, err := s.repo.FindByID(tenantID, id, true)
+	img, err := s.repo.FindByID(tenantID, imgID, true)
 	if err != nil {
 		return err
 	}
@@ -427,14 +427,14 @@ func (s *service) ClearRecycleBin(tenantID domain.TenantID, id string) error {
 	}
 
 	// 3.硬删除数据库记录
-	if err := s.repo.Delete(tenantID, id, true); err != nil {
+	if err := s.repo.Delete(tenantID, imgID, true); err != nil {
 		return err
 	}
 
 	// 4.从删除队列中移除（防止定时器重复删除）
-	if err := s.msgQueue.RemoveFromDeleteQueue(tenantID, id); err != nil {
+	if err := s.msgQueue.RemoveFromDeleteQueue(tenantID, imgID); err != nil {
 		zap.L().Error("清空回收站：移除定时删除任务失败",
-			zap.String("imgID", id),
+			zap.String("imgID", imgID.String()),
 			zap.Error(err),
 		)
 	}
@@ -442,14 +442,14 @@ func (s *service) ClearRecycleBin(tenantID domain.TenantID, id string) error {
 	return nil
 }
 
-func (s *service) RestoreFromRecycleBin(tenantID domain.TenantID, id string) error {
-	value, _ := s.imgMutex.LoadOrStore(id, &sync.Mutex{})
+func (s *service) RestoreFromRecycleBin(tenantID domain.TenantID, imgID domain.ImgID) error {
+	value, _ := s.imgMutex.LoadOrStore(imgID, &sync.Mutex{})
 	mu := value.(*sync.Mutex)
 	mu.Lock()
 	defer mu.Unlock()
 
 	// 1.查询已软删除的图片信息
-	img, err := s.repo.FindByID(tenantID, id, true)
+	img, err := s.repo.FindByID(tenantID, imgID, true)
 	if err != nil {
 		return err
 	}
@@ -475,15 +475,15 @@ func (s *service) RestoreFromRecycleBin(tenantID domain.TenantID, id string) err
 	}
 
 	// 4.恢复数据库记录（取消软删除）
-	res, err := s.repo.Restore(tenantID, id)
+	res, err := s.repo.Restore(tenantID, imgID)
 	if err != nil {
 		return err
 	}
 
 	// 5.从删除队列中移除
-	if err := s.msgQueue.RemoveFromDeleteQueue(tenantID, id); err != nil {
+	if err := s.msgQueue.RemoveFromDeleteQueue(tenantID, imgID); err != nil {
 		zap.L().Error("从回收站恢复：移除定时删除任务失败",
-			zap.String("img_id", id),
+			zap.String("img_id", imgID.String()),
 			zap.Error(err),
 		)
 	}
@@ -516,8 +516,8 @@ func (s *service) CreateCategory(category *domain.Category) error {
 	return s.repo.CreateCategory(category)
 }
 
-func (s *service) isCategoryExistImg(tenantID domain.TenantID, id string) error {
-	existing, err := s.repo.IsCategoryExistImg(tenantID, id)
+func (s *service) isCategoryExistImg(tenantID domain.TenantID, categoryID domain.CategoryID) error {
+	existing, err := s.repo.IsCategoryExistImg(tenantID, categoryID)
 	if err != nil {
 		return err
 	}
@@ -558,13 +558,13 @@ func (s *service) UpdateCategory(category *domain.Category) error {
 	return s.repo.UpdateCategory(category)
 }
 
-func (s *service) DeleteCategory(tenantID domain.TenantID, id string) error {
+func (s *service) DeleteCategory(tenantID domain.TenantID, categoryID domain.CategoryID) error {
 	// 检验当前分类下是否存在图片
-	if err := s.isCategoryExistImg(tenantID, id); err != nil {
+	if err := s.isCategoryExistImg(tenantID, categoryID); err != nil {
 		return err
 	}
 
-	return s.repo.DeleteCategory(tenantID, id)
+	return s.repo.DeleteCategory(tenantID, categoryID)
 }
 
 func (s *service) ListCategories(tenantID domain.TenantID) (categories []*domain.Category, err error) {

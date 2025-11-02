@@ -182,9 +182,9 @@ CREATE INDEX IF NOT EXISTS idx_comment_tenant_configs_if_audit ON public.comment
 -- 评论板块配置（资源级别，高精细度）
 CREATE TABLE public.comment_plate_configs
 (
-    tenant_id     UUID      NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
-    plate_id      UUID         NOT NULL REFERENCES public.comment_plates (id) ON DELETE CASCADE,
-    if_audit      boolean     NOT NULL DEFAULT true,  -- 是否开启审核
+    plate_id      UUID           NOT NULL REFERENCES public.comment_plates (id) ON DELETE CASCADE,
+    tenant_id     UUID           NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
+    if_audit      boolean        NOT NULL DEFAULT true,  -- 是否开启审核
     created_at    timestamptz(6) NOT NULL DEFAULT now(),
     updated_at    timestamptz(6) NOT NULL DEFAULT now(),
     PRIMARY KEY (tenant_id, plate_id)

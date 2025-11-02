@@ -12,7 +12,7 @@ func domainImgToResponse(img *domain.Img) *ImgResponse {
 	// 默认访问public
 	resp := &ImgResponse{
 		ID:          img.ID,
-		Url:         img.GetPublicPreURL() + "/" + img.Path,
+		URL:         img.GetPublicPreURL() + "/" + img.Path,
 		Description: img.Description,
 		CreatedAt:   img.CreatedAt.Unix(),
 		UpdatedAt:   img.UpdatedAt.Unix(),
@@ -20,7 +20,7 @@ func domainImgToResponse(img *domain.Img) *ImgResponse {
 
 	// 如果是要访问软删除文件
 	if img.IsDeleted() {
-		resp.Url = img.Path
+		resp.URL = img.Path
 	}
 
 	return resp
