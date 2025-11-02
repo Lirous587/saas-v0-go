@@ -581,3 +581,58 @@ func (repo *CommentPSQLRepository) GetPlateConfig(tenantID domain.TenantID, plat
 
 	return ormPlateConfigToDomain(ormConfig), nil
 }
+
+func (repo *CommentPSQLRepository) GetLikeStatus(tenantID domain.TenantID, commentID domain.CommentID, userID domain.UserID) (domain.LikeStatus, error) {
+	exist, err := orm.CommentLikes(
+		orm.CommentLikeWhere.TenantID.EQ(tenantID.String()),
+		orm.CommentLikeWhere.UserID.EQ(userID.String()),
+		orm.CommentLikeWhere.CommentID.EQ(commentID.String()),
+	).ExistsG()
+
+	var likeStatus domain.LikeStatus
+
+	if err != nil {
+		return likeStatus, errors.WithStack(err)
+	}
+
+	if exist {
+		likeStatus.Like()
+		return likeStatus, nil
+	}
+
+	likeStatus.UnLike()
+	return likeStatus, nil
+}
+
+func (repo *CommentPSQLRepository) AddLike(tenantID domain.TenantID, commentID domain.CommentID, userID domain.UserID) error {
+	ormLike := orm.CommentLike{
+		TenantID:  tenantID.String(),
+		CommentID: commentID.String(),
+		UserID:    userID.String(),
+	}
+
+	if err := ormLike.InsertG(boil.Infer()); err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
+}
+
+func (repo *CommentPSQLRepository) RemoveLike(tenantID domain.TenantID, commentID domain.CommentID, userID domain.UserID) error {
+	ormLike := orm.CommentLike{
+		TenantID:  tenantID.String(),
+		CommentID: commentID.String(),
+		UserID:    userID.String(),
+	}
+
+	rows, err := ormLike.DeleteG()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	if rows == 0 {
+		return errors.WithStack(codes.ErrCommentLikeRecordNotFound)
+	}
+
+	return nil
+}

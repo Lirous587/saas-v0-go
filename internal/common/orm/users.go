@@ -115,16 +115,19 @@ var UserWhere = struct {
 // UserRels is where relationship names are stored.
 var UserRels = struct {
 	CreatorTenant string
+	CommentLikes  string
 	Comments      string
 }{
 	CreatorTenant: "CreatorTenant",
+	CommentLikes:  "CommentLikes",
 	Comments:      "Comments",
 }
 
 // userR is where relationships are stored.
 type userR struct {
-	CreatorTenant *Tenant      `boil:"CreatorTenant" json:"CreatorTenant" toml:"CreatorTenant" yaml:"CreatorTenant"`
-	Comments      CommentSlice `boil:"Comments" json:"Comments" toml:"Comments" yaml:"Comments"`
+	CreatorTenant *Tenant          `boil:"CreatorTenant" json:"CreatorTenant" toml:"CreatorTenant" yaml:"CreatorTenant"`
+	CommentLikes  CommentLikeSlice `boil:"CommentLikes" json:"CommentLikes" toml:"CommentLikes" yaml:"CommentLikes"`
+	Comments      CommentSlice     `boil:"Comments" json:"Comments" toml:"Comments" yaml:"Comments"`
 }
 
 // NewStruct creates a new relationship struct
@@ -146,6 +149,22 @@ func (r *userR) GetCreatorTenant() *Tenant {
 	}
 
 	return r.CreatorTenant
+}
+
+func (o *User) GetCommentLikes() CommentLikeSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetCommentLikes()
+}
+
+func (r *userR) GetCommentLikes() CommentLikeSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.CommentLikes
 }
 
 func (o *User) GetComments() CommentSlice {
@@ -475,6 +494,20 @@ func (o *User) CreatorTenant(mods ...qm.QueryMod) tenantQuery {
 	return Tenants(queryMods...)
 }
 
+// CommentLikes retrieves all the comment_like's CommentLikes with an executor.
+func (o *User) CommentLikes(mods ...qm.QueryMod) commentLikeQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"comment_likes\".\"user_id\"=?", o.ID),
+	)
+
+	return CommentLikes(queryMods...)
+}
+
 // Comments retrieves all the comment's Comments with an executor.
 func (o *User) Comments(mods ...qm.QueryMod) commentQuery {
 	var queryMods []qm.QueryMod
@@ -598,6 +631,119 @@ func (userL) LoadCreatorTenant(e boil.Executor, singular bool, maybeUser interfa
 					foreign.R = &tenantR{}
 				}
 				foreign.R.Creator = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadCommentLikes allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userL) LoadCommentLikes(e boil.Executor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		var ok bool
+		object, ok = maybeUser.(*User)
+		if !ok {
+			object = new(User)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUser))
+			}
+		}
+	} else {
+		s, ok := maybeUser.(*[]*User)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUser))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`comment_likes`),
+		qm.WhereIn(`comment_likes.user_id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.Query(e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load comment_likes")
+	}
+
+	var resultSlice []*CommentLike
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice comment_likes")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on comment_likes")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for comment_likes")
+	}
+
+	if len(commentLikeAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.CommentLikes = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &commentLikeR{}
+			}
+			foreign.R.User = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.UserID {
+				local.R.CommentLikes = append(local.R.CommentLikes, foreign)
+				if foreign.R == nil {
+					foreign.R = &commentLikeR{}
+				}
+				foreign.R.User = local
 				break
 			}
 		}
@@ -772,6 +918,67 @@ func (o *User) SetCreatorTenant(exec boil.Executor, insert bool, related *Tenant
 		}
 	} else {
 		related.R.Creator = o
+	}
+	return nil
+}
+
+// AddCommentLikesG adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.CommentLikes.
+// Sets related.R.User appropriately.
+// Uses the global database handle.
+func (o *User) AddCommentLikesG(insert bool, related ...*CommentLike) error {
+	return o.AddCommentLikes(boil.GetDB(), insert, related...)
+}
+
+// AddCommentLikes adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.CommentLikes.
+// Sets related.R.User appropriately.
+func (o *User) AddCommentLikes(exec boil.Executor, insert bool, related ...*CommentLike) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.UserID = o.ID
+			if err = rel.Insert(exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"comment_likes\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
+				strmangle.WhereClause("\"", "\"", 2, commentLikePrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.TenantID, rel.UserID, rel.CommentID}
+
+			if boil.DebugMode {
+				fmt.Fprintln(boil.DebugWriter, updateQuery)
+				fmt.Fprintln(boil.DebugWriter, values)
+			}
+			if _, err = exec.Exec(updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.UserID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userR{
+			CommentLikes: related,
+		}
+	} else {
+		o.R.CommentLikes = append(o.R.CommentLikes, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &commentLikeR{
+				User: o,
+			}
+		} else {
+			rel.R.User = o
+		}
 	}
 	return nil
 }

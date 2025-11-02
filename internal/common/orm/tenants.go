@@ -229,7 +229,7 @@ var TenantRels = struct {
 	Creator             string
 	CommentTenantConfig string
 	TenantR2Config      string
-	CommentPlateConfigs string
+	CommentLikes        string
 	CommentPlates       string
 	Comments            string
 	ImgCategories       string
@@ -238,7 +238,7 @@ var TenantRels = struct {
 	Creator:             "Creator",
 	CommentTenantConfig: "CommentTenantConfig",
 	TenantR2Config:      "TenantR2Config",
-	CommentPlateConfigs: "CommentPlateConfigs",
+	CommentLikes:        "CommentLikes",
 	CommentPlates:       "CommentPlates",
 	Comments:            "Comments",
 	ImgCategories:       "ImgCategories",
@@ -247,14 +247,14 @@ var TenantRels = struct {
 
 // tenantR is where relationships are stored.
 type tenantR struct {
-	Creator             *User                   `boil:"Creator" json:"Creator" toml:"Creator" yaml:"Creator"`
-	CommentTenantConfig *CommentTenantConfig    `boil:"CommentTenantConfig" json:"CommentTenantConfig" toml:"CommentTenantConfig" yaml:"CommentTenantConfig"`
-	TenantR2Config      *TenantR2Config         `boil:"TenantR2Config" json:"TenantR2Config" toml:"TenantR2Config" yaml:"TenantR2Config"`
-	CommentPlateConfigs CommentPlateConfigSlice `boil:"CommentPlateConfigs" json:"CommentPlateConfigs" toml:"CommentPlateConfigs" yaml:"CommentPlateConfigs"`
-	CommentPlates       CommentPlateSlice       `boil:"CommentPlates" json:"CommentPlates" toml:"CommentPlates" yaml:"CommentPlates"`
-	Comments            CommentSlice            `boil:"Comments" json:"Comments" toml:"Comments" yaml:"Comments"`
-	ImgCategories       ImgCategorySlice        `boil:"ImgCategories" json:"ImgCategories" toml:"ImgCategories" yaml:"ImgCategories"`
-	Imgs                ImgSlice                `boil:"Imgs" json:"Imgs" toml:"Imgs" yaml:"Imgs"`
+	Creator             *User                `boil:"Creator" json:"Creator" toml:"Creator" yaml:"Creator"`
+	CommentTenantConfig *CommentTenantConfig `boil:"CommentTenantConfig" json:"CommentTenantConfig" toml:"CommentTenantConfig" yaml:"CommentTenantConfig"`
+	TenantR2Config      *TenantR2Config      `boil:"TenantR2Config" json:"TenantR2Config" toml:"TenantR2Config" yaml:"TenantR2Config"`
+	CommentLikes        CommentLikeSlice     `boil:"CommentLikes" json:"CommentLikes" toml:"CommentLikes" yaml:"CommentLikes"`
+	CommentPlates       CommentPlateSlice    `boil:"CommentPlates" json:"CommentPlates" toml:"CommentPlates" yaml:"CommentPlates"`
+	Comments            CommentSlice         `boil:"Comments" json:"Comments" toml:"Comments" yaml:"Comments"`
+	ImgCategories       ImgCategorySlice     `boil:"ImgCategories" json:"ImgCategories" toml:"ImgCategories" yaml:"ImgCategories"`
+	Imgs                ImgSlice             `boil:"Imgs" json:"Imgs" toml:"Imgs" yaml:"Imgs"`
 }
 
 // NewStruct creates a new relationship struct
@@ -310,20 +310,20 @@ func (r *tenantR) GetTenantR2Config() *TenantR2Config {
 	return r.TenantR2Config
 }
 
-func (o *Tenant) GetCommentPlateConfigs() CommentPlateConfigSlice {
+func (o *Tenant) GetCommentLikes() CommentLikeSlice {
 	if o == nil {
 		return nil
 	}
 
-	return o.R.GetCommentPlateConfigs()
+	return o.R.GetCommentLikes()
 }
 
-func (r *tenantR) GetCommentPlateConfigs() CommentPlateConfigSlice {
+func (r *tenantR) GetCommentLikes() CommentLikeSlice {
 	if r == nil {
 		return nil
 	}
 
-	return r.CommentPlateConfigs
+	return r.CommentLikes
 }
 
 func (o *Tenant) GetCommentPlates() CommentPlateSlice {
@@ -723,18 +723,18 @@ func (o *Tenant) TenantR2Config(mods ...qm.QueryMod) tenantR2ConfigQuery {
 	return TenantR2Configs(queryMods...)
 }
 
-// CommentPlateConfigs retrieves all the comment_plate_config's CommentPlateConfigs with an executor.
-func (o *Tenant) CommentPlateConfigs(mods ...qm.QueryMod) commentPlateConfigQuery {
+// CommentLikes retrieves all the comment_like's CommentLikes with an executor.
+func (o *Tenant) CommentLikes(mods ...qm.QueryMod) commentLikeQuery {
 	var queryMods []qm.QueryMod
 	if len(mods) != 0 {
 		queryMods = append(queryMods, mods...)
 	}
 
 	queryMods = append(queryMods,
-		qm.Where("\"comment_plate_configs\".\"tenant_id\"=?", o.ID),
+		qm.Where("\"comment_likes\".\"tenant_id\"=?", o.ID),
 	)
 
-	return CommentPlateConfigs(queryMods...)
+	return CommentLikes(queryMods...)
 }
 
 // CommentPlates retrieves all the comment_plate's CommentPlates with an executor.
@@ -1147,9 +1147,9 @@ func (tenantL) LoadTenantR2Config(e boil.Executor, singular bool, maybeTenant in
 	return nil
 }
 
-// LoadCommentPlateConfigs allows an eager lookup of values, cached into the
+// LoadCommentLikes allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (tenantL) LoadCommentPlateConfigs(e boil.Executor, singular bool, maybeTenant interface{}, mods queries.Applicator) error {
+func (tenantL) LoadCommentLikes(e boil.Executor, singular bool, maybeTenant interface{}, mods queries.Applicator) error {
 	var slice []*Tenant
 	var object *Tenant
 
@@ -1202,8 +1202,8 @@ func (tenantL) LoadCommentPlateConfigs(e boil.Executor, singular bool, maybeTena
 	}
 
 	query := NewQuery(
-		qm.From(`comment_plate_configs`),
-		qm.WhereIn(`comment_plate_configs.tenant_id in ?`, argsSlice...),
+		qm.From(`comment_likes`),
+		qm.WhereIn(`comment_likes.tenant_id in ?`, argsSlice...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -1211,22 +1211,22 @@ func (tenantL) LoadCommentPlateConfigs(e boil.Executor, singular bool, maybeTena
 
 	results, err := query.Query(e)
 	if err != nil {
-		return errors.Wrap(err, "failed to eager load comment_plate_configs")
+		return errors.Wrap(err, "failed to eager load comment_likes")
 	}
 
-	var resultSlice []*CommentPlateConfig
+	var resultSlice []*CommentLike
 	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice comment_plate_configs")
+		return errors.Wrap(err, "failed to bind eager loaded slice comment_likes")
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on comment_plate_configs")
+		return errors.Wrap(err, "failed to close results in eager load on comment_likes")
 	}
 	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for comment_plate_configs")
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for comment_likes")
 	}
 
-	if len(commentPlateConfigAfterSelectHooks) != 0 {
+	if len(commentLikeAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
 			if err := obj.doAfterSelectHooks(e); err != nil {
 				return err
@@ -1234,10 +1234,10 @@ func (tenantL) LoadCommentPlateConfigs(e boil.Executor, singular bool, maybeTena
 		}
 	}
 	if singular {
-		object.R.CommentPlateConfigs = resultSlice
+		object.R.CommentLikes = resultSlice
 		for _, foreign := range resultSlice {
 			if foreign.R == nil {
-				foreign.R = &commentPlateConfigR{}
+				foreign.R = &commentLikeR{}
 			}
 			foreign.R.Tenant = object
 		}
@@ -1247,9 +1247,9 @@ func (tenantL) LoadCommentPlateConfigs(e boil.Executor, singular bool, maybeTena
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
 			if local.ID == foreign.TenantID {
-				local.R.CommentPlateConfigs = append(local.R.CommentPlateConfigs, foreign)
+				local.R.CommentLikes = append(local.R.CommentLikes, foreign)
 				if foreign.R == nil {
-					foreign.R = &commentPlateConfigR{}
+					foreign.R = &commentLikeR{}
 				}
 				foreign.R.Tenant = local
 				break
@@ -1881,20 +1881,20 @@ func (o *Tenant) SetTenantR2Config(exec boil.Executor, insert bool, related *Ten
 	return nil
 }
 
-// AddCommentPlateConfigsG adds the given related objects to the existing relationships
+// AddCommentLikesG adds the given related objects to the existing relationships
 // of the tenant, optionally inserting them as new records.
-// Appends related to o.R.CommentPlateConfigs.
+// Appends related to o.R.CommentLikes.
 // Sets related.R.Tenant appropriately.
 // Uses the global database handle.
-func (o *Tenant) AddCommentPlateConfigsG(insert bool, related ...*CommentPlateConfig) error {
-	return o.AddCommentPlateConfigs(boil.GetDB(), insert, related...)
+func (o *Tenant) AddCommentLikesG(insert bool, related ...*CommentLike) error {
+	return o.AddCommentLikes(boil.GetDB(), insert, related...)
 }
 
-// AddCommentPlateConfigs adds the given related objects to the existing relationships
+// AddCommentLikes adds the given related objects to the existing relationships
 // of the tenant, optionally inserting them as new records.
-// Appends related to o.R.CommentPlateConfigs.
+// Appends related to o.R.CommentLikes.
 // Sets related.R.Tenant appropriately.
-func (o *Tenant) AddCommentPlateConfigs(exec boil.Executor, insert bool, related ...*CommentPlateConfig) error {
+func (o *Tenant) AddCommentLikes(exec boil.Executor, insert bool, related ...*CommentLike) error {
 	var err error
 	for _, rel := range related {
 		if insert {
@@ -1904,11 +1904,11 @@ func (o *Tenant) AddCommentPlateConfigs(exec boil.Executor, insert bool, related
 			}
 		} else {
 			updateQuery := fmt.Sprintf(
-				"UPDATE \"comment_plate_configs\" SET %s WHERE %s",
+				"UPDATE \"comment_likes\" SET %s WHERE %s",
 				strmangle.SetParamNames("\"", "\"", 1, []string{"tenant_id"}),
-				strmangle.WhereClause("\"", "\"", 2, commentPlateConfigPrimaryKeyColumns),
+				strmangle.WhereClause("\"", "\"", 2, commentLikePrimaryKeyColumns),
 			)
-			values := []interface{}{o.ID, rel.TenantID, rel.PlateID}
+			values := []interface{}{o.ID, rel.TenantID, rel.UserID, rel.CommentID}
 
 			if boil.DebugMode {
 				fmt.Fprintln(boil.DebugWriter, updateQuery)
@@ -1924,15 +1924,15 @@ func (o *Tenant) AddCommentPlateConfigs(exec boil.Executor, insert bool, related
 
 	if o.R == nil {
 		o.R = &tenantR{
-			CommentPlateConfigs: related,
+			CommentLikes: related,
 		}
 	} else {
-		o.R.CommentPlateConfigs = append(o.R.CommentPlateConfigs, related...)
+		o.R.CommentLikes = append(o.R.CommentLikes, related...)
 	}
 
 	for _, rel := range related {
 		if rel.R == nil {
-			rel.R = &commentPlateConfigR{
+			rel.R = &commentLikeR{
 				Tenant: o,
 			}
 		} else {

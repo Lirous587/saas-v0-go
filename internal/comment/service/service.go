@@ -8,6 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"golang.org/x/sync/errgroup"
 )
 
 type service struct {
@@ -229,7 +230,7 @@ func (s *service) ListReplies(belongKey string, userID domain.UserID, query *dom
 
 func (s *service) ToggleLike(tenantID domain.TenantID, userID domain.UserID, commentID domain.CommentID) error {
 	// 去查询当前status
-	likeStatus, err := s.cache.GetLikeStatus(tenantID, userID, commentID)
+	likeStatus, err := s.repo.GetLikeStatus(tenantID, commentID, userID)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -237,26 +238,24 @@ func (s *service) ToggleLike(tenantID domain.TenantID, userID domain.UserID, com
 	// toogle状态
 	likeStatus.Toogle()
 
-	// 判断当前操作
+	var eg errgroup.Group
+
+	// 并发执行数据库操作和点赞计数更新
 	if likeStatus.IsLike() {
-		// 当前操作为点赞点赞
-		if err := s.cache.AddLike(tenantID, userID, commentID); err != nil {
-			return errors.WithStack(err)
-		}
-		if err := s.repo.UpdateLikeCount(tenantID, commentID, likeStatus.IsLike()); err != nil {
-			return errors.WithStack(err)
-		}
+		eg.Go(func() error {
+			return s.repo.AddLike(tenantID, commentID, userID)
+		})
 	} else {
-		// 当前操作为取消点赞
-		if err := s.cache.RemoveLike(tenantID, userID, commentID); err != nil {
-			return errors.WithStack(err)
-		}
-		if err := s.repo.UpdateLikeCount(tenantID, commentID, likeStatus.IsLike()); err != nil {
-			return errors.WithStack(err)
-		}
+		eg.Go(func() error {
+			return s.repo.RemoveLike(tenantID, commentID, userID)
+		})
 	}
 
-	return nil
+	eg.Go(func() error {
+		return s.repo.UpdateLikeCount(tenantID, commentID, likeStatus.IsLike())
+	})
+
+	return eg.Wait()
 }
 
 func (s *service) CreatePlate(plate *domain.Plate) error {

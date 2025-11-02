@@ -26,7 +26,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.22.0
 	github.com/redis/go-redis/v9 v9.7.1
-	github.com/shopspring/decimal v1.4.0
 	github.com/sony/sonyflake/v2 v2.2.0
 	github.com/subosito/gotenv v1.4.1
 	github.com/swaggo/files v1.0.1
@@ -36,6 +35,7 @@ require (
 	github.com/wenlng/go-captcha/v2 v2.0.4
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.39.0
+	golang.org/x/sync v0.16.0
 	golang.org/x/text v0.27.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	resty.dev/v3 v3.0.0-beta.3
@@ -107,7 +107,6 @@ require (
 	golang.org/x/image v0.29.0 // indirect
 	golang.org/x/mod v0.25.0 // indirect
 	golang.org/x/net v0.41.0 // indirect
-	golang.org/x/sync v0.16.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/tools v0.34.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect

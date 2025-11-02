@@ -30,6 +30,11 @@ type CommentRepository interface {
 	GetPlateRelatedURlByID(tenantID TenantID, plateID PlateID) (string, error)
 	SetPlateConfig(config *PlateConfig) error
 	GetPlateConfig(tenantID TenantID, palteID PlateID) (*PlateConfig, error)
+
+	GetLikeStatus(tenantID TenantID, commentID CommentID, userID UserID) (LikeStatus, error)
+	AddLike(tenantID TenantID, commentID CommentID, userID UserID) error
+	RemoveLike(tenantID TenantID, commentID CommentID, userID UserID) error
+	// GetLikeMap(tenantID TenantID, userID UserID, commentIDs []CommentID) (map[CommentID]struct{}, error)
 }
 
 type CommentCache interface {
@@ -44,8 +49,8 @@ type CommentCache interface {
 	GetPlateConfig(tenantID TenantID, plateID PlateID) (*PlateConfig, error)
 	DeletePlateConfig(tenantID TenantID, plateID PlateID) error
 
-	GetLikeStatus(tenantID TenantID, userID UserID, commentID CommentID) (LikeStatus, error)
-	AddLike(tenantID TenantID, userID UserID, commentID CommentID) error
-	RemoveLike(tenantID TenantID, userID UserID, commentID CommentID) error
+	// GetLikeStatus(tenantID TenantID, userID UserID, commentID CommentID) (LikeStatus, error)
+	// AddLike(tenantID TenantID, userID UserID, commentID CommentID) error
+	// RemoveLike(tenantID TenantID, userID UserID, commentID CommentID) error
 	GetLikeMap(tenantID TenantID, userID UserID, commentIDs []CommentID) (map[CommentID]struct{}, error)
 }

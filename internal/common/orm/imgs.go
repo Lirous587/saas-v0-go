@@ -25,12 +25,12 @@ import (
 type Img struct {
 	ID          string      `boil:"id" json:"id" toml:"id" yaml:"id"`
 	TenantID    string      `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
+	CategoryID  null.String `boil:"category_id" json:"category_id,omitempty" toml:"category_id" yaml:"category_id,omitempty"`
 	Path        string      `boil:"path" json:"path" toml:"path" yaml:"path"`
 	Description null.String `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
 	CreatedAt   time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt   time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 	DeletedAt   null.Time   `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
-	CategoryID  null.String `boil:"category_id" json:"category_id,omitempty" toml:"category_id" yaml:"category_id,omitempty"`
 
 	R *imgR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L imgL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -39,41 +39,41 @@ type Img struct {
 var ImgColumns = struct {
 	ID          string
 	TenantID    string
+	CategoryID  string
 	Path        string
 	Description string
 	CreatedAt   string
 	UpdatedAt   string
 	DeletedAt   string
-	CategoryID  string
 }{
 	ID:          "id",
 	TenantID:    "tenant_id",
+	CategoryID:  "category_id",
 	Path:        "path",
 	Description: "description",
 	CreatedAt:   "created_at",
 	UpdatedAt:   "updated_at",
 	DeletedAt:   "deleted_at",
-	CategoryID:  "category_id",
 }
 
 var ImgTableColumns = struct {
 	ID          string
 	TenantID    string
+	CategoryID  string
 	Path        string
 	Description string
 	CreatedAt   string
 	UpdatedAt   string
 	DeletedAt   string
-	CategoryID  string
 }{
 	ID:          "imgs.id",
 	TenantID:    "imgs.tenant_id",
+	CategoryID:  "imgs.category_id",
 	Path:        "imgs.path",
 	Description: "imgs.description",
 	CreatedAt:   "imgs.created_at",
 	UpdatedAt:   "imgs.updated_at",
 	DeletedAt:   "imgs.deleted_at",
-	CategoryID:  "imgs.category_id",
 }
 
 // Generated where
@@ -105,21 +105,21 @@ func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsN
 var ImgWhere = struct {
 	ID          whereHelperstring
 	TenantID    whereHelperstring
+	CategoryID  whereHelpernull_String
 	Path        whereHelperstring
 	Description whereHelpernull_String
 	CreatedAt   whereHelpertime_Time
 	UpdatedAt   whereHelpertime_Time
 	DeletedAt   whereHelpernull_Time
-	CategoryID  whereHelpernull_String
 }{
 	ID:          whereHelperstring{field: "\"imgs\".\"id\""},
 	TenantID:    whereHelperstring{field: "\"imgs\".\"tenant_id\""},
+	CategoryID:  whereHelpernull_String{field: "\"imgs\".\"category_id\""},
 	Path:        whereHelperstring{field: "\"imgs\".\"path\""},
 	Description: whereHelpernull_String{field: "\"imgs\".\"description\""},
 	CreatedAt:   whereHelpertime_Time{field: "\"imgs\".\"created_at\""},
 	UpdatedAt:   whereHelpertime_Time{field: "\"imgs\".\"updated_at\""},
 	DeletedAt:   whereHelpernull_Time{field: "\"imgs\".\"deleted_at\""},
-	CategoryID:  whereHelpernull_String{field: "\"imgs\".\"category_id\""},
 }
 
 // ImgRels is where relationship names are stored.
@@ -178,9 +178,9 @@ func (r *imgR) GetTenant() *Tenant {
 type imgL struct{}
 
 var (
-	imgAllColumns            = []string{"id", "tenant_id", "path", "description", "created_at", "updated_at", "deleted_at", "category_id"}
+	imgAllColumns            = []string{"id", "tenant_id", "category_id", "path", "description", "created_at", "updated_at", "deleted_at"}
 	imgColumnsWithoutDefault = []string{"tenant_id", "path"}
-	imgColumnsWithDefault    = []string{"id", "description", "created_at", "updated_at", "deleted_at", "category_id"}
+	imgColumnsWithDefault    = []string{"id", "category_id", "description", "created_at", "updated_at", "deleted_at"}
 	imgPrimaryKeyColumns     = []string{"id"}
 	imgGeneratedColumns      = []string{}
 )

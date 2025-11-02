@@ -22,8 +22,8 @@ import (
 
 // CommentPlateConfig is an object representing the database table.
 type CommentPlateConfig struct {
-	TenantID  string    `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
 	PlateID   string    `boil:"plate_id" json:"plate_id" toml:"plate_id" yaml:"plate_id"`
+	TenantID  string    `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
 	IfAudit   bool      `boil:"if_audit" json:"if_audit" toml:"if_audit" yaml:"if_audit"`
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
@@ -33,65 +33,34 @@ type CommentPlateConfig struct {
 }
 
 var CommentPlateConfigColumns = struct {
-	TenantID  string
 	PlateID   string
+	TenantID  string
 	IfAudit   string
 	CreatedAt string
 	UpdatedAt string
 }{
-	TenantID:  "tenant_id",
 	PlateID:   "plate_id",
+	TenantID:  "tenant_id",
 	IfAudit:   "if_audit",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 }
 
 var CommentPlateConfigTableColumns = struct {
-	TenantID  string
 	PlateID   string
+	TenantID  string
 	IfAudit   string
 	CreatedAt string
 	UpdatedAt string
 }{
-	TenantID:  "comment_plate_configs.tenant_id",
 	PlateID:   "comment_plate_configs.plate_id",
+	TenantID:  "comment_plate_configs.tenant_id",
 	IfAudit:   "comment_plate_configs.if_audit",
 	CreatedAt: "comment_plate_configs.created_at",
 	UpdatedAt: "comment_plate_configs.updated_at",
 }
 
 // Generated where
-
-type whereHelperstring struct{ field string }
-
-func (w whereHelperstring) EQ(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperstring) NEQ(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperstring) LT(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperstring) LTE(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperstring) GT(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperstring) GTE(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-func (w whereHelperstring) LIKE(x string) qm.QueryMod    { return qm.Where(w.field+" LIKE ?", x) }
-func (w whereHelperstring) NLIKE(x string) qm.QueryMod   { return qm.Where(w.field+" NOT LIKE ?", x) }
-func (w whereHelperstring) ILIKE(x string) qm.QueryMod   { return qm.Where(w.field+" ILIKE ?", x) }
-func (w whereHelperstring) NILIKE(x string) qm.QueryMod  { return qm.Where(w.field+" NOT ILIKE ?", x) }
-func (w whereHelperstring) SIMILAR(x string) qm.QueryMod { return qm.Where(w.field+" SIMILAR TO ?", x) }
-func (w whereHelperstring) NSIMILAR(x string) qm.QueryMod {
-	return qm.Where(w.field+" NOT SIMILAR TO ?", x)
-}
-func (w whereHelperstring) IN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
 
 type whereHelperbool struct{ field string }
 
@@ -102,36 +71,15 @@ func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field
 func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
 func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
-type whereHelpertime_Time struct{ field string }
-
-func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.EQ, x)
-}
-func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.NEQ, x)
-}
-func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 var CommentPlateConfigWhere = struct {
-	TenantID  whereHelperstring
 	PlateID   whereHelperstring
+	TenantID  whereHelperstring
 	IfAudit   whereHelperbool
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 }{
-	TenantID:  whereHelperstring{field: "\"comment_plate_configs\".\"tenant_id\""},
 	PlateID:   whereHelperstring{field: "\"comment_plate_configs\".\"plate_id\""},
+	TenantID:  whereHelperstring{field: "\"comment_plate_configs\".\"tenant_id\""},
 	IfAudit:   whereHelperbool{field: "\"comment_plate_configs\".\"if_audit\""},
 	CreatedAt: whereHelpertime_Time{field: "\"comment_plate_configs\".\"created_at\""},
 	UpdatedAt: whereHelpertime_Time{field: "\"comment_plate_configs\".\"updated_at\""},
@@ -139,17 +87,10 @@ var CommentPlateConfigWhere = struct {
 
 // CommentPlateConfigRels is where relationship names are stored.
 var CommentPlateConfigRels = struct {
-	Plate  string
-	Tenant string
-}{
-	Plate:  "Plate",
-	Tenant: "Tenant",
-}
+}{}
 
 // commentPlateConfigR is where relationships are stored.
 type commentPlateConfigR struct {
-	Plate  *CommentPlate `boil:"Plate" json:"Plate" toml:"Plate" yaml:"Plate"`
-	Tenant *Tenant       `boil:"Tenant" json:"Tenant" toml:"Tenant" yaml:"Tenant"`
 }
 
 // NewStruct creates a new relationship struct
@@ -157,46 +98,14 @@ func (*commentPlateConfigR) NewStruct() *commentPlateConfigR {
 	return &commentPlateConfigR{}
 }
 
-func (o *CommentPlateConfig) GetPlate() *CommentPlate {
-	if o == nil {
-		return nil
-	}
-
-	return o.R.GetPlate()
-}
-
-func (r *commentPlateConfigR) GetPlate() *CommentPlate {
-	if r == nil {
-		return nil
-	}
-
-	return r.Plate
-}
-
-func (o *CommentPlateConfig) GetTenant() *Tenant {
-	if o == nil {
-		return nil
-	}
-
-	return o.R.GetTenant()
-}
-
-func (r *commentPlateConfigR) GetTenant() *Tenant {
-	if r == nil {
-		return nil
-	}
-
-	return r.Tenant
-}
-
 // commentPlateConfigL is where Load methods for each relationship are stored.
 type commentPlateConfigL struct{}
 
 var (
-	commentPlateConfigAllColumns            = []string{"tenant_id", "plate_id", "if_audit", "created_at", "updated_at"}
-	commentPlateConfigColumnsWithoutDefault = []string{"tenant_id", "plate_id"}
+	commentPlateConfigAllColumns            = []string{"plate_id", "tenant_id", "if_audit", "created_at", "updated_at"}
+	commentPlateConfigColumnsWithoutDefault = []string{"plate_id", "tenant_id"}
 	commentPlateConfigColumnsWithDefault    = []string{"if_audit", "created_at", "updated_at"}
-	commentPlateConfigPrimaryKeyColumns     = []string{"tenant_id", "plate_id"}
+	commentPlateConfigPrimaryKeyColumns     = []string{"plate_id", "tenant_id"}
 	commentPlateConfigGeneratedColumns      = []string{}
 )
 
@@ -489,376 +398,6 @@ func (q commentPlateConfigQuery) Exists(exec boil.Executor) (bool, error) {
 	return count > 0, nil
 }
 
-// Plate pointed to by the foreign key.
-func (o *CommentPlateConfig) Plate(mods ...qm.QueryMod) commentPlateQuery {
-	queryMods := []qm.QueryMod{
-		qm.Where("\"id\" = ?", o.PlateID),
-	}
-
-	queryMods = append(queryMods, mods...)
-
-	return CommentPlates(queryMods...)
-}
-
-// Tenant pointed to by the foreign key.
-func (o *CommentPlateConfig) Tenant(mods ...qm.QueryMod) tenantQuery {
-	queryMods := []qm.QueryMod{
-		qm.Where("\"id\" = ?", o.TenantID),
-	}
-
-	queryMods = append(queryMods, mods...)
-
-	return Tenants(queryMods...)
-}
-
-// LoadPlate allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for an N-1 relationship.
-func (commentPlateConfigL) LoadPlate(e boil.Executor, singular bool, maybeCommentPlateConfig interface{}, mods queries.Applicator) error {
-	var slice []*CommentPlateConfig
-	var object *CommentPlateConfig
-
-	if singular {
-		var ok bool
-		object, ok = maybeCommentPlateConfig.(*CommentPlateConfig)
-		if !ok {
-			object = new(CommentPlateConfig)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeCommentPlateConfig)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeCommentPlateConfig))
-			}
-		}
-	} else {
-		s, ok := maybeCommentPlateConfig.(*[]*CommentPlateConfig)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeCommentPlateConfig)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeCommentPlateConfig))
-			}
-		}
-	}
-
-	args := make(map[interface{}]struct{})
-	if singular {
-		if object.R == nil {
-			object.R = &commentPlateConfigR{}
-		}
-		args[object.PlateID] = struct{}{}
-
-	} else {
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &commentPlateConfigR{}
-			}
-
-			args[obj.PlateID] = struct{}{}
-
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	argsSlice := make([]interface{}, len(args))
-	i := 0
-	for arg := range args {
-		argsSlice[i] = arg
-		i++
-	}
-
-	query := NewQuery(
-		qm.From(`comment_plates`),
-		qm.WhereIn(`comment_plates.id in ?`, argsSlice...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.Query(e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load CommentPlate")
-	}
-
-	var resultSlice []*CommentPlate
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice CommentPlate")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for comment_plates")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for comment_plates")
-	}
-
-	if len(commentPlateAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(e); err != nil {
-				return err
-			}
-		}
-	}
-
-	if len(resultSlice) == 0 {
-		return nil
-	}
-
-	if singular {
-		foreign := resultSlice[0]
-		object.R.Plate = foreign
-		if foreign.R == nil {
-			foreign.R = &commentPlateR{}
-		}
-		foreign.R.PlateCommentPlateConfigs = append(foreign.R.PlateCommentPlateConfigs, object)
-		return nil
-	}
-
-	for _, local := range slice {
-		for _, foreign := range resultSlice {
-			if local.PlateID == foreign.ID {
-				local.R.Plate = foreign
-				if foreign.R == nil {
-					foreign.R = &commentPlateR{}
-				}
-				foreign.R.PlateCommentPlateConfigs = append(foreign.R.PlateCommentPlateConfigs, local)
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
-// LoadTenant allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for an N-1 relationship.
-func (commentPlateConfigL) LoadTenant(e boil.Executor, singular bool, maybeCommentPlateConfig interface{}, mods queries.Applicator) error {
-	var slice []*CommentPlateConfig
-	var object *CommentPlateConfig
-
-	if singular {
-		var ok bool
-		object, ok = maybeCommentPlateConfig.(*CommentPlateConfig)
-		if !ok {
-			object = new(CommentPlateConfig)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeCommentPlateConfig)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeCommentPlateConfig))
-			}
-		}
-	} else {
-		s, ok := maybeCommentPlateConfig.(*[]*CommentPlateConfig)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeCommentPlateConfig)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeCommentPlateConfig))
-			}
-		}
-	}
-
-	args := make(map[interface{}]struct{})
-	if singular {
-		if object.R == nil {
-			object.R = &commentPlateConfigR{}
-		}
-		args[object.TenantID] = struct{}{}
-
-	} else {
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &commentPlateConfigR{}
-			}
-
-			args[obj.TenantID] = struct{}{}
-
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	argsSlice := make([]interface{}, len(args))
-	i := 0
-	for arg := range args {
-		argsSlice[i] = arg
-		i++
-	}
-
-	query := NewQuery(
-		qm.From(`tenants`),
-		qm.WhereIn(`tenants.id in ?`, argsSlice...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.Query(e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load Tenant")
-	}
-
-	var resultSlice []*Tenant
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice Tenant")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for tenants")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for tenants")
-	}
-
-	if len(tenantAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(e); err != nil {
-				return err
-			}
-		}
-	}
-
-	if len(resultSlice) == 0 {
-		return nil
-	}
-
-	if singular {
-		foreign := resultSlice[0]
-		object.R.Tenant = foreign
-		if foreign.R == nil {
-			foreign.R = &tenantR{}
-		}
-		foreign.R.CommentPlateConfigs = append(foreign.R.CommentPlateConfigs, object)
-		return nil
-	}
-
-	for _, local := range slice {
-		for _, foreign := range resultSlice {
-			if local.TenantID == foreign.ID {
-				local.R.Tenant = foreign
-				if foreign.R == nil {
-					foreign.R = &tenantR{}
-				}
-				foreign.R.CommentPlateConfigs = append(foreign.R.CommentPlateConfigs, local)
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
-// SetPlateG of the commentPlateConfig to the related item.
-// Sets o.R.Plate to related.
-// Adds o to related.R.PlateCommentPlateConfigs.
-// Uses the global database handle.
-func (o *CommentPlateConfig) SetPlateG(insert bool, related *CommentPlate) error {
-	return o.SetPlate(boil.GetDB(), insert, related)
-}
-
-// SetPlate of the commentPlateConfig to the related item.
-// Sets o.R.Plate to related.
-// Adds o to related.R.PlateCommentPlateConfigs.
-func (o *CommentPlateConfig) SetPlate(exec boil.Executor, insert bool, related *CommentPlate) error {
-	var err error
-	if insert {
-		if err = related.Insert(exec, boil.Infer()); err != nil {
-			return errors.Wrap(err, "failed to insert into foreign table")
-		}
-	}
-
-	updateQuery := fmt.Sprintf(
-		"UPDATE \"comment_plate_configs\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"plate_id"}),
-		strmangle.WhereClause("\"", "\"", 2, commentPlateConfigPrimaryKeyColumns),
-	)
-	values := []interface{}{related.ID, o.TenantID, o.PlateID}
-
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, updateQuery)
-		fmt.Fprintln(boil.DebugWriter, values)
-	}
-	if _, err = exec.Exec(updateQuery, values...); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	o.PlateID = related.ID
-	if o.R == nil {
-		o.R = &commentPlateConfigR{
-			Plate: related,
-		}
-	} else {
-		o.R.Plate = related
-	}
-
-	if related.R == nil {
-		related.R = &commentPlateR{
-			PlateCommentPlateConfigs: CommentPlateConfigSlice{o},
-		}
-	} else {
-		related.R.PlateCommentPlateConfigs = append(related.R.PlateCommentPlateConfigs, o)
-	}
-
-	return nil
-}
-
-// SetTenantG of the commentPlateConfig to the related item.
-// Sets o.R.Tenant to related.
-// Adds o to related.R.CommentPlateConfigs.
-// Uses the global database handle.
-func (o *CommentPlateConfig) SetTenantG(insert bool, related *Tenant) error {
-	return o.SetTenant(boil.GetDB(), insert, related)
-}
-
-// SetTenant of the commentPlateConfig to the related item.
-// Sets o.R.Tenant to related.
-// Adds o to related.R.CommentPlateConfigs.
-func (o *CommentPlateConfig) SetTenant(exec boil.Executor, insert bool, related *Tenant) error {
-	var err error
-	if insert {
-		if err = related.Insert(exec, boil.Infer()); err != nil {
-			return errors.Wrap(err, "failed to insert into foreign table")
-		}
-	}
-
-	updateQuery := fmt.Sprintf(
-		"UPDATE \"comment_plate_configs\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"tenant_id"}),
-		strmangle.WhereClause("\"", "\"", 2, commentPlateConfigPrimaryKeyColumns),
-	)
-	values := []interface{}{related.ID, o.TenantID, o.PlateID}
-
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, updateQuery)
-		fmt.Fprintln(boil.DebugWriter, values)
-	}
-	if _, err = exec.Exec(updateQuery, values...); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	o.TenantID = related.ID
-	if o.R == nil {
-		o.R = &commentPlateConfigR{
-			Tenant: related,
-		}
-	} else {
-		o.R.Tenant = related
-	}
-
-	if related.R == nil {
-		related.R = &tenantR{
-			CommentPlateConfigs: CommentPlateConfigSlice{o},
-		}
-	} else {
-		related.R.CommentPlateConfigs = append(related.R.CommentPlateConfigs, o)
-	}
-
-	return nil
-}
-
 // CommentPlateConfigs retrieves all the records using an executor.
 func CommentPlateConfigs(mods ...qm.QueryMod) commentPlateConfigQuery {
 	mods = append(mods, qm.From("\"comment_plate_configs\""))
@@ -871,13 +410,13 @@ func CommentPlateConfigs(mods ...qm.QueryMod) commentPlateConfigQuery {
 }
 
 // FindCommentPlateConfigG retrieves a single record by ID.
-func FindCommentPlateConfigG(tenantID string, plateID string, selectCols ...string) (*CommentPlateConfig, error) {
-	return FindCommentPlateConfig(boil.GetDB(), tenantID, plateID, selectCols...)
+func FindCommentPlateConfigG(plateID string, tenantID string, selectCols ...string) (*CommentPlateConfig, error) {
+	return FindCommentPlateConfig(boil.GetDB(), plateID, tenantID, selectCols...)
 }
 
 // FindCommentPlateConfig retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindCommentPlateConfig(exec boil.Executor, tenantID string, plateID string, selectCols ...string) (*CommentPlateConfig, error) {
+func FindCommentPlateConfig(exec boil.Executor, plateID string, tenantID string, selectCols ...string) (*CommentPlateConfig, error) {
 	commentPlateConfigObj := &CommentPlateConfig{}
 
 	sel := "*"
@@ -885,10 +424,10 @@ func FindCommentPlateConfig(exec boil.Executor, tenantID string, plateID string,
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"comment_plate_configs\" where \"tenant_id\"=$1 AND \"plate_id\"=$2", sel,
+		"select %s from \"comment_plate_configs\" where \"plate_id\"=$1 AND \"tenant_id\"=$2", sel,
 	)
 
-	q := queries.Raw(query, tenantID, plateID)
+	q := queries.Raw(query, plateID, tenantID)
 
 	err := q.Bind(nil, exec, commentPlateConfigObj)
 	if err != nil {
@@ -1292,7 +831,7 @@ func (o *CommentPlateConfig) Delete(exec boil.Executor) (int64, error) {
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), commentPlateConfigPrimaryKeyMapping)
-	sql := "DELETE FROM \"comment_plate_configs\" WHERE \"tenant_id\"=$1 AND \"plate_id\"=$2"
+	sql := "DELETE FROM \"comment_plate_configs\" WHERE \"plate_id\"=$1 AND \"tenant_id\"=$2"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -1405,7 +944,7 @@ func (o *CommentPlateConfig) ReloadG() error {
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *CommentPlateConfig) Reload(exec boil.Executor) error {
-	ret, err := FindCommentPlateConfig(exec, o.TenantID, o.PlateID)
+	ret, err := FindCommentPlateConfig(exec, o.PlateID, o.TenantID)
 	if err != nil {
 		return err
 	}
@@ -1454,20 +993,20 @@ func (o *CommentPlateConfigSlice) ReloadAll(exec boil.Executor) error {
 }
 
 // CommentPlateConfigExistsG checks if the CommentPlateConfig row exists.
-func CommentPlateConfigExistsG(tenantID string, plateID string) (bool, error) {
-	return CommentPlateConfigExists(boil.GetDB(), tenantID, plateID)
+func CommentPlateConfigExistsG(plateID string, tenantID string) (bool, error) {
+	return CommentPlateConfigExists(boil.GetDB(), plateID, tenantID)
 }
 
 // CommentPlateConfigExists checks if the CommentPlateConfig row exists.
-func CommentPlateConfigExists(exec boil.Executor, tenantID string, plateID string) (bool, error) {
+func CommentPlateConfigExists(exec boil.Executor, plateID string, tenantID string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"comment_plate_configs\" where \"tenant_id\"=$1 AND \"plate_id\"=$2 limit 1)"
+	sql := "select exists(select 1 from \"comment_plate_configs\" where \"plate_id\"=$1 AND \"tenant_id\"=$2 limit 1)"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
-		fmt.Fprintln(boil.DebugWriter, tenantID, plateID)
+		fmt.Fprintln(boil.DebugWriter, plateID, tenantID)
 	}
-	row := exec.QueryRow(sql, tenantID, plateID)
+	row := exec.QueryRow(sql, plateID, tenantID)
 
 	err := row.Scan(&exists)
 	if err != nil {
@@ -1479,5 +1018,5 @@ func CommentPlateConfigExists(exec boil.Executor, tenantID string, plateID strin
 
 // Exists checks if the CommentPlateConfig row exists.
 func (o *CommentPlateConfig) Exists(exec boil.Executor) (bool, error) {
-	return CommentPlateConfigExists(exec, o.TenantID, o.PlateID)
+	return CommentPlateConfigExists(exec, o.PlateID, o.TenantID)
 }

@@ -94,9 +94,17 @@ func (cache *CommentRedisCache) DeleteTenantConfig(tenantID domain.TenantID) err
 const commentPlateID = "comment:plate:id"
 const commentPlateIDExpired = 1 * time.Hour
 
+func (cache *CommentRedisCache) getPlateIDKey() string {
+	return utils.GetRedisKey(commentPlateID)
+}
+
+func (cache *CommentRedisCache) buildPlateIDField(tenantID domain.TenantID, belongKey string) string {
+	return fmt.Sprintf("%s-%s", tenantID, belongKey)
+}
+
 func (cache *CommentRedisCache) SetPlateID(tenantID domain.TenantID, belongKey string, plateID domain.PlateID) error {
-	key := utils.GetRedisKey(commentPlateID)
-	field := fmt.Sprintf("%s-%s", tenantID, belongKey)
+	key := cache.getPlateIDKey()
+	field := cache.buildPlateIDField(tenantID, belongKey)
 
 	pipeline := cache.client.Pipeline()
 	pipeline.HSet(context.Background(), key, field, plateID.String())
@@ -110,8 +118,8 @@ func (cache *CommentRedisCache) SetPlateID(tenantID domain.TenantID, belongKey s
 }
 
 func (cache *CommentRedisCache) GetPlateID(tenantID domain.TenantID, belongKey string) (domain.PlateID, error) {
-	key := utils.GetRedisKey(commentPlateID)
-	field := fmt.Sprintf("%s-%s", tenantID, belongKey)
+	key := cache.getPlateIDKey()
+	field := cache.buildPlateIDField(tenantID, belongKey)
 
 	plateID, err := cache.client.HGet(context.Background(), key, field).Result()
 	if err != nil {
@@ -125,8 +133,9 @@ func (cache *CommentRedisCache) GetPlateID(tenantID domain.TenantID, belongKey s
 }
 
 func (cache *CommentRedisCache) DeletePlateID(tenantID domain.TenantID, belongKey string) error {
-	key := utils.GetRedisKey(commentPlateID)
-	field := fmt.Sprintf("%s-%s", tenantID, belongKey)
+	key := cache.getPlateIDKey()
+	field := cache.buildPlateIDField(tenantID, belongKey)
+
 	if err := cache.client.HDel(context.Background(), key, field).Err(); err != nil {
 		return errors.WithStack(err)
 	}
@@ -137,9 +146,18 @@ func (cache *CommentRedisCache) DeletePlateID(tenantID domain.TenantID, belongKe
 const commentPlateConfigKey = "comment:plate:config"
 const commentPlateConfigExpired = 1 * time.Hour
 
+func (cache *CommentRedisCache) getPlateConfigKey() string {
+	return utils.GetRedisKey(commentPlateConfigKey)
+}
+
+func (cache *CommentRedisCache) buildPlateConfigField(tenantID domain.TenantID, plateID domain.PlateID) string {
+	return fmt.Sprintf("%s-%s", tenantID, plateID)
+}
+
 func (cache *CommentRedisCache) SetPlateConfig(config *domain.PlateConfig) error {
-	key := utils.GetRedisKey(commentPlateConfigKey)
-	field := fmt.Sprintf("%s-%s", config.TenantID, config.Plate.ID)
+	key := cache.getPlateConfigKey()
+	field := cache.buildPlateConfigField(config.TenantID, config.Plate.ID)
+
 	data, err := json.Marshal(config)
 	if err != nil {
 		return errors.WithStack(err)
@@ -158,8 +176,8 @@ func (cache *CommentRedisCache) SetPlateConfig(config *domain.PlateConfig) error
 }
 
 func (cache *CommentRedisCache) GetPlateConfig(tenantID domain.TenantID, plateID domain.PlateID) (*domain.PlateConfig, error) {
-	key := utils.GetRedisKey(commentPlateConfigKey)
-	field := fmt.Sprintf("%s-%s", tenantID, plateID)
+	key := cache.getPlateConfigKey()
+	field := cache.buildPlateConfigField(tenantID, plateID)
 
 	result, err := cache.client.HGet(context.Background(), key, field).Result()
 	if err != nil {
@@ -179,8 +197,9 @@ func (cache *CommentRedisCache) GetPlateConfig(tenantID domain.TenantID, plateID
 }
 
 func (cache *CommentRedisCache) DeletePlateConfig(tenantID domain.TenantID, plateID domain.PlateID) error {
-	key := utils.GetRedisKey(commentPlateConfigKey)
-	field := fmt.Sprintf("%s-%s", tenantID, plateID)
+	key := cache.getPlateConfigKey()
+	field := cache.buildPlateConfigField(tenantID, plateID)
+
 	if err := cache.client.HDel(context.Background(), key, field).Err(); err != nil {
 		return errors.WithStack(err)
 	}
@@ -188,47 +207,10 @@ func (cache *CommentRedisCache) DeletePlateConfig(tenantID domain.TenantID, plat
 }
 
 const commentLikeKey = "comment:like"
-const commentLikeExpired = 30 * time.Hour * 24 // 30缓存 场景足够
 
 func (cache *CommentRedisCache) buildLikeKey(tenantID domain.TenantID, userID domain.UserID) string {
 	preKey := utils.GetRedisKey(commentLikeKey)
 	return fmt.Sprintf("%s:%s:%s", preKey, tenantID, userID)
-}
-
-func (cache *CommentRedisCache) GetLikeStatus(tenantID domain.TenantID, userID domain.UserID, commentID domain.CommentID) (domain.LikeStatus, error) {
-	key := cache.buildLikeKey(tenantID, userID)
-
-	exists, err := cache.client.SIsMember(context.Background(), key, commentID.String()).Result()
-	if err != nil {
-		return false, errors.WithStack(err)
-	}
-
-	likeStatus := new(domain.LikeStatus)
-
-	if exists {
-		likeStatus.Like()
-		return *likeStatus, nil // true，表示已点赞
-	}
-	likeStatus.UnLike()
-	return *likeStatus, nil // false，表示未点赞
-}
-
-func (cache *CommentRedisCache) AddLike(tenantID domain.TenantID, userID domain.UserID, commentID domain.CommentID) error {
-	key := cache.buildLikeKey(tenantID, userID)
-
-	if err := cache.client.SAdd(context.Background(), key, commentID.String()).Err(); err != nil {
-		return errors.WithStack(err)
-	}
-	return nil
-}
-
-func (cache *CommentRedisCache) RemoveLike(tenantID domain.TenantID, userID domain.UserID, commentID domain.CommentID) error {
-	key := cache.buildLikeKey(tenantID, userID)
-
-	if err := cache.client.SRem(context.Background(), key, commentID.String()).Err(); err != nil {
-		return errors.WithStack(err)
-	}
-	return nil
 }
 
 func (cache *CommentRedisCache) GetLikeMap(tenantID domain.TenantID, userID domain.UserID, commentIDs []domain.CommentID) (map[domain.CommentID]struct{}, error) {

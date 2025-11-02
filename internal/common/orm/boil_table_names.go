@@ -4,6 +4,7 @@
 package orm
 
 var TableNames = struct {
+	CommentLikes         string
 	CommentPlateConfigs  string
 	CommentPlates        string
 	CommentTenantConfigs string
@@ -14,6 +15,7 @@ var TableNames = struct {
 	Tenants              string
 	Users                string
 }{
+	CommentLikes:         "comment_likes",
 	CommentPlateConfigs:  "comment_plate_configs",
 	CommentPlates:        "comment_plates",
 	CommentTenantConfigs: "comment_tenant_configs",

@@ -168,6 +168,20 @@ CREATE INDEX IF NOT EXISTS idx_comments_like_count ON public.comments (like_coun
 CREATE INDEX idx_comments_tenant_plate_status_root_parent ON public.comments (tenant_id, plate_id, status, root_id, parent_id);
 
 
+-- 评论点赞表
+CREATE TABLE public.comment_likes (
+    tenant_id UUID NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
+    comment_id UUID NOT NULL REFERENCES public.comments (id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES public.users (id) ON DELETE CASCADE,
+    created_at timestamptz(6) NOT NULL DEFAULT now(),
+    PRIMARY KEY (tenant_id, user_id, comment_id)
+);
+
+-- 索引优化
+CREATE INDEX IF NOT EXISTS idx_comment_likes_user_like ON public.comment_likes (tenant_id, user_id);
+CREATE INDEX IF NOT EXISTS idx_comment_likes_comment_like ON public.comment_likes (tenant_id, comment_id);
+CREATE INDEX IF NOT EXISTS idx_comment_likes_created_at ON public.comment_likes (created_at DESC);
+
 
 -- 评论租户全局配置（默认配置）
 CREATE TABLE public.comment_tenant_configs
