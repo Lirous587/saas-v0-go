@@ -53,7 +53,7 @@ func (cache *CommentRedisCache) SetTenantConfig(config *domain.TenantConfig) err
 
 	pipeline := cache.client.Pipeline()
 	pipeline.HSet(context.Background(), key, config.TenantID, data)
-	pipeline.HExpire(context.Background(), key, CommentTenantConfigExpired, string(config.TenantID)).Err()
+	pipeline.HExpire(context.Background(), key, CommentTenantConfigExpired, config.TenantID.String()).Err()
 	_, err = pipeline.Exec(context.Background())
 	if err != nil {
 		return errors.WithStack(err)

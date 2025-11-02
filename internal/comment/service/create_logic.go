@@ -144,8 +144,8 @@ func (s *service) getCommentConfig(tenantID domain.TenantID, plateID domain.Plat
 
 	// 出现意外错误 记录日志 并且返回默认配置
 	zap.L().Error("获取配置失败",
-		zap.String("tenant_id", string(tenantID)),
-		zap.String("plate_id", string(plateID)),
+		zap.String("tenant_id", tenantID.String()),
+		zap.String("plate_id", plateID.String()),
 		zap.Error(err))
 
 	return &domain.CommentConfig{
@@ -282,7 +282,7 @@ func (s *service) viewerComment(comment *domain.Comment, admin *domain.UserInfo)
 				filterUIDsStr := domain.UserIDs(filterUIDs).ToStringSlice()
 
 				// 去重 并添加管理员(此时可以确保管理员id不为用户id)
-				toUIDs := utils.UniqueStrings(append(filterUIDsStr, string(admin.ID)))
+				toUIDs := utils.UniqueStrings(append(filterUIDsStr, admin.ID.String()))
 
 				// 无toUIDs 无需发送邮件
 				if len(toUIDs) == 0 {

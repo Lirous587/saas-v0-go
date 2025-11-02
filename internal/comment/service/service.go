@@ -285,7 +285,7 @@ func (s *service) UpdatePlate(plate *domain.Plate) error {
 		zap.L().Error(
 			"删除板块ID缓存失败",
 			zap.Error(err),
-			zap.String("tenant_id", string(plate.TenantID)),
+			zap.String("tenant_id", plate.TenantID.String()),
 			zap.String("belong_key", plate.BelongKey),
 		)
 	}
@@ -321,9 +321,9 @@ func (s *service) getPlateID(tenantID domain.TenantID, belongKey string) (domain
 				zap.L().Error(
 					"设置板块ID缓存失败",
 					zap.Error(setErr),
-					zap.String("tenant_id", string(tenantID)),
+					zap.String("tenant_id", tenantID.String()),
 					zap.String("belong_key", belong.BelongKey),
-					zap.String("plate_id", string(belong.ID)),
+					zap.String("plate_id", belong.ID.String()),
 				)
 			}
 		}()
@@ -338,7 +338,7 @@ func (s *service) SetTenantConfig(config *domain.TenantConfig) error {
 		zap.L().Error(
 			"删除租户级别评论配置缓存失败",
 			zap.Error(err),
-			zap.String("tenant_id", string(config.TenantID)),
+			zap.String("tenant_id", config.TenantID.String()),
 		)
 	}
 
@@ -365,7 +365,7 @@ func (s *service) GetTenantConfig(tenantID domain.TenantID) (*domain.TenantConfi
 				zap.L().Error(
 					"设置租户级别评论配置缓存失败",
 					zap.Error(setErr),
-					zap.String("tenant_id", string(tenantID)),
+					zap.String("tenant_id", tenantID.String()),
 				)
 			}
 		}()
@@ -386,8 +386,8 @@ func (s *service) SetPlateConfig(config *domain.PlateConfig) error {
 		zap.L().Error(
 			"删除板块级别评论配置缓存失败",
 			zap.Error(err),
-			zap.String("tenant_id", string(config.TenantID)),
-			zap.String("plate_id", string(config.Plate.ID)),
+			zap.String("tenant_id", config.TenantID.String()),
+			zap.String("plate_id", config.Plate.ID.String()),
 		)
 	}
 
@@ -418,8 +418,8 @@ func (s *service) GetPlateConfig(tenantID domain.TenantID, plateID domain.PlateI
 				zap.L().Error(
 					"设置板块级别评论配置缓存失败",
 					zap.Error(setErr),
-					zap.String("tenant_id", string(tenantID)),
-					zap.String("plate_id", string(plateID)),
+					zap.String("tenant_id", tenantID.String()),
+					zap.String("plate_id", plateID.String()),
 				)
 			}
 		}()

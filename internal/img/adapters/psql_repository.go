@@ -189,8 +189,8 @@ func (repo *ImgPSQLRepository) UpdateCategory(category *domain.Category) error {
 
 func (repo *ImgPSQLRepository) DeleteCategory(tenantID domain.TenantID, categoryID domain.CategoryID) error {
 	ormCategory := orm.ImgCategory{
-		ID:       string(categoryID),
-		TenantID: string(tenantID),
+		ID:       categoryID.String(),
+		TenantID: tenantID.String(),
 	}
 
 	rows, err := ormCategory.DeleteG()
@@ -330,7 +330,7 @@ func (repo *ImgPSQLRepository) SetTenantR2Config(config *domain.R2Config) error 
 
 func (repo *ImgPSQLRepository) ExistTenantR2Config(tenantID domain.TenantID) (bool, error) {
 	exist, err := orm.TenantR2Configs(
-		orm.TenantR2ConfigWhere.TenantID.EQ(string(tenantID)),
+		orm.TenantR2ConfigWhere.TenantID.EQ(tenantID.String()),
 	).ExistsG()
 	if err != nil {
 		return false, errors.WithStack(err)
