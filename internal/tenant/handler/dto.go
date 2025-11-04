@@ -24,7 +24,7 @@ type ReadRequest struct {
 }
 
 type UpdateRequest struct {
-	ID          string `json:"-" uri:"id" binding:"required"`
+	ID          string `json:"-" uri:"id" binding:"required,uuid"`
 	Name        string `json:"name" binding:"required,max=20"`
 	Description string `json:"description" binding:"max=120"`
 }

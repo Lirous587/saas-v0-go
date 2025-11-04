@@ -69,7 +69,12 @@ func (repo *TenantPSQLRepository) Create(tenant *domain.Tenant) (*domain.Tenant,
 func (repo *TenantPSQLRepository) Update(tenant *domain.Tenant) error {
 	ormTenant := domainTenantToORM(tenant)
 
-	rows, err := ormTenant.UpdateG(boil.Infer())
+	rows, err := ormTenant.UpdateG(
+		boil.Whitelist(
+			orm.TenantColumns.Name,
+			orm.TenantColumns.Description,
+		),
+	)
 
 	if err != nil {
 		return err
