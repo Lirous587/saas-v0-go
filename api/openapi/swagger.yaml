@@ -119,6 +119,8 @@ definitions:
         type: string
       root_id:
         type: string
+      to_user:
+        $ref: '#/definitions/handler.UserInfo'
       user:
         $ref: '#/definitions/handler.UserInfo'
     type: object
@@ -807,7 +809,7 @@ paths:
       - BearerAuth: []
       summary: 获取租户级别的评论系统配置
       tags:
-      - comment
+      - tenant
     put:
       consumes:
       - application/json
@@ -842,7 +844,7 @@ paths:
       - BearerAuth: []
       summary: 设置租户级别的评论系统配置
       tags:
-      - comment
+      - tenant
   /v1/comment/{tenant_id}/like/{id}:
     put:
       consumes:

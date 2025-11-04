@@ -246,7 +246,7 @@ func (h *HttpHandler) Audit(ctx *gin.Context) {
 
 // SetTenantConfig godoc
 // @Summary      设置租户级别的评论系统配置
-// @Tags         comment
+// @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
@@ -276,7 +276,7 @@ func (h *HttpHandler) SetTenantConfig(ctx *gin.Context) {
 
 // GetTenantConfig godoc
 // @Summary      获取租户级别的评论系统配置
-// @Tags         comment
+// @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth

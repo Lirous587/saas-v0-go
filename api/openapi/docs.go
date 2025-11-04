@@ -157,7 +157,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "comment"
+                    "tenant"
                 ],
                 "summary": "获取租户级别的评论系统配置",
                 "parameters": [
@@ -215,7 +215,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "comment"
+                    "tenant"
                 ],
                 "summary": "设置租户级别的评论系统配置",
                 "parameters": [
@@ -2499,6 +2499,9 @@ const docTemplate = `{
                 },
                 "root_id": {
                     "type": "string"
+                },
+                "to_user": {
+                    "$ref": "#/definitions/handler.UserInfo"
                 },
                 "user": {
                     "$ref": "#/definitions/handler.UserInfo"
