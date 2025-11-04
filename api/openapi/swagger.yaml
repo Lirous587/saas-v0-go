@@ -1582,35 +1582,6 @@ paths:
       tags:
       - tenant
   /v1/tenant/{id}:
-    delete:
-      consumes:
-      - application/json
-      parameters:
-      - description: 租户id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 请求成功
-          schema:
-            $ref: '#/definitions/response.successResponse'
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/response.invalidParamsResponse'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/response.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: 删除
-      tags:
-      - tenant
     get:
       consumes:
       - application/json

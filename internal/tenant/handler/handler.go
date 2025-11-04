@@ -116,32 +116,6 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 	response.Success(ctx)
 }
 
-// Delete godoc
-// @Summary      删除
-// @Tags         tenant
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        id   path string true "租户id"
-// @Success      200  {object}  response.successResponse "请求成功"
-// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
-// @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/tenant/{id} [delete]
-func (h *HttpHandler) Delete(ctx *gin.Context) {
-	req := new(DeleteRequest)
-
-	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
-		return
-	}
-
-	if err := h.service.Delete(req.ID); err != nil {
-		response.Error(ctx, err)
-		return
-	}
-
-	response.Success(ctx)
-}
-
 // Paging godoc
 // @Summary      获取用户的租户分页
 // @Tags         tenant
