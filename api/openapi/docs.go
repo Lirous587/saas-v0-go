@@ -1367,7 +1367,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "img"
+                    "tenant"
                 ],
                 "summary": "获取配置图库R2配置",
                 "parameters": [
@@ -1419,7 +1419,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "img"
+                    "tenant"
                 ],
                 "summary": "配置图库R2配置",
                 "parameters": [

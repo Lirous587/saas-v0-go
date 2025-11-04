@@ -1366,7 +1366,7 @@ paths:
       - BearerAuth: []
       summary: 获取配置图库R2配置
       tags:
-      - img
+      - tenant
     put:
       consumes:
       - application/json
@@ -1397,7 +1397,7 @@ paths:
       - BearerAuth: []
       summary: 配置图库R2配置
       tags:
-      - img
+      - tenant
   /v1/img/{tenant_id}/recycle/{id}:
     delete:
       consumes:

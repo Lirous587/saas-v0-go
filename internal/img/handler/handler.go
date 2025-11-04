@@ -391,7 +391,7 @@ func (h *HttpHandler) ListCategories(ctx *gin.Context) {
 
 // SetR2Config godoc
 // @Summary      配置图库R2配置
-// @Tags         img
+// @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Param        tenant_id      path   string  true  "租户id"
@@ -428,7 +428,7 @@ func (h *HttpHandler) SetR2Config(ctx *gin.Context) {
 
 // GetR2Config godoc
 // @Summary      获取配置图库R2配置
-// @Tags         img
+// @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Param        tenant_id      path   string  true  "租户id"
