@@ -78,11 +78,11 @@ type ListCategoryRequest struct {
 
 type SetR2ConfigRequest struct {
 	TenantID        domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
-	AccountID       string          `json:"account_id" binding:"required"`
-	AccessKeyID     string          `json:"access_key_id" binding:"required"`
-	PublicBucket    string          `json:"public_bucket" binding:"required"`
-	PublicURLPrefix string          `json:"public_url_prefix" binding:"required,url"`
-	DeleteBucket    string          `json:"delete_bucket" binding:"required"`
+	AccountID       string          `json:"account_id" binding:"required,len=32"`
+	AccessKeyID     string          `json:"access_key_id" binding:"required,len=32"`
+	PublicBucket    string          `json:"public_bucket" binding:"required,max=32"`
+	PublicURLPrefix string          `json:"public_url_prefix" binding:"required,domain_url,max=128"`
+	DeleteBucket    string          `json:"delete_bucket" binding:"required,max=32"`
 }
 
 type R2ConfigResponse struct {
@@ -99,7 +99,7 @@ type GetR2ConfigRequest struct {
 
 type SetR2SecretAccessKeyRequest struct {
 	TenantID        domain.TenantID          `json:"-" uri:"tenant_id" binding:"required,uuid"`
-	SecretAccessKey domain.R2SecretAccessKey `json:"secret_access_key" binding:"required"`
+	SecretAccessKey domain.R2SecretAccessKey `json:"secret_access_key" binding:"required,len=64"`
 }
 
 type IsSetR2SecretRequest struct {

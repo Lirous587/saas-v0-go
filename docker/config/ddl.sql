@@ -103,12 +103,12 @@ CREATE INDEX idx_img_description_trgm ON public.imgs USING gin (description gin_
 -- 租户r2配置表
 CREATE TABLE public.tenant_r2_configs (
     tenant_id UUID NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE PRIMARY KEY,  
-    account_id varchar(255) NOT NULL,
-    access_key_id varchar(255) NOT NULL,
-    secret_access_key varchar(255) NOT NULL,  -- 加密存储
-    public_bucket varchar(255) NOT NULL,
-    public_url_prefix varchar(500) NOT NULL,
-    delete_bucket varchar(255) NOT NULL,
+    account_id varchar(32) NOT NULL,
+    access_key_id varchar(32) NOT NULL,
+    secret_access_key text  NULL,  -- 加密存储
+    public_bucket varchar(32) NOT NULL,
+    public_url_prefix varchar(128) NOT NULL,
+    delete_bucket varchar(32) NOT NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now()
 );

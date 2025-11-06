@@ -19,6 +19,11 @@ func validateDomainURL(fl validator.FieldLevel) bool {
 		return false
 	}
 
+	// 协议验证
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return false
+	}
+
 	// 检查是否为IP地址
 	if net.ParseIP(u.Host) != nil {
 		return false
