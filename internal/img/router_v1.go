@@ -36,6 +36,8 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 		// 图库配置
 		protect.PUT("/r2_config", handler.SetR2Config)
 		protect.GET("/r2_config", handler.GetR2Config)
+		protect.PUT("/r2_config/secret", handler.SetR2Secret)
+		protect.GET("/r2_config/secret", handler.IsSetR2Secret)
 	}
 
 	go func() {

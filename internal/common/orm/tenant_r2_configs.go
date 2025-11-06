@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
@@ -22,15 +23,15 @@ import (
 
 // TenantR2Config is an object representing the database table.
 type TenantR2Config struct {
-	TenantID        string    `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
-	AccountID       string    `boil:"account_id" json:"account_id" toml:"account_id" yaml:"account_id"`
-	AccessKeyID     string    `boil:"access_key_id" json:"access_key_id" toml:"access_key_id" yaml:"access_key_id"`
-	SecretAccessKey string    `boil:"secret_access_key" json:"secret_access_key" toml:"secret_access_key" yaml:"secret_access_key"`
-	PublicBucket    string    `boil:"public_bucket" json:"public_bucket" toml:"public_bucket" yaml:"public_bucket"`
-	PublicURLPrefix string    `boil:"public_url_prefix" json:"public_url_prefix" toml:"public_url_prefix" yaml:"public_url_prefix"`
-	DeleteBucket    string    `boil:"delete_bucket" json:"delete_bucket" toml:"delete_bucket" yaml:"delete_bucket"`
-	CreatedAt       time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt       time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	TenantID        string      `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
+	AccountID       string      `boil:"account_id" json:"account_id" toml:"account_id" yaml:"account_id"`
+	AccessKeyID     string      `boil:"access_key_id" json:"access_key_id" toml:"access_key_id" yaml:"access_key_id"`
+	SecretAccessKey null.String `boil:"secret_access_key" json:"secret_access_key,omitempty" toml:"secret_access_key" yaml:"secret_access_key,omitempty"`
+	PublicBucket    string      `boil:"public_bucket" json:"public_bucket" toml:"public_bucket" yaml:"public_bucket"`
+	PublicURLPrefix string      `boil:"public_url_prefix" json:"public_url_prefix" toml:"public_url_prefix" yaml:"public_url_prefix"`
+	DeleteBucket    string      `boil:"delete_bucket" json:"delete_bucket" toml:"delete_bucket" yaml:"delete_bucket"`
+	CreatedAt       time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt       time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *tenantR2ConfigR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L tenantR2ConfigL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -86,7 +87,7 @@ var TenantR2ConfigWhere = struct {
 	TenantID        whereHelperstring
 	AccountID       whereHelperstring
 	AccessKeyID     whereHelperstring
-	SecretAccessKey whereHelperstring
+	SecretAccessKey whereHelpernull_String
 	PublicBucket    whereHelperstring
 	PublicURLPrefix whereHelperstring
 	DeleteBucket    whereHelperstring
@@ -96,7 +97,7 @@ var TenantR2ConfigWhere = struct {
 	TenantID:        whereHelperstring{field: "\"tenant_r2_configs\".\"tenant_id\""},
 	AccountID:       whereHelperstring{field: "\"tenant_r2_configs\".\"account_id\""},
 	AccessKeyID:     whereHelperstring{field: "\"tenant_r2_configs\".\"access_key_id\""},
-	SecretAccessKey: whereHelperstring{field: "\"tenant_r2_configs\".\"secret_access_key\""},
+	SecretAccessKey: whereHelpernull_String{field: "\"tenant_r2_configs\".\"secret_access_key\""},
 	PublicBucket:    whereHelperstring{field: "\"tenant_r2_configs\".\"public_bucket\""},
 	PublicURLPrefix: whereHelperstring{field: "\"tenant_r2_configs\".\"public_url_prefix\""},
 	DeleteBucket:    whereHelperstring{field: "\"tenant_r2_configs\".\"delete_bucket\""},
@@ -142,8 +143,8 @@ type tenantR2ConfigL struct{}
 
 var (
 	tenantR2ConfigAllColumns            = []string{"tenant_id", "account_id", "access_key_id", "secret_access_key", "public_bucket", "public_url_prefix", "delete_bucket", "created_at", "updated_at"}
-	tenantR2ConfigColumnsWithoutDefault = []string{"tenant_id", "account_id", "access_key_id", "secret_access_key", "public_bucket", "public_url_prefix", "delete_bucket"}
-	tenantR2ConfigColumnsWithDefault    = []string{"created_at", "updated_at"}
+	tenantR2ConfigColumnsWithoutDefault = []string{"tenant_id", "account_id", "access_key_id", "public_bucket", "public_url_prefix", "delete_bucket"}
+	tenantR2ConfigColumnsWithDefault    = []string{"secret_access_key", "created_at", "updated_at"}
 	tenantR2ConfigPrimaryKeyColumns     = []string{"tenant_id"}
 	tenantR2ConfigGeneratedColumns      = []string{}
 )

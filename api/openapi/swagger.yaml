@@ -202,6 +202,11 @@ definitions:
       url:
         type: string
     type: object
+  handler.IsSetR2SecretResponse:
+    properties:
+      is_set:
+        type: boolean
+    type: object
   handler.PagingResponse:
     properties:
       has_next:
@@ -302,14 +307,19 @@ definitions:
         type: string
       public_url_prefix:
         type: string
-      secret_access_key:
-        type: string
     required:
     - access_key_id
     - account_id
     - delete_bucket
     - public_bucket
     - public_url_prefix
+    type: object
+  handler.SetR2SecretAccessKeyRequest:
+    properties:
+      secret_access_key:
+        type: string
+    required:
+    - secret_access_key
     type: object
   handler.SetTenantConfigRequest:
     properties:
@@ -1395,7 +1405,69 @@ paths:
             $ref: '#/definitions/response.errorResponse'
       security:
       - BearerAuth: []
-      summary: 配置图库R2配置
+      summary: 配置图库R2配置(不包含密钥)
+      tags:
+      - tenant
+  /v1/img/{tenant_id}/r2_config/secret:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.IsSetR2SecretResponse'
+              type: object
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 是否已配置图库R2密钥
+      tags:
+      - tenant
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      - description: 请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.SetR2SecretAccessKeyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 配置图库R2密钥
       tags:
       - tenant
   /v1/img/{tenant_id}/recycle/{id}:

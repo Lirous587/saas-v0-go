@@ -1415,7 +1415,7 @@
                 "tags": [
                     "tenant"
                 ],
-                "summary": "配置图库R2配置",
+                "summary": "配置图库R2配置(不包含密钥)",
                 "parameters": [
                     {
                         "type": "string",
@@ -1431,6 +1431,109 @@
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/handler.SetR2ConfigRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.successResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/img/{tenant_id}/r2_config/secret": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tenant"
+                ],
+                "summary": "是否已配置图库R2密钥",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.successResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.IsSetR2SecretResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.errorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tenant"
+                ],
+                "summary": "配置图库R2密钥",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.SetR2SecretAccessKeyRequest"
                         }
                     }
                 ],
@@ -2572,6 +2675,14 @@
                 }
             }
         },
+        "handler.IsSetR2SecretResponse": {
+            "type": "object",
+            "properties": {
+                "is_set": {
+                    "type": "boolean"
+                }
+            }
+        },
         "handler.PagingResponse": {
             "type": "object",
             "properties": {
@@ -2732,7 +2843,15 @@
                 },
                 "public_url_prefix": {
                     "type": "string"
-                },
+                }
+            }
+        },
+        "handler.SetR2SecretAccessKeyRequest": {
+            "type": "object",
+            "required": [
+                "secret_access_key"
+            ],
+            "properties": {
                 "secret_access_key": {
                     "type": "string"
                 }

@@ -23,67 +23,72 @@ import (
 
 // Comment is an object representing the database table.
 type Comment struct {
-	ID        string        `boil:"id" json:"id" toml:"id" yaml:"id"`
-	TenantID  string        `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
-	PlateID   string        `boil:"plate_id" json:"plate_id" toml:"plate_id" yaml:"plate_id"`
-	UserID    string        `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
-	ParentID  null.String   `boil:"parent_id" json:"parent_id,omitempty" toml:"parent_id" yaml:"parent_id,omitempty"`
-	RootID    null.String   `boil:"root_id" json:"root_id,omitempty" toml:"root_id" yaml:"root_id,omitempty"`
-	Content   string        `boil:"content" json:"content" toml:"content" yaml:"content"`
-	Status    CommentStatus `boil:"status" json:"status" toml:"status" yaml:"status"`
-	LikeCount int64         `boil:"like_count" json:"like_count" toml:"like_count" yaml:"like_count"`
-	CreatedAt time.Time     `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	ID         string        `boil:"id" json:"id" toml:"id" yaml:"id"`
+	TenantID   string        `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
+	PlateID    string        `boil:"plate_id" json:"plate_id" toml:"plate_id" yaml:"plate_id"`
+	UserID     string        `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	ParentID   null.String   `boil:"parent_id" json:"parent_id,omitempty" toml:"parent_id" yaml:"parent_id,omitempty"`
+	RootID     null.String   `boil:"root_id" json:"root_id,omitempty" toml:"root_id" yaml:"root_id,omitempty"`
+	Content    string        `boil:"content" json:"content" toml:"content" yaml:"content"`
+	Status     CommentStatus `boil:"status" json:"status" toml:"status" yaml:"status"`
+	LikeCount  int64         `boil:"like_count" json:"like_count" toml:"like_count" yaml:"like_count"`
+	CreatedAt  time.Time     `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	ReplyCount null.Int64    `boil:"reply_count" json:"reply_count,omitempty" toml:"reply_count" yaml:"reply_count,omitempty"`
 
 	R *commentR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L commentL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var CommentColumns = struct {
-	ID        string
-	TenantID  string
-	PlateID   string
-	UserID    string
-	ParentID  string
-	RootID    string
-	Content   string
-	Status    string
-	LikeCount string
-	CreatedAt string
+	ID         string
+	TenantID   string
+	PlateID    string
+	UserID     string
+	ParentID   string
+	RootID     string
+	Content    string
+	Status     string
+	LikeCount  string
+	CreatedAt  string
+	ReplyCount string
 }{
-	ID:        "id",
-	TenantID:  "tenant_id",
-	PlateID:   "plate_id",
-	UserID:    "user_id",
-	ParentID:  "parent_id",
-	RootID:    "root_id",
-	Content:   "content",
-	Status:    "status",
-	LikeCount: "like_count",
-	CreatedAt: "created_at",
+	ID:         "id",
+	TenantID:   "tenant_id",
+	PlateID:    "plate_id",
+	UserID:     "user_id",
+	ParentID:   "parent_id",
+	RootID:     "root_id",
+	Content:    "content",
+	Status:     "status",
+	LikeCount:  "like_count",
+	CreatedAt:  "created_at",
+	ReplyCount: "reply_count",
 }
 
 var CommentTableColumns = struct {
-	ID        string
-	TenantID  string
-	PlateID   string
-	UserID    string
-	ParentID  string
-	RootID    string
-	Content   string
-	Status    string
-	LikeCount string
-	CreatedAt string
+	ID         string
+	TenantID   string
+	PlateID    string
+	UserID     string
+	ParentID   string
+	RootID     string
+	Content    string
+	Status     string
+	LikeCount  string
+	CreatedAt  string
+	ReplyCount string
 }{
-	ID:        "comments.id",
-	TenantID:  "comments.tenant_id",
-	PlateID:   "comments.plate_id",
-	UserID:    "comments.user_id",
-	ParentID:  "comments.parent_id",
-	RootID:    "comments.root_id",
-	Content:   "comments.content",
-	Status:    "comments.status",
-	LikeCount: "comments.like_count",
-	CreatedAt: "comments.created_at",
+	ID:         "comments.id",
+	TenantID:   "comments.tenant_id",
+	PlateID:    "comments.plate_id",
+	UserID:     "comments.user_id",
+	ParentID:   "comments.parent_id",
+	RootID:     "comments.root_id",
+	Content:    "comments.content",
+	Status:     "comments.status",
+	LikeCount:  "comments.like_count",
+	CreatedAt:  "comments.created_at",
+	ReplyCount: "comments.reply_count",
 }
 
 // Generated where
@@ -202,28 +207,68 @@ func (w whereHelperint64) NIN(slice []int64) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
+type whereHelpernull_Int64 struct{ field string }
+
+func (w whereHelpernull_Int64) EQ(x null.Int64) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Int64) NEQ(x null.Int64) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Int64) LT(x null.Int64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Int64) LTE(x null.Int64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Int64) GT(x null.Int64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Int64) GTE(x null.Int64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+func (w whereHelpernull_Int64) IN(slice []int64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelpernull_Int64) NIN(slice []int64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
+func (w whereHelpernull_Int64) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Int64) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+
 var CommentWhere = struct {
-	ID        whereHelperstring
-	TenantID  whereHelperstring
-	PlateID   whereHelperstring
-	UserID    whereHelperstring
-	ParentID  whereHelpernull_String
-	RootID    whereHelpernull_String
-	Content   whereHelperstring
-	Status    whereHelperCommentStatus
-	LikeCount whereHelperint64
-	CreatedAt whereHelpertime_Time
+	ID         whereHelperstring
+	TenantID   whereHelperstring
+	PlateID    whereHelperstring
+	UserID     whereHelperstring
+	ParentID   whereHelpernull_String
+	RootID     whereHelpernull_String
+	Content    whereHelperstring
+	Status     whereHelperCommentStatus
+	LikeCount  whereHelperint64
+	CreatedAt  whereHelpertime_Time
+	ReplyCount whereHelpernull_Int64
 }{
-	ID:        whereHelperstring{field: "\"comments\".\"id\""},
-	TenantID:  whereHelperstring{field: "\"comments\".\"tenant_id\""},
-	PlateID:   whereHelperstring{field: "\"comments\".\"plate_id\""},
-	UserID:    whereHelperstring{field: "\"comments\".\"user_id\""},
-	ParentID:  whereHelpernull_String{field: "\"comments\".\"parent_id\""},
-	RootID:    whereHelpernull_String{field: "\"comments\".\"root_id\""},
-	Content:   whereHelperstring{field: "\"comments\".\"content\""},
-	Status:    whereHelperCommentStatus{field: "\"comments\".\"status\""},
-	LikeCount: whereHelperint64{field: "\"comments\".\"like_count\""},
-	CreatedAt: whereHelpertime_Time{field: "\"comments\".\"created_at\""},
+	ID:         whereHelperstring{field: "\"comments\".\"id\""},
+	TenantID:   whereHelperstring{field: "\"comments\".\"tenant_id\""},
+	PlateID:    whereHelperstring{field: "\"comments\".\"plate_id\""},
+	UserID:     whereHelperstring{field: "\"comments\".\"user_id\""},
+	ParentID:   whereHelpernull_String{field: "\"comments\".\"parent_id\""},
+	RootID:     whereHelpernull_String{field: "\"comments\".\"root_id\""},
+	Content:    whereHelperstring{field: "\"comments\".\"content\""},
+	Status:     whereHelperCommentStatus{field: "\"comments\".\"status\""},
+	LikeCount:  whereHelperint64{field: "\"comments\".\"like_count\""},
+	CreatedAt:  whereHelpertime_Time{field: "\"comments\".\"created_at\""},
+	ReplyCount: whereHelpernull_Int64{field: "\"comments\".\"reply_count\""},
 }
 
 // CommentRels is where relationship names are stored.
@@ -396,9 +441,9 @@ func (r *commentR) GetRootComments() CommentSlice {
 type commentL struct{}
 
 var (
-	commentAllColumns            = []string{"id", "tenant_id", "plate_id", "user_id", "parent_id", "root_id", "content", "status", "like_count", "created_at"}
+	commentAllColumns            = []string{"id", "tenant_id", "plate_id", "user_id", "parent_id", "root_id", "content", "status", "like_count", "created_at", "reply_count"}
 	commentColumnsWithoutDefault = []string{"tenant_id", "plate_id", "user_id", "content"}
-	commentColumnsWithDefault    = []string{"id", "parent_id", "root_id", "status", "like_count", "created_at"}
+	commentColumnsWithDefault    = []string{"id", "parent_id", "root_id", "status", "like_count", "created_at", "reply_count"}
 	commentPrimaryKeyColumns     = []string{"id"}
 	commentGeneratedColumns      = []string{}
 )

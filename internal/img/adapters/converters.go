@@ -127,10 +127,14 @@ func doaminR2ConfigToORM(r2Config *domain.R2Config) *orm.TenantR2Config {
 		TenantID:        r2Config.TenantID.String(),
 		AccountID:       r2Config.AccountID,
 		AccessKeyID:     r2Config.AccessKeyID,
-		SecretAccessKey: r2Config.GetSecretAccessKey(),
 		PublicBucket:    r2Config.PublicBucket,
 		PublicURLPrefix: r2Config.PublicURLPrefix,
 		DeleteBucket:    r2Config.DeleteBucket,
+	}
+
+	// 处理null
+	if r2Config.GetSecretAccessKey() != "" {
+		ormR2Config.SecretAccessKey = null.NewString(r2Config.GetSecretAccessKey(), true)
 	}
 
 	return ormR2Config
@@ -150,7 +154,10 @@ func ormR2ConfigToDomian(ormR2Config *orm.TenantR2Config) *domain.R2Config {
 		DeleteBucket:    ormR2Config.DeleteBucket,
 	}
 
-	r2Config.SetSecretAccessKey(ormR2Config.SecretAccessKey)
+	// 处理null
+	if ormR2Config.SecretAccessKey.Valid {
+		r2Config.SetSecretAccessKey(ormR2Config.SecretAccessKey.String)
+	}
 
 	return r2Config
 }

@@ -390,7 +390,7 @@ func (h *HttpHandler) ListCategories(ctx *gin.Context) {
 }
 
 // SetR2Config godoc
-// @Summary      配置图库R2配置
+// @Summary      配置图库R2配置(不包含密钥)
 // @Tags         tenant
 // @Accept       json
 // @Produce      json
@@ -414,8 +414,6 @@ func (h *HttpHandler) SetR2Config(ctx *gin.Context) {
 		PublicURLPrefix: req.PublicURLPrefix,
 		DeleteBucket:    req.DeleteBucket,
 	}
-
-	config.SetSecretAccessKey(req.SecretAccessKey)
 
 	err := h.service.SetR2Config(config)
 	if err != nil {
@@ -450,4 +448,58 @@ func (h *HttpHandler) GetR2Config(ctx *gin.Context) {
 	}
 
 	response.Success(ctx, domainR2ConfigToResponse(res))
+}
+
+// SetR2Secret godoc
+// @Summary      配置图库R2密钥
+// @Tags         tenant
+// @Accept       json
+// @Produce      json
+// @Param        tenant_id      path   string  true  "租户id"
+// @Param        request body   handler.SetR2SecretAccessKeyRequest true "请求参数"
+// @Success      200 {object} response.successResponse "请求成功"
+// @Failure      500 {object} response.errorResponse "服务器错误"
+// @Security     BearerAuth
+// @Router       /v1/img/{tenant_id}/r2_config/secret [put]
+func (h *HttpHandler) SetR2Secret(ctx *gin.Context) {
+	req := new(SetR2SecretAccessKeyRequest)
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	err := h.service.SetR2SecretKey(req.TenantID, req.SecretAccessKey)
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx)
+}
+
+// IsSetR2Secret godoc
+// @Summary      是否已配置图库R2密钥
+// @Tags         tenant
+// @Accept       json
+// @Produce      json
+// @Param        tenant_id      path   string  true  "租户id"
+// @Success      200 {object} response.successResponse{data=handler.IsSetR2SecretResponse} "请求成功"
+// @Failure      500 {object} response.errorResponse "服务器错误"
+// @Security     BearerAuth
+// @Router       /v1/img/{tenant_id}/r2_config/secret [get]
+func (h *HttpHandler) IsSetR2Secret(ctx *gin.Context) {
+	req := new(IsSetR2SecretRequest)
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	isSet, err := h.service.IsSetR2SecretKey(req.TenantID)
+
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx, IsSetR2SecretResponse{
+		IsSet: isSet,
+	})
 }

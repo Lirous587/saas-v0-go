@@ -72,3 +72,5 @@ func (r *R2Config) GetSecretAccessKey() string {
 func (r *R2Config) SetSecretAccessKey(key string) {
 	r.secretAccessKey = key
 }
+
+type R2SecretAccessKey string

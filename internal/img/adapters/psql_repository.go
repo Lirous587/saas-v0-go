@@ -296,6 +296,17 @@ func (repo *ImgPSQLRepository) IsCategoryExistImg(tenantID domain.TenantID, cate
 	return existing2, nil
 }
 
+func (repo *ImgPSQLRepository) ExistTenantR2Config(tenantID domain.TenantID) (bool, error) {
+	exist, err := orm.TenantR2Configs(
+		orm.TenantR2ConfigWhere.TenantID.EQ(tenantID.String()),
+	).ExistsG()
+	if err != nil {
+		return false, errors.WithStack(err)
+	}
+
+	return exist, nil
+}
+
 func (repo *ImgPSQLRepository) GetTenantR2Config(tenantID domain.TenantID) (*domain.R2Config, error) {
 	config, err := orm.TenantR2Configs(
 		orm.TenantR2ConfigWhere.TenantID.EQ(tenantID.String()),
@@ -314,29 +325,40 @@ func (repo *ImgPSQLRepository) GetTenantR2Config(tenantID domain.TenantID) (*dom
 func (repo *ImgPSQLRepository) SetTenantR2Config(config *domain.R2Config) error {
 	ormR2Config := doaminR2ConfigToORM(config)
 
-	var updateWhiteList boil.Columns
-	// 除开SecretAccessKey列 其余列必定不为空 故此仅需处理SecretAccessKey列
-	if config.GetSecretAccessKey() == "" {
-		updateWhiteList = boil.Blacklist(
-			orm.TenantR2ConfigColumns.SecretAccessKey,
-		)
-	} else {
-		updateWhiteList = boil.Infer()
-	}
-
 	err := ormR2Config.UpsertG(
 		true,
 		[]string{orm.TenantR2ConfigColumns.TenantID},
-		updateWhiteList,
-		boil.Infer(),
+		boil.Blacklist(
+			orm.TenantR2ConfigColumns.SecretAccessKey,
+		),
+		boil.Blacklist(
+			orm.TenantR2ConfigColumns.SecretAccessKey,
+		),
 	)
 
 	return err
 }
 
-func (repo *ImgPSQLRepository) ExistTenantR2Config(tenantID domain.TenantID) (bool, error) {
+func (repo *ImgPSQLRepository) SetR2SecretKey(tenantID domain.TenantID, secretKey domain.R2SecretAccessKey) error {
+	_, err := orm.TenantR2Configs(
+		orm.TenantR2ConfigWhere.TenantID.EQ(string(tenantID)),
+	).UpdateAllG(
+		orm.M{
+			orm.TenantR2ConfigColumns.SecretAccessKey: string(secretKey),
+		},
+	)
+
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
+}
+
+func (repo *ImgPSQLRepository) IsSetR2SecretKey(tenantID domain.TenantID) (bool, error) {
 	exist, err := orm.TenantR2Configs(
 		orm.TenantR2ConfigWhere.TenantID.EQ(tenantID.String()),
+		orm.TenantR2ConfigWhere.SecretAccessKey.IsNotNull(),
 	).ExistsG()
 	if err != nil {
 		return false, errors.WithStack(err)

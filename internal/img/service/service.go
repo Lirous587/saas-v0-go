@@ -575,25 +575,6 @@ func (s *service) ListCategories(tenantID domain.TenantID) (categories []*domain
 }
 
 func (s *service) SetR2Config(config *domain.R2Config) error {
-	exist, err := s.repo.ExistTenantR2Config(config.TenantID)
-	if err != nil {
-		return err
-	}
-
-	if !exist && config.GetSecretAccessKey() == "" {
-		return codes.ErrCommentTenantConfigSecretMissing
-	}
-
-	// 已有配置 则可不再提供secret
-	// 如果有secret 就去做加密
-	if config.GetSecretAccessKey() != "" {
-		encryptSecret, err := s.ace256Encryptor.Encrypt(config.GetSecretAccessKey())
-		if err != nil {
-			return err
-		}
-		config.SetSecretAccessKey(encryptSecret)
-	}
-
 	if err := s.repo.SetTenantR2Config(config); err != nil {
 		return err
 	}
@@ -602,9 +583,31 @@ func (s *service) SetR2Config(config *domain.R2Config) error {
 	s.tenantR2.Delete(config.TenantID)
 
 	return nil
-
 }
 
 func (s *service) GetR2Config(tenantID domain.TenantID) (*domain.R2Config, error) {
 	return s.repo.GetTenantR2Config(tenantID)
+}
+
+func (s *service) SetR2SecretKey(tenantID domain.TenantID, secretAccessKey domain.R2SecretAccessKey) error {
+	exist, err := s.repo.ExistTenantR2Config(tenantID)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	if !exist {
+		return codes.ErrImgR2ConfigNotFound
+	}
+
+	encryptSecret, err := s.ace256Encryptor.Encrypt(string(secretAccessKey))
+	if err != nil {
+		return err
+	}
+
+	return s.repo.SetR2SecretKey(tenantID, domain.R2SecretAccessKey(encryptSecret))
+
+}
+
+func (s *service) IsSetR2SecretKey(tenantID domain.TenantID) (bool, error) {
+	return s.repo.IsSetR2SecretKey(tenantID)
 }

@@ -21,4 +21,7 @@ type ImgService interface {
 	// 配置
 	SetR2Config(config *R2Config) error
 	GetR2Config(tenantID TenantID) (*R2Config, error)
+
+	SetR2SecretKey(tenantID TenantID, secretKey R2SecretAccessKey) error
+	IsSetR2SecretKey(tenantID TenantID) (bool, error)
 }
