@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"saas/internal/common/reqkit/bind"
+	"saas/internal/common/reskit/codes"
 	"saas/internal/common/reskit/response"
 	"saas/internal/img/domain"
 	"strings"
@@ -442,7 +443,7 @@ func (h *HttpHandler) GetR2Config(ctx *gin.Context) {
 
 	res, err := h.service.GetR2Config(req.TenantID)
 
-	if err != nil {
+	if err != nil && !errors.Is(err, codes.ErrImgR2ConfigNotFound) {
 		response.Error(ctx, err)
 		return
 	}

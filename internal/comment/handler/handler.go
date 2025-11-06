@@ -1,8 +1,10 @@
 ﻿package handler
 
 import (
+	"errors"
 	"saas/internal/comment/domain"
 	"saas/internal/common/reqkit/bind"
+	"saas/internal/common/reskit/codes"
 	"saas/internal/common/reskit/response"
 	"saas/internal/common/server"
 
@@ -293,7 +295,7 @@ func (h *HttpHandler) GetTenantConfig(ctx *gin.Context) {
 	}
 
 	res, err := h.service.GetTenantConfig(req.TenantID)
-	if err != nil {
+	if err != nil && !errors.Is(err, codes.ErrCommentTenantConfigNotFound) {
 		response.Error(ctx, err)
 		return
 	}
