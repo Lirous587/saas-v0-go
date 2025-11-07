@@ -9,6 +9,7 @@ import (
 	"saas/internal/img/domain"
 	"time"
 
+	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/pkg/errors"
@@ -284,16 +285,16 @@ func (repo *ImgPSQLRepository) CountCategory(tenantID domain.TenantID) (int64, e
 }
 
 func (repo *ImgPSQLRepository) IsCategoryExistImg(tenantID domain.TenantID, categoryID domain.CategoryID) (bool, error) {
-	existing2, err := orm.Imgs(
-		orm.ImgCategoryWhere.TenantID.EQ(tenantID.String()),
-		orm.ImgCategoryWhere.ID.EQ(categoryID.String()),
+	exist, err := orm.Imgs(
+		orm.ImgWhere.TenantID.EQ(tenantID.String()),
+		orm.ImgWhere.CategoryID.EQ(null.StringFrom(categoryID.String())),
 		qm.WithDeleted(),
 	).ExistsG()
 	if err != nil {
 		return false, err
 	}
 
-	return existing2, nil
+	return exist, nil
 }
 
 func (repo *ImgPSQLRepository) ExistTenantR2Config(tenantID domain.TenantID) (bool, error) {
