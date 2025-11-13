@@ -33,7 +33,7 @@ CREATE TABLE public.tenants
     name           varchar(20)          NOT NULL,
     status         tenant_status        NOT NULL DEFAULT 'active',
     billing_cycle  tnant_plan_billing_cycle  NOT NULL DEFAULT 'monthly',
-    description    varchar(120)         NULL,
+    description    text         NULL,
     start_at       timestamptz(6)       NOT NULL DEFAULT now(),
     end_at         timestamptz(6)       NULL,
     created_at     timestamptz(6)       NOT NULL DEFAULT now(),
@@ -88,7 +88,7 @@ CREATE TABLE public.imgs
     id          UUID PRIMARY KEY DEFAULT uuidv7(),
     tenant_id   UUID         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
     category_id UUID REFERENCES img_categories (id),
-    path        varchar(120)   NOT NULL,
+    path        text   NOT NULL,
     description varchar(60),
     created_at  timestamptz(6) NOT NULL DEFAULT now(),
     updated_at  timestamptz(6) NOT NULL DEFAULT now(),
@@ -120,8 +120,8 @@ CREATE TABLE public.comment_plates
 (
     id          UUID PRIMARY KEY DEFAULT uuidv7(),
     belong_key  varchar(50)    NOT NULL,  -- 资源标识，如 "article:123"
-    related_url  varchar(255) NOT NULL,
-    summary     varchar(60)    NOT NULL,
+    related_url varchar(255) NOT NULL,
+    summary     text    NOT NULL,
     tenant_id   UUID         NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
     UNIQUE (tenant_id, belong_key)
 );

@@ -14,7 +14,7 @@ type TenantResponse struct {
 
 type CreateRequest struct {
 	Name         string          `json:"name" binding:"required,max=20"`
-	Description  string          `json:"description" binding:"max=120"`
+	Description  string          `json:"description" binding:"max=200"`
 	PlanType     domain.PlanType `json:"plan_type" binding:"required,oneof=free care pro"`
 	BillingCycle string          `json:"billing_cycle" binding:"required,oneof=monthly yearly lifetime"`
 }

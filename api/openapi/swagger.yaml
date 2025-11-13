@@ -166,7 +166,7 @@ definitions:
         maxLength: 255
         type: string
       summary:
-        maxLength: 60
+        maxLength: 500
         type: string
     required:
     - belong_key
@@ -302,10 +302,13 @@ definitions:
       account_id:
         type: string
       delete_bucket:
+        maxLength: 32
         type: string
       public_bucket:
+        maxLength: 32
         type: string
       public_url_prefix:
+        maxLength: 128
         type: string
     required:
     - access_key_id
@@ -462,7 +465,7 @@ definitions:
         - lifetime
         type: string
       description:
-        maxLength: 120
+        maxLength: 200
         type: string
       name:
         maxLength: 20

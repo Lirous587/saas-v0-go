@@ -2632,7 +2632,7 @@ const docTemplate = `{
                 },
                 "summary": {
                     "type": "string",
-                    "maxLength": 60
+                    "maxLength": 500
                 }
             }
         },
@@ -2842,13 +2842,16 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "delete_bucket": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 32
                 },
                 "public_bucket": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 32
                 },
                 "public_url_prefix": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 128
                 }
             }
         },
@@ -3079,7 +3082,7 @@ const docTemplate = `{
                 },
                 "description": {
                     "type": "string",
-                    "maxLength": 120
+                    "maxLength": 200
                 },
                 "name": {
                     "type": "string",

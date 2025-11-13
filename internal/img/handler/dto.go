@@ -12,8 +12,8 @@ type ImgResponse struct {
 
 type UploadRequest struct {
 	TenantID    domain.TenantID   `json:"-" uri:"tenant_id" binding:"required,uuid"`
-	Path        string            `form:"path" binding:"omitempty,slug"`
-	Description string            `form:"description" binding:"max=60"`
+	Path        string            `form:"path" binding:"omitempty,slug,max=200"`
+	Description string            `form:"description" binding:"max=120"`
 	CategoryID  domain.CategoryID `form:"category_id" binding:"omitempty,uuid"`
 }
 
