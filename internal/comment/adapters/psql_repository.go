@@ -487,7 +487,7 @@ func (repo *CommentPSQLRepository) ListPlate(query *domain.PlateQuery) (*domain.
 		return nil, err
 	}
 
-	listMods := append(whereMods, qm.Offset(offset), qm.Limit(query.PageSize))
+	listMods := append(whereMods, qm.Offset(offset), qm.Limit(query.PageSize), qm.OrderBy(orm.CommentPlateColumns.ID+" DESC"))
 
 	// 3.查询数据
 	plate, err := orm.CommentPlates(listMods...).AllG()

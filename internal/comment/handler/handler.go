@@ -485,7 +485,7 @@ func (h *HttpHandler) GetPlateConfig(ctx *gin.Context) {
 	}
 
 	res, err := h.service.GetPlateConfig(req.TenantID, req.ID)
-	if err != nil {
+	if err != nil && !errors.Is(err, codes.ErrCommentPlateConfigNotFound) {
 		response.Error(ctx, err)
 		return
 	}
