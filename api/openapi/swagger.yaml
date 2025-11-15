@@ -1051,6 +1051,41 @@ paths:
       summary: 删除评论板块
       tags:
       - comment
+  /v1/comment/{tenant_id}/plate/check_name:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      - description: 租户id
+        in: query
+        name: belong_key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.successResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 检测是否有相同的板块名
+      tags:
+      - comment
   /v1/comment/{tenant_id}/plate/config/{belong_key}:
     put:
       consumes:
@@ -1769,6 +1804,7 @@ paths:
       - description: 租户名称
         in: query
         name: name
+        required: true
         type: string
       produces:
       - application/json

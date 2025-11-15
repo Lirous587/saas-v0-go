@@ -426,3 +426,7 @@ func (s *service) GetPlateConfig(tenantID domain.TenantID, plateID domain.PlateI
 
 	return config, nil
 }
+
+func (s *service) CheckPlateBelongKey(tenantID domain.TenantID, belongKey string) (bool, error) {
+	return s.repo.ExistPlateBykey(tenantID, belongKey)
+}

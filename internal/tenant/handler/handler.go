@@ -193,7 +193,7 @@ func (h *HttpHandler) GetPlan(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        name    query     string  false  "租户名称"
+// @Param        name    query     string  true  "租户名称"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"

@@ -49,7 +49,7 @@ type PagingResponse struct {
 }
 
 type CheckNameRequest struct {
-	Name string `form:"name"  binding:"required,max=20"`
+	Name string `json:"-" form:"name"  binding:"required,max=20"`
 }
 
 type UpgradeRequest struct {

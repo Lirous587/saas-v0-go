@@ -492,3 +492,37 @@ func (h *HttpHandler) GetPlateConfig(ctx *gin.Context) {
 
 	response.Success(ctx, domainPlateConfigToResponse(res))
 }
+
+// CheckPlateBelongKey godoc
+// @Summary      检测是否有相同的板块名
+// @Tags         comment
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        tenant_id   			path string true "租户id"
+// @Param        belong_key   		query string true "租户id"
+// @Success      200  {object}  response.successResponse "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/comment/{tenant_id}/plate/check_name [get]
+func (h *HttpHandler) CheckPlateBelongKey(ctx *gin.Context) {
+	req := new(PlateCheckBelongKeyRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	exist, err := h.service.CheckPlateBelongKey(req.TenantID, req.BelongKey)
+
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	if exist {
+		response.Error(ctx, codes.ErrCommentPlateHasSameBelongKey)
+		return
+	}
+
+	response.Success(ctx)
+}

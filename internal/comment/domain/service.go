@@ -13,6 +13,7 @@ type CommentService interface {
 	UpdatePlate(plate *Plate) error
 	DeletePlate(tenantID TenantID, plateID PlateID) error
 	ListPlate(query *PlateQuery) (*PlateList, error)
+	CheckPlateBelongKey(tenantID TenantID,belongKey string) (bool,error)
 
 	SetTenantConfig(config *TenantConfig) error
 	GetTenantConfig(tenantID TenantID) (*TenantConfig, error)

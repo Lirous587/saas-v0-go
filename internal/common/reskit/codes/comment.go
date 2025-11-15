@@ -13,8 +13,9 @@ var (
 	ErrCommentIllegalAudit         = ErrCode{Msg: "不合法的审计操作", Type: ErrorTypeExternal, Code: 2213}
 
 	//  评论板块错误 2320-2339
-	ErrCommentPlateNotFound = ErrCode{Msg: "评论板块不存在", Type: ErrorTypeNotFound, Code: 2320}
-	ErrCommentPlateExist    = ErrCode{Msg: "该评论板块已存在", Type: ErrorTypeAlreadyExists, Code: 2321}
+	ErrCommentPlateNotFound         = ErrCode{Msg: "评论板块不存在", Type: ErrorTypeNotFound, Code: 2320}
+	ErrCommentPlateExist            = ErrCode{Msg: "该评论板块已存在", Type: ErrorTypeAlreadyExists, Code: 2321}
+	ErrCommentPlateHasSameBelongKey = ErrCode{Msg: "存在相同的归属键", Type: ErrorTypeConflict, Code: 2232}
 
 	//  评论配置错误 2340-2359
 	ErrCommentTenantConfigNotFound      = ErrCode{Msg: "该租户下的评论配置不存在", Type: ErrorTypeNotFound, Code: 2340}

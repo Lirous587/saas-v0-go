@@ -62,6 +62,8 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 			// 板块配置
 			plateGroup.PUT("/config/:belong_key", handler.SetPlateConfig)
 			plateGroup.GET("/config/:id", handler.GetPlateConfig)
+
+			plateGroup.GET("/check_name", handler.CheckPlateBelongKey)
 		}
 
 	}

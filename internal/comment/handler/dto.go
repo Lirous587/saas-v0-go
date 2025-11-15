@@ -170,3 +170,8 @@ type PlateConfigResponse struct {
 	CreatedAt int64 `json:"created_at"`
 	UpdatedAt int64 `json:"updated_at"`
 }
+
+type PlateCheckBelongKeyRequest struct {
+	TenantID  domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
+	BelongKey string          `json:"-" form:"belong_key" binding:"required"`
+}
