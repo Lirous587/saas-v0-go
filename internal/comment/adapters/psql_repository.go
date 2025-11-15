@@ -471,9 +471,14 @@ func (repo *CommentPSQLRepository) DeletePlate(tenantID domain.TenantID, plateID
 
 func (repo *CommentPSQLRepository) ListPlate(query *domain.PlateQuery) (*domain.PlateList, error) {
 	var whereMods []qm.QueryMod
+	whereMods = append(whereMods, orm.CommentPlateWhere.TenantID.EQ(query.TenantID.String()))
+
 	if query.Keyword != "" {
 		like := "%" + query.Keyword + "%"
-		whereMods = append(whereMods, qm.Where(fmt.Sprintf("(%s LIKE ? OR %s LIKE ?)", orm.CommentPlateColumns.BelongKey, orm.CommentPlateColumns.Summary), like, like))
+		whereMods = append(
+			whereMods,
+			qm.Where(fmt.Sprintf("(%s LIKE ? OR %s LIKE ?)", orm.CommentPlateColumns.BelongKey, orm.CommentPlateColumns.Summary), like, like),
+		)
 	}
 	// 1.计算total
 	total, err := orm.CommentPlates(whereMods...).CountG()
