@@ -145,7 +145,7 @@ func (h *HttpHandler) Paging(ctx *gin.Context) {
 
 	data, err := h.service.Paging(&domain.TenantPagingQuery{
 		CreatorID:  userID,
-		Keyword:    req.KeyWord,
+		Keyword:    req.Keyword,
 		PrevCursor: req.PrevCursor,
 		NextCursor: req.NextCursor,
 		PageSize:   req.PageSize,

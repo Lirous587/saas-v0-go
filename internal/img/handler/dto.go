@@ -36,7 +36,7 @@ type RestoreFromRecycleBinRequest struct {
 type ListRequest struct {
 	TenantID   domain.TenantID   `json:"-" uri:"tenant_id" binding:"required,uuid"`
 	CategoryID domain.CategoryID `form:"category_id" binding:"omitempty,uuid"`
-	KeyWord    string            `form:"keyword" binding:"max=20"`
+	Keyword    string            `form:"keyword" binding:"max=20"`
 	Deleted    bool              `form:"deleted,default=false"`
 	PageSize   int               `form:"page_size,default=5" binding:"min=5,max=50"`
 	Page       int               `form:"page,default=1" binding:"min=1"`

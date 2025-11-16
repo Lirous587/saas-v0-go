@@ -204,7 +204,7 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 
 	list, err := h.service.List(&domain.ImgQuery{
 		TenantID:   req.TenantID,
-		Keyword:    req.KeyWord,
+		Keyword:    req.Keyword,
 		Page:       req.Page,
 		PageSize:   req.PageSize,
 		Deleted:    req.Deleted,
