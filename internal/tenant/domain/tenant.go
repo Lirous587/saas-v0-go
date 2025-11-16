@@ -14,11 +14,11 @@ type Tenant struct {
 	CreatorID   string
 }
 
-func (t Tenant) GetCreatedAt() time.Time {
+func (t *Tenant) GetCreatedAt() time.Time {
 	return t.CreatedAt
 }
 
-func (t Tenant) GetID() string {
+func (t *Tenant) GetID() string {
 	return t.ID
 }
 

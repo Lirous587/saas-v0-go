@@ -29,7 +29,7 @@ type keyset[T CursorFields] struct {
 }
 
 type paginationResult[T any] struct {
-	Items      []*T
+	Items      []T
 	PrevCursor string
 	NextCursor string
 	HasPrev    bool
@@ -79,14 +79,10 @@ func (k keyset[T]) decodeCursor(cursorStr string) *keysetCursor {
 	return &payload
 }
 
-func (k keyset[T]) extractKeysetCursor(item *T) *keysetCursor {
-	if item == nil {
-		return nil
-	}
-
+func (k keyset[T]) extractKeysetCursor(item T) *keysetCursor {
 	return &keysetCursor{
-		CreatedAt: (*item).GetCreatedAt(),
-		ID:        (*item).GetID(),
+		CreatedAt: item.GetCreatedAt(),
+		ID:        item.GetID(),
 	}
 }
 
@@ -118,7 +114,7 @@ func (k keyset[T]) ApplyKeysetMods(base []qm.QueryMod) []qm.QueryMod {
 	return base
 }
 
-func (k keyset[T]) BuildPaginationResult(domainSlice []*T) *paginationResult[T] {
+func (k keyset[T]) BuildPaginationResult(domainSlice []T) *paginationResult[T] {
 	hasMore := len(domainSlice) > k.PageSize
 
 	// 截取

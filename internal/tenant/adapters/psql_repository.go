@@ -125,7 +125,7 @@ func (repo *TenantPSQLRepository) Paging(query *domain.TenantPagingQuery) (*doma
 		mods = append(mods, qm.Where(fmt.Sprintf("(%s LIKE ? OR %s LIKE ?)", orm.TenantColumns.Name, orm.TenantColumns.Description), like, like))
 	}
 
-	keyset := dbkit.NewKeyset[domain.Tenant](orm.TenantColumns.ID, orm.TenantColumns.CreatedAt, query.PrevCursor, query.NextCursor, query.PageSize)
+	keyset := dbkit.NewKeyset[*domain.Tenant](orm.TenantColumns.ID, orm.TenantColumns.CreatedAt, query.PrevCursor, query.NextCursor, query.PageSize)
 
 	mods = keyset.ApplyKeysetMods(mods)
 
