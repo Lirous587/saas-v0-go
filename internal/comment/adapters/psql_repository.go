@@ -158,7 +158,6 @@ func (repo *CommentPSQLRepository) ListRoots(query *domain.CommentRootsQuery) ([
 		roots = append(roots, &domain.CommentRoot{
 			ID:           domain.CommentID(ormComment.ID),
 			User:         userInfo,
-			ParentID:     domain.CommentID(ormComment.ParentID.String),
 			RootID:       domain.CommentID(ormComment.RootID.String),
 			Content:      ormComment.Content,
 			LikeCount:    ormComment.LikeCount,
@@ -246,6 +245,43 @@ func (repo *CommentPSQLRepository) ListReplies(query *domain.CommentRepliesQuery
 	}
 
 	return replies, nil
+}
+
+func (repo *CommentPSQLRepository) ListNoAudits(query *domain.CommentNoAuditQuery) ([]*domain.CommentNoAudit, error) {
+	mods := make([]qm.QueryMod, 0, 6)
+	mods = append(mods, orm.CommentWhere.TenantID.EQ(query.TenantID.String()))
+	mods = append(mods, orm.CommentWhere.PlateID.EQ(query.PlateID.String()))
+	mods = append(mods, orm.CommentWhere.Status.EQ(orm.CommentStatusPending))
+
+	if query.Keyword != "" {
+		like := "%" + query.Keyword + "%"
+		mods = append(mods, orm.CommentWhere.Content.LIKE(like))
+	}
+
+	// 按创建时间降序
+	mods = append(mods, qm.OrderBy(orm.CommentColumns.CreatedAt+" DESC"))
+	mods = append(mods, qm.Limit(query.PageSize))
+
+	// 加载用户信息
+	mods = append(mods, qm.Load(orm.CommentRels.User))
+
+	ormComments, err := orm.Comments(mods...).AllG()
+	if err != nil {
+		return nil, err
+	}
+
+	noAudits := make([]*domain.CommentNoAudit, 0, len(ormComments))
+	for _, c := range ormComments {
+		item := &domain.CommentNoAudit{
+			ID:        domain.CommentID(c.ID),
+			Content:   c.Content,
+			CreatedAt: c.CreatedAt,
+			User:      ormUserToDomain(c.R.User),
+		}
+		noAudits = append(noAudits, item)
+	}
+
+	return noAudits, nil
 }
 
 func (repo *CommentPSQLRepository) UpdateLikeCount(tenantID domain.TenantID, commentID domain.CommentID, isLike bool) error {

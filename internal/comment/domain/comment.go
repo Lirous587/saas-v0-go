@@ -126,19 +126,6 @@ func (l *LikeStatus) Toogle() {
 	*l = !*l
 }
 
-// -- 评论响应
-
-// type CommentWithUser struct {
-// 	ID        CommentID
-// 	User      *UserInfo
-// 	ParentID  CommentID
-// 	RootID    CommentID
-// 	Content   string
-// 	LikeCount int64
-// 	CreatedAt time.Time
-// 	IsLiked   bool
-// }
-
 type CommentRootsQuery struct {
 	TenantID TenantID
 	PlateID  PlateID
@@ -148,7 +135,6 @@ type CommentRootsQuery struct {
 
 type CommentRoot struct {
 	ID           CommentID
-	ParentID     CommentID
 	RootID       CommentID
 	User         *UserInfo
 	Content      string
@@ -191,6 +177,20 @@ func (cr *CommentReply) CommentID() CommentID {
 }
 func (cr *CommentReply) Like() {
 	cr.IsLiked = true
+}
+
+type CommentNoAudit struct {
+	ID        CommentID
+	User      *UserInfo
+	Content   string
+	CreatedAt time.Time
+}
+
+type CommentNoAuditQuery struct {
+	TenantID TenantID
+	PlateID  PlateID
+	Keyword  string
+	PageSize int
 }
 
 // -- 板块

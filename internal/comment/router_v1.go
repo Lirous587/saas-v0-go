@@ -46,7 +46,8 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 	{
 		// 管理员
 		// 审计
-		creatorOnly.PUT("/:id", auth.TenantCreatorValited(), handler.Audit)
+		creatorOnly.GET("/audit", auth.TenantCreatorValited(), handler.ListNoAudit)
+		creatorOnly.PUT("/audit/:id", auth.TenantCreatorValited(), handler.Audit)
 
 		// 全局配置
 		creatorOnly.PUT("/config", handler.SetTenantConfig)

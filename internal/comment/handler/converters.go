@@ -29,7 +29,6 @@ func domainCommentRootsToResponse(roots []*domain.CommentRoot) []*CommentRootRes
 		responses = append(responses, &CommentRootResponse{
 			ID:           roots[i].ID,
 			User:         userInfoToResponse(roots[i].User),
-			ParentID:     roots[i].ParentID,
 			RootID:       roots[i].RootID,
 			Content:      roots[i].Content,
 			LikeCount:    roots[i].LikeCount,
@@ -63,6 +62,27 @@ func domainCommentRepliesToResponse(replies []*domain.CommentReply) []*CommentRe
 			LikeCount: replies[i].LikeCount,
 			CreatedAt: replies[i].CreatedAt.Unix(),
 			IsLiked:   replies[i].IsLiked,
+		})
+	}
+
+	return responses
+}
+
+func domainCommentNoAuditsToResponse(items []*domain.CommentNoAudit) []*CommentNoAuditResponse {
+	if len(items) == 0 {
+		return nil
+	}
+
+	responses := make([]*CommentNoAuditResponse, 0, len(items))
+	for _, it := range items {
+		if it == nil {
+			continue
+		}
+		responses = append(responses, &CommentNoAuditResponse{
+			ID:        it.ID,
+			User:      userInfoToResponse(it.User),
+			Content:   it.Content,
+			CreatedAt: it.CreatedAt.Unix(),
 		})
 	}
 

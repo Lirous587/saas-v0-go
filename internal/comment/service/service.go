@@ -228,6 +228,17 @@ func (s *service) ListReplies(belongKey string, userID domain.UserID, query *dom
 	return replies, nil
 }
 
+func (s *service) ListNoAudits(belongKey string, query *domain.CommentNoAuditQuery) ([]*domain.CommentNoAudit, error) {
+	plateID, err := s.getPlateID(query.TenantID, belongKey)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	query.PlateID = plateID
+
+	return s.repo.ListNoAudits(query)
+}
+
 func (s *service) ToggleLike(tenantID domain.TenantID, userID domain.UserID, commentID domain.CommentID) error {
 	// 去查询当前status
 	likeStatus, err := s.repo.GetLikeStatus(tenantID, commentID, userID)

@@ -7,6 +7,7 @@ type CommentRepository interface {
 	Approve(tenantID TenantID, commentID CommentID) error
 	ListRoots(query *CommentRootsQuery) ([]*CommentRoot, error)
 	ListReplies(query *CommentRepliesQuery) ([]*CommentReply, error)
+	ListNoAudits(query *CommentNoAuditQuery) ([]*CommentNoAudit, error)
 	UpdateLikeCount(tenantID TenantID, commentID CommentID, isLike bool) error
 
 	GetCommentUser(tenantID TenantID, commentID CommentID) (UserID, error)

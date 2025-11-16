@@ -37,7 +37,7 @@ type PagingRequest struct {
 	PageSize   int    `form:"page_size,default=5" binding:"min=5,max=20"`
 	PrevCursor string `form:"prev_cursor"`
 	NextCursor string `form:"next_cursor"`
-	Keyword    string `form:"keyword" binding:"max=20"`
+	Keyword    string `form:"keyword"`
 }
 
 type PagingResponse struct {

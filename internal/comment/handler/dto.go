@@ -79,6 +79,20 @@ type ToggleLikeRequest struct {
 	ID       domain.CommentID `json:"-" uri:"id" binding:"required,uuid"`
 }
 
+type ListNoAuditRequest struct {
+	TenantID  domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
+	BelongKey string          `json:"-" form:"belong_key" binding:"required"`
+	Keyword   string          `form:"keyword"`
+	PageSize  int             `json:"-" form:"page_size,default=5" binding:"min=5,max=15"`
+}
+
+type CommentNoAuditResponse struct {
+	ID        domain.CommentID `json:"id"`
+	User      *UserInfo        `json:"user"`
+	Content   string           `json:"content"`
+	CreatedAt int64            `json:"created_at"`
+}
+
 type AuditAction string
 
 func (ac *AuditAction) isAccept() bool {
@@ -132,7 +146,7 @@ type PlateListRequest struct {
 	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
 	Page     int             `form:"page,default=1" binding:"min=1"`
 	PageSize int             `form:"page_size,default=5" binding:"min=5,max=20"`
-	Keyword  string          `form:"keyword" binding:"max=20"`
+	Keyword  string          `form:"keyword"`
 }
 
 // --- 租户级别配置

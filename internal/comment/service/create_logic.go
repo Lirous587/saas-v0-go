@@ -110,6 +110,7 @@ func (s *service) validateCommentLegitimacy(comment *domain.Comment) error {
 			})
 		}
 	}
+
 	return nil
 }
 

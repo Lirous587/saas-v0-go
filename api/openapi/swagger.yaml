@@ -103,6 +103,29 @@ definitions:
       title:
         type: string
     type: object
+  handler.CommentNoAuditResponse:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: integer
+      id:
+        type: string
+      parent:
+        properties:
+          content:
+            type: string
+          user:
+            $ref: '#/definitions/handler.UserInfo'
+        type: object
+      root:
+        properties:
+          content:
+            type: string
+          user:
+            $ref: '#/definitions/handler.UserInfo'
+        type: object
+    type: object
   handler.CommentReplyResponse:
     properties:
       content:
@@ -748,6 +771,53 @@ paths:
       summary: 删除评论
       tags:
       - comment
+  /v1/comment/{tenant_id}/audit:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      - description: 评论板块
+        in: query
+        name: belong_key
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.successResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/handler.CommentNoAuditResponse'
+                  type: array
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.invalidParamsResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 获取未审核的评论
+      tags:
+      - comment
+  /v1/comment/{tenant_id}/audit/{id}:
     put:
       consumes:
       - application/json

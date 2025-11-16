@@ -176,6 +176,77 @@ func (h *HttpHandler) ListReplies(ctx *gin.Context) {
 	response.Success(ctx, domainCommentRepliesToResponse(data))
 }
 
+// ListNoAudits godoc
+// @Summary      获取未审核的评论
+// @Tags         comment
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        tenant_id   path 	 string 	true 	 "租户id"
+// @Param        belong_key  query 	 string 	true   "评论板块"
+// @Param        page_size   query   int    	false  "页码"
+// @Success      200  {object}  response.successResponse{data=[]handler.CommentNoAuditResponse} "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/comment/{tenant_id}/audit [get]
+func (h *HttpHandler) ListNoAudit(ctx *gin.Context) {
+	req := new(ListNoAuditRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	data, err := h.service.ListNoAudits(req.BelongKey, &domain.CommentNoAuditQuery{
+		TenantID: req.TenantID,
+		PageSize: req.PageSize,
+		Keyword:  req.Keyword,
+	})
+
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx, domainCommentNoAuditsToResponse(data))
+}
+
+// Audit godoc
+// @Summary      评论审计
+// @Tags         comment
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        tenant_id   path string true "租户id"
+// @Param        id   			 path string true "评论id"
+// @Param        request body handler.AuditRequest true "请求参数"
+// @Success      200  {object}  response.successResponse "请求成功"
+// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
+// @Failure      500  {object}  response.errorResponse "服务器错误"
+// @Router       /v1/comment/{tenant_id}/audit/{id} [put]
+func (h *HttpHandler) Audit(ctx *gin.Context) {
+	req := new(AuditRequest)
+
+	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
+		return
+	}
+
+	var status domain.CommentStatus
+	if req.Action.isAccept() {
+		status.SetApproved()
+	} else {
+		status.SetPending()
+	}
+
+	err := h.service.Audit(req.TenantID, req.ID, status)
+
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	response.Success(ctx)
+}
+
 // ToggleLike godoc
 // @Summary      点赞/取消点赞评论
 // @Tags         comment
@@ -202,43 +273,6 @@ func (h *HttpHandler) ToggleLike(ctx *gin.Context) {
 	}
 
 	if err := h.service.ToggleLike(req.TenantID, domain.UserID(userID), req.ID); err != nil {
-		response.Error(ctx, err)
-		return
-	}
-
-	response.Success(ctx)
-}
-
-// Audit godoc
-// @Summary      评论审计
-// @Tags         comment
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        tenant_id   path string true "租户id"
-// @Param        id   			 path string true "评论id"
-// @Param        request body handler.AuditRequest true "请求参数"
-// @Success      200  {object}  response.successResponse "请求成功"
-// @Failure      400  {object}  response.invalidParamsResponse "参数错误"
-// @Failure      500  {object}  response.errorResponse "服务器错误"
-// @Router       /v1/comment/{tenant_id}/{id} [put]
-func (h *HttpHandler) Audit(ctx *gin.Context) {
-	req := new(AuditRequest)
-
-	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
-		return
-	}
-
-	var status domain.CommentStatus
-	if req.Action.isAccept() {
-		status.SetApproved()
-	} else {
-		status.SetPending()
-	}
-
-	err := h.service.Audit(req.TenantID, req.ID, status)
-
-	if err != nil {
 		response.Error(ctx, err)
 		return
 	}

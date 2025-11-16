@@ -6,6 +6,7 @@ type CommentService interface {
 	Audit(tenantID TenantID, commentID CommentID, status CommentStatus) error
 	ListRoots(belongKey string, userID UserID, query *CommentRootsQuery) ([]*CommentRoot, error)
 	ListReplies(belongKey string, userID UserID, query *CommentRepliesQuery) ([]*CommentReply, error)
+	ListNoAudits(belongKey string, query *CommentNoAuditQuery) ([]*CommentNoAudit, error)
 
 	ToggleLike(tenantID TenantID, userID UserID, commentID CommentID) error
 
@@ -13,7 +14,7 @@ type CommentService interface {
 	UpdatePlate(plate *Plate) error
 	DeletePlate(tenantID TenantID, plateID PlateID) error
 	ListPlate(query *PlateQuery) (*PlateList, error)
-	CheckPlateBelongKey(tenantID TenantID,belongKey string) (bool,error)
+	CheckPlateBelongKey(tenantID TenantID, belongKey string) (bool, error)
 
 	SetTenantConfig(config *TenantConfig) error
 	GetTenantConfig(tenantID TenantID) (*TenantConfig, error)
