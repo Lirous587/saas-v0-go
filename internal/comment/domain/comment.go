@@ -75,11 +75,13 @@ func (c *Comment) IsReply() bool {
 }
 
 func (c *Comment) IsReplyRootComment() bool {
+	// 有 root_id 且没有 parent_id，表示直接回复根评论
 	return !c.RootID.IsZero() && c.ParentID.IsZero()
 }
 
 func (c *Comment) IsReplyParentComment() bool {
-	return c.RootID.IsZero() && !c.ParentID.IsZero()
+	// 只要 parent_id 存在，就表示是对某条评论（父评论）的回复
+	return !c.ParentID.IsZero()
 }
 
 func (c *Comment) CanReply() bool {
