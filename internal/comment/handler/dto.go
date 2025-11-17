@@ -133,7 +133,7 @@ type UpdatePlateRequest struct {
 	ID         domain.PlateID  `json:"-" uri:"id" binding:"required,uuid"`
 	BelongKey  string          `json:"belong_key" binding:"required,max=50"`
 	RelatedURL string          `json:"related_url" binding:"required,url,max=255"`
-	Summary    string          `json:"summary" binding:"required,max=60"`
+	Summary    string          `json:"summary" binding:"required,max=500"`
 }
 
 type DeletePlateRequest struct {

@@ -111,7 +111,7 @@ func (s *service) validateCommentLegitimacy(comment *domain.Comment) error {
 		}
 	}
 
-	return codes.ErrCommentBuildIllegalTree
+	return nil
 }
 
 // 获取评论配置
