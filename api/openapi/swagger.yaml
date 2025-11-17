@@ -111,20 +111,8 @@ definitions:
         type: integer
       id:
         type: string
-      parent:
-        properties:
-          content:
-            type: string
-          user:
-            $ref: '#/definitions/handler.UserInfo'
-        type: object
-      root:
-        properties:
-          content:
-            type: string
-          user:
-            $ref: '#/definitions/handler.UserInfo'
-        type: object
+      user:
+        $ref: '#/definitions/handler.UserInfo'
     type: object
   handler.CommentReplyResponse:
     properties:
@@ -163,8 +151,6 @@ definitions:
         type: string
       replies_count:
         type: integer
-      root_id:
-        type: string
       user:
         $ref: '#/definitions/handler.UserInfo'
     type: object
@@ -412,7 +398,7 @@ definitions:
     type: object
   handler.UserInfo:
     properties:
-      avatar_url:
+      avatar:
         type: string
       id:
         type: string
@@ -421,7 +407,7 @@ definitions:
     type: object
   handler.UserResponse:
     properties:
-      avatar_url:
+      avatar:
         type: string
       created_at:
         type: integer

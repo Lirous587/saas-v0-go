@@ -26,7 +26,7 @@ type User struct {
 	ID           string      `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Nickname     string      `boil:"nickname" json:"nickname" toml:"nickname" yaml:"nickname"`
 	Email        string      `boil:"email" json:"email" toml:"email" yaml:"email"`
-	AvatarURL    string      `boil:"avatar_url" json:"avatar_url" toml:"avatar_url" yaml:"avatar_url"`
+	Avatar       string      `boil:"avatar" json:"avatar" toml:"avatar" yaml:"avatar"`
 	GithubID     null.String `boil:"github_id" json:"github_id,omitempty" toml:"github_id" yaml:"github_id,omitempty"`
 	GoogleID     null.String `boil:"google_id" json:"google_id,omitempty" toml:"google_id" yaml:"google_id,omitempty"`
 	PasswordHash null.String `boil:"password_hash" json:"password_hash,omitempty" toml:"password_hash" yaml:"password_hash,omitempty"`
@@ -42,7 +42,7 @@ var UserColumns = struct {
 	ID           string
 	Nickname     string
 	Email        string
-	AvatarURL    string
+	Avatar       string
 	GithubID     string
 	GoogleID     string
 	PasswordHash string
@@ -53,7 +53,7 @@ var UserColumns = struct {
 	ID:           "id",
 	Nickname:     "nickname",
 	Email:        "email",
-	AvatarURL:    "avatar_url",
+	Avatar:       "avatar",
 	GithubID:     "github_id",
 	GoogleID:     "google_id",
 	PasswordHash: "password_hash",
@@ -66,7 +66,7 @@ var UserTableColumns = struct {
 	ID           string
 	Nickname     string
 	Email        string
-	AvatarURL    string
+	Avatar       string
 	GithubID     string
 	GoogleID     string
 	PasswordHash string
@@ -77,7 +77,7 @@ var UserTableColumns = struct {
 	ID:           "users.id",
 	Nickname:     "users.nickname",
 	Email:        "users.email",
-	AvatarURL:    "users.avatar_url",
+	Avatar:       "users.avatar",
 	GithubID:     "users.github_id",
 	GoogleID:     "users.google_id",
 	PasswordHash: "users.password_hash",
@@ -92,7 +92,7 @@ var UserWhere = struct {
 	ID           whereHelperstring
 	Nickname     whereHelperstring
 	Email        whereHelperstring
-	AvatarURL    whereHelperstring
+	Avatar       whereHelperstring
 	GithubID     whereHelpernull_String
 	GoogleID     whereHelpernull_String
 	PasswordHash whereHelpernull_String
@@ -103,7 +103,7 @@ var UserWhere = struct {
 	ID:           whereHelperstring{field: "\"users\".\"id\""},
 	Nickname:     whereHelperstring{field: "\"users\".\"nickname\""},
 	Email:        whereHelperstring{field: "\"users\".\"email\""},
-	AvatarURL:    whereHelperstring{field: "\"users\".\"avatar_url\""},
+	Avatar:       whereHelperstring{field: "\"users\".\"avatar\""},
 	GithubID:     whereHelpernull_String{field: "\"users\".\"github_id\""},
 	GoogleID:     whereHelpernull_String{field: "\"users\".\"google_id\""},
 	PasswordHash: whereHelpernull_String{field: "\"users\".\"password_hash\""},
@@ -187,8 +187,8 @@ func (r *userR) GetComments() CommentSlice {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "nickname", "email", "avatar_url", "github_id", "google_id", "password_hash", "last_login_at", "created_at", "updated_at"}
-	userColumnsWithoutDefault = []string{"nickname", "email", "avatar_url", "last_login_at"}
+	userAllColumns            = []string{"id", "nickname", "email", "avatar", "github_id", "google_id", "password_hash", "last_login_at", "created_at", "updated_at"}
+	userColumnsWithoutDefault = []string{"nickname", "email", "avatar", "last_login_at"}
 	userColumnsWithDefault    = []string{"id", "github_id", "google_id", "password_hash", "created_at", "updated_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 	userGeneratedColumns      = []string{}

@@ -67,43 +67,6 @@ func (h *HttpHandler) GithubAuth(ctx *gin.Context) {
 	response.Success(ctx, domain2TokenToAuthResponse(session))
 }
 
-func (h *HttpHandler) getRefreshToke(ctx *gin.Context) (string, error) {
-	refreshToken := ctx.GetHeader("X-Refresh-Token")
-	if refreshToken == "" {
-		return "", codes.ErrRefreshTokenMissingInHeader
-	}
-	return refreshToken, nil
-}
-
-// RefreshToken godoc
-// @Summary      刷新令牌
-// @Description  使用刷新令牌获取新的访问令牌
-// @Tags         user
-// @Accept       json
-// @Produce      json
-// @Param        X-Refresh-Token header string true "refresh_token刷新令牌"
-// @Success      200 {object} response.successResponse{data=handler.RefreshTokenResponse} "请求成功"
-// @Failure      400 {object} response.errorResponse "参数错误"
-// @Failure      401 {object} response.errorResponse
-// @Failure      500 {object} response.errorResponse "服务器错误"
-// @Router       /v1/user/refresh_token [post]
-func (h *HttpHandler) RefreshToken(ctx *gin.Context) {
-	refreshToken, err := h.getRefreshToke(ctx)
-	if err != nil {
-		response.Error(ctx, err)
-		return
-	}
-
-	session, err := h.userService.RefreshUserToken(refreshToken)
-	if err != nil {
-		response.Error(ctx, err)
-		return
-	}
-
-	res := domainSessionToRefreshResponse(session)
-	response.Success(ctx, res)
-}
-
 // GitHub API 调用逻辑 - 返回包装好的领域错误
 func (h *HttpHandler) getGithubUserInfo(code string) (*domain.OAuthUserInfo, error) {
 	accessToken, err := h.getGithubAccessToken(code)
@@ -166,8 +129,44 @@ func (h *HttpHandler) fetchGithubUserInfo(accessToken string) (*domain.OAuthUser
 		Login:    githubUser.Login,
 		Nickname: githubUser.Name,
 		Email:    githubUser.Email,
-		AvatarURL:   githubUser.AvatarURL,
 	}, nil
+}
+
+// RefreshToken godoc
+// @Summary      刷新令牌
+// @Description  使用刷新令牌获取新的访问令牌
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param        X-Refresh-Token header string true "refresh_token刷新令牌"
+// @Success      200 {object} response.successResponse{data=handler.RefreshTokenResponse} "请求成功"
+// @Failure      400 {object} response.errorResponse "参数错误"
+// @Failure      401 {object} response.errorResponse
+// @Failure      500 {object} response.errorResponse "服务器错误"
+// @Router       /v1/user/refresh_token [post]
+func (h *HttpHandler) RefreshToken(ctx *gin.Context) {
+	refreshToken, err := h.getRefreshToke(ctx)
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	session, err := h.userService.RefreshUserToken(refreshToken)
+	if err != nil {
+		response.Error(ctx, err)
+		return
+	}
+
+	res := domainSessionToRefreshResponse(session)
+	response.Success(ctx, res)
+}
+
+func (h *HttpHandler) getRefreshToke(ctx *gin.Context) (string, error) {
+	refreshToken := ctx.GetHeader("X-Refresh-Token")
+	if refreshToken == "" {
+		return "", codes.ErrRefreshTokenMissingInHeader
+	}
+	return refreshToken, nil
 }
 
 // ValidateAuth godoc

@@ -7,7 +7,7 @@ CREATE TABLE public.users
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     nickname      varchar(20)    NOT NULL,
     email         varchar(80)    NOT NULL UNIQUE,
-    avatar_url    varchar(255)   NOT NULL,
+    avatar        varchar(255)   NOT NULL DEFAULT 'https://picsum.photos/300/300',
     github_id     varchar(60)    NULL UNIQUE,
     google_id     varchar(60)    NULL UNIQUE,
     password_hash text           NULL,

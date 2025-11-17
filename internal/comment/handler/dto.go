@@ -6,9 +6,9 @@ import (
 )
 
 type UserInfo struct {
-	ID        domain.UserID `json:"id"`
-	NickName  string        `json:"nickname"`
-	AvatarURL string        `json:"avatar_url,omitempty"`
+	ID       domain.UserID `json:"id"`
+	NickName string        `json:"nickname"`
+	Avatar   string        `json:"avatar,omitempty"`
 }
 
 type CreateRequest struct {
@@ -46,7 +46,6 @@ type CommentRootResponse struct {
 	ID           domain.CommentID `json:"id"`
 	User         *UserInfo        `json:"user"`
 	ParentID     domain.CommentID `json:"parent_id,omitempty"`
-	RootID       domain.CommentID `json:"root_id,omitempty"`
 	Content      string           `json:"content"`
 	LikeCount    int64            `json:"like_count,omitempty"`
 	CreatedAt    int64            `json:"created_at"`

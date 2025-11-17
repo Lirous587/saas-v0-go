@@ -5,10 +5,10 @@ import (
 )
 
 type UserInfo struct {
-	ID        UserID
-	NickName  string
-	AvatarURL string
-	email     string
+	ID       UserID
+	NickName string
+	Avatar   string
+	email    string
 }
 
 func (u *UserInfo) SetEmail(email string) {

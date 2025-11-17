@@ -414,7 +414,7 @@ func (repo *CommentPSQLRepository) GetUserInfosByIDs(userIDs []domain.UserID) ([
 func (repo *CommentPSQLRepository) GetUserInfoByID(userID domain.UserID) (*domain.UserInfo, error) {
 	ormUser, err := orm.Users(
 		orm.UserWhere.ID.EQ(userID.String()),
-		qm.Select(orm.UserColumns.ID, orm.UserColumns.Nickname, orm.UserColumns.AvatarURL, orm.UserColumns.Email),
+		qm.Select(orm.UserColumns.ID, orm.UserColumns.Nickname, orm.UserColumns.Avatar, orm.UserColumns.Email),
 	).OneG()
 
 	if err != nil {

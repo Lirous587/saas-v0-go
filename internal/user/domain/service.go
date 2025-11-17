@@ -1,7 +1,7 @@
 package domain
 
 type UserService interface {
-	AuthenticateWithOAuth(provider string, userInfo *OAuthUserInfo) (*User2Token, error)
+	AuthenticateWithOAuth(provider OAuthProvider, userInfo *OAuthUserInfo) (*User2Token, error)
 	RefreshUserToken(refreshToken string) (*User2Token, error)
 	GetUser(id string) (*User, error)
 }

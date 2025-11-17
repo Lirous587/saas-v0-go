@@ -9,9 +9,9 @@ func userInfoToResponse(user *domain.UserInfo) *UserInfo {
 		return nil
 	}
 	return &UserInfo{
-		ID:        user.ID,
-		NickName:  user.NickName,
-		AvatarURL: user.AvatarURL,
+		ID:       user.ID,
+		NickName: user.NickName,
+		Avatar:   user.Avatar,
 	}
 }
 
@@ -29,7 +29,6 @@ func domainCommentRootsToResponse(roots []*domain.CommentRoot) []*CommentRootRes
 		responses = append(responses, &CommentRootResponse{
 			ID:           roots[i].ID,
 			User:         userInfoToResponse(roots[i].User),
-			RootID:       roots[i].RootID,
 			Content:      roots[i].Content,
 			LikeCount:    roots[i].LikeCount,
 			CreatedAt:    roots[i].CreatedAt.Unix(),

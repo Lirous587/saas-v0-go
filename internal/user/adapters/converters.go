@@ -37,7 +37,7 @@ func ormUserToDomain(ormUser *orm.User) *domain.User {
 		ID:          ormUser.ID,
 		Email:       ormUser.Email,
 		Nickname:    ormUser.Nickname,
-		AvatarURL:   ormUser.AvatarURL,
+		Avatar:      ormUser.Avatar,
 		CreatedAt:   ormUser.CreatedAt,
 		UpdatedAt:   ormUser.UpdatedAt,
 		LastLoginAt: ormUser.LastLoginAt,

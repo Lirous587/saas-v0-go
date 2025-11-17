@@ -2,10 +2,18 @@ package domain
 
 import "time"
 
+type OAuthProvider string
+
+func (o OAuthProvider) String() string {
+	return string(o)
+}
+
+const OAuthProviderGithub = "github"
+
 type User struct {
 	ID           string
 	Email        string
-	AvatarURL    string
+	Avatar       string
 	PasswordHash string
 	Nickname     string
 	GithubID     string
@@ -24,10 +32,9 @@ type User2Token struct {
 }
 
 type OAuthUserInfo struct {
-	Provider  string
-	ID        string
-	Login     string
-	Nickname  string
-	Email     string
-	AvatarURL string
+	Provider string
+	ID       string
+	Login    string
+	Nickname string
+	Email    string
 }

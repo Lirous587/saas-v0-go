@@ -2679,27 +2679,8 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "parent": {
-                    "type": "object",
-                    "properties": {
-                        "content": {
-                            "type": "string"
-                        },
-                        "user": {
-                            "$ref": "#/definitions/handler.UserInfo"
-                        }
-                    }
-                },
-                "root": {
-                    "type": "object",
-                    "properties": {
-                        "content": {
-                            "type": "string"
-                        },
-                        "user": {
-                            "$ref": "#/definitions/handler.UserInfo"
-                        }
-                    }
+                "user": {
+                    "$ref": "#/definitions/handler.UserInfo"
                 }
             }
         },
@@ -2758,9 +2739,6 @@ const docTemplate = `{
                 },
                 "replies_count": {
                     "type": "integer"
-                },
-                "root_id": {
-                    "type": "string"
                 },
                 "user": {
                     "$ref": "#/definitions/handler.UserInfo"
@@ -3134,7 +3112,7 @@ const docTemplate = `{
         "handler.UserInfo": {
             "type": "object",
             "properties": {
-                "avatar_url": {
+                "avatar": {
                     "type": "string"
                 },
                 "id": {
@@ -3148,7 +3126,7 @@ const docTemplate = `{
         "handler.UserResponse": {
             "type": "object",
             "properties": {
-                "avatar_url": {
+                "avatar": {
                     "type": "string"
                 },
                 "created_at": {
