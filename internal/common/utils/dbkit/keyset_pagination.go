@@ -261,11 +261,11 @@ func (k keyset[T, P]) AfterWhere(primary P, id string) qm.QueryMod {
 	return qm.Where(fmt.Sprintf("(%s, %s) > (?, ?)", k.PrimaryCol, k.IDCol), primary, id)
 }
 
-// BuildPaginationResultWithExistence 通过用户提供的 existence 检查器做精确的 hasPrev/hasNext 判断。
+// BuildWithExistence 通过用户提供的 existence 检查器做精确的 hasPrev/hasNext 判断。
 // exists 期望实现：func(primary P, id string, checkPrev bool) (bool, error)
 // - checkPrev=true 检查是否存在比 (primary,id) 更“前”的记录（previous page）
 // - checkPrev=false 检查是否存在比 (primary,id) 更“后”的记录（next page）
-func (k keyset[T, P]) BuildPaginationResultWithExistence(domainSlice []T, exists func(P, string, bool) (bool, error)) (*paginationResult[T], error) {
+func (k keyset[T, P]) BuildWithExistence(domainSlice []T, exists func(P, string, bool) (bool, error)) (*paginationResult[T], error) {
 	hasMore := len(domainSlice) > k.PageSize
 
 	// 截取
@@ -334,11 +334,11 @@ func (k keyset[T, P]) BuildPaginationResultWithExistence(domainSlice []T, exists
 	}, nil
 }
 
-// BuildPaginationResultFeed: 轻量 feed-only 策略，专注 next-page（不做存在性查询）
+// BuildFeed: 轻量 feed-only 策略，专注 next-page（不做存在性查询）
 // - 总是返回 PrevCursor（方便前端尝试上一页）
 // - HasPrev 采用简单推断：当请求带有 next_cursor 时，认为上一页存在（用户刚刚翻到下一页）
 // - HasNext 基于 pageSize+1 判断；Prev 分页时仍会反转结果以展示正确顺序
-func (k keyset[T, P]) BuildPaginationResultFeed(domainSlice []T) *paginationResult[T] {
+func (k keyset[T, P]) BuildFeed(domainSlice []T) *paginationResult[T] {
 	hasMore := len(domainSlice) > k.PageSize
 	if hasMore {
 		domainSlice = domainSlice[:k.PageSize]

@@ -183,7 +183,7 @@ func (repo *ImgPSQLRepository) ListByKeyset(query *domain.ListByKeysetQuery) (*d
 	}
 
 	// 精确构建分页结果（包含 HasPrev/HasNext, 游标）
-	pager, err := ks.BuildPaginationResultWithExistence(domains, exists)
+	pager, err := ks.BuildWithExistence(domains, exists)
 	if err != nil {
 		return nil, err
 	}

@@ -158,7 +158,7 @@ func (repo *TenantPSQLRepository) ListByKeyset(query *domain.TenantKeysetQuery) 
 		return orm.Tenants(checkMods...).ExistsG()
 	}
 
-	result, err := ks.BuildPaginationResultWithExistence(domains, exists)
+	result, err := ks.BuildWithExistence(domains, exists)
 	if err != nil {
 		return nil, err
 	}
