@@ -184,31 +184,28 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Tags         img
 // @Accept       json
 // @Produce      json
-// @Param        page        query int    false "页号"
-// @Param        page_size   query int    false "页码"
-// @Param        keyword     query string false "关键词"
-// @Param        deleted     query bool   false "是否查询回收站图片"
-// @Param        category_id query string  false "分类id"
-// @Success      200 {object} response.successResponse{data=handler.ImgListResponse} "请求成功"
+// @Param        request query handler.ListByKeysetRequest false "请求参数"
+// @Success      200 {object} response.successResponse{data=handler.ListByKeysetResponse} "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
 // @Router       /v1/img/{tenant_id} [get]
-func (h *HttpHandler) List(ctx *gin.Context) {
-	req := new(ListRequest)
+func (h *HttpHandler) ListByKeyset(ctx *gin.Context) {
+	req := new(ListByKeysetRequest)
 
 	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		response.InvalidParams(ctx, err)
 		return
 	}
 
-	list, err := h.service.List(&domain.ImgQuery{
+	list, err := h.service.ListByKeyset(&domain.ListByKeysetQuery{
 		TenantID:   req.TenantID,
+		CategoryID: req.CategoryID,
+		PrevCursor: req.PrevCursor,
+		NextCursor: req.NextCursor,
 		Keyword:    req.Keyword,
-		Page:       req.Page,
 		PageSize:   req.PageSize,
 		Deleted:    req.Deleted,
-		CategoryID: req.CategoryID,
 	})
 
 	if err != nil {
@@ -216,7 +213,7 @@ func (h *HttpHandler) List(ctx *gin.Context) {
 		return
 	}
 
-	response.Success(ctx, domainImgListToResponse(list))
+	response.Success(ctx, domainImgKeysetToResponse(list))
 }
 
 // ClearRecycleBin godoc
@@ -366,22 +363,23 @@ func (h *HttpHandler) DeleteCategory(ctx *gin.Context) {
 	response.Success(ctx)
 }
 
-// ListCategories godoc
-// @Summary      分类列表
+// AllCategories godoc
+// @Summary      获取全部图库分类
 // @Tags         img-category
 // @Accept       json
 // @Produce      json
+// @Param        tenant_id path string true "租户id"
 // @Success      200 {object} response.successResponse{data=[]handler.CategoryResponse} "请求成功"
 // @Failure      500 {object} response.errorResponse "服务器错误"
 // @Security     BearerAuth
 // @Router       /v1/img/{tenant_id}/categories [get]
-func (h *HttpHandler) ListCategories(ctx *gin.Context) {
-	req := new(ListCategoryRequest)
+func (h *HttpHandler) AllCategories(ctx *gin.Context) {
+	req := new(AllCategoryRequest)
 	if err := bind.BindingRegularAndResponse(ctx, req); err != nil {
 		return
 	}
 
-	res, err := h.service.ListCategories(req.TenantID)
+	res, err := h.service.AllCategories(req.TenantID)
 	if err != nil {
 		response.Error(ctx, err)
 		return

@@ -7,12 +7,12 @@ type ImgRepository interface {
 	Create(img *Img, categoryID CategoryID) (*Img, error)
 	Delete(tenantID TenantID, imgID ImgID, hard bool) error
 	Restore(tenantID TenantID, imgID ImgID) (*Img, error)
-	List(query *ImgQuery) (*ImgList, error)
+	ListByKeyset(query *ListByKeysetQuery) (*ListByKeysetResult, error)
 
 	CreateCategory(category *Category) error
 	UpdateCategory(category *Category) error
 	DeleteCategory(tenantID TenantID, categoryID CategoryID) error
-	ListCategories(tenantID TenantID) ([]*Category, error)
+	AllCategories(tenantID TenantID) ([]*Category, error)
 	FindCategoryByID(tenantID TenantID, categoryID CategoryID) (*Category, error)
 	FindCategoryByTitle(tenantID TenantID, title string) (*Category, error)
 	CategoryExistByTitle(tenantID TenantID, title string) (bool, error)

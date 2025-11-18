@@ -21,7 +21,7 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 		protect.POST("/upload", handler.Upload)
 
 		protect.DELETE("/:id", handler.Delete)
-		protect.GET("", handler.List)
+		protect.GET("", handler.ListByKeyset)
 
 		// 回收站
 		protect.DELETE("/recycle/:id", handler.ClearRecycleBin)
@@ -31,7 +31,7 @@ func RegisterV1(r *gin.RouterGroup, handler *handler.HttpHandler) func() {
 		protect.POST("/category", handler.CreateCategory)
 		protect.DELETE("/category/:id", handler.DeleteCategory)
 		protect.PUT("/category/:id", handler.UpdateCategory)
-		protect.GET("/categories", handler.ListCategories)
+		protect.GET("/categories", handler.AllCategories)
 
 		// 图库配置
 		protect.PUT("/r2_config", handler.SetR2Config)

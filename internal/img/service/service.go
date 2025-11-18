@@ -319,29 +319,29 @@ func (s *service) Delete(tenantID domain.TenantID, imgID domain.ImgID, hard ...b
 
 const deletedPresignExpired = 1 * time.Minute
 
-func (s *service) List(query *domain.ImgQuery) (*domain.ImgList, error) {
+func (s *service) ListByKeyset(query *domain.ListByKeysetQuery) (*domain.ListByKeysetResult, error) {
 	// 加载配置
 	r2Config, err := s.getTenantR2Config(query.TenantID)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := s.repo.List(query)
+	res, err := s.repo.ListByKeyset(query)
 	if err != nil {
 		return nil, err
 	}
 	if query.Deleted {
-		for i := range res.List {
-			presignUrl, err := s.getPresignURL(r2Config.presignClient, r2Config.deleteBucket, res.List[i].Path, deletedPresignExpired)
+		for i := range res.Items {
+			presignUrl, err := s.getPresignURL(r2Config.presignClient, r2Config.deleteBucket, res.Items[i].Path, deletedPresignExpired)
 			if err != nil {
 				return nil, errors.WithStack(err)
 			}
-			res.List[i].Path = presignUrl
+			res.Items[i].Path = presignUrl
 		}
 	}
 
-	for i := range res.List {
-		res.List[i].SetPublicPreURL(r2Config.publicURLPrefix)
+	for i := range res.Items {
+		res.Items[i].SetPublicPreURL(r2Config.publicURLPrefix)
 	}
 
 	return res, nil
@@ -570,8 +570,8 @@ func (s *service) DeleteCategory(tenantID domain.TenantID, categoryID domain.Cat
 	return s.repo.DeleteCategory(tenantID, categoryID)
 }
 
-func (s *service) ListCategories(tenantID domain.TenantID) (categories []*domain.Category, err error) {
-	return s.repo.ListCategories(tenantID)
+func (s *service) AllCategories(tenantID domain.TenantID) (categories []*domain.Category, err error) {
+	return s.repo.AllCategories(tenantID)
 }
 
 func (s *service) SetR2Config(config *domain.R2Config) error {

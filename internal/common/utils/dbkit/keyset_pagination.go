@@ -97,9 +97,6 @@ func WithPrimaryOrder[T CursorFields[P], P any](dir SortDirection) KeysetOption[
 func WithIDOrder[T CursorFields[P], P any](dir SortDirection) KeysetOption[T, P] {
 	return func(k *keyset[T, P]) { k.idOrder = dir }
 }
-func WithExtraOrderCols[T CursorFields[P], P any](cols ...string) KeysetOption[T, P] {
-	return func(k *keyset[T, P]) { k.extraOrderCols = cols }
-}
 
 type keysetCursor[P any] struct {
 	Primary P      `json:"primary"`
@@ -112,16 +109,14 @@ type CursorFields[P any] interface {
 }
 
 type keyset[T CursorFields[P], P any] struct {
-	IDCol      string
-	PrimaryCol string
+	IDCol        string
+	idOrder      SortDirection
+	PrimaryCol   string
+	primaryOrder SortDirection
+
 	PrevCursor string
 	NextCursor string
 	PageSize   int
-
-	primaryOrder SortDirection
-	idOrder      SortDirection
-
-	extraOrderCols []string
 }
 
 type paginationResult[T any] struct {
@@ -150,10 +145,16 @@ func NewKeyset[T CursorFields[P], P any](
 		NextCursor:   nextCursor,
 		PageSize:     pageSize,
 		primaryOrder: SortDesc, // feed 常见默认降序按时间
-		idOrder:      SortAsc,  // id 默认正序
+		// idOrder 默认不设置，随后与 primaryOrder 同步
+		idOrder: "",
 	}
 	for _, opt := range opts {
 		opt(k)
+	}
+
+	// 若未显式设置 idOrder，则默认与 primaryOrder 保持一致
+	if string(k.idOrder) == "" {
+		k.idOrder = k.primaryOrder
 	}
 	return k
 }
@@ -189,54 +190,49 @@ func (k keyset[T, P]) extractKeysetCursor(item T) *keysetCursor[P] {
 }
 
 // ApplyKeysetMods 附加keyset查询的mods
-// mods建议额外预留4
 func (k keyset[T, P]) ApplyKeysetMods(base []qm.QueryMod) []qm.QueryMod {
 	var cursor *keysetCursor[P]
 	var orderParts []string
 
-	// ORDER BY 先主列（direction 动态）
+	// ORDER BY 初始配置
 	pOrder := string(k.primaryOrder)
 	idOrder := string(k.idOrder)
 
-	// 如果正在 prev 分页，需要以 DESC 查询再反转
 	if k.NextCursor != "" {
 		cursor = k.decodeCursor(k.NextCursor)
 		if cursor != nil {
-			base = append(base, qm.Where(fmt.Sprintf("(%s, %s) > (?, ?)", k.PrimaryCol, k.IDCol), cursor.Primary, cursor.ID))
+			// 使用 AfterWhere 保证和 After/Before 的方向一致
+			base = append(base, k.AfterWhere(cursor.Primary, cursor.ID))
 		}
-		// next 保持 primary ASC
+		// next 保持 order 与配置一致
 		pOrder = string(k.primaryOrder)
 		idOrder = string(k.idOrder)
 	} else if k.PrevCursor != "" {
 		cursor = k.decodeCursor(k.PrevCursor)
 		if cursor != nil {
-			base = append(base, qm.Where(fmt.Sprintf("(%s, %s) < (?, ?)", k.PrimaryCol, k.IDCol), cursor.Primary, cursor.ID))
+			// 使用 BeforeWhere 保证和 After/Before 的方向一致
+			base = append(base, k.BeforeWhere(cursor.Primary, cursor.ID))
 		}
-		// Prev 查询时主列倒序以取“前一页”
+		// Prev 查询时主列、ID 的排序方向都要反转
 		if k.primaryOrder == SortAsc {
 			pOrder = string(SortDesc)
 		} else {
 			pOrder = string(SortAsc)
 		}
-		// ID 同理反向
 		if k.idOrder == SortAsc {
 			idOrder = string(SortDesc)
 		} else {
 			idOrder = string(SortAsc)
 		}
 	} else {
-		// 无游标：按配置方向
+		// 无游标，按配置方向
 		pOrder = string(k.primaryOrder)
 		idOrder = string(k.idOrder)
 	}
 
-	// build order parts
 	orderParts = append(orderParts, fmt.Sprintf("%s %s", k.PrimaryCol, pOrder))
-	for _, extra := range k.extraOrderCols {
-		orderParts = append(orderParts, extra) // extra 需包含方向，如 "score DESC"
-	}
 	orderParts = append(orderParts, fmt.Sprintf("%s %s", k.IDCol, idOrder))
-	order := fmt.Sprintf("%s", strings.Join(orderParts, ", "))
+	order := strings.Join(orderParts, ", ")
 
 	base = append(base, qm.OrderBy(order))
 	base = append(base, qm.Limit(k.PageSize+1))
@@ -247,21 +243,21 @@ func (k keyset[T, P]) ApplyKeysetMods(base []qm.QueryMod) []qm.QueryMod {
 // BeforeWhere 返回用于判断是否存在“在给定 (primary,id) 之前（prev page）”的 qm.Where
 // 语义："之前" 是相对于 ApplyKeysetMods 所使用的主排序方向（primaryOrder）。
 func (k keyset[T, P]) BeforeWhere(primary P, id string) qm.QueryMod {
+	// Before = 获取“在游标之前”的项目（prev page）
+	// 若主列 DESC，则“之前”是更新的项 => > ，否则 <。
 	if k.primaryOrder == SortDesc {
-		// 主列降序时：比 (primary,id) 大的是更“前”的（新）项 => 用 >
 		return qm.Where(fmt.Sprintf("(%s, %s) > (?, ?)", k.PrimaryCol, k.IDCol), primary, id)
 	}
-	// 主列升序时：比 (primary,id) 小的是更“前”的项 => 用 <
 	return qm.Where(fmt.Sprintf("(%s, %s) < (?, ?)", k.PrimaryCol, k.IDCol), primary, id)
 }
 
 // AfterWhere 返回用于判断是否存在“在给定 (primary,id) 之后（next page）”的 qm.Where
 func (k keyset[T, P]) AfterWhere(primary P, id string) qm.QueryMod {
+	// After = 获取“在游标之后”的项目（next page）
+	// 若主列 DESC，则“之后”是更旧的项 => < ，否则 >。
 	if k.primaryOrder == SortDesc {
-		// 主列降序时：比 (primary,id) 小的是“后”（旧）项 => 用 <
 		return qm.Where(fmt.Sprintf("(%s, %s) < (?, ?)", k.PrimaryCol, k.IDCol), primary, id)
 	}
-	// 主列升序时：比 (primary,id) 大的是“后”的项 => 用 >
 	return qm.Where(fmt.Sprintf("(%s, %s) > (?, ?)", k.PrimaryCol, k.IDCol), primary, id)
 }
 

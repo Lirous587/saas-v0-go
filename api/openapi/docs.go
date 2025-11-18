@@ -1200,33 +1200,35 @@ const docTemplate = `{
                 "summary": "图片列表",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "页号",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "页码",
-                        "name": "page_size",
-                        "in": "query"
-                    },
-                    {
                         "type": "string",
-                        "description": "关键词",
-                        "name": "keyword",
+                        "name": "category_id",
                         "in": "query"
                     },
                     {
                         "type": "boolean",
-                        "description": "是否查询回收站图片",
                         "name": "deleted",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "分类id",
-                        "name": "category_id",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "next_cursor",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 20,
+                        "minimum": 5,
+                        "type": "integer",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "prev_cursor",
                         "in": "query"
                     }
                 ],
@@ -1242,7 +1244,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/handler.ImgListResponse"
+                                            "$ref": "#/definitions/saas_internal_img_handler.ListByKeysetResponse"
                                         }
                                     }
                                 }
@@ -1280,7 +1282,16 @@ const docTemplate = `{
                 "tags": [
                     "img-category"
                 ],
-                "summary": "分类列表",
+                "summary": "获取全部图库分类",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "请求成功",
@@ -1962,7 +1973,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/handler.KeysetPagingResponse"
+                                            "$ref": "#/definitions/saas_internal_tenant_handler.ListByKeysetResponse"
                                         }
                                     }
                                 }
@@ -2795,20 +2806,6 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.ImgListResponse": {
-            "type": "object",
-            "properties": {
-                "list": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handler.ImgResponse"
-                    }
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
         "handler.ImgResponse": {
             "type": "object",
             "properties": {
@@ -2834,29 +2831,6 @@ const docTemplate = `{
             "properties": {
                 "is_set": {
                     "type": "boolean"
-                }
-            }
-        },
-        "handler.KeysetPagingResponse": {
-            "type": "object",
-            "properties": {
-                "has_next": {
-                    "type": "boolean"
-                },
-                "has_prev": {
-                    "type": "boolean"
-                },
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handler.TenantResponse"
-                    }
-                },
-                "next_cursor": {
-                    "type": "string"
-                },
-                "prev_cursor": {
-                    "type": "string"
                 }
             }
         },
@@ -3212,6 +3186,29 @@ const docTemplate = `{
                 }
             }
         },
+        "saas_internal_img_handler.ListByKeysetResponse": {
+            "type": "object",
+            "properties": {
+                "has_next": {
+                    "type": "boolean"
+                },
+                "has_prev": {
+                    "type": "boolean"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.ImgResponse"
+                    }
+                },
+                "next_cursor": {
+                    "type": "string"
+                },
+                "prev_cursor": {
+                    "type": "string"
+                }
+            }
+        },
         "saas_internal_tenant_handler.CreateRequest": {
             "type": "object",
             "required": [
@@ -3247,6 +3244,29 @@ const docTemplate = `{
                             "$ref": "#/definitions/domain.PlanType"
                         }
                     ]
+                }
+            }
+        },
+        "saas_internal_tenant_handler.ListByKeysetResponse": {
+            "type": "object",
+            "properties": {
+                "has_next": {
+                    "type": "boolean"
+                },
+                "has_prev": {
+                    "type": "boolean"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.TenantResponse"
+                    }
+                },
+                "next_cursor": {
+                    "type": "string"
+                },
+                "prev_cursor": {
+                    "type": "string"
                 }
             }
         }

@@ -33,14 +33,14 @@ type DeleteRequest struct {
 	ID string `json:"-" uri:"id" binding:"required"`
 }
 
-type KeysetPagingRequest struct {
+type ListByKeysetRequest struct {
 	PageSize   int    `form:"page_size,default=5" binding:"min=5,max=20"`
 	PrevCursor string `form:"prev_cursor"`
 	NextCursor string `form:"next_cursor"`
 	Keyword    string `form:"keyword"`
 }
 
-type KeysetPagingResponse struct {
+type ListByKeysetResponse struct {
 	Items      []*TenantResponse `json:"items"`
 	PrevCursor string            `json:"prev_cursor,omitempty"`
 	NextCursor string            `json:"next_cursor,omitempty"`

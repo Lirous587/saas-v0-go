@@ -33,18 +33,22 @@ type RestoreFromRecycleBinRequest struct {
 	ID       domain.ImgID    `uri:"id" binding:"required,uuid"`
 }
 
-type ListRequest struct {
+type ListByKeysetRequest struct {
 	TenantID   domain.TenantID   `json:"-" uri:"tenant_id" binding:"required,uuid"`
 	CategoryID domain.CategoryID `form:"category_id" binding:"omitempty,uuid"`
+	PrevCursor string            `form:"prev_cursor"`
+	NextCursor string            `form:"next_cursor"`
 	Keyword    string            `form:"keyword"`
+	PageSize   int               `form:"page_size,default=5" binding:"min=5,max=20"`
 	Deleted    bool              `form:"deleted,default=false"`
-	PageSize   int               `form:"page_size,default=5" binding:"min=5,max=50"`
-	Page       int               `form:"page,default=1" binding:"min=1"`
 }
 
-type ImgListResponse struct {
-	Total int64          `json:"total"`
-	List  []*ImgResponse `json:"list"`
+type ListByKeysetResponse struct {
+	Items      []*ImgResponse `json:"items"`
+	PrevCursor string         `json:"prev_cursor,omitempty"`
+	NextCursor string         `json:"next_cursor,omitempty"`
+	HasPrev    bool           `json:"has_prev"`
+	HasNext    bool           `json:"has_next"`
 }
 
 type CategoryResponse struct {
@@ -72,7 +76,7 @@ type DeleteCategoryRequest struct {
 	TenantID domain.TenantID   `json:"-" uri:"tenant_id" binding:"required,uuid"`
 }
 
-type ListCategoryRequest struct {
+type AllCategoryRequest struct {
 	TenantID domain.TenantID `json:"-" uri:"tenant_id" binding:"required,uuid"`
 }
 

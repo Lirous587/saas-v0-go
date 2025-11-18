@@ -7,7 +7,7 @@ import (
 type ImgService interface {
 	Upload(src io.Reader, img *Img, categoryID CategoryID) error
 	Delete(tenantID TenantID, imgID ImgID, hard ...bool) error
-	List(query *ImgQuery) (*ImgList, error)
+	ListByKeyset(query *ListByKeysetQuery) (*ListByKeysetResult, error)
 	ClearRecycleBin(tenantID TenantID, imgID ImgID) error
 	ListenDeleteQueue()
 	RestoreFromRecycleBin(tenantID TenantID, imgID ImgID) error
@@ -16,7 +16,7 @@ type ImgService interface {
 	CreateCategory(category *Category) error
 	UpdateCategory(category *Category) error
 	DeleteCategory(tenantID TenantID, categoryID CategoryID) error
-	ListCategories(tenantID TenantID) (categories []*Category, err error)
+	AllCategories(tenantID TenantID) (categories []*Category, err error)
 
 	// 配置
 	SetR2Config(config *R2Config) error

@@ -41,14 +41,17 @@ func domainImgsToResponse(imgs []*domain.Img) []*ImgResponse {
 	return list
 }
 
-func domainImgListToResponse(data *domain.ImgList) *ImgListResponse {
-	if data == nil {
+func domainImgKeysetToResponse(pager *domain.ListByKeysetResult) *ListByKeysetResponse {
+	if pager == nil {
 		return nil
 	}
 
-	return &ImgListResponse{
-		List:  domainImgsToResponse(data.List),
-		Total: data.Total,
+	return &ListByKeysetResponse{
+		Items:      domainImgsToResponse(pager.Items),
+		PrevCursor: pager.PrevCursor,
+		NextCursor: pager.NextCursor,
+		HasPrev:    pager.HasPrev,
+		HasNext:    pager.HasNext,
 	}
 }
 

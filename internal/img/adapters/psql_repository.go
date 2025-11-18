@@ -125,52 +125,75 @@ func (repo *ImgPSQLRepository) Restore(tenantID domain.TenantID, imgID domain.Im
 	return img, nil
 }
 
-func (repo *ImgPSQLRepository) List(query *domain.ImgQuery) (*domain.ImgList, error) {
-	var whereMods []qm.QueryMod
+func (repo *ImgPSQLRepository) ListByKeyset(query *domain.ListByKeysetQuery) (*domain.ListByKeysetResult, error) {
+	var baseMods []qm.QueryMod
 
-	whereMods = append(
-		whereMods,
+	baseMods = append(
+		baseMods,
 		orm.ImgWhere.TenantID.EQ(query.TenantID.String()),
 	)
 
 	if query.Keyword != "" {
 		like := "%" + query.Keyword + "%"
-		whereMods = append(whereMods, qm.Where("description ILIKE ?", like))
+		baseMods = append(baseMods, qm.Where("description ILIKE ?", like))
 	}
 
 	if query.CategoryID != "" {
-		whereMods = append(
-			whereMods,
+		baseMods = append(
+			baseMods,
 			qm.Where(fmt.Sprintf("%s = ?", orm.ImgColumns.CategoryID), query.CategoryID))
 	}
 
 	if query.Deleted {
-		whereMods = append(whereMods, qm.WithDeleted())
-		whereMods = append(whereMods, qm.Where("deleted_at is not null"))
+		baseMods = append(baseMods, qm.WithDeleted())
+		baseMods = append(baseMods, qm.Where("deleted_at is not null"))
 	}
 
-	// 1.计算count
-	total, err := orm.Imgs(whereMods...).CountG()
+	// Keyset: 主排序为 created_at, tie-breaker 为 id
+	ks := dbkit.NewKeyset(
+		orm.ImgColumns.ID,
+		orm.ImgColumns.CreatedAt,
+		query.PrevCursor,
+		query.NextCursor,
+		query.PageSize,
+		dbkit.WithPrimaryOrder[*domain.Img](dbkit.SortDesc), // 保持与原来的 CreatedAt DESC 一致
+	)
+
+	// 使用 keyset 生成包含 ORDER BY / LIMIT 的 query mods
+	mods := ks.ApplyKeysetMods(baseMods)
+
+	ormImgs, err := orm.Imgs(mods...).AllG()
 	if err != nil {
 		return nil, err
 	}
 
-	// 2.计算offset
-	offset, err := dbkit.ComputeOffset(query.Page, query.PageSize)
+	domains := ormImgsToDomain(ormImgs)
+
+	// 精确判断 hasPrev/hasNext：exists 必须和 baseMods 保持一致
+	exists := func(primary time.Time, id string, checkPrev bool) (bool, error) {
+		var cond qm.QueryMod
+		if checkPrev {
+			cond = ks.BeforeWhere(primary, id)
+		} else {
+			cond = ks.AfterWhere(primary, id)
+		}
+		checkMods := append([]qm.QueryMod{}, baseMods...)
+		checkMods = append(checkMods, cond, qm.Limit(1))
+		return orm.Imgs(checkMods...).ExistsG()
+	}
+
+	// 精确构建分页结果（包含 HasPrev/HasNext, 游标）
+	pager, err := ks.BuildPaginationResultWithExistence(domains, exists)
 	if err != nil {
 		return nil, err
 	}
 
-	pageMods := append(whereMods, qm.Offset(offset), qm.Limit(query.PageSize), qm.OrderBy(orm.ImgColumns.UpdatedAt+" DESC"), qm.OrderBy(orm.ImgColumns.ID+" DESC"))
-
-	imgs, err := orm.Imgs(pageMods...).AllG()
-	if err != nil {
-		return nil, err
-	}
-
-	return &domain.ImgList{
-		Total: total,
-		List:  ormImgsToDomain(imgs),
+	return &domain.ListByKeysetResult{
+		Items:      pager.Items,
+		PrevCursor: pager.PrevCursor,
+		NextCursor: pager.NextCursor,
+		HasPrev:    pager.HasPrev,
+		HasNext:    pager.HasNext,
 	}, nil
 }
 
@@ -209,7 +232,7 @@ func (repo *ImgPSQLRepository) DeleteCategory(tenantID domain.TenantID, category
 	return nil
 }
 
-func (repo *ImgPSQLRepository) ListCategories(tenantID domain.TenantID) ([]*domain.Category, error) {
+func (repo *ImgPSQLRepository) AllCategories(tenantID domain.TenantID) ([]*domain.Category, error) {
 	ormCategories, err := orm.ImgCategories(
 		orm.ImgCategoryWhere.TenantID.EQ(tenantID.String()),
 	).AllG()

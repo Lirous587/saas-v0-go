@@ -189,15 +189,6 @@ definitions:
     required:
     - code
     type: object
-  handler.ImgListResponse:
-    properties:
-      list:
-        items:
-          $ref: '#/definitions/handler.ImgResponse'
-        type: array
-      total:
-        type: integer
-    type: object
   handler.ImgResponse:
     properties:
       created_at:
@@ -215,21 +206,6 @@ definitions:
     properties:
       is_set:
         type: boolean
-    type: object
-  handler.KeysetPagingResponse:
-    properties:
-      has_next:
-        type: boolean
-      has_prev:
-        type: boolean
-      items:
-        items:
-          $ref: '#/definitions/handler.TenantResponse'
-        type: array
-      next_cursor:
-        type: string
-      prev_cursor:
-        type: string
     type: object
   handler.PlanResponse:
     properties:
@@ -465,6 +441,21 @@ definitions:
     required:
     - content
     type: object
+  saas_internal_img_handler.ListByKeysetResponse:
+    properties:
+      has_next:
+        type: boolean
+      has_prev:
+        type: boolean
+      items:
+        items:
+          $ref: '#/definitions/handler.ImgResponse'
+        type: array
+      next_cursor:
+        type: string
+      prev_cursor:
+        type: string
+    type: object
   saas_internal_tenant_handler.CreateRequest:
     properties:
       billing_cycle:
@@ -490,6 +481,21 @@ definitions:
     - billing_cycle
     - name
     - plan_type
+    type: object
+  saas_internal_tenant_handler.ListByKeysetResponse:
+    properties:
+      has_next:
+        type: boolean
+      has_prev:
+        type: boolean
+      items:
+        items:
+          $ref: '#/definitions/handler.TenantResponse'
+        type: array
+      next_cursor:
+        type: string
+      prev_cursor:
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -1228,25 +1234,25 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: 页号
-        in: query
-        name: page
-        type: integer
-      - description: 页码
-        in: query
-        name: page_size
-        type: integer
-      - description: 关键词
-        in: query
-        name: keyword
+      - in: query
+        name: category_id
         type: string
-      - description: 是否查询回收站图片
-        in: query
+      - in: query
         name: deleted
         type: boolean
-      - description: 分类id
-        in: query
-        name: category_id
+      - in: query
+        name: keyword
+        type: string
+      - in: query
+        name: next_cursor
+        type: string
+      - in: query
+        maximum: 20
+        minimum: 5
+        name: page_size
+        type: integer
+      - in: query
+        name: prev_cursor
         type: string
       produces:
       - application/json
@@ -1258,7 +1264,7 @@ paths:
             - $ref: '#/definitions/response.successResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/handler.ImgListResponse'
+                  $ref: '#/definitions/saas_internal_img_handler.ListByKeysetResponse'
               type: object
         "400":
           description: 参数错误
@@ -1306,6 +1312,12 @@ paths:
     get:
       consumes:
       - application/json
+      parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1326,7 +1338,7 @@ paths:
             $ref: '#/definitions/response.errorResponse'
       security:
       - BearerAuth: []
-      summary: 分类列表
+      summary: 获取全部图库分类
       tags:
       - img-category
   /v1/img/{tenant_id}/category:
@@ -1702,7 +1714,7 @@ paths:
             - $ref: '#/definitions/response.successResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/handler.KeysetPagingResponse'
+                  $ref: '#/definitions/saas_internal_tenant_handler.ListByKeysetResponse'
               type: object
         "400":
           description: 参数错误

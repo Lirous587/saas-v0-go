@@ -33,18 +33,30 @@ func (img *Img) GetPublicPreURL() string {
 	return img.publicPreURL
 }
 
-type ImgQuery struct {
+func (img *Img) GetID() string {
+	return img.ID.String()
+}
+
+func (img *Img) GetCursorPrimary() time.Time {
+	return img.CreatedAt
+}
+
+type ListByKeysetQuery struct {
 	TenantID   TenantID
 	CategoryID CategoryID
+	PrevCursor string
+	NextCursor string
 	Keyword    string
-	Page       int
 	PageSize   int
 	Deleted    bool
 }
 
-type ImgList struct {
-	List  []*Img
-	Total int64
+type ListByKeysetResult struct {
+	Items      []*Img
+	PrevCursor string
+	NextCursor string
+	HasPrev    bool
+	HasNext    bool
 }
 
 type Category struct {
