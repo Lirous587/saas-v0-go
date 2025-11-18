@@ -35,12 +35,12 @@ func domainTenantsToResponse(tenants []*domain.Tenant) []*TenantResponse {
 	return ret
 }
 
-func domainTenantKeysetToResponse(pager *domain.TenantKeysetResult) *KeysetPagingResponse {
+func domainTenantKeysetToResponse(pager *domain.TenantKeysetResult) *ListByKeysetResponse {
 	if pager == nil {
 		return nil
 	}
 
-	return &KeysetPagingResponse{
+	return &ListByKeysetResponse{
 		Items:      domainTenantsToResponse(pager.Items),
 		PrevCursor: pager.PrevCursor,
 		NextCursor: pager.NextCursor,
