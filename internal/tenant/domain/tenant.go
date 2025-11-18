@@ -15,7 +15,7 @@ type Tenant struct {
 }
 
 func (t *Tenant) GetCursorPrimary() time.Time {
-	return t.CreatedAt
+	return t.UpdatedAt
 }
 
 func (t *Tenant) GetID() string {

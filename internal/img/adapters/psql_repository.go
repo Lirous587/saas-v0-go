@@ -169,8 +169,24 @@ func (repo *ImgPSQLRepository) ListByKeyset(query *domain.ListByKeysetQuery) (*d
 
 	domains := ormImgsToDomain(ormImgs)
 
+	// 精确判断 hasPrev/hasNext：exists 必须和 baseMods 保持一致
+	exists := func(primary time.Time, id string, checkPrev bool) (bool, error) {
+		var cond qm.QueryMod
+		if checkPrev {
+			cond = ks.BeforeWhere(primary, id)
+		} else {
+			cond = ks.AfterWhere(primary, id)
+		}
+		checkMods := append([]qm.QueryMod{}, baseMods...)
+		checkMods = append(checkMods, cond, qm.Limit(1))
+		return orm.Imgs(checkMods...).ExistsG()
+	}
+
 	// 精确构建分页结果（包含 HasPrev/HasNext, 游标）
-	pager := ks.BuildPaginationResultWithoutExistence(domains)
+	pager, err := ks.BuildPaginationResultWithExistence(domains, exists)
+	if err != nil {
+		return nil, err
+	}
 
 	return &domain.ListByKeysetResult{
 		Items:      pager.Items,

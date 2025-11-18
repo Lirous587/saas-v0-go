@@ -74,6 +74,7 @@ func (repo *TenantPSQLRepository) Update(tenant *domain.Tenant) error {
 		boil.Whitelist(
 			orm.TenantColumns.Name,
 			orm.TenantColumns.Description,
+			orm.TenantColumns.UpdatedAt,
 		),
 	)
 
@@ -128,7 +129,7 @@ func (repo *TenantPSQLRepository) ListByKeyset(query *domain.TenantKeysetQuery) 
 
 	ks := dbkit.NewKeyset[*domain.Tenant](
 		orm.TenantColumns.ID,
-		orm.TenantColumns.CreatedAt,
+		orm.TenantColumns.UpdatedAt,
 		query.PrevCursor,
 		query.NextCursor,
 		query.PageSize,
