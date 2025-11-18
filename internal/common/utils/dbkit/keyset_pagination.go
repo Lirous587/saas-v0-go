@@ -334,55 +334,38 @@ func (k keyset[T, P]) BuildPaginationResultWithExistence(domainSlice []T, exists
 	}, nil
 }
 
-/*
-BuildPaginationResultWithoutExistence (轻量策略 — 总是构造 prev cursor)
-用途：
-- 在只需向后翻页 (next-only / infinite scroll) 场景使用，避免额外的 exists/COUNT 查询。
-- 返回结果通过读取 pageSize+1 的条数判断是否有下一页 (HasNext)。
-- 为了方便前端快速尝试“上一页”导航，本方法会默认构造 PrevCursor（用列表首条记录作为 anchor），即使没有额外查询确认上一页存在。
-
-行为与语义：
-- HasNext: 基于 pageSize+1 精确判断（true 表示“可能还有更多”）。
-- PrevCursor: 默认总是以当前页第一条构造并返回（便于前端尝试上一页）。
-- HasPrev: 采用简单策略：若请求携带 PrevCursor 则返回 true（表示用户在翻回），否则返回 false。此处不做 DB 验证，因此不保证 PrevCursor 一定对应有上一页的数据。
-- PrevCursor 可能为无效/无内容的锚点（若沒有上一页，后端在接收该 prevCursor 时可能返回空结果或 HasPrev=false）。前端不应把 prevCursor 本身作为 hasPrev 的依据，而应结合响应里的 HasPrev 字段判断是否展示“上一页”按钮。
-
-优点：
-- 极大减少额外 SQL，在高频滚动/Feed 场景下性能好、延迟低。
-- 前端保有一个“尝试上一页”的锚点，从 UX 角度更灵活。
-
-缺点：
-- PrevCursor 不代表数据库中确实存在上一页（需要额外 exists 检查才精确）。
-- 若项目需严格显示“上一页是否存在”，应使用 BuildPaginationResultWithExistence（会额外触发 exists 查询以精确返回 HasPrev/HasNext）。
-*/
-func (k keyset[T, P]) BuildPaginationResultWithoutExistence(domainSlice []T) *paginationResult[T] {
-	// 检测是否多读了一条（pageSize+1），以判断是否还有下一页
+// BuildPaginationResultFeed: 轻量 feed-only 策略，专注 next-page（不做存在性查询）
+// - 总是返回 PrevCursor（方便前端尝试上一页）
+// - HasPrev 采用简单推断：当请求带有 next_cursor 时，认为上一页存在（用户刚刚翻到下一页）
+// - HasNext 基于 pageSize+1 判断；Prev 分页时仍会反转结果以展示正确顺序
+func (k keyset[T, P]) BuildPaginationResultFeed(domainSlice []T) *paginationResult[T] {
 	hasMore := len(domainSlice) > k.PageSize
 	if hasMore {
 		domainSlice = domainSlice[:k.PageSize]
 	}
 
-	// 如果是 Prev 分页（客户端传了 prev cursor），先按 DESC 取，结果需要翻转回正常显示顺序
+	// 如果是 Prev 分页（极少使用），反转回正常显示顺序
 	isPrev := k.PrevCursor != ""
 	if isPrev && len(domainSlice) > 0 {
 		slices.Reverse(domainSlice)
 	}
 
-	// 构造游标
 	var prevCursor, nextCursor string
 	if len(domainSlice) > 0 {
 		first := domainSlice[0]
 		last := domainSlice[len(domainSlice)-1]
+		// Always build prev cursor so frontend can try to go back
 		prevCursor = k.encode(k.extractKeysetCursor(first))
+		// next cursor only present when we actually have more items
 		if hasMore {
 			nextCursor = k.encode(k.extractKeysetCursor(last))
 		}
 	}
 
-	// 简单判断 hasPrev/hasNext：
-	// - hasNext: 基于 pageSize+1 的读取判断
-	// - hasPrev: 简单策略，若客户端传了 prev cursor 则认为存在上一页；否则返回 false（无需 DB 查询）
-	hasPrev := k.PrevCursor != ""
+	// Feed-only 语义：
+	// - HasPrev: 如果客户端带有 next_cursor（即刚点“下一页”），认为上页还可以回溯
+	// - HasNext: 依据 pageSize+1 判定（精确）
+	hasPrev := k.NextCursor != ""
 	hasNext := hasMore
 
 	return &paginationResult[T]{
