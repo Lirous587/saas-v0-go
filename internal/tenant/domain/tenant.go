@@ -14,7 +14,7 @@ type Tenant struct {
 	CreatorID   string
 }
 
-func (t *Tenant) GetCreatedAt() time.Time {
+func (t *Tenant) GetCursorPrimary() time.Time {
 	return t.CreatedAt
 }
 
@@ -22,7 +22,7 @@ func (t *Tenant) GetID() string {
 	return t.ID
 }
 
-type TenantPagingQuery struct {
+type TenantKeysetQuery struct {
 	PageSize   int
 	CreatorID  string
 	PrevCursor string
@@ -30,7 +30,7 @@ type TenantPagingQuery struct {
 	Keyword    string
 }
 
-type TenantPagination struct {
+type TenantKeysetResult struct {
 	Items      []*Tenant
 	PrevCursor string
 	NextCursor string

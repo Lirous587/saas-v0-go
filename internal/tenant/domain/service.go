@@ -4,7 +4,7 @@ type TenantService interface {
 	Create(tenant *Tenant) error
 	Update(tenant *Tenant) error
 	Delete(id string) error
-	Paging(query *TenantPagingQuery) (*TenantPagination, error)
+	ListByKeyset(query *TenantKeysetQuery) (*TenantKeysetResult, error)
 	GetByID(id string) (*Tenant, error)
 
 	CheckName(creatorID string, tenantName string) (bool, error)

@@ -216,7 +216,7 @@ definitions:
       is_set:
         type: boolean
     type: object
-  handler.PagingResponse:
+  handler.KeysetPagingResponse:
     properties:
       has_next:
         type: boolean
@@ -1702,7 +1702,7 @@ paths:
             - $ref: '#/definitions/response.successResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/handler.PagingResponse'
+                  $ref: '#/definitions/handler.KeysetPagingResponse'
               type: object
         "400":
           description: 参数错误

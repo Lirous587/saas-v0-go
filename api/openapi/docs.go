@@ -1962,7 +1962,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/handler.PagingResponse"
+                                            "$ref": "#/definitions/handler.KeysetPagingResponse"
                                         }
                                     }
                                 }
@@ -2837,7 +2837,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.PagingResponse": {
+        "handler.KeysetPagingResponse": {
             "type": "object",
             "properties": {
                 "has_next": {

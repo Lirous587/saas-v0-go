@@ -1956,7 +1956,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/handler.PagingResponse"
+                                            "$ref": "#/definitions/handler.KeysetPagingResponse"
                                         }
                                     }
                                 }
@@ -2831,7 +2831,7 @@
                 }
             }
         },
-        "handler.PagingResponse": {
+        "handler.KeysetPagingResponse": {
             "type": "object",
             "properties": {
                 "has_next": {

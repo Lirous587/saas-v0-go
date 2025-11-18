@@ -54,8 +54,8 @@ func (s *service) GetByID(id string) (*domain.Tenant, error) {
 	return s.repo.GetByID(id)
 }
 
-func (s *service) Paging(query *domain.TenantPagingQuery) (*domain.TenantPagination, error) {
-	return s.repo.Paging(query)
+func (s *service) ListByKeyset(query *domain.TenantKeysetQuery) (*domain.TenantKeysetResult, error) {
+	return s.repo.ListByKeyset(query)
 }
 
 func (s *service) CheckName(creatorID string, tenantName string) (bool, error) {

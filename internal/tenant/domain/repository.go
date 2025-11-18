@@ -12,7 +12,7 @@ type TenantRepository interface {
 	Create(tenant *Tenant) (*Tenant, error)
 	Update(tenant *Tenant) error
 	Delete(id string) error
-	Paging(query *TenantPagingQuery) (*TenantPagination, error)
+	ListByKeyset(query *TenantKeysetQuery) (*TenantKeysetResult, error)
 	ExistSameName(creatorID string, name string) (bool, error)
 	IsCreatorHasPlan(creatorID string, planType PlanType) (bool, error)
 

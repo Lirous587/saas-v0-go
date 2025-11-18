@@ -8,6 +8,7 @@ import (
 	"saas/internal/common/reskit/codes"
 	"saas/internal/common/utils/dbkit"
 	"saas/internal/tenant/domain"
+	"time"
 
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
@@ -101,14 +102,14 @@ func (repo *TenantPSQLRepository) Delete(id string) error {
 	return nil
 }
 
-func (repo *TenantPSQLRepository) Paging(query *domain.TenantPagingQuery) (*domain.TenantPagination, error) {
-	mods := make([]qm.QueryMod, 0, 7)
+func (repo *TenantPSQLRepository) ListByKeyset(query *domain.TenantKeysetQuery) (*domain.TenantKeysetResult, error) {
+	baseMods := make([]qm.QueryMod, 0, 7)
 
 	// 基本条件
-	mods = append(mods, orm.TenantWhere.CreatorID.EQ(query.CreatorID))
+	baseMods = append(baseMods, orm.TenantWhere.CreatorID.EQ(query.CreatorID))
 
 	// 选择列
-	mods = append(mods,
+	baseMods = append(baseMods,
 		qm.Select(
 			orm.TenantColumns.ID,
 			orm.TenantColumns.PlanType,
@@ -122,12 +123,19 @@ func (repo *TenantPSQLRepository) Paging(query *domain.TenantPagingQuery) (*doma
 
 	if query.Keyword != "" {
 		like := "%" + query.Keyword + "%"
-		mods = append(mods, qm.Where(fmt.Sprintf("(%s LIKE ? OR %s LIKE ?)", orm.TenantColumns.Name, orm.TenantColumns.Description), like, like))
+		baseMods = append(baseMods, qm.Where(fmt.Sprintf("(%s LIKE ? OR %s LIKE ?)", orm.TenantColumns.Name, orm.TenantColumns.Description), like, like))
 	}
 
-	keyset := dbkit.NewKeyset[*domain.Tenant](orm.TenantColumns.ID, orm.TenantColumns.CreatedAt, query.PrevCursor, query.NextCursor, query.PageSize)
+	ks := dbkit.NewKeyset[*domain.Tenant](
+		orm.TenantColumns.ID,
+		orm.TenantColumns.CreatedAt,
+		query.PrevCursor,
+		query.NextCursor,
+		query.PageSize,
+	)
 
-	mods = keyset.ApplyKeysetMods(mods)
+	// 使用 keyset 生成包含 order/limit 的 query mods
+	mods := ks.ApplyKeysetMods(baseMods)
 
 	ormTenants, err := orm.Tenants(mods...).AllG()
 	if err != nil {
@@ -136,9 +144,25 @@ func (repo *TenantPSQLRepository) Paging(query *domain.TenantPagingQuery) (*doma
 
 	domains := ormTenantsToDomain(ormTenants)
 
-	result := keyset.BuildPaginationResult(domains)
+	// 精确判断 hasPrev/hasNext：exists 必须和 baseMods 保持一致
+	exists := func(primary time.Time, id string, checkPrev bool) (bool, error) {
+		var cond qm.QueryMod
+		if checkPrev {
+			cond = ks.BeforeWhere(primary, id)
+		} else {
+			cond = ks.AfterWhere(primary, id)
+		}
+		checkMods := append([]qm.QueryMod{}, baseMods...)
+		checkMods = append(checkMods, cond, qm.Limit(1))
+		return orm.Tenants(checkMods...).ExistsG()
+	}
 
-	return &domain.TenantPagination{
+	result, err := ks.BuildPaginationResultWithExistence(domains, exists)
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.TenantKeysetResult{
 		Items:      result.Items,
 		PrevCursor: result.PrevCursor,
 		NextCursor: result.NextCursor,

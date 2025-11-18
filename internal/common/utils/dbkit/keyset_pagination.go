@@ -5,27 +5,123 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
-	"time"
+	"strings"
 
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 )
 
-type keysetCursor struct {
-	CreatedAt time.Time
-	ID        string
+/*
+Keyset 使用示例（Feed，带 score 排序）
+
+示例 1 — 简单 Feed（created_at 为主游标，score 为显示优先级但不参与 existence 检查）
+1) 创建 keyset：
+   ks := dbkit.NewKeyset[*domain.FeedItem, time.Time](
+       orm.CommentColumns.ID,
+       orm.CommentColumns.CreatedAt,
+       query.PrevCursor,
+       query.NextCursor,
+       query.PageSize,
+       dbkit.WithPrimaryOrder[*domain.FeedItem, time.Time](dbkit.SortDesc),
+       dbkit.WithExtraOrderCols[*domain.FeedItem, time.Time]("score DESC"), // 仅用于排序
+   )
+
+2) 构造基础 filters（与 existence 保持一致）：
+   baseMods := []qm.QueryMod{
+       orm.CommentWhere.Status.EQ(orm.CommentStatusApproved),
+       // ... 其他过滤 ...
+   }
+
+3) 加入 keyset mods 并查询：
+   mods := ks.ApplyKeysetMods(baseMods)
+   ormItems, _ := orm.Comments(mods...).AllG()
+   items := ormFeedItemsFromORM(ormItems)
+
+4) 精确 existence（仅用 primary+id）：
+   // 若 extraOrderCols 只是展示 tie-breaker，且 primary+id 已能区分记录，
+   // 则可直接用 BeforeWhere/AfterWhere（基于 primary+id）
+   exists := func(primary time.Time, id string, checkPrev bool) (bool, error) {
+       var cond qm.QueryMod
+       if checkPrev {
+           cond = ks.BeforeWhere(primary, id)
+       } else {
+           cond = ks.AfterWhere(primary, id)
+       }
+       checkMods := append(baseMods, cond, qm.Limit(1))
+       return orm.Comments(checkMods...).ExistsG()
+   }
+
+5) 构造分页结果：
+   res, _ := ks.BuildPaginationResultWithExistence(items, exists)
+
+
+示例 2 — 复杂 Feed（created_at + score 共同排序，需精确 hasPrev/hasNext）
+说明：如果你把 score 放进排序列里，并期望精确判断“首/尾之外是否有记录”，则 existence 查询必须也用相同的元组比较 (created_at, score, id)。
+两种实现方法：
+A) 读取首/尾记录的 score（从 item 直接取，或通过 DB 再取），并在 exists 中用三元组比较：
+   exists := func(primary time.Time, id string, checkPrev bool) (bool, error) {
+       // 从数据库查出所需的 score（或从 repo 的 domain item 获得）
+       score, err := repo.GetScoreByID(id)
+       if err != nil { return false, err }
+
+       var cond qm.QueryMod
+       if checkPrev {
+           cond = qm.Where("(created_at, score, id) > (?, ?, ?)", primary, score, id)
+       } else {
+           cond = qm.Where("(created_at, score, id) < (?, ?, ?)", primary, score, id)
+       }
+       checkMods := append(baseMods, cond, qm.Limit(1))
+       return orm.Comments(checkMods...).ExistsG()
+   }
+注意：此实现会产生额外 DB 查询来获得 score（一次/端点存在性判断），代价较小但需要注意性能。
+
+B) 更优雅但更改量更大：把 score 一并包含到游标（扩展 keysetCursor 结构与 GetCursorPrimary 返回类型 P），使 keyset 的 encode/decode 带上 score，这样 BeforeWhere/AfterWhere 可以直接构造 "(created_at, score, id) < ... / > ..." 而无需额外查询。实现需要修改 keyset 以支持 composite primary 值（例如 struct{CreatedAt time.Time; Score float64}）并把 ApplyKeysetMods、BeforeWhere/AfterWhere 调整为支持多列比较。
+
+总结：
+- 推荐初期用示例 A（简单且易实现）。
+- 如果对性能敏感且需要稳定无额外查询的判断，考虑实现 B（把额外排序列包含进游标）。
+- 无论哪种方式，务必保证：ApplyKeysetMods 的排序列、Before/AfterWhere 的比较逻辑与 existence 的实现保持一致，否则 hasPrev/hasNext 将不准确。
+*/
+
+type SortDirection string
+
+const (
+	SortAsc  SortDirection = "ASC"
+	SortDesc SortDirection = "DESC"
+)
+
+type KeysetOption[T CursorFields[P], P any] func(k *keyset[T, P])
+
+func WithPrimaryOrder[T CursorFields[P], P any](dir SortDirection) KeysetOption[T, P] {
+	return func(k *keyset[T, P]) { k.primaryOrder = dir }
+}
+func WithIDOrder[T CursorFields[P], P any](dir SortDirection) KeysetOption[T, P] {
+	return func(k *keyset[T, P]) { k.idOrder = dir }
+}
+func WithExtraOrderCols[T CursorFields[P], P any](cols ...string) KeysetOption[T, P] {
+	return func(k *keyset[T, P]) { k.extraOrderCols = cols }
 }
 
-type CursorFields interface {
-	GetCreatedAt() time.Time
+type keysetCursor[P any] struct {
+	Primary P      `json:"primary"`
+	ID      string `json:"id"`
+}
+
+type CursorFields[P any] interface {
+	GetCursorPrimary() P
 	GetID() string
 }
 
-type keyset[T CursorFields] struct {
-	IDCol        string
-	CreatedAtCol string
-	PrevCursor   string
-	NextCursor   string
-	PageSize     int
+type keyset[T CursorFields[P], P any] struct {
+	IDCol      string
+	PrimaryCol string
+	PrevCursor string
+	NextCursor string
+	PageSize   int
+
+	primaryOrder SortDirection
+	idOrder      SortDirection
+
+	extraOrderCols []string
 }
 
 type paginationResult[T any] struct {
@@ -36,35 +132,41 @@ type paginationResult[T any] struct {
 	HasNext    bool
 }
 
-func NewKeyset[T CursorFields](
+func NewKeyset[T CursorFields[P], P any](
 	idCol string,
-	createdAtCol string,
+	primaryCol string,
 	prevCursor string,
 	nextCursor string,
 	pageSize int,
-) *keyset[T] {
+	opts ...KeysetOption[T, P],
+) *keyset[T, P] {
 	if pageSize <= 0 {
 		pageSize = 5
 	}
-	return &keyset[T]{
+	k := &keyset[T, P]{
 		IDCol:        idCol,
-		CreatedAtCol: createdAtCol,
+		PrimaryCol:   primaryCol,
 		PrevCursor:   prevCursor,
 		NextCursor:   nextCursor,
 		PageSize:     pageSize,
+		primaryOrder: SortDesc, // feed 常见默认降序按时间
+		idOrder:      SortAsc,  // id 默认正序
 	}
+	for _, opt := range opts {
+		opt(k)
+	}
+	return k
 }
 
-func (k keyset[T]) encode(cursor *keysetCursor) string {
+func (k keyset[T, P]) encode(cursor *keysetCursor[P]) string {
 	if cursor == nil {
 		return ""
 	}
-
 	data, _ := json.Marshal(cursor)
 	return base64.StdEncoding.EncodeToString(data)
 }
 
-func (k keyset[T]) decodeCursor(cursorStr string) *keysetCursor {
+func (k keyset[T, P]) decodeCursor(cursorStr string) *keysetCursor[P] {
 	if cursorStr == "" {
 		return nil
 	}
@@ -72,41 +174,69 @@ func (k keyset[T]) decodeCursor(cursorStr string) *keysetCursor {
 	if err != nil {
 		return nil
 	}
-	var payload keysetCursor
+	var payload keysetCursor[P]
 	if json.Unmarshal(data, &payload) != nil {
 		return nil
 	}
 	return &payload
 }
 
-func (k keyset[T]) extractKeysetCursor(item T) *keysetCursor {
-	return &keysetCursor{
-		CreatedAt: item.GetCreatedAt(),
-		ID:        item.GetID(),
+func (k keyset[T, P]) extractKeysetCursor(item T) *keysetCursor[P] {
+	return &keysetCursor[P]{
+		Primary: item.GetCursorPrimary(),
+		ID:      item.GetID(),
 	}
 }
 
 // ApplyKeysetMods 附加keyset查询的mods
 // mods建议额外预留4
-func (k keyset[T]) ApplyKeysetMods(base []qm.QueryMod) []qm.QueryMod {
-	var cursor *keysetCursor
-	var order string
+func (k keyset[T, P]) ApplyKeysetMods(base []qm.QueryMod) []qm.QueryMod {
+	var cursor *keysetCursor[P]
+	var orderParts []string
 
+	// ORDER BY 先主列（direction 动态）
+	pOrder := string(k.primaryOrder)
+	idOrder := string(k.idOrder)
+
+	// 如果正在 prev 分页，需要以 DESC 查询再反转
 	if k.NextCursor != "" {
 		cursor = k.decodeCursor(k.NextCursor)
 		if cursor != nil {
-			base = append(base, qm.Where(fmt.Sprintf("(%s, %s) > (?, ?)", k.CreatedAtCol, k.IDCol), cursor.CreatedAt, cursor.ID))
+			base = append(base, qm.Where(fmt.Sprintf("(%s, %s) > (?, ?)", k.PrimaryCol, k.IDCol), cursor.Primary, cursor.ID))
 		}
-		order = fmt.Sprintf("%s ASC, %s ASC", k.CreatedAtCol, k.IDCol)
+		// next 保持 primary ASC
+		pOrder = string(k.primaryOrder)
+		idOrder = string(k.idOrder)
 	} else if k.PrevCursor != "" {
 		cursor = k.decodeCursor(k.PrevCursor)
 		if cursor != nil {
-			base = append(base, qm.Where(fmt.Sprintf("(%s, %s) < (?, ?)", k.CreatedAtCol, k.IDCol), cursor.CreatedAt, cursor.ID))
+			base = append(base, qm.Where(fmt.Sprintf("(%s, %s) < (?, ?)", k.PrimaryCol, k.IDCol), cursor.Primary, cursor.ID))
 		}
-		order = fmt.Sprintf("%s DESC, %s DESC", k.CreatedAtCol, k.IDCol)
+		// Prev 查询时主列倒序以取“前一页”
+		if k.primaryOrder == SortAsc {
+			pOrder = string(SortDesc)
+		} else {
+			pOrder = string(SortAsc)
+		}
+		// ID 同理反向
+		if k.idOrder == SortAsc {
+			idOrder = string(SortDesc)
+		} else {
+			idOrder = string(SortAsc)
+		}
 	} else {
-		order = fmt.Sprintf("%s ASC, %s ASC", k.CreatedAtCol, k.IDCol)
+		// 无游标：按配置方向
+		pOrder = string(k.primaryOrder)
+		idOrder = string(k.idOrder)
 	}
+
+	// build order parts
+	orderParts = append(orderParts, fmt.Sprintf("%s %s", k.PrimaryCol, pOrder))
+	for _, extra := range k.extraOrderCols {
+		orderParts = append(orderParts, extra) // extra 需包含方向，如 "score DESC"
+	}
+	orderParts = append(orderParts, fmt.Sprintf("%s %s", k.IDCol, idOrder))
+	order := fmt.Sprintf("%s", strings.Join(orderParts, ", "))
 
 	base = append(base, qm.OrderBy(order))
 	base = append(base, qm.Limit(k.PageSize+1))
@@ -114,7 +244,32 @@ func (k keyset[T]) ApplyKeysetMods(base []qm.QueryMod) []qm.QueryMod {
 	return base
 }
 
-func (k keyset[T]) BuildPaginationResult(domainSlice []T) *paginationResult[T] {
+// BeforeWhere 返回用于判断是否存在“在给定 (primary,id) 之前（prev page）”的 qm.Where
+// 语义："之前" 是相对于 ApplyKeysetMods 所使用的主排序方向（primaryOrder）。
+func (k keyset[T, P]) BeforeWhere(primary P, id string) qm.QueryMod {
+	if k.primaryOrder == SortDesc {
+		// 主列降序时：比 (primary,id) 大的是更“前”的（新）项 => 用 >
+		return qm.Where(fmt.Sprintf("(%s, %s) > (?, ?)", k.PrimaryCol, k.IDCol), primary, id)
+	}
+	// 主列升序时：比 (primary,id) 小的是更“前”的项 => 用 <
+	return qm.Where(fmt.Sprintf("(%s, %s) < (?, ?)", k.PrimaryCol, k.IDCol), primary, id)
+}
+
+// AfterWhere 返回用于判断是否存在“在给定 (primary,id) 之后（next page）”的 qm.Where
+func (k keyset[T, P]) AfterWhere(primary P, id string) qm.QueryMod {
+	if k.primaryOrder == SortDesc {
+		// 主列降序时：比 (primary,id) 小的是“后”（旧）项 => 用 <
+		return qm.Where(fmt.Sprintf("(%s, %s) < (?, ?)", k.PrimaryCol, k.IDCol), primary, id)
+	}
+	// 主列升序时：比 (primary,id) 大的是“后”的项 => 用 >
+	return qm.Where(fmt.Sprintf("(%s, %s) > (?, ?)", k.PrimaryCol, k.IDCol), primary, id)
+}
+
+// BuildPaginationResultWithExistence 通过用户提供的 existence 检查器做精确的 hasPrev/hasNext 判断。
+// exists 期望实现：func(primary P, id string, checkPrev bool) (bool, error)
+// - checkPrev=true 检查是否存在比 (primary,id) 更“前”的记录（previous page）
+// - checkPrev=false 检查是否存在比 (primary,id) 更“后”的记录（next page）
+func (k keyset[T, P]) BuildPaginationResultWithExistence(domainSlice []T, exists func(P, string, bool) (bool, error)) (*paginationResult[T], error) {
 	hasMore := len(domainSlice) > k.PageSize
 
 	// 截取
@@ -122,9 +277,7 @@ func (k keyset[T]) BuildPaginationResult(domainSlice []T) *paginationResult[T] {
 		domainSlice = domainSlice[:k.PageSize]
 	}
 
-	// 判断分页方向
 	isPrev := k.PrevCursor != ""
-	isNext := k.NextCursor != ""
 
 	// 如果是 Prev 分页，先按 DESC 取，结果需要反转为 ASC 展示
 	if isPrev && len(domainSlice) > 0 {
@@ -134,27 +287,37 @@ func (k keyset[T]) BuildPaginationResult(domainSlice []T) *paginationResult[T] {
 	// 生成新的游标
 	var prevCursor, nextCursor string
 	if len(domainSlice) > 0 {
-		// 首条和末条数据生成游标
 		first := domainSlice[0]
 		last := domainSlice[len(domainSlice)-1]
 
-		// 编码
 		prevCursor = k.encode(k.extractKeysetCursor(first))
 		nextCursor = k.encode(k.extractKeysetCursor(last))
 	}
 
-	// hasPrev/hasNext 判断
+	// 精确判断 hasPrev/hasNext：交给 exists 回调
 	var hasPrev, hasNext bool
-	switch {
-	case isNext:
-		hasPrev = true
-		hasNext = hasMore
-	case isPrev:
-		hasPrev = hasMore
-		hasNext = true
-	default:
+	if len(domainSlice) == 0 {
 		hasPrev = false
-		hasNext = hasMore
+		hasNext = false
+	} else {
+		first := domainSlice[0]
+		last := domainSlice[len(domainSlice)-1]
+
+		// 由 caller 提供实现，需与 ApplyKeysetMods 里的比较方向一致
+		pFirst := k.extractKeysetCursor(first).Primary
+		idFirst := k.extractKeysetCursor(first).ID
+		pLast := k.extractKeysetCursor(last).Primary
+		idLast := k.extractKeysetCursor(last).ID
+
+		var err error
+		hasPrev, err = exists(pFirst, idFirst, true)
+		if err != nil {
+			return nil, err
+		}
+		hasNext, err = exists(pLast, idLast, false)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// 没有下一页时 next_cursor置空
@@ -172,5 +335,5 @@ func (k keyset[T]) BuildPaginationResult(domainSlice []T) *paginationResult[T] {
 		NextCursor: nextCursor,
 		HasPrev:    hasPrev,
 		HasNext:    hasNext,
-	}
+	}, nil
 }
