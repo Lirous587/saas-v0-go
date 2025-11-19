@@ -122,10 +122,7 @@ func (h *HttpHandler) Update(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        keyword    	 query     string  false  "关键词"
-// @Param        prev_cursor   query     string  false  "用于上一页游标"
-// @Param        next_cursor   query     string  false  "用于下一页游标"
-// @Param        page_size  	 query     int     false  "页码"
+// @Param        request query handler.ListByKeysetRequest false "请求参数"
 // @Success      200  {object}  response.successResponse{data=handler.ListByKeysetResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -193,7 +190,7 @@ func (h *HttpHandler) GetPlan(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        name    query     string  true  "租户名称"
+// @Param        request query handler.CheckNameRequest false "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"

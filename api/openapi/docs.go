@@ -170,15 +170,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "评论板块",
-                        "name": "belong_key",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "页码",
-                        "name": "page_size",
+                        "name": "keyword",
                         "in": "query"
                     }
                 ],
@@ -480,19 +472,19 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "关键词",
                         "name": "keyword",
                         "in": "query"
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
-                        "description": "页号",
                         "name": "page",
                         "in": "query"
                     },
                     {
+                        "maximum": 20,
+                        "minimum": 5,
                         "type": "integer",
-                        "description": "页码",
                         "name": "page_size",
                         "in": "query"
                     }
@@ -673,13 +665,6 @@ const docTemplate = `{
                         "description": "租户id",
                         "name": "tenant_id",
                         "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "租户id",
-                        "name": "belong_key",
-                        "in": "query",
                         "required": true
                     }
                 ],
@@ -986,18 +971,6 @@ const docTemplate = `{
                         "name": "belong_key",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "上页最后一条记录id",
-                        "name": "last_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "页码",
-                        "name": "page_size",
-                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1075,18 +1048,6 @@ const docTemplate = `{
                         "name": "root_id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "上页最后一条记录id",
-                        "name": "last_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "页码",
-                        "name": "page_size",
-                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1199,6 +1160,13 @@ const docTemplate = `{
                 ],
                 "summary": "图片列表",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "name": "category_id",
@@ -1776,6 +1744,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "图片id",
                         "name": "id",
                         "in": "path",
@@ -1890,10 +1865,29 @@ const docTemplate = `{
                 "summary": "删除图片",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "租户id",
+                        "name": "tenant_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "图片id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "type": "boolean",
-                        "description": "是否硬删除",
                         "name": "hard",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1938,26 +1932,24 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "关键词",
                         "name": "keyword",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "用于上一页游标",
-                        "name": "prev_cursor",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "用于下一页游标",
                         "name": "next_cursor",
                         "in": "query"
                     },
                     {
+                        "maximum": 20,
+                        "minimum": 5,
                         "type": "integer",
-                        "description": "页码",
                         "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "prev_cursor",
                         "in": "query"
                     }
                 ],
@@ -2060,15 +2052,6 @@ const docTemplate = `{
                     "tenant"
                 ],
                 "summary": "检测是否有相同的租户名",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "租户名称",
-                        "name": "name",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "请求成功",

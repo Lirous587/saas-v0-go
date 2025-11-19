@@ -108,8 +108,7 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Security     BearerAuth
 // @Param        tenant_id   path 	 string 	  true 	 "租户id"
 // @Param        belong_key  path 	 string 		true   "评论板块"
-// @Param        last_id     query   string     false  "上页最后一条记录id"
-// @Param        page_size   query   int    		false  "页码"
+// @Param        request query handler.ListRootsRequest false "请求参数"
 // @Success      200  {object}  response.successResponse{data=[]handler.CommentRootResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -146,8 +145,7 @@ func (h *HttpHandler) ListRoots(ctx *gin.Context) {
 // @Param        tenant_id   path 	 string 	  true 	 "租户id"
 // @Param        belong_key  path 	 string true   "评论板块"
 // @Param        root_id   	 path 	 string 	  true   "根评论id"
-// @Param        last_id     query   string    false  "上页最后一条记录id"
-// @Param        page_size   query   int    false  "页码"
+// @Param        request query handler.ListRepliesRequest false "请求参数"
 // @Success      200  {object}  response.successResponse{data=[]handler.CommentReplyResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -183,8 +181,7 @@ func (h *HttpHandler) ListReplies(ctx *gin.Context) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        tenant_id   path 	 string 	true 	 "租户id"
-// @Param        belong_key  query 	 string 	true   "评论板块"
-// @Param        page_size   query   int    	false  "页码"
+// @Param        request query handler.ListNoAuditRequest false "请求参数"
 // @Success      200  {object}  response.successResponse{data=[]handler.CommentNoAuditResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -437,9 +434,7 @@ func (h *HttpHandler) DeletePlate(ctx *gin.Context) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        tenant_id   path string true "租户id"
-// @Param        keyword    query     string  false  "关键词"
-// @Param        page       query     int     false  "页号"
-// @Param        page_size  query     int     false  "页码"
+// @Param        request query handler.PlateListRequest false "请求参数"
 // @Success      200  {object}  response.successResponse{data=handler.PlateListResponse} "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"
@@ -534,7 +529,7 @@ func (h *HttpHandler) GetPlateConfig(ctx *gin.Context) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        tenant_id   			path string true "租户id"
-// @Param        belong_key   		query string true "租户id"
+// @Param        request query handler.PlateCheckBelongKeyRequest false "请求参数"
 // @Success      200  {object}  response.successResponse "请求成功"
 // @Failure      400  {object}  response.invalidParamsResponse "参数错误"
 // @Failure      500  {object}  response.errorResponse "服务器错误"

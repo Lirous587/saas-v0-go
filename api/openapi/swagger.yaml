@@ -643,14 +643,6 @@ paths:
         name: root_id
         required: true
         type: string
-      - description: 上页最后一条记录id
-        in: query
-        name: last_id
-        type: string
-      - description: 页码
-        in: query
-        name: page_size
-        type: integer
       produces:
       - application/json
       responses:
@@ -693,14 +685,6 @@ paths:
         name: belong_key
         required: true
         type: string
-      - description: 上页最后一条记录id
-        in: query
-        name: last_id
-        type: string
-      - description: 页码
-        in: query
-        name: page_size
-        type: integer
       produces:
       - application/json
       responses:
@@ -773,15 +757,9 @@ paths:
         name: tenant_id
         required: true
         type: string
-      - description: 评论板块
-        in: query
-        name: belong_key
-        required: true
+      - in: query
+        name: keyword
         type: string
-      - description: 页码
-        in: query
-        name: page_size
-        type: integer
       produces:
       - application/json
       responses:
@@ -965,16 +943,16 @@ paths:
         name: tenant_id
         required: true
         type: string
-      - description: 关键词
-        in: query
+      - in: query
         name: keyword
         type: string
-      - description: 页号
-        in: query
+      - in: query
+        minimum: 1
         name: page
         type: integer
-      - description: 页码
-        in: query
+      - in: query
+        maximum: 20
+        minimum: 5
         name: page_size
         type: integer
       produces:
@@ -1123,11 +1101,6 @@ paths:
         name: tenant_id
         required: true
         type: string
-      - description: 租户id
-        in: query
-        name: belong_key
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -1234,6 +1207,11 @@ paths:
       consumes:
       - application/json
       parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: string
       - in: query
         name: category_id
         type: string
@@ -1284,10 +1262,23 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: 是否硬删除
-        in: query
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      - description: 图片id
+        in: path
+        name: id
+        required: true
+        type: string
+      - in: query
         name: hard
         type: boolean
+      - in: query
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1581,6 +1572,11 @@ paths:
       consumes:
       - application/json
       parameters:
+      - description: 租户id
+        in: path
+        name: tenant_id
+        required: true
+        type: string
       - description: 图片id
         in: path
         name: id
@@ -1688,22 +1684,20 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: 关键词
-        in: query
+      - in: query
         name: keyword
         type: string
-      - description: 用于上一页游标
-        in: query
-        name: prev_cursor
-        type: string
-      - description: 用于下一页游标
-        in: query
+      - in: query
         name: next_cursor
         type: string
-      - description: 页码
-        in: query
+      - in: query
+        maximum: 20
+        minimum: 5
         name: page_size
         type: integer
+      - in: query
+        name: prev_cursor
+        type: string
       produces:
       - application/json
       responses:
@@ -1868,12 +1862,6 @@ paths:
     get:
       consumes:
       - application/json
-      parameters:
-      - description: 租户名称
-        in: query
-        name: name
-        required: true
-        type: string
       produces:
       - application/json
       responses:

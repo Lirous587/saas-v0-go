@@ -151,7 +151,9 @@ func (h *HttpHandler) Upload(ctx *gin.Context) {
 // @Tags         img
 // @Accept       json
 // @Produce      json
-// @Param        hard  query  bool   false "是否硬删除"
+// @Param        tenant_id path string true "租户id"
+// @Param        id        path string true "图片id"
+// @Param        request query handler.DeleteRequest false "请求参数"
 // @Success      200 {object} response.successResponse "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
@@ -184,6 +186,7 @@ func (h *HttpHandler) Delete(ctx *gin.Context) {
 // @Tags         img
 // @Accept       json
 // @Produce      json
+// @Param        tenant_id path string true "租户id"
 // @Param        request query handler.ListByKeysetRequest false "请求参数"
 // @Success      200 {object} response.successResponse{data=handler.ListByKeysetResponse} "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
@@ -221,7 +224,8 @@ func (h *HttpHandler) ListByKeyset(ctx *gin.Context) {
 // @Tags         img
 // @Accept       json
 // @Produce      json
-// @Param        id path string true "图片id"
+// @Param        tenant_id path string true "租户id"
+// @Param        id        path string true "图片id"
 // @Success      200 {object} response.successResponse "请求成功"
 // @Failure      400 {object} response.invalidParamsResponse "参数错误"
 // @Failure      500 {object} response.errorResponse "服务器错误"
